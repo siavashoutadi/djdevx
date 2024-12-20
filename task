@@ -1,0 +1,36 @@
+#!/bin/bash
+set -eo pipefail
+
+function help {
+    echo "$0 <task> <args>"
+    echo "Tasks:"
+    compgen -A function | cat -n
+}
+
+function generate_doc {
+    poetry run typer djdevx.main utils docs --output README.md --name djdevx
+}
+
+function step_version {
+    pyproject_file="pyproject.toml"
+    version_line=$(grep -E '^version\s*=' "$pyproject_file")
+    current_version=$(echo "$version_line" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+
+    if [[ -z "$current_version" ]]; then
+        echo "Version not found in pyproject.toml."
+        exit 1
+    fi
+
+    IFS='.' read -r MAJOR MINOR PATCH <<<"$current_version"
+    MINOR=$((MINOR + 1))
+    new_version="$MAJOR.$MINOR.$PATCH"
+
+    sed -i "s/$current_version/$new_version/" "$pyproject_file"
+    sed -i "s/$current_version/$new_version/" "./djdevx/__init__.py"
+
+    echo "Version updated to $new_version"
+
+}
+
+TIMEFORMAT="Task completed in %3lR"
+time ${@:-help}
