@@ -14,6 +14,7 @@ WSGI_APPLICATION: str = "applications.wsgi.application"
 ASGI_APPLICATION: str = "applications.asgi.application"
 
 INSTALLED_APPS: list[str] = [
+    "users.apps.UsersConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
