@@ -25,16 +25,23 @@ def requirement():
         uv_link = "https://docs.astral.sh/uv/getting-started/installation/"
         print_info(f"❌ uv is not installed - [link={uv_link}]Install uv[/link]")
 
+    git_installed = is_installed("git")
+    if git_installed:
+        print_info("✅ git is installed")
+    else:
+        git_link = "https://git-scm.com/downloads"
+        print_info(f"❌ git is not installed - [link={git_link}]Install git[/link]")
+
     docker_installed = is_installed("docker")
     if docker_installed:
         print_info("✅ Docker is installed")
     else:
-        docker_link = "https://docs.docker.com/get-docker/"
+        git_link = "https://docs.docker.com/get-docker/"
         print_info(
-            f"❌ Docker is not installed - [link={docker_link}]Install Docker[/link]"
+            f"❌ Docker is not installed - [link={git_link}]Install Docker[/link]"
         )
 
-    if docker_installed and uv_installed:
+    if docker_installed and uv_installed and git_installed:
         print_success("All requirements are met!")
     else:
         print_error(
