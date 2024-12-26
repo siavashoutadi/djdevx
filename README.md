@@ -15,6 +15,7 @@ $ djdevx [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `version`: Show the application version.
+* `requirement`: Check the requirement for project creation.
 
 ## `djdevx version`
 
@@ -24,6 +25,20 @@ Show the application version.
 
 ```console
 $ djdevx version [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## `djdevx requirement`
+
+Check the requirement for project creation.
+
+**Usage**:
+
+```console
+$ djdevx requirement [OPTIONS]
 ```
 
 **Options**:
