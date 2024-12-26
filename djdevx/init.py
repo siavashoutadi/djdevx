@@ -66,15 +66,25 @@ def init(
 
     print_success("Project is initialized successfully.")
 
-    print_step("Installing Django ...")
-
-    subprocess.check_call(["uv", "add", "django"], cwd=dest_dir)
-
-    print_success("Django is installed successfully.")
+    install_dependencies(dest_dir=dest_dir)
 
     if git_init and not is_git_repository():
         print_step("Initializing the git repository ...")
         init_git()
+
+
+def install_dependencies(dest_dir: Path):
+    dependencies: list[str] = ["django", "django-typer"]
+    for pkg in dependencies:
+        print_step(f"Installing {pkg} ...")
+        subprocess.check_call(["uv", "add", pkg], cwd=dest_dir)
+        print_success(f"{pkg} is installed successfully.")
+
+    dev_dependencies: list[str] = ["factory_boy"]
+    for pkg in dev_dependencies:
+        print_step(f"Installing {pkg} ...")
+        subprocess.check_call(["uv", "add", "--dev", pkg], cwd=dest_dir)
+        print_success(f"{pkg} is installed successfully.")
 
 
 def copy_template_files(source_dir: Path, dest_dir: Path, template_context: dict):
