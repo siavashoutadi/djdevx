@@ -2,13 +2,16 @@
 # https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from settings import BASE_DIR
+from settings.utils.env import get_env
 
+env = get_env()
+
+SECRET_KEY: str = env("SECRET_KEY")
+DEBUG: bool = env.bool("DEBUG", default=False)
+ALLOWED_HOSTS: list[str] = env.list("ALLOWED_HOSTS", default=[])
 
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD: str = "django.db.models.BigAutoField"
-SECRET_KEY: str = "django-insecure-sk%q2_j=huun7$4%+zcgz#=!@#r5#18-qc8%pz8um97nw-9mth"
-DEBUG: bool = True
-ALLOWED_HOSTS: list[str] = []
 ROOT_URLCONF: str = "urls"
 WSGI_APPLICATION: str = "applications.wsgi.application"
 ASGI_APPLICATION: str = "applications.asgi.application"

@@ -1,3 +1,4 @@
+import secrets
 import shutil
 import subprocess
 import typer
@@ -56,6 +57,7 @@ def init(
     data = {
         "project_name": project_name,
         "project_description": project_description,
+        "django_secret_key": generate_secret(),
     }
 
     copy_template_files(
@@ -73,8 +75,12 @@ def init(
         init_git()
 
 
+def generate_secret():
+    return secrets.token_hex(32)
+
+
 def install_dependencies(dest_dir: Path):
-    dependencies: list[str] = ["django", "django-typer"]
+    dependencies: list[str] = ["django", "django-typer", "django-environ"]
     for pkg in dependencies:
         print_step(f"Installing {pkg} ...")
         subprocess.check_call(["uv", "add", pkg], cwd=dest_dir)
