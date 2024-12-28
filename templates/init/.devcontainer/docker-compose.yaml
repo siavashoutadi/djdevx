@@ -1,0 +1,44 @@
+services:
+  devcontainer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env/devcontainer
+    volumes:
+      - ../:/home/devuser/workspace:cached
+    networks:
+      - devcontainer
+    command: sleep infinity
+  db:
+    image: postgres:16
+    env_file:
+      - ./.env/postgres
+    volumes:
+      - app-db-data:/var/lib/postgresql/data/pgdata
+    networks:
+      - devcontainer
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - 8888:80
+    env_file:
+      - ./.env/pgadmin
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - devcontainer
+    depends_on:
+      - db
+
+volumes:
+  app-db-data:
+    driver: local
+  pgadmin-data:
+    driver: local
+  pgadmin-config:
+    driver: local
+
+networks:
+  devcontainer:
+    driver: bridge

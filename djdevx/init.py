@@ -80,7 +80,12 @@ def generate_secret():
 
 
 def install_dependencies(dest_dir: Path):
-    dependencies: list[str] = ["django", "django-typer", "django-environ"]
+    dependencies: list[str] = [
+        "django",
+        "django-typer",
+        "django-environ",
+        "psycopg2-binary",
+    ]
     for pkg in dependencies:
         print_step(f"Installing {pkg} ...")
         subprocess.check_call(["uv", "add", pkg], cwd=dest_dir)
