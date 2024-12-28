@@ -1,0 +1,48 @@
+[alias]
+    git = !git
+    review = push origin -u --force
+    co = checkout
+    st = status
+    conf = config --list --show-scope
+    confo = config --list --show-origin
+    tree = log --decorate --oneline --graph --all --color --topo-order -30
+    treef = log --decorate --oneline --graph --all --color --topo-order
+    stat = show --stat
+    sync = fetch --prune
+    nv = commit --no-verify
+    rs = reset --soft HEAD^
+    plain = !git -c core.pager=less
+
+[core]
+    filemode = True
+    autocrlf = input
+    pager = delta
+
+[help]
+    autoCorrect = immediate
+
+[color "status"]
+    changed = yellow
+
+[difftool]
+    prompt = false
+    trustExitCode = true
+
+[pager]
+    status = true
+    ls-files = true
+
+[delta]
+    line-numbers = true
+    navigate = true
+    side-by-side = true
+    syntax-theme = Monokai Extended
+
+[diff]
+    colorMoved = default
+
+[interactive]
+    diffFilter = delta --color-only
+
+[merge]
+    conflictstyle = diff3
