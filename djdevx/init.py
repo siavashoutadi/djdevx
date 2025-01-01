@@ -91,7 +91,7 @@ def install_dependencies(dest_dir: Path):
         subprocess.check_call(["uv", "add", pkg], cwd=dest_dir)
         print_success(f"{pkg} is installed successfully.")
 
-    dev_dependencies: list[str] = ["factory_boy"]
+    dev_dependencies: list[str] = ["factory_boy", "rich"]
     for pkg in dev_dependencies:
         print_step(f"Installing {pkg} ...")
         subprocess.check_call(["uv", "add", "--dev", pkg], cwd=dest_dir)
