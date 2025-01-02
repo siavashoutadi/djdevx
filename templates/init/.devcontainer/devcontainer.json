@@ -17,7 +17,9 @@
                 "qwtel.sqlite-viewer",
                 "Cardinal90.multi-cursor-case-preserve",
                 "yzhang.markdown-all-in-one",
-                "oderwat.indent-rainbow"
+                "oderwat.indent-rainbow",
+                "timonwong.shellcheck",
+                "biomejs.biome"
             ],
             "settings": {
                 "files.trimTrailingWhitespace": true,
@@ -51,5 +53,6 @@
                 "tree.inactiveIndentGuidesStroke": "#51b8e1"
             }
         }
-    }
+    },
+    "postStartCommand": "uv sync && uv run pre-commit install"
 }
