@@ -1,7 +1,6 @@
 import typer
 
-from typing import List
-from typing_extensions import Annotated
+from typing import Annotated
 from django.contrib.auth import get_user_model
 from django_typer.management import TyperCommand, command
 
@@ -37,7 +36,7 @@ class Command(TyperCommand):
     @command()
     def clean(
         self,
-        exclude_user: Annotated[List[str], typer.Option()] = [],
+        exclude_user: Annotated[list[str], typer.Option()] = [],
     ):
         """
         Delete all users

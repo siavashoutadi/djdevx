@@ -74,6 +74,8 @@ def init(
         print_step("Initializing the git repository ...")
         init_git()
 
+    update_precommit_hooks(dest_dir=dest_dir)
+
 
 def generate_secret():
     return secrets.token_hex(32)
@@ -91,11 +93,23 @@ def install_dependencies(dest_dir: Path):
         subprocess.check_call(["uv", "add", pkg], cwd=dest_dir)
         print_success(f"{pkg} is installed successfully.")
 
-    dev_dependencies: list[str] = ["factory_boy", "rich"]
+    dev_dependencies: list[str] = [
+        "factory_boy",
+        "rich",
+        "pre-commit",
+        "django-upgrade",
+    ]
     for pkg in dev_dependencies:
         print_step(f"Installing {pkg} ...")
         subprocess.check_call(["uv", "add", "--dev", pkg], cwd=dest_dir)
         print_success(f"{pkg} is installed successfully.")
+
+
+def update_precommit_hooks(dest_dir):
+    print_step("Updating pre-commit hooks ...")
+    subprocess.check_call(["uv", "run", "pre-commit", "autoupdate"], cwd=dest_dir)
+    subprocess.check_call(["git", "add", "."], cwd=dest_dir)
+    subprocess.check_call(["git", "commit", "--amend", "--no-edit"], cwd=dest_dir)
 
 
 def copy_template_files(source_dir: Path, dest_dir: Path, template_context: dict):
@@ -114,6 +128,7 @@ def copy_template_files(source_dir: Path, dest_dir: Path, template_context: dict
 
                 template = jinja_env.get_template(str(rel_path))
                 rendered_content = template.render(**template_context)
+                rendered_content = rendered_content.rstrip("\n") + "\n"
 
                 dest_path.write_text(rendered_content)
             else:
