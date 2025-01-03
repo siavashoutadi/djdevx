@@ -17,6 +17,7 @@ $ djdevx [OPTIONS] COMMAND [ARGS]...
 * `version`: Show the application version.
 * `requirement`: Check the requirement for project creation.
 * `init`: Initialize the project
+* `packages`: Install and configure django packages
 
 ## `djdevx version`
 
@@ -62,4 +63,69 @@ $ djdevx init [OPTIONS]
 * `--project-description TEXT`: The description of the project  [default: My project is awesome]
 * `--project-directory PATH`: The directory to initialize the project in  [default: .]
 * `--git-init / --no-git-init`: whether to initialize a git repository in the project directory  [default: git-init]
+* `--help`: Show this message and exit.
+
+## `djdevx packages`
+
+Install and configure django packages
+
+**Usage**:
+
+```console
+$ djdevx packages [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `django-browser-reload`: Manage django-browser-reload package
+
+### `djdevx packages django-browser-reload`
+
+Manage django-browser-reload package
+
+**Usage**:
+
+```console
+$ djdevx packages django-browser-reload [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure django-browser-reload
+* `remove`: Remove django-browser-reload
+
+#### `djdevx packages django-browser-reload install`
+
+Install and configure django-browser-reload
+
+**Usage**:
+
+```console
+$ djdevx packages django-browser-reload install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages django-browser-reload remove`
+
+Remove django-browser-reload
+
+**Usage**:
+
+```console
+$ djdevx packages django-browser-reload remove [OPTIONS]
+```
+
+**Options**:
+
 * `--help`: Show this message and exit.
