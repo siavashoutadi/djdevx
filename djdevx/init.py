@@ -1,14 +1,13 @@
 import secrets
-import shutil
 import subprocess
 import typer
 
-from jinja2 import Environment, FileSystemLoader
 from typing_extensions import Annotated
 from pathlib import Path
-from djdevx.utils.print_console import print_step, print_success
 
-from djdevx.requirement import requirement
+from .utils.print_console import print_step, print_success
+from .utils.project_files import copy_template_files
+from .requirement import requirement
 
 app = typer.Typer()
 
@@ -110,29 +109,6 @@ def update_precommit_hooks(dest_dir):
     subprocess.check_call(["uv", "run", "pre-commit", "autoupdate"], cwd=dest_dir)
     subprocess.check_call(["git", "add", "."], cwd=dest_dir)
     subprocess.check_call(["git", "commit", "--amend", "--no-edit"], cwd=dest_dir)
-
-
-def copy_template_files(source_dir: Path, dest_dir: Path, template_context: dict):
-    dest_dir.mkdir(parents=True, exist_ok=True)
-    jinja_env = Environment(loader=FileSystemLoader(source_dir))
-
-    for source_path in source_dir.rglob("*"):
-        rel_path = source_path.relative_to(source_dir)
-        dest_path = dest_dir / rel_path
-
-        if source_path.is_dir():
-            dest_path.mkdir(parents=True, exist_ok=True)
-        else:
-            if source_path.suffix == ".j2":
-                dest_path = dest_path.with_suffix("")
-
-                template = jinja_env.get_template(str(rel_path))
-                rendered_content = template.render(**template_context)
-                rendered_content = rendered_content.rstrip("\n") + "\n"
-
-                dest_path.write_text(rendered_content)
-            else:
-                shutil.copy2(source_path, dest_path)
 
 
 def is_git_repository() -> bool:
