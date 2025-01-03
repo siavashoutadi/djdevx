@@ -82,6 +82,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `django-browser-reload`: Manage django-browser-reload package
+* `whitenoise`: Manage whitenoise package
 
 ### `djdevx packages django-browser-reload`
 
@@ -124,6 +125,53 @@ Remove django-browser-reload
 
 ```console
 $ djdevx packages django-browser-reload remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx packages whitenoise`
+
+Manage whitenoise package
+
+**Usage**:
+
+```console
+$ djdevx packages whitenoise [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure whitenoise
+* `remove`: Remove whitenoise
+
+#### `djdevx packages whitenoise install`
+
+Install and configure whitenoise
+
+**Usage**:
+
+```console
+$ djdevx packages whitenoise install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages whitenoise remove`
+
+Remove whitenoise
+
+**Usage**:
+
+```console
+$ djdevx packages whitenoise remove [OPTIONS]
 ```
 
 **Options**:
