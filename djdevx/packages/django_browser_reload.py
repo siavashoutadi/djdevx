@@ -23,7 +23,7 @@ def install():
     is_project_exists_or_raise()
 
     print_step("Installing django-browser-reload package ...")
-    subprocess.check_call(["uv", "add", "django-browser-reload"])
+    subprocess.check_call(["uv", "add", "django-browser-reload", "--dev"])
 
     current_dir = Path(__file__).resolve().parent
     source_dir = current_dir.parent.parent / "templates" / "django_browser_reload"
@@ -42,7 +42,7 @@ def remove():
     Remove django-browser-reload
     """
     print_step("Removing django-browser-reload package ...")
-    subprocess.check_call(["uv", "remove", "django-browser-reload"])
+    subprocess.check_call(["uv", "remove", "django-browser-reload", "--group", "dev"])
 
     url_path = Path.joinpath(get_packages_url_path(), "django_browser_reload.py")
     url_path.unlink(missing_ok=True)
