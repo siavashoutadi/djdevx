@@ -67,7 +67,11 @@ RUN --mount=type=cache,target=/var/cache/apt \
     mv biome-linux-x64 /usr/local/bin/biome && \
     cd /tmp && curl -sLO https://github.com/nushell/nushell/releases/download/0.101.0/nu-0.101.0-x86_64-unknown-linux-musl.tar.gz && \
     tar -xvzf nu-*.tar.gz && \
-    cp nu*/n* /usr/local/bin
+    cp nu*/n* /usr/local/bin && \
+    cd /tmp && curl -sLO https://github.com/zellij-org/zellij/releases/download/v0.41.2/zellij-x86_64-unknown-linux-musl.tar.gz && \
+    tar -xvzf zellij-*.tar.gz && mv zellij /usr/local/bin && \
+    rm -rf /tmp/*
+
 
 
 
