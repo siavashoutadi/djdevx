@@ -81,8 +81,56 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `django-browser-reload`: Manage django-browser-reload package
 * `whitenoise`: Manage whitenoise package
+* `django-browser-reload`: Manage django-browser-reload package
+* `django-debug-toolbar`: Manage django-debug-toolbar package
+
+### `djdevx packages whitenoise`
+
+Manage whitenoise package
+
+**Usage**:
+
+```console
+$ djdevx packages whitenoise [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure whitenoise
+* `remove`: Remove whitenoise
+
+#### `djdevx packages whitenoise install`
+
+Install and configure whitenoise
+
+**Usage**:
+
+```console
+$ djdevx packages whitenoise install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages whitenoise remove`
+
+Remove whitenoise
+
+**Usage**:
+
+```console
+$ djdevx packages whitenoise remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
 
 ### `djdevx packages django-browser-reload`
 
@@ -131,14 +179,14 @@ $ djdevx packages django-browser-reload remove [OPTIONS]
 
 * `--help`: Show this message and exit.
 
-### `djdevx packages whitenoise`
+### `djdevx packages django-debug-toolbar`
 
-Manage whitenoise package
+Manage django-debug-toolbar package
 
 **Usage**:
 
 ```console
-$ djdevx packages whitenoise [OPTIONS] COMMAND [ARGS]...
+$ djdevx packages django-debug-toolbar [OPTIONS] COMMAND [ARGS]...
 ```
 
 **Options**:
@@ -147,31 +195,31 @@ $ djdevx packages whitenoise [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `install`: Install and configure whitenoise
-* `remove`: Remove whitenoise
+* `install`: Install and configure django-debug-toolbar
+* `remove`: Remove django-debug-toolbar
 
-#### `djdevx packages whitenoise install`
+#### `djdevx packages django-debug-toolbar install`
 
-Install and configure whitenoise
+Install and configure django-debug-toolbar
 
 **Usage**:
 
 ```console
-$ djdevx packages whitenoise install [OPTIONS]
+$ djdevx packages django-debug-toolbar install [OPTIONS]
 ```
 
 **Options**:
 
 * `--help`: Show this message and exit.
 
-#### `djdevx packages whitenoise remove`
+#### `djdevx packages django-debug-toolbar remove`
 
-Remove whitenoise
+Remove django-debug-toolbar
 
 **Usage**:
 
 ```console
-$ djdevx packages whitenoise remove [OPTIONS]
+$ djdevx packages django-debug-toolbar remove [OPTIONS]
 ```
 
 **Options**:
