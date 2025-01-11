@@ -1,5 +1,6 @@
 import typer
 
+from .all import app as all_packages
 from .whitenoise import app as whitenoise
 from .django_browser_reload import app as browser_reload
 from .django_debug_toolbar import app as debug_toolbar
@@ -7,6 +8,11 @@ from .django_debug_toolbar import app as debug_toolbar
 
 app = typer.Typer(no_args_is_help=True)
 
+app.add_typer(
+    all_packages,
+    name="all",
+    help="Manage all packages at once",
+)
 app.add_typer(
     whitenoise,
     name="whitenoise",

@@ -81,9 +81,57 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
+* `all`: Manage all packages at once
 * `whitenoise`: Manage whitenoise package
 * `django-browser-reload`: Manage django-browser-reload package
 * `django-debug-toolbar`: Manage django-debug-toolbar package
+
+### `djdevx packages all`
+
+Manage all packages at once
+
+**Usage**:
+
+```console
+$ djdevx packages all [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure all available packages
+* `remove`: Remove all packages
+
+#### `djdevx packages all install`
+
+Install and configure all available packages
+
+**Usage**:
+
+```console
+$ djdevx packages all install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages all remove`
+
+Remove all packages
+
+**Usage**:
+
+```console
+$ djdevx packages all remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
 
 ### `djdevx packages whitenoise`
 
