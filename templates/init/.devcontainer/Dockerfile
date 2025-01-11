@@ -64,7 +64,11 @@ RUN --mount=type=cache,target=/var/cache/apt \
     mv ripsecrets-0.1.8-x86_64-unknown-linux-gnu/ripsecrets /usr/local/bin && \
     wget https://github.com/biomejs/biome/releases/download/cli%2Fv1.9.4/biome-linux-x64 && \
     chmod +x biome-linux-x64 && \
-    mv biome-linux-x64 /usr/local/bin/biome
+    mv biome-linux-x64 /usr/local/bin/biome && \
+    cd /tmp && curl -sLO https://github.com/nushell/nushell/releases/download/0.101.0/nu-0.101.0-x86_64-unknown-linux-musl.tar.gz && \
+    tar -xvzf nu-*.tar.gz && \
+    cp nu*/n* /usr/local/bin
+
 
 
 USER devuser
