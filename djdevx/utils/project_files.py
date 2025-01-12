@@ -32,6 +32,14 @@ def get_packages_url_path() -> Path:
     return Path.joinpath(get_url_path(), "packages")
 
 
+def get_base_template_path() -> Path:
+    return Path.joinpath(get_project_path(), "templates", "_base.html")
+
+
+def get_gitignore_path() -> Path:
+    return Path.joinpath(get_project_path(), ".gitignore")
+
+
 def copy_template_files(source_dir: Path, dest_dir: Path, template_context: dict):
     dest_dir.mkdir(parents=True, exist_ok=True)
     jinja_env = Environment(loader=FileSystemLoader(source_dir))

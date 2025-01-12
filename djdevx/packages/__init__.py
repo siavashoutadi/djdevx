@@ -4,6 +4,7 @@ from .all import app as all_packages
 from .whitenoise import app as whitenoise
 from .django_browser_reload import app as browser_reload
 from .django_debug_toolbar import app as debug_toolbar
+from .django_tailwind_cli import app as tailwind_cli
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -27,4 +28,9 @@ app.add_typer(
     debug_toolbar,
     name="django-debug-toolbar",
     help="Manage django-debug-toolbar package",
+)
+app.add_typer(
+    tailwind_cli,
+    name="django-tailwind-cli",
+    help="Manage django-tailwind-cli package",
 )
