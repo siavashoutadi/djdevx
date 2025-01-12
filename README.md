@@ -85,6 +85,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 * `whitenoise`: Manage whitenoise package
 * `django-browser-reload`: Manage django-browser-reload package
 * `django-debug-toolbar`: Manage django-debug-toolbar package
+* `django-tailwind-cli`: Manage django-tailwind-cli package
 
 ### `djdevx packages all`
 
@@ -268,6 +269,53 @@ Remove django-debug-toolbar
 
 ```console
 $ djdevx packages django-debug-toolbar remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx packages django-tailwind-cli`
+
+Manage django-tailwind-cli package
+
+**Usage**:
+
+```console
+$ djdevx packages django-tailwind-cli [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure django-tailwind-cli
+* `remove`: Remove django-tailwind-cli
+
+#### `djdevx packages django-tailwind-cli install`
+
+Install and configure django-tailwind-cli
+
+**Usage**:
+
+```console
+$ djdevx packages django-tailwind-cli install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages django-tailwind-cli remove`
+
+Remove django-tailwind-cli
+
+**Usage**:
+
+```console
+$ djdevx packages django-tailwind-cli remove [OPTIONS]
 ```
 
 **Options**:
