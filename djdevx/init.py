@@ -87,6 +87,8 @@ def install_dependencies(dest_dir: Path):
         "django-environ",
         "psycopg2-binary",
         "django-redis",
+        "ipython",
+        "ipdb",
     ]
     for pkg in dependencies:
         print_step(f"Installing {pkg} ...")
