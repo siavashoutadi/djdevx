@@ -86,6 +86,7 @@ def install_dependencies(dest_dir: Path):
         "django-typer",
         "django-environ",
         "psycopg2-binary",
+        "django-redis",
     ]
     for pkg in dependencies:
         print_step(f"Installing {pkg} ...")
