@@ -19,6 +19,15 @@ services:
       - app-db-data:/var/lib/postgresql/data/pgdata
     networks:
       - devcontainer
+  cache:
+    image: redis:7.4-alpine
+    env_file:
+      - ./.env/redis
+    command: /bin/sh -c 'redis-server --appendonly yes --requirepass $${REDIS_PASSWORD}'
+    volumes:
+          - cache-data:/data
+    networks:
+      - devcontainer
   pgadmin:
     image: dpage/pgadmin4
     ports:
@@ -40,6 +49,8 @@ volumes:
   pgadmin-data:
     driver: local
   pgadmin-config:
+    driver: local
+  cache-data:
     driver: local
 
 networks:
