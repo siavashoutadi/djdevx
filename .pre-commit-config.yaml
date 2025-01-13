@@ -16,9 +16,9 @@ repos:
         name: ruff (formatter)
   - repo: local
     hooks:
-      - id: update-readme
-        name: Update README
-        entry: ./task generate_doc
+      - id: update-manual
+        name: Update Manual
+        entry: ./task generate_manual
         language: script
         files: ^.*$
-        exclude: ^README\.md$
+        exclude: ^manual\.md$

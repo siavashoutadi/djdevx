@@ -7,8 +7,8 @@ function help {
     compgen -A function | cat -n
 }
 
-function generate_doc {
-    poetry run typer djdevx.main utils docs --output README.md --name djdevx
+function generate_manual {
+    poetry run typer djdevx.main utils docs --output manual.md --name djdevx
 }
 
 function step_version {
