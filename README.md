@@ -85,6 +85,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 * `whitenoise`: Manage whitenoise package
 * `django-browser-reload`: Manage django-browser-reload package
 * `django-debug-toolbar`: Manage django-debug-toolbar package
+* `django-health-check`: Manage django-health-check package
 * `django-tailwind-cli`: Manage django-tailwind-cli package
 
 ### `djdevx packages all`
@@ -269,6 +270,53 @@ Remove django-debug-toolbar
 
 ```console
 $ djdevx packages django-debug-toolbar remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx packages django-health-check`
+
+Manage django-health-check package
+
+**Usage**:
+
+```console
+$ djdevx packages django-health-check [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure django-health-check
+* `remove`: Remove django-health-check
+
+#### `djdevx packages django-health-check install`
+
+Install and configure django-health-check
+
+**Usage**:
+
+```console
+$ djdevx packages django-health-check install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages django-health-check remove`
+
+Remove django-health-check
+
+**Usage**:
+
+```console
+$ djdevx packages django-health-check remove [OPTIONS]
 ```
 
 **Options**:
