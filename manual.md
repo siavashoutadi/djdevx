@@ -62,6 +62,7 @@ $ djdevx init [OPTIONS]
 * `--project-name TEXT`: The name of the project  [default: my-project]
 * `--project-description TEXT`: The description of the project  [default: My project is awesome]
 * `--project-directory PATH`: The directory to initialize the project in  [default: .]
+* `--python-version PATH`: The minimum python version for the project  [default: 3.13]
 * `--git-init / --no-git-init`: whether to initialize a git repository in the project directory  [default: git-init]
 * `--help`: Show this message and exit.
 
