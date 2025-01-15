@@ -34,6 +34,13 @@ def init(
             prompt="Please enter directory to initialize the project in",
         ),
     ] = Path("."),
+    python_version: Annotated[
+        Path,
+        typer.Option(
+            help="The minimum python version for the project",
+            prompt="Please enter the minimum python version for the project",
+        ),
+    ] = Path("3.13"),
     git_init: Annotated[
         bool,
         typer.Option(
@@ -57,6 +64,7 @@ def init(
         "project_name": project_name,
         "project_description": project_description,
         "django_secret_key": generate_secret(),
+        "python_version": python_version,
     }
 
     copy_template_files(
