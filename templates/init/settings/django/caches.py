@@ -8,7 +8,7 @@ CACHES = {
         "LOCATION": env("CACHE_LOCATION", default="redis://127.0.0.1:6379/1"),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "PASSWORD": env("REDIS_PASSWORD"),
+            "PASSWORD": env("REDIS_PASSWORD", default=""),
             "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
             "IGNORE_EXCEPTIONS": True,
         },

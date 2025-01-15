@@ -6,7 +6,7 @@ from settings.utils.env import get_env
 
 env = get_env()
 
-SECRET_KEY: str = env("SECRET_KEY")
+SECRET_KEY: str = env("SECRET_KEY", default="")
 DEBUG: bool = env.bool("DEBUG", default=False)
 ALLOWED_HOSTS: list[str] = env.list("ALLOWED_HOSTS", default=[])
 
