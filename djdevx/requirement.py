@@ -1,12 +1,14 @@
-import shutil
 import typer
 
-from djdevx.utils.print_console import (
+from .utils.print_console import (
     print_error,
     print_info,
     print_step,
     print_success,
 )
+
+from .utils.os_tools import is_tool_installed
+
 
 app = typer.Typer()
 
@@ -18,21 +20,21 @@ def requirement():
     """
     print_step("Checking the requirement ...")
 
-    uv_installed = is_installed("uv")
+    uv_installed = is_tool_installed("uv")
     if uv_installed:
         print_info("✅ uv is installed")
     else:
         uv_link = "https://docs.astral.sh/uv/getting-started/installation/"
         print_info(f"❌ uv is not installed - [link={uv_link}]Install uv[/link]")
 
-    git_installed = is_installed("git")
+    git_installed = is_tool_installed("git")
     if git_installed:
         print_info("✅ git is installed")
     else:
         git_link = "https://git-scm.com/downloads"
         print_info(f"❌ git is not installed - [link={git_link}]Install git[/link]")
 
-    docker_installed = is_installed("docker")
+    docker_installed = is_tool_installed("docker")
     if docker_installed:
         print_info("✅ Docker is installed")
     else:
@@ -48,7 +50,3 @@ def requirement():
             "Some requirements are missing. Please follow the links above to install them."
         )
         raise typer.Exit(code=1)
-
-
-def is_installed(command: str) -> bool:
-    return shutil.which(command) is not None

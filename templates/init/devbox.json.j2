@@ -1,0 +1,28 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.13.7/.schema/devbox.schema.json",
+  "packages": [
+    "starship@latest",
+    "ripgrep@latest",
+    "zellij@latest",
+    "nushell@latest",
+    "lsd@latest",
+    "delta@latest",
+    "tree@latest",
+    "viddy@latest",
+    "jq@latest",
+    "yq@latest",
+    "bat@latest",
+    "shellcheck@latest",
+    "ripsecrets@latest",
+    "biome@latest",
+    "gh@latest",
+    "fd@latest",
+    "gettext@latest"
+  ],
+  "shell": {
+    "init_hook": [
+      "eval \"$(starship init bash)\""
+    ],
+  },
+  "env_from": "./devbox.d/.env"
+}

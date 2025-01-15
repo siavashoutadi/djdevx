@@ -17,3 +17,7 @@ def print_error(line: str):
 
 def print_info(line: str):
     console.print(f"{line}")
+
+
+def print_warning(line: str):
+    console.print(f"\n[bold yellow]{line}[/bold yellow]\n")
