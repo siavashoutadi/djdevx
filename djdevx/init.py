@@ -5,7 +5,9 @@ import typer
 from typing_extensions import Annotated
 from pathlib import Path
 
-from .utils.print_console import print_step, print_success
+from .utils.os_tools import is_tool_installed
+
+from .utils.print_console import print_step, print_success, print_warning
 from .utils.project_files import copy_template_files
 from .requirement import requirement
 
@@ -77,6 +79,8 @@ def init(
 
     install_dependencies(dest_dir=dest_dir)
 
+    devbox_init(python_version)
+
     if git_init and not is_git_repository():
         print_step("Initializing the git repository ...")
         init_git()
@@ -131,6 +135,17 @@ def init_git():
     subprocess.check_call(["git", "init", "--initial-branch=main"])
     subprocess.check_call(["git", "add", "."])
     subprocess.check_call(["git", "commit", "-m", "Initial commit"])
+
+
+def devbox_init(python_version):
+    print_step("Updating devbox packages ...")
+    if not is_tool_installed("devbox"):
+        print_warning("Devbox is not installed. Skip Updating the packages.")
+        return
+
+    subprocess.check_call(["devbox", "update"])
+
+    print_success("Packages are updated successfully.\n")
 
 
 if __name__ == "__main__":
