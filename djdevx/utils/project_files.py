@@ -40,6 +40,10 @@ def get_gitignore_path() -> Path:
     return Path.joinpath(get_project_path(), ".gitignore")
 
 
+def get_docker_file_path() -> Path:
+    return Path.joinpath(get_project_path(), "Dockerfile")
+
+
 def copy_template_files(source_dir: Path, dest_dir: Path, template_context: dict):
     dest_dir.mkdir(parents=True, exist_ok=True)
     jinja_env = Environment(loader=FileSystemLoader(source_dir))
