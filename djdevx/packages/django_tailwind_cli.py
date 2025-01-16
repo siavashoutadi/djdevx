@@ -12,6 +12,7 @@ from ..utils.project_files import (
     get_base_template_path,
     get_packages_settings_path,
     get_gitignore_path,
+    get_docker_file_path,
 )
 
 app = typer.Typer(no_args_is_help=True)
@@ -61,6 +62,30 @@ def remove_input_css_to_git_ignore():
                 print(line, end="")
 
 
+def add_tailwind_build_to_docker_file():
+    print_step("Updating Dockerfile ...")
+    build_static_line = "uv run manage.py collectstatic --noinput && \\"
+    tailwind_build_line = "uv run manage.py tailwind build && \\"
+
+    docker_file = get_docker_file_path()
+    content = docker_file.read_text()
+
+    if tailwind_build_line not in content:
+        content = content.replace(
+            build_static_line, tailwind_build_line + "\n    " + build_static_line
+        )
+
+    docker_file.write_text(content)
+
+
+def remove_tailwind_build_to_docker_file():
+    docker_file = get_docker_file_path()
+    with fileinput.input(files=[docker_file], inplace=True) as f:
+        for line in f:
+            if "uv run manage.py tailwind build" not in line:
+                print(line, end="")
+
+
 @app.command()
 def install():
     """
@@ -81,6 +106,7 @@ def install():
 
     add_tailwind_snippets()
     add_input_css_to_git_ignore()
+    add_tailwind_build_to_docker_file()
 
     print_success("django-tailwind-cli is installed successfully.")
 
@@ -111,5 +137,6 @@ def remove():
     tailwind_css_output.unlink(missing_ok=True)
 
     remove_input_css_to_git_ignore()
+    remove_tailwind_build_to_docker_file()
 
     print_success("django-tailwind-cli is removed successfully.")

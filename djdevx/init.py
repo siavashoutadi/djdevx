@@ -101,6 +101,7 @@ def install_dependencies(dest_dir: Path):
         "django-redis",
         "ipython",
         "ipdb",
+        "uvicorn",
     ]
     for pkg in dependencies:
         print_step(f"Installing {pkg} ...")
