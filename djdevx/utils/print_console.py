@@ -8,11 +8,11 @@ def print_step(line: str):
 
 
 def print_success(line: str):
-    console.print(f"\n[bold green]{line}[/bold green]\n")
+    console.print(f"[bold green]{line}[/bold green]")
 
 
 def print_error(line: str):
-    console.print(f"\n[bold red]{line}[/bold red]\n")
+    console.print(f"[bold red]{line}[/bold red]")
 
 
 def print_info(line: str):
@@ -20,4 +20,4 @@ def print_info(line: str):
 
 
 def print_warning(line: str):
-    console.print(f"\n[bold yellow]{line}[/bold yellow]\n")
+    console.print(f"[bold yellow]{line}[/bold yellow]")
