@@ -1,0 +1,37 @@
+{% if isSES %}
+ANYMAIL = {
+    "AMAZON_SES_CLIENT_PARAMS": {
+        "aws_access_key_id": env("ANYMAIL_SES_ACCESS_KEY", default=""),
+        "aws_secret_access_key": env("ANYMAIL_SES_SECRET_KEY", default=""),
+        "region_name": env("ANYMAIL_SES_REGION_NAME", default=""),
+    }
+}
+
+EMAIL_BACKEND = "anymail.backends.amazon_ses.EmailBackend"
+{% elif isBrevo %}
+ANYMAIL = {
+    "BREVO_API_KEY": env("ANYMAIL_BREVO_API_KEY", default=""),
+}
+
+EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
+{% elif isMailgun %}
+ANYMAIL = {
+    "MAILGUN_API_KEY": env("ANYMAIL_MAILGUN_API_KEY", default=""),
+    "MAILGUN_API_URL": "{{ mailgun_api_url }}",
+}
+
+EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
+{% elif isMailjet %}
+ANYMAIL = {
+    "MAILJET_API_KEY": env("ANYMAIL_MAILJET_API_KEY", default=""),
+    "MAILJET_SECRET_KEY": env("ANYMAIL_MAILJET_SECRET_KEY", default=""),
+}
+
+EMAIL_BACKEND = "anymail.backends.mailjet.EmailBackend"
+{% elif isResend %}
+ANYMAIL = {
+    "RESEND_API_KEY": env("ANYMAIL_RESEND_API_KEY", default=""),
+}
+
+EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
+{% endif %}
