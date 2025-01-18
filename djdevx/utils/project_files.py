@@ -1,6 +1,9 @@
-import typer
-from pathlib import Path
 import shutil
+import typer
+import fileinput
+
+from pathlib import Path
+
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -44,6 +47,18 @@ def get_docker_file_path() -> Path:
     return Path.joinpath(get_project_path(), "Dockerfile")
 
 
+def get_devcontainer_path() -> Path:
+    return Path.joinpath(get_project_path(), ".devcontainer")
+
+
+def get_devcontainer_env_path() -> Path:
+    return Path.joinpath(get_devcontainer_path(), ".env")
+
+
+def get_devcontainer_env_devcontainer_path() -> Path:
+    return Path.joinpath(get_devcontainer_env_path(), "devcontainer")
+
+
 def copy_template_files(source_dir: Path, dest_dir: Path, template_context: dict):
     dest_dir.mkdir(parents=True, exist_ok=True)
     jinja_env = Environment(loader=FileSystemLoader(source_dir))
@@ -72,3 +87,20 @@ def is_project_exists_or_raise():
             "Could not find pyproject.toml. Are you running from the project directory?"
         )
         raise typer.Abort()
+
+
+def add_env_varibles(
+    key: str, value: str, file_path: Path = get_devcontainer_env_devcontainer_path()
+):
+    remove_env_varibles(key)
+    with open(file_path, "a") as f:
+        f.write(f"{key}={value}\n")
+
+
+def remove_env_varibles(
+    key: str, file_path: Path = get_devcontainer_env_devcontainer_path()
+):
+    with fileinput.input(files=[file_path], inplace=True) as f:
+        for line in f:
+            if not line.startswith(f"{key}="):
+                print(line, end="")

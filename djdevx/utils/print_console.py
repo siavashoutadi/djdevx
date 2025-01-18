@@ -21,3 +21,8 @@ def print_info(line: str):
 
 def print_warning(line: str):
     console.print(f"[bold yellow]{line}[/bold yellow]")
+
+
+def print_list(items: list):
+    for item in items:
+        console.print(f"🔹[bold]{item}[/bold]")
