@@ -87,6 +87,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 * `django-browser-reload`: Manage django-browser-reload package
 * `django-debug-toolbar`: Manage django-debug-toolbar package
 * `django-health-check`: Manage django-health-check package
+* `django-storages`: Manage django-storages package
 * `django-tailwind-cli`: Manage django-tailwind-cli package
 
 ### `djdevx packages all`
@@ -322,6 +323,110 @@ $ djdevx packages django-health-check remove [OPTIONS]
 
 **Options**:
 
+* `--help`: Show this message and exit.
+
+### `djdevx packages django-storages`
+
+Manage django-storages package
+
+**Usage**:
+
+```console
+$ djdevx packages django-storages [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `remove`: Removing the django-storages package
+* `install`: Installing the django-storages for...
+
+#### `djdevx packages django-storages remove`
+
+Removing the django-storages package
+
+**Usage**:
+
+```console
+$ djdevx packages django-storages remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages django-storages install`
+
+Installing the django-storages for different backends
+
+**Usage**:
+
+```console
+$ djdevx packages django-storages install [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `s3`: Installing django-storages package with S3...
+* `azure`: Installing django-storages package with...
+* `google`: Installing django-storages package with...
+
+##### `djdevx packages django-storages install s3`
+
+Installing django-storages package with S3 backend
+
+**Usage**:
+
+```console
+$ djdevx packages django-storages install s3 [OPTIONS]
+```
+
+**Options**:
+
+* `--access-key TEXT`: The AWS access key for authentication  [required]
+* `--secret-key TEXT`: The AWS Secret key for authentication  [required]
+* `--region-name TEXT`: The AWS region  [required]
+* `--bucket-name TEXT`: The AWS bucket name to store the files in  [required]
+* `--help`: Show this message and exit.
+
+##### `djdevx packages django-storages install azure`
+
+Installing django-storages package with Azure backend
+
+**Usage**:
+
+```console
+$ djdevx packages django-storages install azure [OPTIONS]
+```
+
+**Options**:
+
+* `--account-key TEXT`: The Azure account key for authentication  [required]
+* `--account-name TEXT`: The Azure account name for authentication  [required]
+* `--container-name TEXT`: The Azure container name to store the files in  [required]
+* `--help`: Show this message and exit.
+
+##### `djdevx packages django-storages install google`
+
+Installing django-storages package with Google backend
+
+**Usage**:
+
+```console
+$ djdevx packages django-storages install google [OPTIONS]
+```
+
+**Options**:
+
+* `--credentials-file-path PATH`: The path to the google credential file  [required]
+* `--bucket-name TEXT`: The Google bucket name to store the files in  [required]
 * `--help`: Show this message and exit.
 
 ### `djdevx packages django-tailwind-cli`
