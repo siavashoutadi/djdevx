@@ -83,12 +83,13 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `all`: Manage all packages at once
-* `whitenoise`: Manage whitenoise package
+* `django-anymail`: Manage django-anymail package
 * `django-browser-reload`: Manage django-browser-reload package
 * `django-debug-toolbar`: Manage django-debug-toolbar package
 * `django-health-check`: Manage django-health-check package
 * `django-storages`: Manage django-storages package
 * `django-tailwind-cli`: Manage django-tailwind-cli package
+* `whitenoise`: Manage whitenoise package
 
 ### `djdevx packages all`
 
@@ -137,14 +138,14 @@ $ djdevx packages all remove [OPTIONS]
 
 * `--help`: Show this message and exit.
 
-### `djdevx packages whitenoise`
+### `djdevx packages django-anymail`
 
-Manage whitenoise package
+Manage django-anymail package
 
 **Usage**:
 
 ```console
-$ djdevx packages whitenoise [OPTIONS] COMMAND [ARGS]...
+$ djdevx packages django-anymail [OPTIONS] COMMAND [ARGS]...
 ```
 
 **Options**:
@@ -153,35 +154,122 @@ $ djdevx packages whitenoise [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `install`: Install and configure whitenoise
-* `remove`: Remove whitenoise
+* `remove`: Removing the django-anymail package
+* `install`: Installing the django-anymail package for...
 
-#### `djdevx packages whitenoise install`
+#### `djdevx packages django-anymail remove`
 
-Install and configure whitenoise
+Removing the django-anymail package
 
 **Usage**:
 
 ```console
-$ djdevx packages whitenoise install [OPTIONS]
+$ djdevx packages django-anymail remove [OPTIONS]
 ```
 
 **Options**:
 
 * `--help`: Show this message and exit.
 
-#### `djdevx packages whitenoise remove`
+#### `djdevx packages django-anymail install`
 
-Remove whitenoise
+Installing the django-anymail package for different backends
 
 **Usage**:
 
 ```console
-$ djdevx packages whitenoise remove [OPTIONS]
+$ djdevx packages django-anymail install [OPTIONS] COMMAND [ARGS]...
 ```
 
 **Options**:
 
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `ses`: Installing django-anymail with SES backend
+* `brevo`: Installing django-anymail with brevo backend
+* `mailgun`: Installing django-anymail with mailgun...
+* `mailjet`: Installing django-anymail with mailjet...
+* `resend`: Installing django-anymail with resend backend
+
+##### `djdevx packages django-anymail install ses`
+
+Installing django-anymail with SES backend
+
+**Usage**:
+
+```console
+$ djdevx packages django-anymail install ses [OPTIONS]
+```
+
+**Options**:
+
+* `--access-key TEXT`: The AWS access key for authentication  [required]
+* `--secret-key TEXT`: The AWS Secret key for authentication  [required]
+* `--region-name TEXT`: The AWS region  [required]
+* `--help`: Show this message and exit.
+
+##### `djdevx packages django-anymail install brevo`
+
+Installing django-anymail with brevo backend
+
+**Usage**:
+
+```console
+$ djdevx packages django-anymail install brevo [OPTIONS]
+```
+
+**Options**:
+
+* `--api-key TEXT`: The Brevo API key for authentication  [required]
+* `--help`: Show this message and exit.
+
+##### `djdevx packages django-anymail install mailgun`
+
+Installing django-anymail with mailgun backend
+
+**Usage**:
+
+```console
+$ djdevx packages django-anymail install mailgun [OPTIONS]
+```
+
+**Options**:
+
+* `--api-key TEXT`: The Mailgun API key for authentication  [required]
+* `--is-europe-region / --no-is-europe-region`: If you are using the Europe region  [required]
+* `--help`: Show this message and exit.
+
+##### `djdevx packages django-anymail install mailjet`
+
+Installing django-anymail with mailjet backend
+
+**Usage**:
+
+```console
+$ djdevx packages django-anymail install mailjet [OPTIONS]
+```
+
+**Options**:
+
+* `--api-key TEXT`: The Mailjet API key for authentication  [required]
+* `--secret-key TEXT`: The Mailjet secret key for authentication  [required]
+* `--help`: Show this message and exit.
+
+##### `djdevx packages django-anymail install resend`
+
+Installing django-anymail with resend backend
+
+**Usage**:
+
+```console
+$ djdevx packages django-anymail install resend [OPTIONS]
+```
+
+**Options**:
+
+* `--api-key TEXT`: The Resend API key for authentication  [required]
 * `--help`: Show this message and exit.
 
 ### `djdevx packages django-browser-reload`
@@ -470,6 +558,53 @@ Remove django-tailwind-cli
 
 ```console
 $ djdevx packages django-tailwind-cli remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx packages whitenoise`
+
+Manage whitenoise package
+
+**Usage**:
+
+```console
+$ djdevx packages whitenoise [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure whitenoise
+* `remove`: Remove whitenoise
+
+#### `djdevx packages whitenoise install`
+
+Install and configure whitenoise
+
+**Usage**:
+
+```console
+$ djdevx packages whitenoise install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages whitenoise remove`
+
+Remove whitenoise
+
+**Usage**:
+
+```console
+$ djdevx packages whitenoise remove [OPTIONS]
 ```
 
 **Options**:

@@ -7,6 +7,7 @@ from .django_debug_toolbar import app as debug_toolbar
 from .django_tailwind_cli import app as tailwind_cli
 from .django_health_check import app as healthcheck
 from .django_storages import app as storages
+from .django_anymail import app as anymail
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -17,9 +18,9 @@ app.add_typer(
     help="Manage all packages at once",
 )
 app.add_typer(
-    whitenoise,
-    name="whitenoise",
-    help="Manage whitenoise package",
+    anymail,
+    name="django-anymail",
+    help="Manage django-anymail package",
 )
 app.add_typer(
     browser_reload,
@@ -45,4 +46,9 @@ app.add_typer(
     tailwind_cli,
     name="django-tailwind-cli",
     help="Manage django-tailwind-cli package",
+)
+app.add_typer(
+    whitenoise,
+    name="whitenoise",
+    help="Manage whitenoise package",
 )
