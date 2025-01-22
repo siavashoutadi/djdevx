@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found</title>
+    <style>
+        /* Theme detection and variables */
+        :root {
+            color-scheme: light dark;
+
+            /* Light theme variables */
+            --background-color: #f7f7f7;
+            --text-color: #34495e;
+            --subtext-color: #7f8c8d;
+            --border-color: #000000;
+            --illustration-fill: #f0f0f0;
+            --illustration-stroke: #2c3e50;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background-color: #1a1a1a;
+                --text-color: #e0e0e0;
+                --subtext-color: #a0a0a0;
+                --border-color: #ffffff;
+                --illustration-fill: #2c2c2c;
+                --illustration-stroke: #e0e0e0;
+            }
+        }
+
+        /* General styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--background-color);
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .container {
+            padding: 20px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .illustration {
+            width: 200px;
+            height: 200px;
+            margin-bottom: 20px;
+        }
+
+        .error-code {
+            font-size: 14px;
+            color: var(--subtext-color);
+            margin-bottom: 10px;
+        }
+
+        .message {
+            font-size: 24px;
+            color: var(--text-color);
+            margin-bottom: 20px;
+        }
+
+        .sub-message {
+            font-size: 16px;
+            color: var(--subtext-color);
+            margin-bottom: 30px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .home-button {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: transparent;
+            color: var(--border-color);
+            text-decoration: none;
+            border-radius: 25px;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .home-button:hover {
+            background-color: var(--border-color);
+            color: var(--background-color);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Compass animation */
+        @keyframes compassSpin {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(-20deg); }
+            75% { transform: rotate(20deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        .compass {
+            animation: compassSpin 3s infinite ease-in-out;
+        }
+
+        @media (max-width: 480px) {
+            .illustration {
+                width: 150px;
+                height: 150px;
+            }
+
+            .message {
+                font-size: 20px;
+            }
+
+            .sub-message {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <svg class="illustration compass" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="100" cy="100" r="80" fill="var(--illustration-fill)" stroke="var(--illustration-stroke)" stroke-width="4"/>
+            <path d="M100,40 L110,100 L100,160 L90,100 Z" fill="#e74c3c"/>
+            <circle cx="100" cy="100" r="5" fill="var(--illustration-stroke)"/>
+            <text x="100" y="35" text-anchor="middle" fill="var(--illustration-stroke)" font-size="12">N</text>
+            <text x="100" y="175" text-anchor="middle" fill="var(--illustration-stroke)" font-size="12">S</text>
+            <text x="175" y="105" text-anchor="middle" fill="var(--illustration-stroke)" font-size="12">E</text>
+            <text x="25" y="105" text-anchor="middle" fill="var(--illustration-stroke)" font-size="12">W</text>
+        </svg>
+        <div class="error-code">Error 404</div>
+        <div class="message">Looks like you're lost!</div>
+        <div class="sub-message">The page you are looking for might have been removed or is temporarily unavailable.</div>
+        <a href="/" class="home-button">Back to Home</a>
+    </div>
+</body>
+</html>
