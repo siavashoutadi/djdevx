@@ -8,6 +8,7 @@ from .django_tailwind_cli import app as tailwind_cli
 from .django_health_check import app as healthcheck
 from .django_storages import app as storages
 from .django_anymail import app as anymail
+from .django_allauth import app as allauth
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -16,6 +17,11 @@ app.add_typer(
     all_packages,
     name="all",
     help="Manage all packages at once",
+)
+app.add_typer(
+    allauth,
+    name="django-allauth",
+    help="Manage django-allauth package",
 )
 app.add_typer(
     anymail,

@@ -83,6 +83,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `all`: Manage all packages at once
+* `django-allauth`: Manage django-allauth package
 * `django-anymail`: Manage django-anymail package
 * `django-browser-reload`: Manage django-browser-reload package
 * `django-debug-toolbar`: Manage django-debug-toolbar package
@@ -136,6 +137,74 @@ $ djdevx packages all remove [OPTIONS]
 
 **Options**:
 
+* `--help`: Show this message and exit.
+
+### `djdevx packages django-allauth`
+
+Manage django-allauth package
+
+**Usage**:
+
+```console
+$ djdevx packages django-allauth [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `remove`: Removing the django-allauth package
+* `install`: Installing the django-allauth for...
+
+#### `djdevx packages django-allauth remove`
+
+Removing the django-allauth package
+
+**Usage**:
+
+```console
+$ djdevx packages django-allauth remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages django-allauth install`
+
+Installing the django-allauth for different backends
+
+**Usage**:
+
+```console
+$ djdevx packages django-allauth install [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `account`: Installing django-allauth package
+
+##### `djdevx packages django-allauth install account`
+
+Installing django-allauth package
+
+**Usage**:
+
+```console
+$ djdevx packages django-allauth install account [OPTIONS]
+```
+
+**Options**:
+
+* `--email-subject-prefix TEXT`: Subject-line prefix to use for email messages sent
+* `--is-profanity-for-username-enabled / --no-is-profanity-for-username-enabled`: Enable profanity filter for username  [default: is-profanity-for-username-enabled]
+* `--account-url-prefix TEXT`: URL prefix for account related URLs  [default: auth]
 * `--help`: Show this message and exit.
 
 ### `djdevx packages django-anymail`

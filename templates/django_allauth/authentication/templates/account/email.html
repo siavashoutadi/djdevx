@@ -1,0 +1,126 @@
+{% extends "./account_base.html" %}
+{% load i18n %}
+{% load static %}
+{% load allauth account %}
+{% block title %}{% trans "Email Addresses" %}{% endblock title %}
+{% block content %}
+  <main class="mx-auto container sm:mt-32">
+    <div class="flex flex-1 flex-col justify-center px-6 py-12 lg:px-8 mb-10">
+      <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+        <h2 class="mt-10 text-center text-2xl font-bold leading-9 tracking-tight">{% trans "Email Addresses" %}</h2>
+      </div>
+      <div class="mt-4 sm:mx-auto sm:w-full sm:max-w-sm">
+        {% if emailaddresses %}
+          <p>{% trans 'The following email addresses are associated with your account:' %}</p>
+          {% url 'account_email' as email_url %}
+          <form method="post" action="{{ email_url }}" class="space-y-6">
+            {% csrf_token %}
+            {% for radio in emailaddress_radios %}
+              {% with emailaddress=radio.emailaddress %}
+                <div>
+                  <input type="radio"
+                         checked="{{ radio.checked }}"
+                         name="email"
+                         value="{{ emailaddress.email }}"
+                         id="{{ radio.id }}" />
+                  <label for="{{ radio.id }}">
+                    <span>{{ emailaddress.email }}</span>
+                    {% if emailaddress.verified %}
+                      <span class="text-green-600 inline-block">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke-width="1.5"
+                             stroke="currentColor"
+                             class="w-4 h-4">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </span>
+                      {% if not emailaddress.primary %}
+                      <span class="text-sm text-gray-400">({% trans "Verified" %})</span>
+                      {% endif %}
+                    {% else %}
+                      <span class="text-red-600 inline-block">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke-width="1.5"
+                             stroke="currentColor"
+                             class="w-4 h-4">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </span>
+                      <span class="text-sm text-gray-400">({% trans "Unverified" %})</span>
+                    {% endif %}
+                    {% if emailaddress.primary %}
+                      <span class="text-sm text-gray-400">({% trans "Primary" %})</span>
+                    {% endif %}
+                  </label>
+                </div>
+              {% endwith %}
+            {% endfor %}
+            <div class="flex flex-col justify-between">
+              <div class="my-2 mx-2">
+                <button type="submit"
+                        name="action_primary"
+                        class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm bg-black text-white hover:bg-slate-900 dark:bg-white dark:text-black dark:hover:bg-gray-100">
+                   {% trans 'Make Primary' %}
+                </button>
+              </div>
+              <div class="my-2 mx-2">
+                <button type="submit"
+                        name="action_send"
+                        class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm text-black outline outline-black hover:bg-gray-200 dark:bg-transparent dark:outline dark:outline-white dark:text-white dark:hover:text-gray-400 dark:hover:outline-gray-400 dark:hover:bg-transparent">
+                  {% trans 'Re-send Verification' %}
+                </button>
+              </div>
+              <div class="my-2 mx-2">
+                <button type="submit"
+                        name="action_remove"
+                        class="flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold leading-6 shadow-sm ring-2 ring-inset ring-red-600 text-red-600 hover:bg-red-100 dark:hover:bg-red-950">
+                  {% trans 'Remove' %}
+                </button>
+              </div>
+            </div>
+          {% else %}
+            <p>
+              <strong>{% trans 'Warning:' %}</strong> {% trans "You currently do not have any email address set up. You should really add an email address so you can receive notifications, reset your password, etc." %}
+            </p>
+          {% endif %}
+        </form>
+        {% if can_add_email %}
+          <h2 class="mt-10 text-center text-2xl font-bold leading-9 tracking-tight">
+            {% trans "Add Email Address" %}
+          </h2>
+          {% url 'account_email' as action_url %}
+          <form method="post" action="{{ action_url }}" class="space-y-6">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="my-4">
+              <button type="submit"
+                      name="action_add"
+                      class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm bg-black text-white hover:bg-slate-900 dark:bg-transparent dark:outline dark:outline-white dark:text-white dark:hover:text-gray-400 dark:hover:outline-gray-400">
+                {% trans "Add Email" %}
+              </button>
+            </div>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </main>
+{% endblock content %}
+{% block extra_scripts %}
+  <script type="text/javascript">
+    (function() {
+      var message = "{% trans 'Do you really want to remove the selected email address?' %}";
+      var actions = document.getElementsByName('action_remove');
+      if (actions.length) {
+        actions[0].addEventListener("click", function(e) {
+          if (! confirm(message)) {
+            e.preventDefault();
+          }
+        });
+      }
+    })();
+  </script>
+{% endblock extra_scripts %}

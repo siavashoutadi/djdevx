@@ -1,0 +1,50 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}" class="light">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="{{ LANGUAGE_CODE }}">
+    <link rel="icon" href="{% static 'images/favicon.svg' %}" type="image/x-icon" />
+    <link rel="stylesheet" href="{% static 'css/vendor/auth.css' %}">
+    <title>{% block title %}Home{% endblock %}</title>
+    {% block extra_head %}{% endblock %}
+    <script>
+      (function () {
+        const theme = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+        document.documentElement.classList.toggle("dark", theme === "dark" || (!theme && prefersDark));
+      })();
+      function setTheme(mode) {
+        if (mode === "dark") {
+          localStorage.setItem("theme", "dark");
+          document.documentElement.classList.add("dark");
+        } else if (mode === "light") {
+          localStorage.setItem("theme", "light");
+          document.documentElement.classList.remove("dark");
+        } else {
+          localStorage.removeItem("theme");
+          document.documentElement.classList.toggle(
+            "dark",
+            window.matchMedia("(prefers-color-scheme: dark)").matches
+          );
+        }
+      }
+    </script>
+    <style>
+      .errorlist li {
+        color: red;
+      }
+    </style>
+  </head>
+  <body class="text-gray-700 dark:text-gray-200 bg-zinc-100 dark:bg-slate-900">
+    <main class="mx-auto container sm:mt-32">
+      {% block content %}
+      {% endblock content %}
+    </main>
+  </body>
+</html>
