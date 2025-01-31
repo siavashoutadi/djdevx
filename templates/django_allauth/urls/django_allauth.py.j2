@@ -1,0 +1,6 @@
+from django.urls import path, include
+
+
+urlpatterns = [
+    path("{{ account_url_prefix }}/", include("allauth.urls")),
+]
