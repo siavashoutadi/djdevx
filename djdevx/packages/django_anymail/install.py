@@ -9,8 +9,13 @@ from ...utils.project_files import (
     copy_template_files,
     is_project_exists_or_raise,
     get_project_path,
-    add_env_varibles,
 )
+
+from .env import ses as ses_env
+from .env import brevo as brevo_env
+from .env import mailgun as mailgun_env
+from .env import mailjet as mailjet_env
+from .env import resend as resend_env
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -65,9 +70,7 @@ def ses(
 
     copy_template(data)
 
-    add_env_varibles(key="ANYMAIL_SES_ACCESS_KEY", value=access_key)
-    add_env_varibles(key="ANYMAIL_SES_SECRET_KEY", value=secret_key)
-    add_env_varibles(key="ANYMAIL_SES_REGION_NAME", value=region_name)
+    ses_env(access_key, secret_key, region_name)
 
     print_success("django-anymail is installed successfully.")
 
@@ -97,7 +100,7 @@ def brevo(
 
     copy_template(data)
 
-    add_env_varibles(key="ANYMAIL_BREVO_API_KEY", value=api_key)
+    brevo_env(api_key)
 
     print_success("django-anymail is installed successfully.")
 
@@ -137,7 +140,7 @@ def mailgun(
 
     copy_template(data)
 
-    add_env_varibles(key="ANYMAIL_MAILGUN_API_KEY", value=api_key)
+    mailgun_env(api_key)
 
     print_success("django-anymail is installed successfully.")
 
@@ -174,8 +177,7 @@ def mailjet(
 
     copy_template(data)
 
-    add_env_varibles(key="ANYMAIL_MAILJET_API_KEY", value=api_key)
-    add_env_varibles(key="ANYMAIL_MAILJET_SECRET_KEY", value=secret_key)
+    mailjet_env(api_key, secret_key)
 
     print_success("django-anymail is installed successfully.")
 
@@ -205,6 +207,6 @@ def resend(
 
     copy_template(data)
 
-    add_env_varibles(key="ANYMAIL_RESEND_API_KEY", value=api_key)
+    resend_env(api_key)
 
     print_success("django-anymail is installed successfully.")

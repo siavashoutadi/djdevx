@@ -1,31 +1,12 @@
-import subprocess
 import typer
 
 from pathlib import Path
 from typing_extensions import Annotated
 
 from ...utils.print_console import print_step, print_success
-from ...utils.project_files import (
-    copy_template_files,
-    is_project_exists_or_raise,
-    get_project_path,
-)
-
-from .env import s3 as s3_env
-from .env import google as google_env
-from .env import azure as azure_env
+from ...utils.project_files import is_project_exists_or_raise, add_env_varibles
 
 app = typer.Typer(no_args_is_help=True)
-
-
-def copy_template(data):
-    current_dir = Path(__file__).resolve().parent
-    source_dir = current_dir.parent.parent.parent / "templates" / "django_storages"
-    project_dir = get_project_path()
-
-    copy_template_files(
-        source_dir=source_dir, dest_dir=project_dir, template_context=data
-    )
 
 
 @app.command()
@@ -61,22 +42,20 @@ def s3(
     ],
 ):
     """
-    Installing django-storages package with S3 backend
+    Creating environment variables for django-storages package with S3 backend
     """
     is_project_exists_or_raise()
 
-    print_step("Installing django-storages package with S3 backend ...")
-    subprocess.check_call(["uv", "add", "django-storages[s3]"])
+    print_step(
+        "Creating environment variables for django-storages package with S3 backend ..."
+    )
 
-    data = {
-        "isS3": True,
-    }
+    add_env_varibles(key="STORAGES_S3_ACCESS_KEY", value=access_key)
+    add_env_varibles(key="STORAGES_S3_SECRET_KEY", value=secret_key)
+    add_env_varibles(key="STORAGES_S3_REGION_NAME", value=region_name)
+    add_env_varibles(key="STORAGES_S3_BUCKET_NAME", value=bucket_name)
 
-    copy_template(data)
-
-    s3_env(access_key, secret_key, region_name, bucket_name)
-
-    print_success("django-storages is installed successfully.")
+    print_success("django-storages environment variables are configured successfully.")
 
 
 @app.command()
@@ -104,17 +83,17 @@ def azure(
     ],
 ):
     """
-    Installing django-storages package with Azure backend
+    Creating environment variables for django-storages package with Azure backend
     """
-    print_step("Installing django-storages package with Azure backend ...")
-    subprocess.check_call(["uv", "add", "django-storages[azure]"])
+    print_step(
+        "Creating environment variables for django-storages package with Azure backend ..."
+    )
 
-    data = {"isAzure": True}
-    copy_template(data)
+    add_env_varibles(key="STORAGES_AZURE_ACCOUNT_KEY", value=account_key)
+    add_env_varibles(key="STORAGES_AZURE_ACCOUNT_NAME", value=account_name)
+    add_env_varibles(key="STORAGES_AZURE_CONTAINER_NAME", value=container_name)
 
-    azure_env(account_key, account_name, container_name)
-
-    print_success("django-storages is installed successfully.")
+    print_success("django-storages environment variables are configured successfully.")
 
 
 @app.command()
@@ -135,14 +114,15 @@ def google(
     ],
 ):
     """
-    Installing django-storages package with Google backend
+    Creating environment variables for django-storages package with Google backend
     """
-    print_step("Installing django-storages package with Google backend ...")
-    subprocess.check_call(["uv", "add", "django-storages[google]"])
+    print_step(
+        "Creating environment variables for django-storages package with Google backend ..."
+    )
 
-    data = {"isGoogle": True}
-    copy_template(data)
+    add_env_varibles(
+        key="STORAGES_GOOGLE_CREDENTIALS", value=str(credentials_file_path)
+    )
+    add_env_varibles(key="STORAGES_GOOGLE_BUCKET_NAME", value=bucket_name)
 
-    google_env(credentials_file_path, bucket_name)
-
-    print_success("django-storages is installed successfully.")
+    print_success("django-storages environment variables are configured successfully.")
