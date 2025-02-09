@@ -225,6 +225,7 @@ $ djdevx packages django-anymail [OPTIONS] COMMAND [ARGS]...
 
 * `remove`: Removing the django-anymail package
 * `install`: Installing the django-anymail package for...
+* `env`: Setting up environment variables for...
 
 #### `djdevx packages django-anymail remove`
 
@@ -334,6 +335,106 @@ Installing django-anymail with resend backend
 
 ```console
 $ djdevx packages django-anymail install resend [OPTIONS]
+```
+
+**Options**:
+
+* `--api-key TEXT`: The Resend API key for authentication  [required]
+* `--help`: Show this message and exit.
+
+#### `djdevx packages django-anymail env`
+
+Setting up environment variables for django-anymail package
+
+**Usage**:
+
+```console
+$ djdevx packages django-anymail env [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `ses`: Creating environment variables for...
+* `brevo`: Creating environment variables for...
+* `mailgun`: Creating environment variables for...
+* `mailjet`: Creating environment variables for...
+* `resend`: Creating environment variables for...
+
+##### `djdevx packages django-anymail env ses`
+
+Creating environment variables for django-anymail with SES backend
+
+**Usage**:
+
+```console
+$ djdevx packages django-anymail env ses [OPTIONS]
+```
+
+**Options**:
+
+* `--access-key TEXT`: The AWS access key for authentication  [required]
+* `--secret-key TEXT`: The AWS Secret key for authentication  [required]
+* `--region-name TEXT`: The AWS region  [required]
+* `--help`: Show this message and exit.
+
+##### `djdevx packages django-anymail env brevo`
+
+Creating environment variables for django-anymail with brevo backend
+
+**Usage**:
+
+```console
+$ djdevx packages django-anymail env brevo [OPTIONS]
+```
+
+**Options**:
+
+* `--api-key TEXT`: The Brevo API key for authentication  [required]
+* `--help`: Show this message and exit.
+
+##### `djdevx packages django-anymail env mailgun`
+
+Creating environment variables for django-anymail with mailgun backend
+
+**Usage**:
+
+```console
+$ djdevx packages django-anymail env mailgun [OPTIONS]
+```
+
+**Options**:
+
+* `--api-key TEXT`: The Mailgun API key for authentication  [required]
+* `--help`: Show this message and exit.
+
+##### `djdevx packages django-anymail env mailjet`
+
+Creating environment variables for django-anymail with mailjet backend
+
+**Usage**:
+
+```console
+$ djdevx packages django-anymail env mailjet [OPTIONS]
+```
+
+**Options**:
+
+* `--api-key TEXT`: The Mailjet API key for authentication  [required]
+* `--secret-key TEXT`: The Mailjet secret key for authentication  [required]
+* `--help`: Show this message and exit.
+
+##### `djdevx packages django-anymail env resend`
+
+Creating environment variables for django-anymail with resend backend
+
+**Usage**:
+
+```console
+$ djdevx packages django-anymail env resend [OPTIONS]
 ```
 
 **Options**:
@@ -500,6 +601,7 @@ $ djdevx packages django-storages [OPTIONS] COMMAND [ARGS]...
 
 * `remove`: Removing the django-storages package
 * `install`: Installing the django-storages for...
+* `env`: Setting up environment variables for...
 
 #### `djdevx packages django-storages remove`
 
@@ -578,6 +680,77 @@ Installing django-storages package with Google backend
 
 ```console
 $ djdevx packages django-storages install google [OPTIONS]
+```
+
+**Options**:
+
+* `--credentials-file-path PATH`: The path to the google credential file  [required]
+* `--bucket-name TEXT`: The Google bucket name to store the files in  [required]
+* `--help`: Show this message and exit.
+
+#### `djdevx packages django-storages env`
+
+Setting up environment variables for django-storages package
+
+**Usage**:
+
+```console
+$ djdevx packages django-storages env [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `s3`: Creating environment variables for...
+* `azure`: Creating environment variables for...
+* `google`: Creating environment variables for...
+
+##### `djdevx packages django-storages env s3`
+
+Creating environment variables for django-storages package with S3 backend
+
+**Usage**:
+
+```console
+$ djdevx packages django-storages env s3 [OPTIONS]
+```
+
+**Options**:
+
+* `--access-key TEXT`: The AWS access key for authentication  [required]
+* `--secret-key TEXT`: The AWS Secret key for authentication  [required]
+* `--region-name TEXT`: The AWS region  [required]
+* `--bucket-name TEXT`: The AWS bucket name to store the files in  [required]
+* `--help`: Show this message and exit.
+
+##### `djdevx packages django-storages env azure`
+
+Creating environment variables for django-storages package with Azure backend
+
+**Usage**:
+
+```console
+$ djdevx packages django-storages env azure [OPTIONS]
+```
+
+**Options**:
+
+* `--account-key TEXT`: The Azure account key for authentication  [required]
+* `--account-name TEXT`: The Azure account name for authentication  [required]
+* `--container-name TEXT`: The Azure container name to store the files in  [required]
+* `--help`: Show this message and exit.
+
+##### `djdevx packages django-storages env google`
+
+Creating environment variables for django-storages package with Google backend
+
+**Usage**:
+
+```console
+$ djdevx packages django-storages env google [OPTIONS]
 ```
 
 **Options**:
