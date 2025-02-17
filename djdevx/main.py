@@ -4,6 +4,7 @@ from .version import app as version_app
 from .requirement import app as requirement_app
 from .init import app as init_app
 from .packages import app as packages_app
+from .feature import app as feature_app
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -13,6 +14,7 @@ app.add_typer(init_app)
 app.add_typer(
     packages_app, name="packages", help="Install and configure django packages"
 )
+app.add_typer(feature_app, name="feature", help="Add features to your project")
 
 if __name__ == "__main__":
     app()

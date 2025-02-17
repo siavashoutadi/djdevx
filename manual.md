@@ -18,6 +18,7 @@ $ djdevx [OPTIONS] COMMAND [ARGS]...
 * `requirement`: Check the requirement for project creation.
 * `init`: Initialize the project
 * `packages`: Install and configure django packages
+* `feature`: Add features to your project
 
 ## `djdevx version`
 
@@ -851,4 +852,37 @@ $ djdevx packages whitenoise remove [OPTIONS]
 
 **Options**:
 
+* `--help`: Show this message and exit.
+
+## `djdevx feature`
+
+Add features to your project
+
+**Usage**:
+
+```console
+$ djdevx feature [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `startapp`: Create a new Django application
+
+### `djdevx feature startapp`
+
+Create a new Django application
+
+**Usage**:
+
+```console
+$ djdevx feature startapp [OPTIONS]
+```
+
+**Options**:
+
+* `--application-name TEXT`: Application name
 * `--help`: Show this message and exit.
