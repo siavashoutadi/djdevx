@@ -59,25 +59,40 @@ def get_devcontainer_env_devcontainer_path() -> Path:
     return Path.joinpath(get_devcontainer_env_path(), "devcontainer")
 
 
+def render_template_string(path: str, template_context: dict) -> str:
+    if "{{" in path or "{%" in path:
+        template = Environment().from_string(path)
+        return template.render(**template_context)
+    return path
+
+
 def copy_template_files(source_dir: Path, dest_dir: Path, template_context: dict):
     dest_dir.mkdir(parents=True, exist_ok=True)
     jinja_env = Environment(loader=FileSystemLoader(source_dir))
+
     for source_path in source_dir.rglob("*"):
         rel_path = source_path.relative_to(source_dir)
-        dest_path = dest_dir / rel_path
+
+        rendered_parts = [
+            render_template_string(part, template_context) for part in rel_path.parts
+        ]
+        dest_path = dest_dir / Path(*rendered_parts)
 
         if source_path.is_dir():
             dest_path.mkdir(parents=True, exist_ok=True)
         else:
             if source_path.suffix == ".j2":
-                dest_path = dest_path.with_suffix("")
-
+                filename = render_template_string(dest_path.stem, template_context)
+                dest_path = dest_path.parent / filename
                 template = jinja_env.get_template(str(rel_path))
                 rendered_content = template.render(**template_context)
                 rendered_content = rendered_content.rstrip("\n") + "\n"
 
                 dest_path.write_text(rendered_content)
             else:
+                filename = render_template_string(dest_path.name, template_context)
+                dest_path = dest_path.parent / filename
+
                 shutil.copy2(source_path, dest_path)
 
 

@@ -1,0 +1,6 @@
+from django.urls import include, path
+
+
+urlpatterns = [
+    path("{{ application_name }}/", include("{{application_name}}.urls")),
+]
