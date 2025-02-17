@@ -28,6 +28,11 @@ def add_tailwind_snippets():
     if "{% tailwind_css %}" not in content:
         content = content.replace("</head>", "  {% tailwind_css %}\n  </head>")
 
+    if '{% include "./_tw_dark_mode.html" %}' not in content:
+        content = content.replace(
+            "</head>", '  {% include "./_tw_dark_mode.html" %}\n  </head>'
+        )
+
     base_template.write_text(content)
 
 
@@ -38,6 +43,7 @@ def remove_tailwind_snippets():
             if (
                 "{% load tailwind_cli %}" not in line
                 and "{% tailwind_css %}" not in line
+                and '{% include "./_tw_dark_mode.html" %}' not in line
             ):
                 print(line, end="")
 
@@ -135,6 +141,11 @@ def remove():
         get_project_path(), "static", "css", "tailwind.css"
     )
     tailwind_css_output.unlink(missing_ok=True)
+
+    tailwind_dark_mode = Path.joinpath(
+        get_project_path(), "templates", "_tw_dark_mode.html"
+    )
+    tailwind_dark_mode.unlink(missing_ok=True)
 
     remove_input_css_to_git_ignore()
     remove_tailwind_build_to_docker_file()
