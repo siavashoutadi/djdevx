@@ -871,6 +871,7 @@ $ djdevx feature [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `startapp`: Create a new Django application
+* `pwa`: Add PWA support to the project
 
 ### `djdevx feature startapp`
 
@@ -885,4 +886,30 @@ $ djdevx feature startapp [OPTIONS]
 **Options**:
 
 * `--application-name TEXT`: Application name
+* `--help`: Show this message and exit.
+
+### `djdevx feature pwa`
+
+Add PWA support to the project
+
+**Usage**:
+
+```console
+$ djdevx feature pwa [OPTIONS]
+```
+
+**Options**:
+
+* `--name TEXT`: The display name for the application  [required]
+* `--short-name TEXT`: The short name for the application when there is not enough space to display the name  [required]
+* `--description TEXT`: The description of the application  [required]
+* `--icon-path PATH`: Path to the input icon file to be used for generating the PWA icons with different sizes  [default: /tmp/icon.png]
+* `--background-color TEXT`: The page color of the window that the application will be opened in  [default: #ffffff]
+* `--theme-color TEXT`: The theme color of the application  [default: #000000]
+* `--start-url TEXT`: The start URL of the application  [default: /]
+* `--dir TEXT`: The base direction of the application  [default: ltr]
+* `--scope TEXT`: Defines which URL are within the navigation scope of your application. Scope can often just be set to the base URL of your PWA.
+* `--orientation TEXT`: The default orientation of the application. Options are   [default: portrait]
+* `--display TEXT`: The display mode that the website should default to. Options are   [default: standalone]
+* `--language TEXT`: The primary language of the application  [default: en]
 * `--help`: Show this message and exit.
