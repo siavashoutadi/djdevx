@@ -90,6 +90,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 * `django-debug-toolbar`: Manage django-debug-toolbar package
 * `djangorestframework`: Manage djangorestframework package
 * `django-health-check`: Manage django-health-check package
+* `django-oauth-toolkit`: Manage django-oauth-toolkit package
 * `django-storages`: Manage django-storages package
 * `django-tailwind-cli`: Manage django-tailwind-cli package
 * `whitenoise`: Manage whitenoise package
@@ -626,6 +627,53 @@ Remove django-health-check
 
 ```console
 $ djdevx packages django-health-check remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx packages django-oauth-toolkit`
+
+Manage django-oauth-toolkit package
+
+**Usage**:
+
+```console
+$ djdevx packages django-oauth-toolkit [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure django-oauth-toolkit
+* `remove`: Remove django-oauth-toolkit
+
+#### `djdevx packages django-oauth-toolkit install`
+
+Install and configure django-oauth-toolkit
+
+**Usage**:
+
+```console
+$ djdevx packages django-oauth-toolkit install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages django-oauth-toolkit remove`
+
+Remove django-oauth-toolkit
+
+**Usage**:
+
+```console
+$ djdevx packages django-oauth-toolkit remove [OPTIONS]
 ```
 
 **Options**:

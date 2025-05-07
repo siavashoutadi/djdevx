@@ -10,6 +10,7 @@ from .django_storages import app as storages
 from .django_anymail import app as anymail
 from .django_allauth import app as allauth
 from .djangorestframework import app as djangorestframework
+from .django_oauth_toolkit import app as oauth_toolkit
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -48,6 +49,11 @@ app.add_typer(
     healthcheck,
     name="django-health-check",
     help="Manage django-health-check package",
+)
+app.add_typer(
+    oauth_toolkit,
+    name="django-oauth-toolkit",
+    help="Manage django-oauth-toolkit package",
 )
 app.add_typer(
     storages,
