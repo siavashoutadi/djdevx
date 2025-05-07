@@ -88,6 +88,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 * `django-anymail`: Manage django-anymail package
 * `django-browser-reload`: Manage django-browser-reload package
 * `django-debug-toolbar`: Manage django-debug-toolbar package
+* `djangorestframework`: Manage djangorestframework package
 * `django-health-check`: Manage django-health-check package
 * `django-storages`: Manage django-storages package
 * `django-tailwind-cli`: Manage django-tailwind-cli package
@@ -531,6 +532,53 @@ Remove django-debug-toolbar
 
 ```console
 $ djdevx packages django-debug-toolbar remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx packages djangorestframework`
+
+Manage djangorestframework package
+
+**Usage**:
+
+```console
+$ djdevx packages djangorestframework [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure djangorestframework
+* `remove`: Remove djangorestframework
+
+#### `djdevx packages djangorestframework install`
+
+Install and configure djangorestframework
+
+**Usage**:
+
+```console
+$ djdevx packages djangorestframework install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages djangorestframework remove`
+
+Remove djangorestframework
+
+**Usage**:
+
+```console
+$ djdevx packages djangorestframework remove [OPTIONS]
 ```
 
 **Options**:
