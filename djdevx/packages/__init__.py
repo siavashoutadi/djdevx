@@ -9,6 +9,7 @@ from .django_health_check import app as healthcheck
 from .django_storages import app as storages
 from .django_anymail import app as anymail
 from .django_allauth import app as allauth
+from .djangorestframework import app as djangorestframework
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -37,6 +38,11 @@ app.add_typer(
     debug_toolbar,
     name="django-debug-toolbar",
     help="Manage django-debug-toolbar package",
+)
+app.add_typer(
+    djangorestframework,
+    name="djangorestframework",
+    help="Manage djangorestframework package",
 )
 app.add_typer(
     healthcheck,
