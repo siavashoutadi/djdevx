@@ -11,6 +11,7 @@ from .django_anymail import app as anymail
 from .django_allauth import app as allauth
 from .djangorestframework import app as djangorestframework
 from .django_oauth_toolkit import app as oauth_toolkit
+from .drf_spectacular import app as drf_spectacular
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -44,6 +45,11 @@ app.add_typer(
     djangorestframework,
     name="djangorestframework",
     help="Manage djangorestframework package",
+)
+app.add_typer(
+    drf_spectacular,
+    name="drf-spectacular",
+    help="Manage drf-spectacular package",
 )
 app.add_typer(
     healthcheck,

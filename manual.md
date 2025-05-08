@@ -89,6 +89,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 * `django-browser-reload`: Manage django-browser-reload package
 * `django-debug-toolbar`: Manage django-debug-toolbar package
 * `djangorestframework`: Manage djangorestframework package
+* `drf-spectacular`: Manage drf-spectacular package
 * `django-health-check`: Manage django-health-check package
 * `django-oauth-toolkit`: Manage django-oauth-toolkit package
 * `django-storages`: Manage django-storages package
@@ -580,6 +581,53 @@ Remove djangorestframework
 
 ```console
 $ djdevx packages djangorestframework remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx packages drf-spectacular`
+
+Manage drf-spectacular package
+
+**Usage**:
+
+```console
+$ djdevx packages drf-spectacular [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure drf-spectacular
+* `remove`: Remove drf-spectacular package
+
+#### `djdevx packages drf-spectacular install`
+
+Install and configure drf-spectacular
+
+**Usage**:
+
+```console
+$ djdevx packages drf-spectacular install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages drf-spectacular remove`
+
+Remove drf-spectacular package
+
+**Usage**:
+
+```console
+$ djdevx packages drf-spectacular remove [OPTIONS]
 ```
 
 **Options**:
