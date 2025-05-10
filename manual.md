@@ -91,6 +91,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 * `django-debug-toolbar`: Manage django-debug-toolbar package
 * `djangorestframework`: Manage djangorestframework package
 * `drf-spectacular`: Manage drf-spectacular package
+* `django-guardian`: Manage django-guardian package
 * `django-health-check`: Manage django-health-check package
 * `django-oauth-toolkit`: Manage django-oauth-toolkit package
 * `django-storages`: Manage django-storages package
@@ -676,6 +677,53 @@ Remove drf-spectacular package
 
 ```console
 $ djdevx packages drf-spectacular remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx packages django-guardian`
+
+Manage django-guardian package
+
+**Usage**:
+
+```console
+$ djdevx packages django-guardian [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure django-guardian
+* `remove`: Remove django-guardian
+
+#### `djdevx packages django-guardian install`
+
+Install and configure django-guardian
+
+**Usage**:
+
+```console
+$ djdevx packages django-guardian install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages django-guardian remove`
+
+Remove django-guardian
+
+**Usage**:
+
+```console
+$ djdevx packages django-guardian remove [OPTIONS]
 ```
 
 **Options**:
