@@ -15,6 +15,7 @@ from .drf_spectacular import app as drf_spectacular
 from .django_auditlog import app as auditlog
 from .django_guardian import app as guardian
 from .django_role_permissions import app as roles
+from .django_cors_headers import app as cors
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -43,6 +44,11 @@ app.add_typer(
     browser_reload,
     name="django-browser-reload",
     help="Manage django-browser-reload package",
+)
+app.add_typer(
+    cors,
+    name="django-cors-headers",
+    help="Manage django-cors-headers package",
 )
 app.add_typer(
     debug_toolbar,

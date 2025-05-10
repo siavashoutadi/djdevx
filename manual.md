@@ -88,6 +88,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 * `django-anymail`: Manage django-anymail package
 * `django_auditlog`: Manage django_auditlog package
 * `django-browser-reload`: Manage django-browser-reload package
+* `django-cors-headers`: Manage django-cors-headers package
 * `django-debug-toolbar`: Manage django-debug-toolbar package
 * `djangorestframework`: Manage djangorestframework package
 * `drf-spectacular`: Manage drf-spectacular package
@@ -537,6 +538,53 @@ Remove django-browser-reload
 
 ```console
 $ djdevx packages django-browser-reload remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx packages django-cors-headers`
+
+Manage django-cors-headers package
+
+**Usage**:
+
+```console
+$ djdevx packages django-cors-headers [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure django-cors-headers
+* `remove`: Remove django-cors-headers package
+
+#### `djdevx packages django-cors-headers install`
+
+Install and configure django-cors-headers
+
+**Usage**:
+
+```console
+$ djdevx packages django-cors-headers install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages django-cors-headers remove`
+
+Remove django-cors-headers package
+
+**Usage**:
+
+```console
+$ djdevx packages django-cors-headers remove [OPTIONS]
 ```
 
 **Options**:
