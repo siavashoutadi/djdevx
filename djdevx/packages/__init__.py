@@ -13,6 +13,7 @@ from .djangorestframework import app as djangorestframework
 from .django_oauth_toolkit import app as oauth_toolkit
 from .drf_spectacular import app as drf_spectacular
 from .django_auditlog import app as auditlog
+from .django_guardian import app as guardian
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -56,6 +57,11 @@ app.add_typer(
     drf_spectacular,
     name="drf-spectacular",
     help="Manage drf-spectacular package",
+)
+app.add_typer(
+    guardian,
+    name="django-guardian",
+    help="Manage django-guardian package",
 )
 app.add_typer(
     healthcheck,
