@@ -86,7 +86,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 * `all`: Manage all packages at once
 * `django-allauth`: Manage django-allauth package
 * `django-anymail`: Manage django-anymail package
-* `django_auditlog`: Manage django_auditlog package
+* `django-auditlog`: Manage django-auditlog package
 * `django-browser-reload`: Manage django-browser-reload package
 * `django-cors-headers`: Manage django-cors-headers package
 * `django-debug-toolbar`: Manage django-debug-toolbar package
@@ -452,14 +452,14 @@ $ djdevx packages django-anymail env resend [OPTIONS]
 * `--api-key TEXT`: The Resend API key for authentication  [required]
 * `--help`: Show this message and exit.
 
-### `djdevx packages django_auditlog`
+### `djdevx packages django-auditlog`
 
-Manage django_auditlog package
+Manage django-auditlog package
 
 **Usage**:
 
 ```console
-$ djdevx packages django_auditlog [OPTIONS] COMMAND [ARGS]...
+$ djdevx packages django-auditlog [OPTIONS] COMMAND [ARGS]...
 ```
 
 **Options**:
@@ -471,28 +471,28 @@ $ djdevx packages django_auditlog [OPTIONS] COMMAND [ARGS]...
 * `install`: Install and configure django-auditlog
 * `remove`: Remove django-auditlog
 
-#### `djdevx packages django_auditlog install`
+#### `djdevx packages django-auditlog install`
 
 Install and configure django-auditlog
 
 **Usage**:
 
 ```console
-$ djdevx packages django_auditlog install [OPTIONS]
+$ djdevx packages django-auditlog install [OPTIONS]
 ```
 
 **Options**:
 
 * `--help`: Show this message and exit.
 
-#### `djdevx packages django_auditlog remove`
+#### `djdevx packages django-auditlog remove`
 
 Remove django-auditlog
 
 **Usage**:
 
 ```console
-$ djdevx packages django_auditlog remove [OPTIONS]
+$ djdevx packages django-auditlog remove [OPTIONS]
 ```
 
 **Options**:
