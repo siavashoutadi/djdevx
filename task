@@ -64,6 +64,7 @@ import typer
 from pathlib import Path
 
 from ..utils.print_console import print_step, print_success
+from ..utils.project_info import has_dependency
 from ..utils.project_files import (
     copy_template_files,
     is_project_exists_or_raise,
@@ -102,7 +103,8 @@ def remove():
     Remove ${name}
     """
     print_step("Removing ${name} package ...")
-    subprocess.check_call(["uv", "remove", "${name}"])
+    if has_dependency("${name}"):
+        subprocess.check_call(["uv", "remove", "${name}"])
 
     url_path = Path.joinpath(get_packages_url_path(), "$(to_underscore ${name}).py")
     url_path.unlink(missing_ok=True)

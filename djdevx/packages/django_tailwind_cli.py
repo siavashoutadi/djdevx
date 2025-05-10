@@ -14,6 +14,7 @@ from ..utils.project_files import (
     get_gitignore_path,
     get_docker_file_path,
 )
+from ..utils.project_info import has_dependency
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -123,7 +124,8 @@ def remove():
     Remove django-tailwind-cli
     """
     print_step("Removing django-tailwind-cli package ...")
-    subprocess.check_call(["uv", "remove", "django-tailwind-cli"])
+    if has_dependency("django-tailwind-cli"):
+        subprocess.check_call(["uv", "remove", "django-tailwind-cli"])
 
     settings_url = Path.joinpath(get_packages_settings_path(), "django_tailwind_cli.py")
     settings_url.unlink(missing_ok=True)

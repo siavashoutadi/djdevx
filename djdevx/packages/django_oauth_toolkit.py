@@ -4,6 +4,7 @@ import typer
 from pathlib import Path
 
 from ..utils.print_console import print_step, print_success
+from ..utils.project_info import has_dependency
 from ..utils.project_files import (
     copy_template_files,
     is_project_exists_or_raise,
@@ -42,7 +43,8 @@ def remove():
     Remove django-oauth-toolkit
     """
     print_step("Removing django-oauth-toolkit package ...")
-    subprocess.check_call(["uv", "remove", "django-oauth-toolkit"])
+    if has_dependency("django-oauth-toolkit"):
+        subprocess.check_call(["uv", "remove", "django-oauth-toolkit"])
 
     url_path = Path.joinpath(get_packages_url_path(), "django_oauth_toolkit.py")
     url_path.unlink(missing_ok=True)

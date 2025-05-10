@@ -10,6 +10,7 @@ from ..utils.project_files import (
     get_project_path,
     get_packages_settings_path,
 )
+from ..utils.project_info import has_dependency
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -41,7 +42,8 @@ def remove():
     Remove whitenoise
     """
     print_step("Removing whitenoise package ...")
-    subprocess.check_call(["uv", "remove", "whitenoise"])
+    if has_dependency("whitenoise"):
+        subprocess.check_call(["uv", "remove", "whitenoise"])
 
     settings_url = Path.joinpath(get_packages_settings_path(), "whitenoise.py")
     settings_url.unlink(missing_ok=True)
