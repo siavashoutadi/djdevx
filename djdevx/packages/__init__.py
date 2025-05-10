@@ -16,6 +16,7 @@ from .django_auditlog import app as auditlog
 from .django_guardian import app as guardian
 from .django_role_permissions import app as roles
 from .django_cors_headers import app as cors
+from .django_filter import app as filter
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -54,6 +55,11 @@ app.add_typer(
     debug_toolbar,
     name="django-debug-toolbar",
     help="Manage django-debug-toolbar package",
+)
+app.add_typer(
+    filter,
+    name="django-filter",
+    help="Manage django-filter package",
 )
 app.add_typer(
     guardian,
