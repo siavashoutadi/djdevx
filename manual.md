@@ -98,6 +98,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 * `django-storages`: Manage django-storages package
 * `django-tailwind-cli`: Manage django-tailwind-cli package
 * `djangorestframework`: Manage djangorestframework package
+* `drf-nested-routers`: Manage drf-nested-routers package
 * `drf-spectacular`: Manage drf-spectacular package
 * `whitenoise`: Manage whitenoise package
 
@@ -1138,6 +1139,53 @@ Remove djangorestframework
 
 ```console
 $ djdevx packages djangorestframework remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx packages drf-nested-routers`
+
+Manage drf-nested-routers package
+
+**Usage**:
+
+```console
+$ djdevx packages drf-nested-routers [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure drf-nested-routers
+* `remove`: Remove drf-nested-routers package
+
+#### `djdevx packages drf-nested-routers install`
+
+Install and configure drf-nested-routers
+
+**Usage**:
+
+```console
+$ djdevx packages drf-nested-routers install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages drf-nested-routers remove`
+
+Remove drf-nested-routers package
+
+**Usage**:
+
+```console
+$ djdevx packages drf-nested-routers remove [OPTIONS]
 ```
 
 **Options**:

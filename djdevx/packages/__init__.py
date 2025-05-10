@@ -17,6 +17,7 @@ from .django_guardian import app as guardian
 from .django_role_permissions import app as roles
 from .django_cors_headers import app as cors
 from .django_filter import app as filter
+from .drf_nested_routers import app as nested_routers
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -95,6 +96,11 @@ app.add_typer(
     djangorestframework,
     name="djangorestframework",
     help="Manage djangorestframework package",
+)
+app.add_typer(
+    nested_routers,
+    name="drf-nested-routers",
+    help="Manage drf-nested-routers package",
 )
 app.add_typer(
     drf_spectacular,
