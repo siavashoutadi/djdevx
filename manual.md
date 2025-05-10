@@ -94,6 +94,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 * `django-guardian`: Manage django-guardian package
 * `django-health-check`: Manage django-health-check package
 * `django-oauth-toolkit`: Manage django-oauth-toolkit package
+* `django-role-permissions`: Manage django-role-permissions package
 * `django-storages`: Manage django-storages package
 * `django-tailwind-cli`: Manage django-tailwind-cli package
 * `whitenoise`: Manage whitenoise package
@@ -818,6 +819,53 @@ Remove django-oauth-toolkit
 
 ```console
 $ djdevx packages django-oauth-toolkit remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx packages django-role-permissions`
+
+Manage django-role-permissions package
+
+**Usage**:
+
+```console
+$ djdevx packages django-role-permissions [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure django-role-permissions
+* `remove`: Remove django-role-permissions package
+
+#### `djdevx packages django-role-permissions install`
+
+Install and configure django-role-permissions
+
+**Usage**:
+
+```console
+$ djdevx packages django-role-permissions install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages django-role-permissions remove`
+
+Remove django-role-permissions package
+
+**Usage**:
+
+```console
+$ djdevx packages django-role-permissions remove [OPTIONS]
 ```
 
 **Options**:

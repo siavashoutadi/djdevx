@@ -14,6 +14,7 @@ from .django_oauth_toolkit import app as oauth_toolkit
 from .drf_spectacular import app as drf_spectacular
 from .django_auditlog import app as auditlog
 from .django_guardian import app as guardian
+from .django_role_permissions import app as roles
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -72,6 +73,11 @@ app.add_typer(
     oauth_toolkit,
     name="django-oauth-toolkit",
     help="Manage django-oauth-toolkit package",
+)
+app.add_typer(
+    roles,
+    name="django-role-permissions",
+    help="Manage django-role-permissions package",
 )
 app.add_typer(
     storages,
