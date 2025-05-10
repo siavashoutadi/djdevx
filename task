@@ -100,7 +100,7 @@ def install():
 @app.command()
 def remove():
     """
-    Remove ${name}
+    Remove ${name} package
     """
     print_step("Removing ${name} package ...")
     if has_dependency("${name}"):
