@@ -3,6 +3,7 @@ import subprocess
 from pathlib import Path
 from ...utils.print_console import print_step, print_success
 from ...utils.project_files import get_packages_settings_path, remove_env_varibles
+from ...utils.project_info import has_dependency
 
 
 def remove_package():
@@ -10,7 +11,8 @@ def remove_package():
     Remove django-anymail package
     """
     print_step("Removing django-anymail package ...")
-    subprocess.check_call(["uv", "remove", "django-anymail"])
+    if has_dependency("django-anymail"):
+        subprocess.check_call(["uv", "remove", "django-anymail"])
 
     settings_url = Path.joinpath(get_packages_settings_path(), "django_anymail.py")
     settings_url.unlink(missing_ok=True)

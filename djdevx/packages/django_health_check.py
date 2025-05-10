@@ -5,6 +5,7 @@ import typer
 from pathlib import Path
 
 from ..utils.print_console import print_step, print_success
+from ..utils.project_info import has_dependency
 from ..utils.project_files import (
     copy_template_files,
     is_project_exists_or_raise,
@@ -43,7 +44,9 @@ def remove():
     Remove django-health-check
     """
     print_step("Removing django-health-check package ...")
-    subprocess.check_call(["uv", "remove", "django-health-check", "psutil"])
+    for dep in ["django-health-check", "psutil"]:
+        if has_dependency(dep):
+            subprocess.check_call(["uv", "remove", dep])
 
     url_path = Path.joinpath(get_packages_url_path(), "django_health_check.py")
     url_path.unlink(missing_ok=True)

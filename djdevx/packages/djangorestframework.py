@@ -11,6 +11,7 @@ from ..utils.project_files import (
     get_packages_url_path,
     get_packages_settings_path,
 )
+from ..utils.project_info import has_dependency
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -42,7 +43,8 @@ def remove():
     Remove djangorestframework
     """
     print_step("Removing djangorestframework package ...")
-    subprocess.check_call(["uv", "remove", "djangorestframework"])
+    if has_dependency("djangorestframework"):
+        subprocess.check_call(["uv", "remove", "djangorestframework"])
 
     url_path = Path.joinpath(get_packages_url_path(), "djangorestframework.py")
     url_path.unlink(missing_ok=True)

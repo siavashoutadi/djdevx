@@ -4,6 +4,7 @@ import typer
 from pathlib import Path
 
 from ..utils.print_console import print_step, print_success
+from ..utils.project_info import has_dependency
 from ..utils.project_files import (
     copy_template_files,
     is_project_exists_or_raise,
@@ -42,7 +43,10 @@ def remove():
     Remove django-browser-reload
     """
     print_step("Removing django-browser-reload package ...")
-    subprocess.check_call(["uv", "remove", "django-browser-reload", "--group", "dev"])
+    if has_dependency("django-browser-reload", "dev"):
+        subprocess.check_call(
+            ["uv", "remove", "django-browser-reload", "--group", "dev"]
+        )
 
     url_path = Path.joinpath(get_packages_url_path(), "django_browser_reload.py")
     url_path.unlink(missing_ok=True)

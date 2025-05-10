@@ -3,6 +3,7 @@ import shutil
 
 from pathlib import Path
 from ...utils.print_console import print_step, print_success
+from ...utils.project_info import has_dependency
 from ...utils.project_files import (
     get_packages_settings_path,
     get_project_path,
@@ -31,6 +32,8 @@ def remove_package():
     css_path = Path.joinpath(get_project_path(), "static", "css", "vendor", "auth.css")
     css_path.unlink(missing_ok=True)
 
-    subprocess.check_call(["uv", "remove", "django-allauth", "better-profanity"])
+    for dep in ["django-allauth", "better-profanity"]:
+        if has_dependency(dep):
+            subprocess.check_call(["uv", "remove", dep])
 
     print_success("django-allauth is removed successfully.")
