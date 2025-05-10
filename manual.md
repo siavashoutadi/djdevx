@@ -86,6 +86,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 * `all`: Manage all packages at once
 * `django-allauth`: Manage django-allauth package
 * `django-anymail`: Manage django-anymail package
+* `django_auditlog`: Manage django_auditlog package
 * `django-browser-reload`: Manage django-browser-reload package
 * `django-debug-toolbar`: Manage django-debug-toolbar package
 * `djangorestframework`: Manage djangorestframework package
@@ -444,6 +445,53 @@ $ djdevx packages django-anymail env resend [OPTIONS]
 **Options**:
 
 * `--api-key TEXT`: The Resend API key for authentication  [required]
+* `--help`: Show this message and exit.
+
+### `djdevx packages django_auditlog`
+
+Manage django_auditlog package
+
+**Usage**:
+
+```console
+$ djdevx packages django_auditlog [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure django-auditlog
+* `remove`: Remove django-auditlog
+
+#### `djdevx packages django_auditlog install`
+
+Install and configure django-auditlog
+
+**Usage**:
+
+```console
+$ djdevx packages django_auditlog install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages django_auditlog remove`
+
+Remove django-auditlog
+
+**Usage**:
+
+```console
+$ djdevx packages django_auditlog remove [OPTIONS]
+```
+
+**Options**:
+
 * `--help`: Show this message and exit.
 
 ### `djdevx packages django-browser-reload`

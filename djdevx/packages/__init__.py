@@ -12,6 +12,7 @@ from .django_allauth import app as allauth
 from .djangorestframework import app as djangorestframework
 from .django_oauth_toolkit import app as oauth_toolkit
 from .drf_spectacular import app as drf_spectacular
+from .django_auditlog import app as auditlog
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -30,6 +31,11 @@ app.add_typer(
     anymail,
     name="django-anymail",
     help="Manage django-anymail package",
+)
+app.add_typer(
+    auditlog,
+    name="django_auditlog",
+    help="Manage django_auditlog package",
 )
 app.add_typer(
     browser_reload,
