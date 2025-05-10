@@ -90,6 +90,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 * `django-browser-reload`: Manage django-browser-reload package
 * `django-cors-headers`: Manage django-cors-headers package
 * `django-debug-toolbar`: Manage django-debug-toolbar package
+* `django-defender`: Manage django-defender package
 * `django-filter`: Manage django-filter package
 * `django-guardian`: Manage django-guardian package
 * `django-health-check`: Manage django-health-check package
@@ -634,6 +635,68 @@ Remove django-debug-toolbar
 
 ```console
 $ djdevx packages django-debug-toolbar remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx packages django-defender`
+
+Manage django-defender package
+
+**Usage**:
+
+```console
+$ djdevx packages django-defender [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `env`: Creating environment variables for...
+* `install`: Install and configure django-defender
+* `remove`: Remove django-defender package
+
+#### `djdevx packages django-defender env`
+
+Creating environment variables for django-defender
+
+**Usage**:
+
+```console
+$ djdevx packages django-defender env [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages django-defender install`
+
+Install and configure django-defender
+
+**Usage**:
+
+```console
+$ djdevx packages django-defender install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages django-defender remove`
+
+Remove django-defender package
+
+**Usage**:
+
+```console
+$ djdevx packages django-defender remove [OPTIONS]
 ```
 
 **Options**:

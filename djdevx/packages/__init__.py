@@ -18,6 +18,7 @@ from .django_role_permissions import app as roles
 from .django_cors_headers import app as cors
 from .django_filter import app as filter
 from .drf_nested_routers import app as nested_routers
+from .django_defender import app as defender
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -56,6 +57,11 @@ app.add_typer(
     debug_toolbar,
     name="django-debug-toolbar",
     help="Manage django-debug-toolbar package",
+)
+app.add_typer(
+    defender,
+    name="django-defender",
+    help="Manage django-defender package",
 )
 app.add_typer(
     filter,
