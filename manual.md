@@ -90,6 +90,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 * `django-browser-reload`: Manage django-browser-reload package
 * `django-cors-headers`: Manage django-cors-headers package
 * `django-debug-toolbar`: Manage django-debug-toolbar package
+* `django-filter`: Manage django-filter package
 * `django-guardian`: Manage django-guardian package
 * `django-health-check`: Manage django-health-check package
 * `django-oauth-toolkit`: Manage django-oauth-toolkit package
@@ -632,6 +633,53 @@ Remove django-debug-toolbar
 
 ```console
 $ djdevx packages django-debug-toolbar remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx packages django-filter`
+
+Manage django-filter package
+
+**Usage**:
+
+```console
+$ djdevx packages django-filter [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure django-filter
+* `remove`: Remove django-filter package
+
+#### `djdevx packages django-filter install`
+
+Install and configure django-filter
+
+**Usage**:
+
+```console
+$ djdevx packages django-filter install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages django-filter remove`
+
+Remove django-filter package
+
+**Usage**:
+
+```console
+$ djdevx packages django-filter remove [OPTIONS]
 ```
 
 **Options**:
