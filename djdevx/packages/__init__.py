@@ -39,8 +39,8 @@ app.add_typer(
 )
 app.add_typer(
     auditlog,
-    name="django_auditlog",
-    help="Manage django_auditlog package",
+    name="django-auditlog",
+    help="Manage django-auditlog package",
 )
 app.add_typer(
     browser_reload,
