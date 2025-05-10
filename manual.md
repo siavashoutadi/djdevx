@@ -90,14 +90,14 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 * `django-browser-reload`: Manage django-browser-reload package
 * `django-cors-headers`: Manage django-cors-headers package
 * `django-debug-toolbar`: Manage django-debug-toolbar package
-* `djangorestframework`: Manage djangorestframework package
-* `drf-spectacular`: Manage drf-spectacular package
 * `django-guardian`: Manage django-guardian package
 * `django-health-check`: Manage django-health-check package
 * `django-oauth-toolkit`: Manage django-oauth-toolkit package
 * `django-role-permissions`: Manage django-role-permissions package
 * `django-storages`: Manage django-storages package
 * `django-tailwind-cli`: Manage django-tailwind-cli package
+* `djangorestframework`: Manage djangorestframework package
+* `drf-spectacular`: Manage drf-spectacular package
 * `whitenoise`: Manage whitenoise package
 
 ### `djdevx packages all`
@@ -638,100 +638,6 @@ $ djdevx packages django-debug-toolbar remove [OPTIONS]
 
 * `--help`: Show this message and exit.
 
-### `djdevx packages djangorestframework`
-
-Manage djangorestframework package
-
-**Usage**:
-
-```console
-$ djdevx packages djangorestframework [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure djangorestframework
-* `remove`: Remove djangorestframework
-
-#### `djdevx packages djangorestframework install`
-
-Install and configure djangorestframework
-
-**Usage**:
-
-```console
-$ djdevx packages djangorestframework install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-#### `djdevx packages djangorestframework remove`
-
-Remove djangorestframework
-
-**Usage**:
-
-```console
-$ djdevx packages djangorestframework remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-### `djdevx packages drf-spectacular`
-
-Manage drf-spectacular package
-
-**Usage**:
-
-```console
-$ djdevx packages drf-spectacular [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure drf-spectacular
-* `remove`: Remove drf-spectacular package
-
-#### `djdevx packages drf-spectacular install`
-
-Install and configure drf-spectacular
-
-**Usage**:
-
-```console
-$ djdevx packages drf-spectacular install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-#### `djdevx packages drf-spectacular remove`
-
-Remove drf-spectacular package
-
-**Usage**:
-
-```console
-$ djdevx packages drf-spectacular remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
 ### `djdevx packages django-guardian`
 
 Manage django-guardian package
@@ -1137,6 +1043,100 @@ Remove django-tailwind-cli
 
 ```console
 $ djdevx packages django-tailwind-cli remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx packages djangorestframework`
+
+Manage djangorestframework package
+
+**Usage**:
+
+```console
+$ djdevx packages djangorestframework [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure djangorestframework
+* `remove`: Remove djangorestframework
+
+#### `djdevx packages djangorestframework install`
+
+Install and configure djangorestframework
+
+**Usage**:
+
+```console
+$ djdevx packages djangorestframework install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages djangorestframework remove`
+
+Remove djangorestframework
+
+**Usage**:
+
+```console
+$ djdevx packages djangorestframework remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx packages drf-spectacular`
+
+Manage drf-spectacular package
+
+**Usage**:
+
+```console
+$ djdevx packages drf-spectacular [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure drf-spectacular
+* `remove`: Remove drf-spectacular package
+
+#### `djdevx packages drf-spectacular install`
+
+Install and configure drf-spectacular
+
+**Usage**:
+
+```console
+$ djdevx packages drf-spectacular install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages drf-spectacular remove`
+
+Remove drf-spectacular package
+
+**Usage**:
+
+```console
+$ djdevx packages drf-spectacular remove [OPTIONS]
 ```
 
 **Options**:

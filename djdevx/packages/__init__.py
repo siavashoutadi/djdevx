@@ -56,16 +56,6 @@ app.add_typer(
     help="Manage django-debug-toolbar package",
 )
 app.add_typer(
-    djangorestframework,
-    name="djangorestframework",
-    help="Manage djangorestframework package",
-)
-app.add_typer(
-    drf_spectacular,
-    name="drf-spectacular",
-    help="Manage drf-spectacular package",
-)
-app.add_typer(
     guardian,
     name="django-guardian",
     help="Manage django-guardian package",
@@ -94,6 +84,16 @@ app.add_typer(
     tailwind_cli,
     name="django-tailwind-cli",
     help="Manage django-tailwind-cli package",
+)
+app.add_typer(
+    djangorestframework,
+    name="djangorestframework",
+    help="Manage djangorestframework package",
+)
+app.add_typer(
+    drf_spectacular,
+    name="drf-spectacular",
+    help="Manage drf-spectacular package",
 )
 app.add_typer(
     whitenoise,
