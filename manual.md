@@ -89,6 +89,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 * `django-auditlog`: Manage django-auditlog package
 * `django-browser-reload`: Manage django-browser-reload package
 * `django-cors-headers`: Manage django-cors-headers package
+* `django-csp`: Manage django-csp package
 * `django-debug-toolbar`: Manage django-debug-toolbar package
 * `django-defender`: Manage django-defender package
 * `django-filter`: Manage django-filter package
@@ -589,6 +590,53 @@ Remove django-cors-headers package
 
 ```console
 $ djdevx packages django-cors-headers remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx packages django-csp`
+
+Manage django-csp package
+
+**Usage**:
+
+```console
+$ djdevx packages django-csp [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure django-csp
+* `remove`: Remove django-csp package
+
+#### `djdevx packages django-csp install`
+
+Install and configure django-csp
+
+**Usage**:
+
+```console
+$ djdevx packages django-csp install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages django-csp remove`
+
+Remove django-csp package
+
+**Usage**:
+
+```console
+$ djdevx packages django-csp remove [OPTIONS]
 ```
 
 **Options**:
