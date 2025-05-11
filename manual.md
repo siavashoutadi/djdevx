@@ -103,6 +103,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 * `django-tailwind-cli`: Manage django-tailwind-cli package
 * `djangorestframework`: Manage djangorestframework package
 * `drf-nested-routers`: Manage drf-nested-routers package
+* `drf-flex-fields`: Manage drf-flex-fields package
 * `drf-spectacular`: Manage drf-spectacular package
 * `whitenoise`: Manage whitenoise package
 
@@ -1393,6 +1394,53 @@ Remove drf-nested-routers package
 
 ```console
 $ djdevx packages drf-nested-routers remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx packages drf-flex-fields`
+
+Manage drf-flex-fields package
+
+**Usage**:
+
+```console
+$ djdevx packages drf-flex-fields [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure drf-flex-fields
+* `remove`: Remove drf-flex-fields package
+
+#### `djdevx packages drf-flex-fields install`
+
+Install and configure drf-flex-fields
+
+**Usage**:
+
+```console
+$ djdevx packages drf-flex-fields install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages drf-flex-fields remove`
+
+Remove drf-flex-fields package
+
+**Usage**:
+
+```console
+$ djdevx packages drf-flex-fields remove [OPTIONS]
 ```
 
 **Options**:
