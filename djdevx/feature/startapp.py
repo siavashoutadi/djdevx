@@ -32,7 +32,7 @@ def startapp(
     subprocess.run(["uv", "run", "manage.py", "startapp", application_name])
 
     current_dir = Path(__file__).resolve().parent
-    source_dir = current_dir.parent.parent / "templates" / "startapp"
+    source_dir = current_dir.parent / "templates" / "startapp"
     project_dir = get_project_path()
 
     copy_template_files(

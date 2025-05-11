@@ -122,7 +122,7 @@ def pwa(
     is_project_exists_or_raise()
 
     current_dir = Path(__file__).resolve().parent
-    source_dir = current_dir.parent.parent / "templates" / "pwa"
+    source_dir = current_dir.parent / "templates" / "pwa"
     project_dir = get_project_path()
 
     copy_template_files(

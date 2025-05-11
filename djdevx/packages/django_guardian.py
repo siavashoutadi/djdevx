@@ -27,7 +27,7 @@ def install():
     subprocess.check_call(["uv", "add", "django-guardian"])
 
     current_dir = Path(__file__).resolve().parent
-    source_dir = current_dir.parent.parent / "templates" / "django-guardian"
+    source_dir = current_dir.parent / "templates" / "django-guardian"
     project_dir = get_project_path()
 
     copy_template_files(

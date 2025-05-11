@@ -27,7 +27,7 @@ def install():
     subprocess.check_call(["uv", "add", "django-simple-history"])
 
     current_dir = Path(__file__).resolve().parent
-    source_dir = current_dir.parent.parent / "templates" / "django-simple-history"
+    source_dir = current_dir.parent / "templates" / "django-simple-history"
     project_dir = get_project_path()
 
     copy_template_files(

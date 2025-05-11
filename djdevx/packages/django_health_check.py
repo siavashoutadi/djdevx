@@ -28,7 +28,7 @@ def install():
     subprocess.check_call(["uv", "add", "django-health-check", "psutil"])
 
     current_dir = Path(__file__).resolve().parent
-    source_dir = current_dir.parent.parent / "templates" / "django_health_check"
+    source_dir = current_dir.parent / "templates" / "django_health_check"
     project_dir = get_project_path()
 
     copy_template_files(

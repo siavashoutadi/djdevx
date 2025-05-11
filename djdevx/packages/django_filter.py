@@ -27,7 +27,7 @@ def install():
     subprocess.check_call(["uv", "add", "django-filter"])
 
     current_dir = Path(__file__).resolve().parent
-    source_dir = current_dir.parent.parent / "templates" / "django-filter"
+    source_dir = current_dir.parent / "templates" / "django-filter"
     project_dir = get_project_path()
 
     copy_template_files(

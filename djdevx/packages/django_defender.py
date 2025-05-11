@@ -45,7 +45,7 @@ def install():
     subprocess.check_call(["uv", "add", "django-defender"])
 
     current_dir = Path(__file__).resolve().parent
-    source_dir = current_dir.parent.parent / "templates" / "django-defender"
+    source_dir = current_dir.parent / "templates" / "django-defender"
     project_dir = get_project_path()
 
     copy_template_files(

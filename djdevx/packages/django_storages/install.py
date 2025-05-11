@@ -20,7 +20,7 @@ app = typer.Typer(no_args_is_help=True)
 
 def copy_template(data):
     current_dir = Path(__file__).resolve().parent
-    source_dir = current_dir.parent.parent.parent / "templates" / "django_storages"
+    source_dir = current_dir.parent.parent / "templates" / "django_storages"
     project_dir = get_project_path()
 
     copy_template_files(

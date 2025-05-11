@@ -27,7 +27,7 @@ def install():
     subprocess.check_call(["uv", "add", "django-oauth-toolkit"])
 
     current_dir = Path(__file__).resolve().parent
-    source_dir = current_dir.parent.parent / "templates" / "django-oauth-toolkit"
+    source_dir = current_dir.parent / "templates" / "django-oauth-toolkit"
     project_dir = get_project_path()
 
     copy_template_files(

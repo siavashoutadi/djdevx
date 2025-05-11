@@ -104,7 +104,7 @@ def install():
     subprocess.check_call(["uv", "add", "django-tailwind-cli"])
 
     current_dir = Path(__file__).resolve().parent
-    source_dir = current_dir.parent.parent / "templates" / "django_tailwind_cli"
+    source_dir = current_dir.parent / "templates" / "django_tailwind_cli"
     project_dir = get_project_path()
 
     copy_template_files(

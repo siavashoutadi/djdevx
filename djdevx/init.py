@@ -59,7 +59,7 @@ def init(
     print_step("Initializing the project ...")
 
     current_dir = Path(__file__).resolve().parent
-    source_dir = current_dir.parent / "templates" / "init"
+    source_dir = current_dir / "templates" / "init"
     dest_dir = project_directory
 
     data = {

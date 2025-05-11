@@ -27,7 +27,7 @@ def install():
     subprocess.check_call(["uv", "add", "django-role-permissions"])
 
     current_dir = Path(__file__).resolve().parent
-    source_dir = current_dir.parent.parent / "templates" / "django-role-permissions"
+    source_dir = current_dir.parent / "templates" / "django-role-permissions"
     project_dir = get_project_path()
 
     copy_template_files(
