@@ -98,6 +98,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 * `django-oauth-toolkit`: Manage django-oauth-toolkit package
 * `django-permissions-policy`: Manage django-permissions-policy package
 * `django-role-permissions`: Manage django-role-permissions package
+* `django-simple-history`: Manage django-simple-history package
 * `django-storages`: Manage django-storages package
 * `django-tailwind-cli`: Manage django-tailwind-cli package
 * `djangorestframework`: Manage djangorestframework package
@@ -1028,6 +1029,53 @@ Remove django-role-permissions package
 
 ```console
 $ djdevx packages django-role-permissions remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx packages django-simple-history`
+
+Manage django-simple-history package
+
+**Usage**:
+
+```console
+$ djdevx packages django-simple-history [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure django-simple-history
+* `remove`: Remove django-simple-history package
+
+#### `djdevx packages django-simple-history install`
+
+Install and configure django-simple-history
+
+**Usage**:
+
+```console
+$ djdevx packages django-simple-history install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages django-simple-history remove`
+
+Remove django-simple-history package
+
+**Usage**:
+
+```console
+$ djdevx packages django-simple-history remove [OPTIONS]
 ```
 
 **Options**:
