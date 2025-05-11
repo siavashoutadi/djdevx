@@ -95,6 +95,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 * `django-guardian`: Manage django-guardian package
 * `django-health-check`: Manage django-health-check package
 * `django-oauth-toolkit`: Manage django-oauth-toolkit package
+* `django-permissions-policy`: Manage django-permissions-policy package
 * `django-role-permissions`: Manage django-role-permissions package
 * `django-storages`: Manage django-storages package
 * `django-tailwind-cli`: Manage django-tailwind-cli package
@@ -885,6 +886,53 @@ Remove django-oauth-toolkit
 
 ```console
 $ djdevx packages django-oauth-toolkit remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx packages django-permissions-policy`
+
+Manage django-permissions-policy package
+
+**Usage**:
+
+```console
+$ djdevx packages django-permissions-policy [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure...
+* `remove`: Remove django-permissions-policy package
+
+#### `djdevx packages django-permissions-policy install`
+
+Install and configure django-permissions-policy
+
+**Usage**:
+
+```console
+$ djdevx packages django-permissions-policy install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages django-permissions-policy remove`
+
+Remove django-permissions-policy package
+
+**Usage**:
+
+```console
+$ djdevx packages django-permissions-policy remove [OPTIONS]
 ```
 
 **Options**:

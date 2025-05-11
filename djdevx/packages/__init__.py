@@ -19,6 +19,7 @@ from .django_cors_headers import app as cors
 from .django_filter import app as filter
 from .drf_nested_routers import app as nested_routers
 from .django_defender import app as defender
+from .django_permissions_policy import app as permission_policy
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -82,6 +83,11 @@ app.add_typer(
     oauth_toolkit,
     name="django-oauth-toolkit",
     help="Manage django-oauth-toolkit package",
+)
+app.add_typer(
+    permission_policy,
+    name="django-permissions-policy",
+    help="Manage django-permissions-policy package",
 )
 app.add_typer(
     roles,
