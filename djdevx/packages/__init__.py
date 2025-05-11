@@ -20,6 +20,7 @@ from .django_filter import app as filter
 from .drf_nested_routers import app as nested_routers
 from .django_defender import app as defender
 from .django_permissions_policy import app as permission_policy
+from .django_csp import app as csp
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -53,6 +54,11 @@ app.add_typer(
     cors,
     name="django-cors-headers",
     help="Manage django-cors-headers package",
+)
+app.add_typer(
+    csp,
+    name="django-csp",
+    help="Manage django-csp package",
 )
 app.add_typer(
     debug_toolbar,
