@@ -22,6 +22,7 @@ from .django_defender import app as defender
 from .django_permissions_policy import app as permission_policy
 from .django_csp import app as csp
 from .django_simple_history import app as simple_history
+from .drf_flex_fields import app as flex_fields
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -125,6 +126,11 @@ app.add_typer(
     nested_routers,
     name="drf-nested-routers",
     help="Manage drf-nested-routers package",
+)
+app.add_typer(
+    flex_fields,
+    name="drf-flex-fields",
+    help="Manage drf-flex-fields package",
 )
 app.add_typer(
     drf_spectacular,
