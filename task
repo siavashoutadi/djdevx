@@ -48,7 +48,7 @@ function scaffold_package {
     }
 
     package_dir="$script_dir/djdevx/packages"
-    template_dir="$script_dir/templates/$name"
+    template_dir="$script_dir/djdevx/templates/$name"
     package_url_dir="$template_dir/urls/packages"
     package_settings_dir="$template_dir/settings/packages"
     package_file="$package_dir/$(to_underscore ${name}).py"
@@ -87,7 +87,7 @@ def install():
     subprocess.check_call(["uv", "add", "${name}"])
 
     current_dir = Path(__file__).resolve().parent
-    source_dir = current_dir.parent.parent / "templates" / "${name}"
+    source_dir = current_dir.parent / "templates" / "${name}"
     project_dir = get_project_path()
 
     copy_template_files(

@@ -27,7 +27,7 @@ def install():
     subprocess.check_call(["uv", "add", "djangorestframework"])
 
     current_dir = Path(__file__).resolve().parent
-    source_dir = current_dir.parent.parent / "templates" / "djangorestframework"
+    source_dir = current_dir.parent / "templates" / "djangorestframework"
     project_dir = get_project_path()
 
     copy_template_files(
