@@ -21,6 +21,7 @@ from .drf_nested_routers import app as nested_routers
 from .django_defender import app as defender
 from .django_permissions_policy import app as permission_policy
 from .django_csp import app as csp
+from .django_simple_history import app as simple_history
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -99,6 +100,11 @@ app.add_typer(
     roles,
     name="django-role-permissions",
     help="Manage django-role-permissions package",
+)
+app.add_typer(
+    simple_history,
+    name="django-simple-history",
+    help="Manage django-simple-history package",
 )
 app.add_typer(
     storages,
