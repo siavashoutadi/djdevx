@@ -29,7 +29,7 @@ Explore the full list of commands and features in the [Manual](manual.md) to see
 
 1. Install `djdevx` using pip:
    ```bash
-   pip install djdevx
+   uv tool install git+https://github.com/siavashoutadi/djdevx
    ```
 2. Initialize a new Django project:
    ```bash
