@@ -1,10 +1,9 @@
 import importlib
-import glob
 from pathlib import Path
 
 URLS_DIR = Path(__file__).parent
 
-url_files = glob.glob(str(URLS_DIR / "**/[!__init__]*.py"), recursive=True)
+url_files = [str(f) for f in Path(URLS_DIR).rglob("*.py") if f.name != "__init__.py"]
 
 urlpatterns = []
 
