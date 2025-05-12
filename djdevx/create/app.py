@@ -14,7 +14,6 @@ from ..utils.project_files import (
 app = typer.Typer(no_args_is_help=True)
 
 
-@app.command()
 def startapp(
     application_name: Annotated[
         str,

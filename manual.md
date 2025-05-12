@@ -19,6 +19,7 @@ $ djdevx [OPTIONS] COMMAND [ARGS]...
 * `init`: Initialize the project
 * `packages`: Install and configure django packages
 * `feature`: Add features to your project
+* `create`: Create new Django applications or components
 
 ## `djdevx version`
 
@@ -1557,23 +1558,7 @@ $ djdevx feature [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `startapp`: Create a new Django application
 * `pwa`: Add PWA support to the project
-
-### `djdevx feature startapp`
-
-Create a new Django application
-
-**Usage**:
-
-```console
-$ djdevx feature startapp [OPTIONS]
-```
-
-**Options**:
-
-* `--application-name TEXT`: Application name
-* `--help`: Show this message and exit.
 
 ### `djdevx feature pwa`
 
@@ -1599,4 +1584,37 @@ $ djdevx feature pwa [OPTIONS]
 * `--orientation TEXT`: The default orientation of the application. Options are   [default: portrait]
 * `--display TEXT`: The display mode that the website should default to. Options are   [default: standalone]
 * `--language TEXT`: The primary language of the application  [default: en]
+* `--help`: Show this message and exit.
+
+## `djdevx create`
+
+Create new Django applications or components
+
+**Usage**:
+
+```console
+$ djdevx create [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `app`: Create a new Django application
+
+### `djdevx create app`
+
+Create a new Django application
+
+**Usage**:
+
+```console
+$ djdevx create app [OPTIONS]
+```
+
+**Options**:
+
+* `--application-name TEXT`: Application name
 * `--help`: Show this message and exit.
