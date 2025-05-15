@@ -85,6 +85,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `all`: Manage all packages at once
+* `channels`: Manage channels package
 * `django-allauth`: Manage django-allauth package
 * `django-anymail`: Manage django-anymail package
 * `django-auditlog`: Manage django-auditlog package
@@ -149,6 +150,68 @@ Remove all packages
 
 ```console
 $ djdevx packages all remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx packages channels`
+
+Manage channels package
+
+**Usage**:
+
+```console
+$ djdevx packages channels [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `env`: Creating environment variables for channels
+* `install`: Install and configure channels
+* `remove`: Remove channels package
+
+#### `djdevx packages channels env`
+
+Creating environment variables for channels
+
+**Usage**:
+
+```console
+$ djdevx packages channels env [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages channels install`
+
+Install and configure channels
+
+**Usage**:
+
+```console
+$ djdevx packages channels install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages channels remove`
+
+Remove channels package
+
+**Usage**:
+
+```console
+$ djdevx packages channels remove [OPTIONS]
 ```
 
 **Options**:

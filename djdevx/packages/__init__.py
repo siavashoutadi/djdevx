@@ -23,6 +23,7 @@ from .django_permissions_policy import app as permission_policy
 from .django_csp import app as csp
 from .django_simple_history import app as simple_history
 from .drf_flex_fields import app as flex_fields
+from .channels import app as channels_app
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -31,6 +32,11 @@ app.add_typer(
     all_packages,
     name="all",
     help="Manage all packages at once",
+)
+app.add_typer(
+    channels_app,
+    name="channels",
+    help="Manage channels package",
 )
 app.add_typer(
     allauth,
