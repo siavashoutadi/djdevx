@@ -31,6 +31,10 @@ def get_url_path() -> Path:
     return Path.joinpath(get_project_path(), "urls")
 
 
+def get_ws_url_path() -> Path:
+    return Path.joinpath(get_project_path(), "ws_urls")
+
+
 def get_packages_url_path() -> Path:
     return Path.joinpath(get_url_path(), "packages")
 
@@ -94,6 +98,31 @@ def copy_template_files(source_dir: Path, dest_dir: Path, template_context: dict
                 dest_path = dest_path.parent / filename
 
                 shutil.copy2(source_path, dest_path)
+
+
+def copy_template_file(
+    source_file: Path, dest_dir: Path, template_context: dict
+) -> Path:
+    dest_dir.mkdir(parents=True, exist_ok=True)
+
+    jinja_env = Environment(loader=FileSystemLoader(source_file.parent))
+
+    filename = render_template_string(source_file.name, template_context)
+    dest_path = dest_dir / filename
+
+    if source_file.suffix == ".j2":
+        template = jinja_env.get_template(source_file.name)
+        rendered_content = template.render(**template_context)
+        rendered_content = rendered_content.rstrip("\n") + "\n"
+
+        if dest_path.suffix == ".j2":
+            dest_path = dest_path.with_suffix("")
+
+        dest_path.write_text(rendered_content)
+    else:
+        shutil.copy2(source_file, dest_path)
+
+    return dest_path
 
 
 def is_project_exists_or_raise():

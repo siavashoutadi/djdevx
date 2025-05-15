@@ -17,6 +17,12 @@ def get_dependencies(group: str = "") -> list[str]:
 def has_dependency(dependency_name: str, group: str = "") -> bool:
     dependencies = get_dependencies(group)
     for dep in dependencies:
-        if dep.startswith(dependency_name):
+        name_without_version = (
+            dep.split(">")[0].split("<")[0].split("=")[0].split("!")[0].strip()
+        )
+
+        name_without_extras = name_without_version.split("[")[0].strip()
+
+        if name_without_extras == dependency_name:
             return True
     return False
