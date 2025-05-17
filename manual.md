@@ -103,6 +103,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 * `django-simple-history`: Manage django-simple-history package
 * `django-storages`: Manage django-storages package
 * `django-tailwind-cli`: Manage django-tailwind-cli package
+* `djangochannelsrestframework`: Manage djangochannelsrestframework package
 * `djangorestframework`: Manage djangorestframework package
 * `drf-nested-routers`: Manage drf-nested-routers package
 * `drf-flex-fields`: Manage drf-flex-fields package
@@ -1364,6 +1365,53 @@ Remove django-tailwind-cli
 
 ```console
 $ djdevx packages django-tailwind-cli remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx packages djangochannelsrestframework`
+
+Manage djangochannelsrestframework package
+
+**Usage**:
+
+```console
+$ djdevx packages djangochannelsrestframework [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure...
+* `remove`: Remove djangochannelsrestframework package
+
+#### `djdevx packages djangochannelsrestframework install`
+
+Install and configure djangochannelsrestframework
+
+**Usage**:
+
+```console
+$ djdevx packages djangochannelsrestframework install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages djangochannelsrestframework remove`
+
+Remove djangochannelsrestframework package
+
+**Usage**:
+
+```console
+$ djdevx packages djangochannelsrestframework remove [OPTIONS]
 ```
 
 **Options**:

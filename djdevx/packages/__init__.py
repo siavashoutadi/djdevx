@@ -24,6 +24,7 @@ from .django_csp import app as csp
 from .django_simple_history import app as simple_history
 from .drf_flex_fields import app as flex_fields
 from .channels import app as channels_app
+from .djangochannelsrestframework import app as channelrest
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -122,6 +123,11 @@ app.add_typer(
     tailwind_cli,
     name="django-tailwind-cli",
     help="Manage django-tailwind-cli package",
+)
+app.add_typer(
+    channelrest,
+    name="djangochannelsrestframework",
+    help="Manage djangochannelsrestframework package",
 )
 app.add_typer(
     djangorestframework,
