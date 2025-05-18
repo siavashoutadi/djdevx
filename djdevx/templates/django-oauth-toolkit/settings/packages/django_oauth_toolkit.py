@@ -1,5 +1,6 @@
 from settings import INSTALLED_APPS, MIDDLEWARE
-from settings.django.base import AUTHENTICATION_BACKENDS
+from settings.django.auth import AUTHENTICATION_BACKENDS
+from settings.django.base import DEBUG
 
 
 INSTALLED_APPS += [
@@ -21,3 +22,9 @@ if oauth2_middleware not in MIDDLEWARE:
         MIDDLEWARE.insert(index + 1, oauth2_middleware)
     except ValueError:
         MIDDLEWARE += ["oauth2_provider.middleware.OAuth2TokenMiddleware"]
+
+
+OAUTH2_PROVIDER = {
+    "ALLOWED_SCHEMES": ["http", "https"] if DEBUG else ["https"],
+    "ALLOWED_REDIRECT_URI_SCHEMES": ["http", "https"] if DEBUG else ["https"],
+}
