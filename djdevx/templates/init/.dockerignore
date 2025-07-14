@@ -1,5 +1,6 @@
 .devcontainer
 .env
+.environments
 .venv
 .dockerignore
 .editorconfig
