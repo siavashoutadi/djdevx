@@ -50,7 +50,7 @@ def remove_tailwind_snippets():
 
 
 def add_input_css_to_git_ignore():
-    ignore_line = "/static/css/tailwind.css"
+    ignore_line = "/static/css/tailwind.min.css"
 
     git_ignore = get_gitignore_path()
     content = git_ignore.read_text()
@@ -65,14 +65,14 @@ def remove_input_css_to_git_ignore():
     git_ignore = get_gitignore_path()
     with fileinput.input(files=[git_ignore], inplace=True) as f:
         for line in f:
-            if "/static/css/tailwind.css" not in line:
+            if "/static/css/tailwind.min.css" not in line:
                 print(line, end="")
 
 
 def add_tailwind_build_to_docker_file():
     print_step("Updating Dockerfile ...")
     build_static_line = "uv run manage.py collectstatic --noinput && \\"
-    tailwind_build_line = "uv run manage.py tailwind build && \\"
+    tailwind_build_line = "uv run manage.py tailwind build --force && \\"
 
     docker_file = get_docker_file_path()
     content = docker_file.read_text()
@@ -136,11 +136,11 @@ def remove():
     tailwind_conifg.unlink(missing_ok=True)
 
     tailwind_css_input = Path.joinpath(
-        get_project_path(), "static", "src", "css", "input.css"
+        get_project_path(), "tailwind", "src", "css", "input.css"
     )
     tailwind_css_input.unlink(missing_ok=True)
     tailwind_css_output = Path.joinpath(
-        get_project_path(), "static", "css", "tailwind.css"
+        get_project_path(), "static", "css", "tailwind.min.css"
     )
     tailwind_css_output.unlink(missing_ok=True)
 
