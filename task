@@ -11,7 +11,7 @@ function help {
 }
 
 function generate_manual {
-    poetry run typer djdevx.main utils docs --output manual.md --name djdevx
+    uv run typer djdevx.main utils docs --output manual.md --name djdevx
 }
 
 function step_version {
