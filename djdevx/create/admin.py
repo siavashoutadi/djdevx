@@ -127,11 +127,16 @@ def generate_admin_class(model, all_models):
     return "\n".join(lines)
 
 
-def generate_admin_file_content(app_name: str) -> Tuple[Path, str]:
+def generate_admin_file_content(app_name: str) -> Tuple[Path, str] | Tuple[None, None]:
     """Generate complete admin.py file."""
     models = get_models(app_name)
 
     model_names = [m["name"] for m in models]
+
+    if not model_names:
+        print_warning("No model found. Nothing to do.")
+        return (None, None)
+
     imports = [
         "from django.contrib import admin",
         f"from .models import {', '.join(model_names)}",
@@ -183,6 +188,7 @@ def get_admin_file_content(application_name: str) -> Tuple[Path, str]:
 def handle_admin_file_content(application_name: str, new_content: str) -> bool:
     admin_file, content = get_admin_file_content(application_name)
     if not content:
+        print(new_content)
         admin_file.write_text(new_content)
         return True
 
@@ -228,9 +234,11 @@ def create_admin(
     is_project_exists_or_raise()
 
     new_file, content = generate_admin_file_content(application_name)
-    should_delete = True
-    try:
-        should_delete = handle_admin_file_content(application_name, content)
-    finally:
-        if should_delete:
-            shutil.rmtree(new_file.parent, ignore_errors=True)
+
+    if new_file and content:
+        should_delete = True
+        try:
+            should_delete = handle_admin_file_content(application_name, content)
+        finally:
+            if should_delete:
+                shutil.rmtree(new_file.parent, ignore_errors=True)
