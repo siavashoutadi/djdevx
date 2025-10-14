@@ -113,7 +113,9 @@ def install_dependencies(dest_dir: Path):
         "rich",
         "pre-commit",
         "django-upgrade",
+        "ruff",
     ]
+
     for pkg in dev_dependencies:
         print_step(f"Installing {pkg} ...")
         subprocess.check_call(["uv", "add", "--dev", pkg], cwd=dest_dir)
