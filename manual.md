@@ -1714,6 +1714,7 @@ $ djdevx create [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `app`: Create a new Django application
+* `admin`: Create admin.py from model.py for an...
 
 ### `djdevx create app`
 
@@ -1723,6 +1724,21 @@ Create a new Django application
 
 ```console
 $ djdevx create app [OPTIONS]
+```
+
+**Options**:
+
+* `--application-name TEXT`: Application name
+* `--help`: Show this message and exit.
+
+### `djdevx create admin`
+
+Create admin.py from model.py for an application
+
+**Usage**:
+
+```console
+$ djdevx create admin [OPTIONS]
 ```
 
 **Options**:
