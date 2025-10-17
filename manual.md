@@ -1715,6 +1715,7 @@ $ djdevx feature css [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `bootstrap`: Manage bootstrap css framework
+* `frankenui`: Manage Franken UI css framework
 
 #### `djdevx feature css bootstrap`
 
@@ -1760,6 +1761,56 @@ Remove Bootstrap CSS framework from the project.
 
 ```console
 $ djdevx feature css bootstrap remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx feature css frankenui`
+
+Manage Franken UI css framework
+
+**Usage**:
+
+```console
+$ djdevx feature css frankenui [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Add FrankenUI CSS framework to the project.
+* `remove`: Remove FrankenUI CSS framework from the...
+
+##### `djdevx feature css frankenui install`
+
+Add FrankenUI CSS framework to the project.
+
+Downloads the specified version (or latest) of FrankenUI&#x27;s minified CSS
+and JavaScript files, then saves them to the static directory.
+
+**Usage**:
+
+```console
+$ djdevx feature css frankenui install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+##### `djdevx feature css frankenui remove`
+
+Remove FrankenUI CSS framework from the project.
+
+**Usage**:
+
+```console
+$ djdevx feature css frankenui remove [OPTIONS]
 ```
 
 **Options**:
