@@ -1670,6 +1670,7 @@ $ djdevx feature [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `pwa`: Add PWA support to the project
+* `css`: Manage css frameworks
 
 ### `djdevx feature pwa`
 
@@ -1695,6 +1696,74 @@ $ djdevx feature pwa [OPTIONS]
 * `--orientation TEXT`: The default orientation of the application. Options are   [default: portrait]
 * `--display TEXT`: The display mode that the website should default to. Options are   [default: standalone]
 * `--language TEXT`: The primary language of the application  [default: en]
+* `--help`: Show this message and exit.
+
+### `djdevx feature css`
+
+Manage css frameworks
+
+**Usage**:
+
+```console
+$ djdevx feature css [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `bootstrap`: Manage bootstrap css framework
+
+#### `djdevx feature css bootstrap`
+
+Manage bootstrap css framework
+
+**Usage**:
+
+```console
+$ djdevx feature css bootstrap [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Add Bootstrap CSS framework to the project.
+* `remove`: Remove Bootstrap CSS framework from the...
+
+##### `djdevx feature css bootstrap install`
+
+Add Bootstrap CSS framework to the project.
+
+Downloads the specified version (or latest) of Bootstrap&#x27;s minified CSS, theme CSS,
+JavaScript files, and jQuery, then saves them to the static directory.
+
+**Usage**:
+
+```console
+$ djdevx feature css bootstrap install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+##### `djdevx feature css bootstrap remove`
+
+Remove Bootstrap CSS framework from the project.
+
+**Usage**:
+
+```console
+$ djdevx feature css bootstrap remove [OPTIONS]
+```
+
+**Options**:
+
 * `--help`: Show this message and exit.
 
 ## `djdevx create`

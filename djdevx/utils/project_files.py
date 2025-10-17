@@ -78,6 +78,27 @@ def get_admin_path(application_name: str) -> Path:
     return Path.joinpath(get_project_path(), application_name, "admin.py")
 
 
+def get_static_path() -> Path:
+    """
+    Get the path to the static directory
+    """
+    return Path.joinpath(get_project_path(), "static")
+
+
+def get_css_path() -> Path:
+    """
+    Get the path to the CSS directory
+    """
+    return Path.joinpath(get_static_path(), "css")
+
+
+def get_js_path() -> Path:
+    """
+    Get the path to the JavaScript directory
+    """
+    return Path.joinpath(get_static_path(), "js")
+
+
 def render_template_string(path: str, template_context: dict) -> str:
     if "{{" in path or "{%" in path:
         template = Environment().from_string(path)
