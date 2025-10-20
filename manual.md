@@ -1716,6 +1716,7 @@ $ djdevx feature css [OPTIONS] COMMAND [ARGS]...
 
 * `bootstrap`: Manage bootstrap css framework
 * `frankenui`: Manage Franken UI css framework
+* `semantic`: Manage Semantic css framework
 
 #### `djdevx feature css bootstrap`
 
@@ -1811,6 +1812,56 @@ Remove FrankenUI CSS framework from the project.
 
 ```console
 $ djdevx feature css frankenui remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx feature css semantic`
+
+Manage Semantic css framework
+
+**Usage**:
+
+```console
+$ djdevx feature css semantic [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Add Semantic UI CSS framework to the project.
+* `remove`: Remove Semantic css framework from the...
+
+##### `djdevx feature css semantic install`
+
+Add Semantic UI CSS framework to the project.
+
+Downloads the latest Semantic UI (from jsdelivr tags) and jQuery, saves them to the
+static directory, and updates the base template to include links.
+
+**Usage**:
+
+```console
+$ djdevx feature css semantic install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+##### `djdevx feature css semantic remove`
+
+Remove Semantic css framework from the project.
+
+**Usage**:
+
+```console
+$ djdevx feature css semantic remove [OPTIONS]
 ```
 
 **Options**:
