@@ -97,6 +97,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 * `django-filter`: Manage django-filter package
 * `django-guardian`: Manage django-guardian package
 * `django-health-check`: Manage django-health-check package
+* `django-meta`: Manage django-meta package
 * `django-oauth-toolkit`: Manage django-oauth-toolkit package
 * `django-permissions-policy`: Manage django-permissions-policy package
 * `django-role-permissions`: Manage django-role-permissions package
@@ -954,6 +955,70 @@ Remove django-health-check
 
 ```console
 $ djdevx packages django-health-check remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx packages django-meta`
+
+Manage django-meta package
+
+**Usage**:
+
+```console
+$ djdevx packages django-meta [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure django-meta
+* `remove`: Remove django-meta package
+
+#### `djdevx packages django-meta install`
+
+Install and configure django-meta
+
+**Usage**:
+
+```console
+$ djdevx packages django-meta install [OPTIONS]
+```
+
+**Options**:
+
+* `--site-protocol TEXT`: Protocol for your site URL: &#x27;http&#x27; or &#x27;https&#x27; (use https for production)  [default: https]
+* `--site-domain TEXT`: Your website domain without protocol (e.g., &#x27;example.com&#x27; or &#x27;blog.example.com&#x27;)
+* `--site-name TEXT`: Display name of your website (e.g., &#x27;My Awesome Blog&#x27;)
+* `--site-type TEXT`: OpenGraph type (website, article, blog, product). See: https://ogp.me/#types  [default: website]
+* `--use-og-properties / --no-use-og-properties`: Enable OpenGraph meta tags for rich previews on Facebook, LinkedIn, WhatsApp, etc.  [default: use-og-properties]
+* `--use-twitter-properties / --no-use-twitter-properties`: Enable Twitter Card meta tags for rich previews when links are shared on Twitter/X  [default: use-twitter-properties]
+* `--use-schemaorg-properties / --no-use-schemaorg-properties`: Enable Schema.org structured data for better SEO and search engine understanding  [default: use-schemaorg-properties]
+* `--use-title-tag / --no-use-title-tag`: Auto-render &lt;title&gt; tags in templates (disable if you manage titles manually)  [default: use-title-tag]
+* `--configure-facebook / --no-configure-facebook`: Configure Facebook-specific settings (App ID, Pages, Publisher). Info: https://developers.facebook.com/docs/sharing/webmasters  [default: no-configure-facebook]
+* `--fb-app-id TEXT`: Facebook App ID from https://developers.facebook.com/apps/ (numeric ID, e.g., &#x27;123456789012345&#x27;)
+* `--fb-pages TEXT`: Facebook Page ID for your business page (numeric ID, find at facebook.com/your-page/about)
+* `--fb-publisher TEXT`: Full Facebook Page URL (e.g., &#x27;https://www.facebook.com/YourPageName&#x27;)
+* `--configure-twitter / --no-configure-twitter`: Configure Twitter Card settings for rich previews. Guide: https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/abouts-cards  [default: no-configure-twitter]
+* `--twitter-site TEXT`: Your website&#x27;s Twitter/X handle including @ (e.g., &#x27;@YourSite&#x27;)
+* `--twitter-author TEXT`: Default author Twitter/X handle with @ (e.g., &#x27;@AuthorName&#x27;)
+* `--twitter-type TEXT`: Twitter Card type: &#x27;summary&#x27; (small image) or &#x27;summary_large_image&#x27; (large image, recommended)  [default: summary_large_image]
+* `--default-image-url TEXT`: Full URL to default share image (1200x630px recommended, e.g., &#x27;https://example.com/share.jpg&#x27;)
+* `--help`: Show this message and exit.
+
+#### `djdevx packages django-meta remove`
+
+Remove django-meta package
+
+**Usage**:
+
+```console
+$ djdevx packages django-meta remove [OPTIONS]
 ```
 
 **Options**:

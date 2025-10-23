@@ -17,6 +17,7 @@ from .django_guardian import app as guardian
 from .django_role_permissions import app as roles
 from .django_cors_headers import app as cors
 from .django_filter import app as filter
+from .django_meta import app as meta
 from .drf_nested_routers import app as nested_routers
 from .django_defender import app as defender
 from .django_permissions_policy import app as permission_policy
@@ -93,6 +94,11 @@ app.add_typer(
     healthcheck,
     name="django-health-check",
     help="Manage django-health-check package",
+)
+app.add_typer(
+    meta,
+    name="django-meta",
+    help="Manage django-meta package",
 )
 app.add_typer(
     oauth_toolkit,

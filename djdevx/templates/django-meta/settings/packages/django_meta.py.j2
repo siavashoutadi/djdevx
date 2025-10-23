@@ -1,0 +1,61 @@
+from settings import INSTALLED_APPS
+
+# Add django-meta to INSTALLED_APPS
+INSTALLED_APPS += [
+    "meta",
+]
+
+# Protocol and Domain Configuration
+# These are required for generating absolute URLs for meta tags
+META_SITE_PROTOCOL = "{{ site_protocol }}"
+META_SITE_DOMAIN = "{{ site_domain }}"
+
+# Site Information
+{% if site_name -%}
+META_SITE_NAME = "{{ site_name }}"
+{% endif -%}
+META_SITE_TYPE = "{{ site_type }}"
+
+# Default Keywords
+META_INCLUDE_KEYWORDS = []  # Extra keywords to include in every view
+META_DEFAULT_KEYWORDS = []  # Default keywords when none specified
+
+{% if default_image_url -%}
+# Default image for social media sharing (must be absolute URL)
+META_DEFAULT_IMAGE = "{{ default_image_url }}"
+
+{% endif -%}
+# Enable/Disable Meta Tag Types
+META_USE_OG_PROPERTIES = {{ use_og_properties|default(False) }}
+META_USE_TWITTER_PROPERTIES = {{ use_twitter_properties|default(False) }}
+META_USE_SCHEMAORG_PROPERTIES = {{ use_schemaorg_properties|default(False) }}
+META_USE_TITLE_TAG = {{ use_title_tag|default(False) }}
+
+# Use Django Sites Framework (optional)
+META_USE_SITES = False
+
+{% if configure_facebook -%}
+# Facebook/OpenGraph Configuration
+{% if fb_app_id -%}
+META_FB_APPID = "{{ fb_app_id }}"
+{% endif -%}
+{% if fb_pages -%}
+META_FB_PAGES = "{{ fb_pages }}"
+{% endif -%}
+{% if fb_publisher -%}
+META_FB_PUBLISHER = "{{ fb_publisher }}"
+{% endif -%}
+{% endif -%}
+
+{% if configure_twitter -%}
+# Twitter Configuration
+{% if twitter_site -%}
+META_TWITTER_SITE = "{{ twitter_site }}"
+{% endif -%}
+{% if twitter_author -%}
+META_TWITTER_AUTHOR = "{{ twitter_author }}"
+{% endif -%}
+{% if twitter_type -%}
+META_TWITTER_TYPE = "{{ twitter_type }}"
+{% endif -%}
+{% endif -%}
