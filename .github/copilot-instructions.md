@@ -25,6 +25,22 @@ djdevx/
 
 ---
 
+## Notes to consider when writing code
+
+1. Never add comments that the user do not need to make a decision about. For example never add comments like `# This method adds this functionality` or `# You can find the official docs here` or `# Configure default meta tags for all pages`. These types of comments can be distracting and unhelpful and usually the name of the method or variable should explain it already. But if there is a decision to be made by the user explain the options clearly nothing more and nothing less. k Example: `# Tags are organized by language code. Use "default" for all languages. # More specific languages (e.g., "en_GB") override less specific ones (e.g., "en")`. Clearly in this example the user needs to make a decision about how to organize the tags so this comment is helpful. So keep the comments concise and decision-focused. Less comments is usually better.
+2. Never use emojis in code comments or docstrings.
+3. Always follow the established code style and conventions in the djdevx codebase. Always check existing similar code for reference.
+4. Ensure all methods and classes are well-documented with clear docstrings. Dont over-explain, be concise. Ensure docstrings explain the purpose, parameters, and return values.
+5. Write clean, maintainable, and efficient code following best practices.
+6. Always test new features thoroughly to ensure they work as intended.
+7. Maintain backward compatibility unless explicitly breaking changes are required.
+8. Use consistent naming conventions for variables, functions, classes, and files.
+9. Prioritize security and data privacy in all implementations.
+10. Ensure proper error handling and logging throughout the codebase.
+11. Keep performance considerations in mind, optimizing code where necessary. But do not prematurely optimize. Always ask if not sure.
+12. Stay updated with the latest Django, typer, jinja2 and Python developments to incorporate best practices.
+13. Follow the step-by-step procedures outlined below for adding new package integrations.
+
 ## Step-by-Step Procedures
 
 ### 1. Adding a New Package Integration
