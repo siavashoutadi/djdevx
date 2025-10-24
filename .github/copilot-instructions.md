@@ -74,6 +74,8 @@ This guide covers adding Django package support to djdevx. Follow these steps sy
 
 **For Single-Action Packages:**
 
+Always look for existing single-action packages for reference such as `django_meta.py`.
+
 Create `djdevx/packages/{package_name}.py`:
 
 ```python
@@ -161,6 +163,8 @@ def remove():
 **For Multi-Action Packages:**
 
 Create directory structure and files as shown in `django_storages` example. The `__init__.py` combines sub-apps, `install.py` has variant-specific installs, `remove.py` handles cleanup, `env.py` manages environment variables per variant.
+
+Always look at existing multi-action packages for reference such as `django_storages folder`.
 
 #### Step 1.4: Implement Environment Variable Management (if needed)
 
