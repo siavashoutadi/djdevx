@@ -1,0 +1,86 @@
+from settings import INSTALLED_APPS
+
+# django-snakeoil configuration
+# https://django-snakeoil.readthedocs.io/
+
+# Add snakeoil to INSTALLED_APPS for Django template support
+INSTALLED_APPS += [
+    "snakeoil",
+]
+
+# Configure default meta tags for all pages
+# Tags are organized by language code. Use "default" for all languages.
+# More specific languages (e.g., "en_GB") override less specific ones (e.g., "en")
+{% if site_name or site_description or author or og_type or default_image_url or site_url or locale or twitter_site or keywords -%}
+SNAKEOIL_DEFAULT_TAGS = {
+    "default": [
+{%- if site_description %}
+        {"name": "description", "content": "{{ site_description }}"},
+        {"property": "og:description", "content": "{{ site_description }}"},
+        {"name": "twitter:description", "content": "{{ site_description }}"},
+{%- endif %}
+{%- if site_name %}
+        {"property": "og:title", "content": "{{ site_name }}"},
+        {"property": "og:site_name", "content": "{{ site_name }}"},
+        {"name": "twitter:title", "content": "{{ site_name }}"},
+{%- endif %}
+{%- if keywords %}
+        {"name": "keywords", "content": "{{ keywords }}"},
+{%- endif %}
+{%- if author %}
+        {"name": "author", "content": "{{ author }}"},
+{%- endif %}
+{%- if og_type %}
+        {"property": "og:type", "content": "{{ og_type }}"},
+{%- endif %}
+{%- if site_url %}
+        {"property": "og:url", "content": "{{ site_url }}"},
+        {"name": "twitter:url", "content": "{{ site_url }}"},
+{%- if site_url.startswith('http://') or site_url.startswith('https://') %}
+        {"name": "twitter:domain", "content": "{{ site_url.split('://')[1].split('/')[0] }}"},
+{%- endif %}
+{%- endif %}
+{%- if locale %}
+        {"property": "og:locale", "content": "{{ locale }}"},
+{%- endif %}
+{%- if default_image_url %}
+{%- if default_image_url.startswith('http://') or default_image_url.startswith('https://') %}
+        {"property": "og:image", "content": "{{ default_image_url }}"},
+        {"name": "twitter:image", "content": "{{ default_image_url }}"},
+{%- else %}
+        {"property": "og:image", "static": "{{ default_image_url }}"},
+        {"name": "twitter:image", "static": "{{ default_image_url }}"},
+{%- endif %}
+{%- endif %}
+{%- if twitter_site %}
+        {"name": "twitter:site", "content": "{{ twitter_site }}"},
+{%- endif %}
+{%- if twitter_card_type %}
+        {"name": "twitter:card", "content": "{{ twitter_card_type }}"},
+{%- endif %}
+    ]
+}
+{% else -%}
+# Example SNAKEOIL_DEFAULT_TAGS configuration:
+# SNAKEOIL_DEFAULT_TAGS = {
+#     "default": [
+#         {"name": "description", "content": "My site description"},
+#         {"property": "og:description", "content": "My site description"},
+#         {"name": "twitter:description", "content": "My site description"},
+#         {"property": "og:title", "content": "My Site Name"},
+#         {"property": "og:site_name", "content": "My Site Name"},
+#         {"name": "twitter:title", "content": "My Site Name"},
+#         {"name": "keywords", "content": "django, web development, python"},
+#         {"name": "author", "content": "Your Name"},
+#         {"property": "og:type", "content": "website"},
+#         {"property": "og:url", "content": "https://example.com"},
+#         {"name": "twitter:url", "content": "https://example.com"},
+#         {"name": "twitter:domain", "content": "example.com"},
+#         {"property": "og:locale", "content": "en_US"},
+#         {"property": "og:image", "static": "images/logo.svg"},
+#         {"name": "twitter:image", "static": "images/logo.svg"},
+#         {"name": "twitter:site", "content": "@yoursite"},
+#         {"name": "twitter:card", "content": "summary_large_image"},
+#     ]
+# }
+{% endif -%}

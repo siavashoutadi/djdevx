@@ -102,6 +102,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 * `django-permissions-policy`: Manage django-permissions-policy package
 * `django-role-permissions`: Manage django-role-permissions package
 * `django-simple-history`: Manage django-simple-history package
+* `django-snakeoil`: Manage django-snakeoil package
 * `django-storages`: Manage django-storages package
 * `django-tailwind-cli`: Manage django-tailwind-cli package
 * `djangochannelsrestframework`: Manage djangochannelsrestframework package
@@ -1207,6 +1208,63 @@ Remove django-simple-history package
 
 ```console
 $ djdevx packages django-simple-history remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx packages django-snakeoil`
+
+Manage django-snakeoil package
+
+**Usage**:
+
+```console
+$ djdevx packages django-snakeoil [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure django-snakeoil for...
+* `remove`: Remove django-snakeoil
+
+#### `djdevx packages django-snakeoil install`
+
+Install and configure django-snakeoil for SEO metadata management
+
+**Usage**:
+
+```console
+$ djdevx packages django-snakeoil install [OPTIONS]
+```
+
+**Options**:
+
+* `--site-name TEXT`: Display name of your website for og:site_name meta tag (e.g., &#x27;My Blog&#x27;)
+* `--site-description TEXT`: Default description for your website (shown in search results and social shares)
+* `--author TEXT`: Default author name for meta author tag
+* `--og-type TEXT`: OpenGraph type for og:type meta tag (website, article, blog). See: https://ogp.me/#types  [default: website]
+* `--default-image-url TEXT`: Full URL to default share image for social media (1200x630px recommended), or leave as default to use images/logo.svg  [default: images/logo.svg]
+* `--site-url TEXT`: Your website&#x27;s full URL including protocol (e.g., &#x27;https://example.com&#x27;)
+* `--locale TEXT`: Default locale/language for og:locale (e.g., &#x27;en_US&#x27;, &#x27;en_GB&#x27;, &#x27;es_ES&#x27;)
+* `--twitter-site TEXT`: Twitter/X handle for your website (e.g., &#x27;@yoursite&#x27;)
+* `--twitter-card-type TEXT`: Twitter card type: &#x27;summary&#x27; or &#x27;summary_large_image&#x27; (recommended for rich previews)  [default: summary_large_image]
+* `--keywords TEXT`: Default keywords for SEO (comma-separated, e.g., &#x27;django, web development, python&#x27;)
+* `--help`: Show this message and exit.
+
+#### `djdevx packages django-snakeoil remove`
+
+Remove django-snakeoil
+
+**Usage**:
+
+```console
+$ djdevx packages django-snakeoil remove [OPTIONS]
 ```
 
 **Options**:
