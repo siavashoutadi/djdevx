@@ -23,8 +23,6 @@ djdevx/
 └── utils/              # Shared utilities
 ```
 
----
-
 ## Notes to consider when writing code
 
 1. Never add comments that the user do not need to make a decision about. For example never add comments like `# This method adds this functionality` or `# You can find the official docs here` or `# Configure default meta tags for all pages`. These types of comments can be distracting and unhelpful and usually the name of the method or variable should explain it already. But if there is a decision to be made by the user explain the options clearly nothing more and nothing less. k Example: `# Tags are organized by language code. Use "default" for all languages. # More specific languages (e.g., "en_GB") override less specific ones (e.g., "en")`. Clearly in this example the user needs to make a decision about how to organize the tags so this comment is helpful. So keep the comments concise and decision-focused. Less comments is usually better.
@@ -40,6 +38,10 @@ djdevx/
 11. Keep performance considerations in mind, optimizing code where necessary. But do not prematurely optimize. Always ask if not sure.
 12. Stay updated with the latest Django, typer, jinja2 and Python developments to incorporate best practices.
 13. Follow the step-by-step procedures outlined below for adding new package integrations.
+14. Always use `uv` for package management commands (install/remove) to ensure compatibility with the user's environment.
+15. Always use `uv` when running python commands to ensure the correct virtual environment is used.
+16. Always use types when writing functions (input parameters and return types).
+17. Always use types for variables.
 
 ## Step-by-Step Procedures
 
