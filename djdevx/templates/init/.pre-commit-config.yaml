@@ -47,3 +47,4 @@ repos:
     hooks:
     - id: biome-check
       files: "\\.css$"
+      exclude: "^static/css/vendor/"

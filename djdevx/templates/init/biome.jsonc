@@ -7,5 +7,10 @@
     "rules": {
       "recommended": true
     }
+  },
+  "files": {
+    "ignore": [
+      "static/css/vendor/**"
+    ]
   }
 }
