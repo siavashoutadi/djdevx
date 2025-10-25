@@ -37,12 +37,12 @@ def init(
         ),
     ] = Path("."),
     python_version: Annotated[
-        Path,
+        str,
         typer.Option(
             help="The minimum python version for the project",
             prompt="Please enter the minimum python version for the project",
         ),
-    ] = Path("3.13"),
+    ] = "3.14",
     git_init: Annotated[
         bool,
         typer.Option(
@@ -79,7 +79,7 @@ def init(
 
     install_dependencies(dest_dir=dest_dir)
 
-    devbox_init(python_version)
+    devbox_init()
 
     if git_init and not is_git_repository():
         print_step("Initializing the git repository ...")
@@ -140,7 +140,7 @@ def init_git():
     subprocess.check_call(["git", "commit", "-m", "Initial commit"])
 
 
-def devbox_init(python_version):
+def devbox_init():
     print_step("Updating devbox packages ...")
     if not is_tool_installed("devbox"):
         print_warning("Devbox is not installed. Skip Updating the packages.")
