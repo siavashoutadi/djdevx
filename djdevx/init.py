@@ -53,6 +53,10 @@ def init(
         bool,
         typer.Option(help="whether to skip devbox initialization"),
     ] = True,
+    skip_biome: Annotated[
+        bool,
+        typer.Option(help="whether to skip biome initialization"),
+    ] = True,
 ):
     """
     Initialize the project
@@ -71,12 +75,16 @@ def init(
         "project_description": project_description,
         "django_secret_key": generate_secret(),
         "python_version": python_version,
+        "skip_biome": skip_biome,
     }
 
     exclude_files: list[Path] = []
 
     if skip_devbox:
         exclude_files.append(source_dir / "devbox.json.j2")
+
+    if skip_biome:
+        exclude_files.append(source_dir / "biome.jsonc")
 
     copy_template_files(
         source_dir=source_dir,

@@ -42,9 +42,11 @@ repos:
     rev: v0.10.0.1
     hooks:
     - id: shellcheck
+{% if not skip_biome %}
   - repo: https://github.com/biomejs/pre-commit
     rev: v0.6.1
     hooks:
     - id: biome-check
       files: "\\.css$"
       exclude: "^static/css/vendor/"
+{% endif %}
