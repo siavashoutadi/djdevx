@@ -49,6 +49,10 @@ def init(
             help="whether to initialize a git repository in the project directory"
         ),
     ] = True,
+    skip_devbox: Annotated[
+        bool,
+        typer.Option(help="whether to skip devbox initialization"),
+    ] = True,
 ):
     """
     Initialize the project
@@ -69,17 +73,24 @@ def init(
         "python_version": python_version,
     }
 
+    exclude_files: list[Path] = []
+
+    if skip_devbox:
+        exclude_files.append(source_dir / "devbox.json.j2")
+
     copy_template_files(
         source_dir=source_dir,
         dest_dir=dest_dir,
         template_context=data,
+        excluede_files=exclude_files,
     )
 
     print_success("Project is initialized successfully.")
 
     install_dependencies(dest_dir=dest_dir)
 
-    devbox_init(project_directory)
+    if not skip_devbox:
+        devbox_init(project_directory)
 
     if git_init and not is_git_repository():
         print_step("Initializing the git repository ...")

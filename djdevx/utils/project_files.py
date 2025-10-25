@@ -106,11 +106,19 @@ def render_template_string(path: str, template_context: dict) -> str:
     return path
 
 
-def copy_template_files(source_dir: Path, dest_dir: Path, template_context: dict):
+def copy_template_files(
+    source_dir: Path,
+    dest_dir: Path,
+    template_context: dict,
+    excluede_files: List[Path] = [],
+):
     dest_dir.mkdir(parents=True, exist_ok=True)
     jinja_env = Environment(loader=FileSystemLoader(source_dir))
 
     for source_path in source_dir.rglob("*"):
+        if any(source_path.match(str(exclude)) for exclude in excluede_files):
+            continue
+
         rel_path = source_path.relative_to(source_dir)
 
         rendered_parts = [

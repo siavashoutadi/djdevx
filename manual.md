@@ -66,6 +66,7 @@ $ djdevx init [OPTIONS]
 * `--project-directory PATH`: The directory to initialize the project in  [default: .]
 * `--python-version TEXT`: The minimum python version for the project  [default: 3.14]
 * `--git-init / --no-git-init`: whether to initialize a git repository in the project directory  [default: git-init]
+* `--skip-devbox / --no-skip-devbox`: whether to skip devbox initialization  [default: skip-devbox]
 * `--help`: Show this message and exit.
 
 ## `djdevx packages`
