@@ -94,7 +94,7 @@ def init(
 
     if git_init and not is_git_repository():
         print_step("Initializing the git repository ...")
-        init_git()
+        init_git(project_directory)
 
     update_precommit_hooks(dest_dir=dest_dir)
 
@@ -145,10 +145,10 @@ def is_git_repository() -> bool:
     return git_repository_dir.exists() and git_repository_dir.is_dir()
 
 
-def init_git():
-    subprocess.check_call(["git", "init", "--initial-branch=main"])
-    subprocess.check_call(["git", "add", "."])
-    subprocess.check_call(["git", "commit", "-m", "Initial commit"])
+def init_git(project_dir: Path):
+    subprocess.check_call(["git", "init", "--initial-branch=main"], cwd=project_dir)
+    subprocess.check_call(["git", "add", "."], cwd=project_dir)
+    subprocess.check_call(["git", "commit", "-m", "Initial commit"], cwd=project_dir)
 
 
 def devbox_init(project_dir: Path):
