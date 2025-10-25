@@ -79,7 +79,7 @@ def init(
 
     install_dependencies(dest_dir=dest_dir)
 
-    devbox_init()
+    devbox_init(project_directory)
 
     if git_init and not is_git_repository():
         print_step("Initializing the git repository ...")
@@ -140,13 +140,13 @@ def init_git():
     subprocess.check_call(["git", "commit", "-m", "Initial commit"])
 
 
-def devbox_init():
+def devbox_init(project_dir: Path):
     print_step("Updating devbox packages ...")
     if not is_tool_installed("devbox"):
         print_warning("Devbox is not installed. Skip Updating the packages.")
         return
 
-    subprocess.check_call(["devbox", "update"])
+    subprocess.check_call(["devbox", "update"], cwd=project_dir)
 
     print_success("Packages are updated successfully.\n")
 
