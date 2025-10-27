@@ -69,10 +69,9 @@ RUN --mount=type=cache,target=/var/cache/apt \
     tar -xvzf zellij-*.tar.gz && mv zellij /usr/local/bin && \
     rm -rf /tmp/*
 
-
-
-
 USER devuser
+
+RUN uv tool install git+https://github.com/siavashoutadi/djdevx
 
 RUN mkdir -p /home/devuser/.bashrc.d/ /home/devuser/.config/git /home/devuser/.cache/pre-commit && \
     echo 'for f in ~/.bashrc.d/*; do source $f; done' >> /home/devuser/.bashrc
