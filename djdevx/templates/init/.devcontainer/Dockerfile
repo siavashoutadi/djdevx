@@ -55,9 +55,6 @@ RUN --mount=type=cache,target=/var/cache/apt \
     tar -xvzf uv-x86_64-unknown-linux-gnu.tar.gz && \
     chmod +x uv-x86_64-unknown-linux-gnu/* && \
     mv uv-x86_64-unknown-linux-gnu/* /usr/local/bin && \
-    curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.16/tailwindcss-linux-x64 && \
-    chmod +x tailwindcss-linux-x64 && \
-    mv tailwindcss-linux-x64 /usr/local/bin/tailwindcss && \
     cd /tmp && wget https://github.com/sirwart/ripsecrets/releases/download/v0.1.8/ripsecrets-0.1.8-x86_64-unknown-linux-gnu.tar.gz && \
     tar -xvzf ripsecrets-*.tar.gz && \
     chmod +x ripsecrets-0.1.8-x86_64-unknown-linux-gnu/* && \
