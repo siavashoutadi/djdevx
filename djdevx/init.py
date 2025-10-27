@@ -1,3 +1,4 @@
+import os
 import secrets
 import subprocess
 import typer
@@ -10,6 +11,7 @@ from .utils.os_tools import is_tool_installed
 from .utils.print_console import print_step, print_success, print_warning
 from .utils.project_files import copy_template_files
 from .requirement import requirement
+from .packages.django_tailwind_cli import install as install_django_tailwind_cli
 
 app = typer.Typer()
 
@@ -68,6 +70,7 @@ def init(
 
     current_dir = Path(__file__).resolve().parent
     source_dir = current_dir / "templates" / "init"
+    project_directory = project_directory.absolute()
     dest_dir = project_directory
 
     data = {
@@ -93,18 +96,21 @@ def init(
         excluede_files=exclude_files,
     )
 
-    print_success("Project is initialized successfully.")
-
     install_dependencies(dest_dir=dest_dir)
+
+    os.chdir(project_directory)
+    install_django_tailwind_cli()
 
     if not skip_devbox:
         devbox_init(project_directory)
 
-    if git_init and not is_git_repository():
+    if git_init and not is_git_repository(project_directory):
         print_step("Initializing the git repository ...")
         init_git(project_directory)
 
     update_precommit_hooks(dest_dir=dest_dir)
+
+    print_success("Project is initialized successfully.")
 
 
 def generate_secret():
@@ -148,8 +154,8 @@ def update_precommit_hooks(dest_dir):
     subprocess.check_call(["git", "commit", "--amend", "--no-edit"], cwd=dest_dir)
 
 
-def is_git_repository() -> bool:
-    git_repository_dir = Path(".git")
+def is_git_repository(project_dir: Path) -> bool:
+    git_repository_dir = project_dir / ".git"
     return git_repository_dir.exists() and git_repository_dir.is_dir()
 
 
