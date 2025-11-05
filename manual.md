@@ -1796,6 +1796,7 @@ $ djdevx feature [OPTIONS] COMMAND [ARGS]...
 
 * `pwa`: Add PWA support to the project
 * `css`: Manage css frameworks
+* `tailwind-theme`: Manage tailwind theme
 
 ### `djdevx feature pwa`
 
@@ -1987,6 +1988,69 @@ Remove Semantic css framework from the project.
 
 ```console
 $ djdevx feature css semantic remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx feature tailwind-theme`
+
+Manage tailwind theme
+
+**Usage**:
+
+```console
+$ djdevx feature tailwind-theme [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install Tailwind theme with customizable...
+* `remove`: Remove Tailwind theme.
+
+#### `djdevx feature tailwind-theme install`
+
+Install Tailwind theme with customizable colors.
+
+**Usage**:
+
+```console
+$ djdevx feature tailwind-theme install [OPTIONS]
+```
+
+**Options**:
+
+* `--primary-color TEXT`: Primary color (hex code or CSS variable). Example: #0047AB or --color-blue-500  [default: #0047AB]
+* `--secondary-color TEXT`: Secondary color (hex code or CSS variable). Example: #2F739F or --color-slate-600  [default: #2F739F]
+* `--accent-color TEXT`: Accent color (hex code or CSS variable). Example: #F38B49 or --color-orange-500  [default: #F38B49]
+* `--neutral-color TEXT`: Neutral color (hex code or CSS variable). Example: #71717A or --color-zinc-500  [default: #71717A]
+* `--bg-light TEXT`: Background color for light theme (hex code or CSS variable). Example: #FFFFFF or --color-white  [default: #FFFFFF]
+* `--bg-secondary-light TEXT`: Secondary background color for light theme (hex code or CSS variable). Example: #84A8E0 or --color-primary-200  [default: var(--color-primary-200)]
+* `--bg-tertiary-light TEXT`: Tertiary background color for light theme (hex code or CSS variable). Example: #C8DFE9 or --color-secondary-200  [default: var(--color-secondary-200)]
+* `--text-light TEXT`: Text color for light theme (hex code or CSS variable). Example: #0f172a or --color-slate-900  [default: --color-slate-900]
+* `--text-secondary-light TEXT`: Secondary text color for light theme (hex code or CSS variable). Example: #334155 or --color-slate-700  [default: --color-slate-700]
+* `--text-muted-light TEXT`: Muted text color for light theme (hex code or CSS variable). Example: #64748b or --color-slate-500  [default: --color-slate-500]
+* `--bg-dark TEXT`: Background color for dark theme (hex code or CSS variable). Example: #0A0F1A  [default: #0A0F1A]
+* `--bg-secondary-dark TEXT`: Secondary background color for dark theme (hex code or CSS variable). Example: #132035  [default: #132035]
+* `--bg-tertiary-dark TEXT`: Tertiary background color for dark theme (hex code or CSS variable). Example: #182945  [default: #182945]
+* `--text-dark TEXT`: Text color for dark theme (hex code or CSS variable). Example: #f1f5f9 or --color-slate-100  [default: --color-slate-100]
+* `--text-secondary-dark TEXT`: Secondary text color for dark theme (hex code or CSS variable). Example: #cbd5e1 or --color-slate-300  [default: --color-slate-300]
+* `--text-muted-dark TEXT`: Muted text color for dark theme (hex code or CSS variable). Example: #64748b or --color-slate-500  [default: --color-slate-500]
+* `--help`: Show this message and exit.
+
+#### `djdevx feature tailwind-theme remove`
+
+Remove Tailwind theme.
+
+**Usage**:
+
+```console
+$ djdevx feature tailwind-theme remove [OPTIONS]
 ```
 
 **Options**:

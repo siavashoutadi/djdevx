@@ -1,0 +1,112 @@
+@theme {
+  /* Primary Color Palette */
+  --color-primary-50:  {{ primary_palette[50] }};
+  --color-primary-100: {{ primary_palette[100] }};
+  --color-primary-200: {{ primary_palette[200] }};
+  --color-primary-300: {{ primary_palette[300] }};
+  --color-primary-400: {{ primary_palette[400] }};
+  --color-primary-500: {{ primary_palette[500] }};
+  --color-primary-600: {{ primary_palette[600] }};
+  --color-primary-700: {{ primary_palette[700] }};
+  --color-primary-800: {{ primary_palette[800] }};
+  --color-primary-900: {{ primary_palette[900] }};
+
+  --color-primary: var(--color-primary-500);
+  --color-primary-hover: var(--color-primary-800);
+  --color-primary-light: var(--color-primary-400);
+
+
+  /* Secondary Color Palette */
+  --color-secondary-50:  {{ secondary_palette[50] }};
+  --color-secondary-100: {{ secondary_palette[100] }};
+  --color-secondary-200: {{ secondary_palette[200] }};
+  --color-secondary-300: {{ secondary_palette[300] }};
+  --color-secondary-400: {{ secondary_palette[400] }};
+  --color-secondary-500: {{ secondary_palette[500] }};
+  --color-secondary-600: {{ secondary_palette[600] }};
+  --color-secondary-700: {{ secondary_palette[700] }};
+  --color-secondary-800: {{ secondary_palette[800] }};
+  --color-secondary-900: {{ secondary_palette[900] }};
+
+  --color-secondary: var(--color-secondary-500);
+  --color-secondary-hover: var(--color-secondary-700);
+  --color-secondary-light: var(--color-secondary-400);
+
+  /* Accent Color Palette */
+  --color-accent-50:  {{ accent_palette[50] }};
+  --color-accent-100: {{ accent_palette[100] }};
+  --color-accent-200: {{ accent_palette[200] }};
+  --color-accent-300: {{ accent_palette[300] }};
+  --color-accent-400: {{ accent_palette[400] }};
+  --color-accent-500: {{ accent_palette[500] }};
+  --color-accent-600: {{ accent_palette[600] }};
+  --color-accent-700: {{ accent_palette[700] }};
+  --color-accent-800: {{ accent_palette[800] }};
+  --color-accent-900: {{ accent_palette[900] }};
+
+  --color-accent: var(--color-accent-500);
+  --color-accent-hover: var(--color-accent-600);
+  --color-accent-light: var(--color-accent-400);
+
+    /* Neutral Color Palette */
+  --color-neutral-50:  {{ neutral_palette[50] }};
+  --color-neutral-100: {{ neutral_palette[100] }};
+  --color-neutral-200: {{ neutral_palette[200] }};
+  --color-neutral-300: {{ neutral_palette[300] }};
+  --color-neutral-400: {{ neutral_palette[400] }};
+  --color-neutral-500: {{ neutral_palette[500] }};
+  --color-neutral-600: {{ neutral_palette[600] }};
+  --color-neutral-700: {{ neutral_palette[700] }};
+  --color-neutral-800: {{ neutral_palette[800] }};
+  --color-neutral-900: {{ neutral_palette[900] }};
+
+
+  /* Status Colors */
+  --color-success: var(--color-green-700);
+  --color-success-hover: var(--color-green-900);
+  --color-success-light: var(--color-green-500);
+
+  --color-warning: var(--color-yellow-500);
+  --color-warning-hover: var(--color-yellow-600);
+  --color-warning-light: var(--color-yellow-400);
+
+  --color-error: var(--color-red-500);
+  --color-error-hover: var(--color-red-600);
+  --color-error-light: var(--color-red-400);
+
+  --color-info: var(--color-blue-500);
+  --color-info-hover: var(--color-blue-600);
+  --color-info-light: var(--color-blue-400);
+}
+
+@layer base {
+  :root {
+    /* Background and Surface Colors */
+    --color-bg: {{ bg_light }};
+    --color-bg-secondary: {{ bg_secondary_light }};
+    --color-bg-tertiary: {{ bg_tertiary_light }};
+
+    --color-text: {{ text_light }};
+    --color-text-secondary: {{ text_secondary_light }};
+    --color-text-muted: {{ text_muted_light }};
+
+    --color-border: var(--color-primary-light);
+    --color-border-secondary: var(--color-secondary-light);
+  }
+
+  [data-theme="dark"] {
+    /* Background and Surface Colors */
+    --color-bg: {{ bg_dark }};
+    --color-bg-secondary: {{ bg_secondary_dark }};
+    --color-bg-tertiary: {{ bg_tertiary_dark }};
+
+    --color-text: {{ text_dark }};
+    --color-text-secondary: {{ text_secondary_dark }};
+    --color-text-muted: {{ text_muted_dark }};
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+  }
+}
