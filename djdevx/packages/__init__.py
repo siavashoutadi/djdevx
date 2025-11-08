@@ -27,6 +27,7 @@ from .django_snakeoil import app as snakeoil
 from .drf_flex_fields import app as flex_fields
 from .channels import app as channels_app
 from .djangochannelsrestframework import app as channelrest
+from .heroicons import app as heroicons
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -135,6 +136,11 @@ app.add_typer(
     tailwind_cli,
     name="django-tailwind-cli",
     help="Manage django-tailwind-cli package",
+)
+app.add_typer(
+    heroicons,
+    name="heroicons",
+    help="Manage heroicons package",
 )
 app.add_typer(
     channelrest,
