@@ -85,6 +85,7 @@ def init(
 
     if skip_devbox:
         exclude_files.append(source_dir / "devbox.json.j2")
+        exclude_files.append(source_dir / "devbox.d" / ".env.j2")
 
     if skip_biome:
         exclude_files.append(source_dir / "biome.jsonc")
