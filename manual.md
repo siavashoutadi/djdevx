@@ -107,6 +107,7 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 * `django-snakeoil`: Manage django-snakeoil package
 * `django-storages`: Manage django-storages package
 * `django-tailwind-cli`: Manage django-tailwind-cli package
+* `heroicons`: Manage heroicons package
 * `djangochannelsrestframework`: Manage djangochannelsrestframework package
 * `djangorestframework`: Manage djangorestframework package
 * `drf-nested-routers`: Manage drf-nested-routers package
@@ -1496,6 +1497,53 @@ $ djdevx packages django-tailwind-cli remove [OPTIONS]
 
 * `--help`: Show this message and exit.
 
+### `djdevx packages heroicons`
+
+Manage heroicons package
+
+**Usage**:
+
+```console
+$ djdevx packages heroicons [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure heroicons
+* `remove`: Remove heroicons
+
+#### `djdevx packages heroicons install`
+
+Install and configure heroicons
+
+**Usage**:
+
+```console
+$ djdevx packages heroicons install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx packages heroicons remove`
+
+Remove heroicons
+
+**Usage**:
+
+```console
+$ djdevx packages heroicons remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
 ### `djdevx packages djangochannelsrestframework`
 
 Manage djangochannelsrestframework package
@@ -1797,6 +1845,7 @@ $ djdevx feature [OPTIONS] COMMAND [ARGS]...
 * `pwa`: Add PWA support to the project
 * `css`: Manage css frameworks
 * `tailwind-theme`: Manage tailwind theme
+* `tailwind-ui`: Manage tailwind ui
 
 ### `djdevx feature pwa`
 
@@ -2028,10 +2077,10 @@ $ djdevx feature tailwind-theme install [OPTIONS]
 * `--primary-color TEXT`: Primary color (hex code or CSS variable). Example: #0047AB or --color-blue-500  [default: #0047AB]
 * `--secondary-color TEXT`: Secondary color (hex code or CSS variable). Example: #2F739F or --color-slate-600  [default: #2F739F]
 * `--accent-color TEXT`: Accent color (hex code or CSS variable). Example: #F38B49 or --color-orange-500  [default: #F38B49]
-* `--neutral-color TEXT`: Neutral color (hex code or CSS variable). Example: #71717A or --color-zinc-500  [default: #71717A]
+* `--neutral-color TEXT`: Neutral color (hex code or CSS variable). Example: #728389 or --color-zinc-500  [default: #728389]
 * `--bg-light TEXT`: Background color for light theme (hex code or CSS variable). Example: #FFFFFF or --color-white  [default: #FFFFFF]
-* `--bg-secondary-light TEXT`: Secondary background color for light theme (hex code or CSS variable). Example: #84A8E0 or --color-primary-200  [default: var(--color-primary-200)]
-* `--bg-tertiary-light TEXT`: Tertiary background color for light theme (hex code or CSS variable). Example: #C8DFE9 or --color-secondary-200  [default: var(--color-secondary-200)]
+* `--bg-secondary-light TEXT`: Secondary background color for light theme (hex code or CSS variable). Example: #84A8E0 or --color-primary-200  [default: #FBFBFB]
+* `--bg-tertiary-light TEXT`: Tertiary background color for light theme (hex code or CSS variable). Example: #C8DFE9 or --color-secondary-200  [default: #F8FFFF]
 * `--text-light TEXT`: Text color for light theme (hex code or CSS variable). Example: #0f172a or --color-slate-900  [default: --color-slate-900]
 * `--text-secondary-light TEXT`: Secondary text color for light theme (hex code or CSS variable). Example: #334155 or --color-slate-700  [default: --color-slate-700]
 * `--text-muted-light TEXT`: Muted text color for light theme (hex code or CSS variable). Example: #64748b or --color-slate-500  [default: --color-slate-500]
@@ -2051,6 +2100,53 @@ Remove Tailwind theme.
 
 ```console
 $ djdevx feature tailwind-theme remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+### `djdevx feature tailwind-ui`
+
+Manage tailwind ui
+
+**Usage**:
+
+```console
+$ djdevx feature tailwind-ui [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install Tailwind UI
+* `remove`: Remove Tailwind UI.
+
+#### `djdevx feature tailwind-ui install`
+
+Install Tailwind UI
+
+**Usage**:
+
+```console
+$ djdevx feature tailwind-ui install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx feature tailwind-ui remove`
+
+Remove Tailwind UI.
+
+**Usage**:
+
+```console
+$ djdevx feature tailwind-ui remove [OPTIONS]
 ```
 
 **Options**:

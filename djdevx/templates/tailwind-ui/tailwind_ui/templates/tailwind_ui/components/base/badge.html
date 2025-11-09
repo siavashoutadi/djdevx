@@ -1,0 +1,15 @@
+<span class="twui-badge
+  {% if type == 'primary' %}twui-badge-primary{% endif %}
+  {% if type == 'success' %}twui-badge-success{% endif %}
+  {% if type == 'warning' %}twui-badge-warning{% endif %}
+  {% if type == 'error' %}twui-badge-error{% endif %}
+  {% if type == 'info' %}twui-badge-info{% endif %}
+  {% if type == 'secondary' %}twui-badge-secondary{% endif %}
+  {% if type == 'tertiary' %}twui-badge-tertiary{% endif %}
+  {% if type == 'accent' %}twui-badge-accent{% endif %}
+  {% if type == 'neutral' %}twui-badge-neutral{% endif %}">
+  {% if icon %}
+    <span class="mr-1">{% heroicon_outline icon %}</span>
+  {% endif %}
+  {{ text }}
+</span>
