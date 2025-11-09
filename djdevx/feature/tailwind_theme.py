@@ -109,7 +109,7 @@ def install(
             prompt="Please enter the secondary background color for light theme",
             callback=validate_color_input,
         ),
-    ] = "--color-primary-200",
+    ] = "#FBFBFB",
     bg_tertiary_light: Annotated[
         str,
         typer.Option(
@@ -117,7 +117,7 @@ def install(
             prompt="Please enter the tertiary background color for light theme",
             callback=validate_color_input,
         ),
-    ] = "--color-secondary-200",
+    ] = "#F8FFFF",
     text_light: Annotated[
         str,
         typer.Option(

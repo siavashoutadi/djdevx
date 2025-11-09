@@ -1,0 +1,30 @@
+<div class="twui-toast {% if type == "info" %}twui-toast-info{% elif type == "success" %}twui-toast-success{% elif type == "warning" %}twui-toast-warning{% elif type == "error" %}twui-toast-error{% endif %} {% if dismissible %}twui-toast-dismissible{% endif %}">
+    <div class="twui-toast-icon">
+        {% if show_icon %}
+            {% if  type == "info" %}
+                {% heroicon_outline "information-circle" class="w-5 h-5 text-info" %}
+            {% elif type == "success" %}
+                {% heroicon_outline "check-circle" class="w-5 h-5 text-success" %}
+            {% elif type == "warning" %}
+                {% heroicon_outline "exclamation-circle" class="w-5 h-5 text-warning" %}
+            {% elif type == "error" %}
+                {% heroicon_outline "x-circle" class="w-5 h-5 text-error" %}
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <div class="twui-toast-content">
+        {% if title %}
+        <div class="twui-toast-title">{{ title }}</div>
+        {% endif %}
+        {% if message %}
+        <div class="twui-toast-message">{{ message }}</div>
+        {% endif %}
+    </div>
+
+    {% if dismissible %}
+        <button class="twui-toast-close" onclick="this.parentElement.classList.add('hiding'); setTimeout(() => this.parentElement.remove(), 300);">
+            {% heroicon_outline "x-mark" class="w-4 h-4" %}
+        </button>
+    {% endif %}
+</div>

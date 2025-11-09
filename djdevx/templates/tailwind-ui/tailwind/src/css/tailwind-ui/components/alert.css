@@ -1,0 +1,32 @@
+@layer components {
+    .twui-alert {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border-width: 1px;
+        border-left-width: 4px;
+    }
+
+    .twui-alert-info {
+        border-color: var(--color-info-light);
+        border-left-color: var(--color-info);
+        color: var(--color-text);
+    }
+
+    .twui-alert-success {
+        border-color: var(--color-success-light);
+        border-left-color: var(--color-success);
+        color: var(--color-text);
+    }
+
+    .twui-alert-warning {
+        border-color: var(--color-warning-light);
+        border-left-color: var(--color-warning);
+        color: var(--color-text);
+    }
+
+    .twui-alert-error {
+        border-color: var(--color-error-light);
+        border-left-color: var(--color-error);
+        color: var(--color-text);
+    }
+}

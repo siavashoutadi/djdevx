@@ -1,0 +1,38 @@
+<div class="twui-alert{% if type == 'info' %} twui-alert-info{% elif type == 'success' %} twui-alert-success{% elif type == 'warning' %} twui-alert-warning{% elif type == 'error' %} twui-alert-error{% endif %}">
+  <div class="flex items-start">
+    {% if show_icon %}
+      <div class="shrink-0 mr-3">
+        {% if type == 'success' %}
+          {% heroicon_outline "check-circle" class="w-5 h-5 text-success" %}
+        {% elif type == 'warning' %}
+          {% heroicon_outline "exclamation-triangle" class="w-5 h-5 text-warning" %}
+        {% elif type == 'error' %}
+          {% heroicon_outline "x-circle" class="w-5 h-5 text-error" %}
+        {% elif type == 'info' %}
+          {% heroicon_outline "information-circle" class="w-5 h-5 text-info" %}
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="flex-1">
+      {% if title %}
+        <h4 class="font-semibold mb-1">{{ title }}</h4>
+      {% endif %}
+
+      {% if message %}
+        <p class="text-sm">{{ message }}</p>
+      {% endif %}
+
+      {% if slot_content %}
+        {{ slot_content }}
+      {% endif %}
+    </div>
+
+    {% if dismissible %}
+      <button class="twui-btn shrink-0 opacity-70 hover:opacity-100 transition-opacity"
+              onclick="this.parentElement.parentElement.style.display='none'">
+        {% heroicon_outline "x-mark" class="w-5 h-5" %}
+      </button>
+    {% endif %}
+  </div>
+</div>

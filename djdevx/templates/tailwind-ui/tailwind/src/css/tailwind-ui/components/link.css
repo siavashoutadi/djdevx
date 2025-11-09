@@ -1,0 +1,16 @@
+@layer components {
+    .twui-link {
+        text-decoration: underline;
+        transition: color 0.2s;
+        color: var(--color-blue-500);
+        cursor: pointer;
+    }
+
+    .twui-link:hover {
+        color: var(--color-blue-700);
+    }
+
+    [data-theme="dark"] .twui-link:hover {
+        color: var(--color-blue-400);
+    }
+}

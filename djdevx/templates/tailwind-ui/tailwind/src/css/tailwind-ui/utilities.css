@@ -1,0 +1,31 @@
+@utility twui-bg-theme {
+    background-color: rgb(var(--color-bg));
+}
+
+@utility twui-bg-theme-secondary {
+    background-color: rgb(var(--color-bg-secondary));
+}
+
+@utility twui-bg-theme-tertiary {
+    background-color: rgb(var(--color-bg-tertiary));
+}
+
+@utility twui-text-theme {
+    color: rgb(var(--color-text));
+}
+
+@utility twui-text-theme-secondary {
+    color: rgb(var(--color-text-secondary));
+}
+
+@utility twui-text-theme-muted {
+    color: rgb(var(--color-text-muted));
+}
+
+@utility twui-border-theme {
+    border-color: rgb(var(--color-border));
+}
+
+@utility twui-border-theme-hover {
+    border-color: rgb(var(--color-border-hover));
+}
