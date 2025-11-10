@@ -15,6 +15,8 @@ from .packages.django_tailwind_cli import install as install_django_tailwind_cli
 
 app = typer.Typer()
 
+DJANGO_VERSION = "5.2"
+
 
 @app.command()
 def init(
@@ -79,6 +81,7 @@ def init(
         "django_secret_key": generate_secret(),
         "python_version": python_version,
         "skip_biome": skip_biome,
+        "django_version": DJANGO_VERSION,
     }
 
     exclude_files: list[Path] = []
@@ -120,7 +123,7 @@ def generate_secret():
 
 def install_dependencies(dest_dir: Path):
     dependencies: list[str] = [
-        "django",
+        f"django~={DJANGO_VERSION}.0",
         "django-typer",
         "django-environ",
         "psycopg2-binary",
