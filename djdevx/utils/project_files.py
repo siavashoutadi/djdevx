@@ -1,109 +1,134 @@
 import ast
-import shutil
 import typer
-import fileinput
+import warnings
 
 from pathlib import Path
-
-from jinja2 import Environment, FileSystemLoader
 from typing import List, Dict, Any, Optional
 
-from .print_console import print_error
+from .print_console import console
+from .djdevx_config import DjdevxConfig
+from .file_operations import TemplateManager
 
 
 def get_pyproject_toml_path() -> Path:
-    project_dir = Path.cwd()
-    return Path.joinpath(project_dir, "pyproject.toml")
+    warnings.warn(
+        "get_pyproject_toml_path is deprecated. Use DjangoProjectManager().pyproject_path instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    config = DjdevxConfig()
+    backend_root = config.django_backend_root
+    return Path.joinpath(backend_root, "pyproject.toml")
 
 
-def get_project_path() -> Path:
+def get_django_project_path() -> Path:
+    warnings.warn(
+        "get_django_project_path is deprecated. Use DjangoProjectManager().project_path instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return get_pyproject_toml_path().parent
 
 
-def get_settings_path() -> Path:
-    return Path.joinpath(get_project_path(), "settings")
+def get_django_settings_path() -> Path:
+    warnings.warn(
+        "get_django_settings_path is deprecated. Use DjangoProjectManager().settings_path instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return Path.joinpath(get_django_project_path(), "settings")
 
 
 def get_packages_settings_path() -> Path:
-    return Path.joinpath(get_settings_path(), "packages")
+    warnings.warn(
+        "get_packages_settings_path is deprecated. Use DjangoProjectManager().packages_settings_path instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return Path.joinpath(get_django_settings_path(), "packages")
 
 
-def get_url_path() -> Path:
-    return Path.joinpath(get_project_path(), "urls")
+def get_django_url_path() -> Path:
+    warnings.warn(
+        "get_django_url_path is deprecated. Use DjangoProjectManager().urls_path instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return Path.joinpath(get_django_project_path(), "urls")
 
 
-def get_ws_url_path() -> Path:
-    return Path.joinpath(get_project_path(), "ws_urls")
+def get_django_ws_url_path() -> Path:
+    warnings.warn(
+        "get_django_ws_url_path is deprecated. Use DjangoProjectManager().ws_urls_path instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return Path.joinpath(get_django_project_path(), "ws_urls")
 
 
-def get_packages_url_path() -> Path:
-    return Path.joinpath(get_url_path(), "packages")
+def get_django_packages_url_path() -> Path:
+    warnings.warn(
+        "get_django_packages_url_path is deprecated. Use DjangoProjectManager().packages_urls_path instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return Path.joinpath(get_django_url_path(), "packages")
 
 
-def get_base_template_path() -> Path:
-    return Path.joinpath(get_project_path(), "templates", "_base.html")
+def get_django_base_template_path() -> Path:
+    warnings.warn(
+        "get_django_base_template_path is deprecated. Use DjangoProjectManager().base_template_path instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return Path.joinpath(get_django_project_path(), "templates", "_base.html")
 
 
-def get_gitignore_path() -> Path:
-    return Path.joinpath(get_project_path(), ".gitignore")
+def get_django_gitignore_path() -> Path:
+    return Path.joinpath(get_django_project_path(), ".gitignore")
 
 
-def get_docker_file_path() -> Path:
-    return Path.joinpath(get_project_path(), "Dockerfile")
+def get_django_docker_file_path() -> Path:
+    return Path.joinpath(get_django_project_path(), "Dockerfile")
 
 
-def get_devcontainer_path() -> Path:
-    return Path.joinpath(get_project_path(), ".devcontainer")
-
-
-def get_devcontainer_env_path() -> Path:
-    return Path.joinpath(get_devcontainer_path(), ".env")
-
-
-def get_devcontainer_env_devcontainer_path() -> Path:
-    return Path.joinpath(get_devcontainer_env_path(), "devcontainer")
-
-
-def get_models_path(application_name: str) -> Path:
+def get_django_models_path(application_name: str) -> Path:
     """
     Get the path to models.py for a given application
     """
-    return Path.joinpath(get_project_path(), application_name, "models.py")
+    return Path.joinpath(get_django_project_path(), application_name, "models.py")
 
 
-def get_admin_path(application_name: str) -> Path:
+def get_django_admin_path(application_name: str) -> Path:
     """
     Get the path to admin.py for a given application
     """
-    return Path.joinpath(get_project_path(), application_name, "admin.py")
+    return Path.joinpath(get_django_project_path(), application_name, "admin.py")
 
 
-def get_static_path() -> Path:
+def get_django_static_path() -> Path:
     """
     Get the path to the static directory
     """
-    return Path.joinpath(get_project_path(), "static")
+    return Path.joinpath(get_django_project_path(), "static")
 
 
-def get_css_path() -> Path:
-    """
-    Get the path to the CSS directory
-    """
-    return Path.joinpath(get_static_path(), "css")
+def get_django_css_path() -> Path:
+    warnings.warn(
+        "get_django_css_path is deprecated. Use DjangoProjectManager().css_path instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return Path.joinpath(get_django_static_path(), "css")
 
 
-def get_js_path() -> Path:
-    """
-    Get the path to the JavaScript directory
-    """
-    return Path.joinpath(get_static_path(), "js")
-
-
-def render_template_string(path: str, template_context: dict) -> str:
-    if "{{" in path or "{%" in path:
-        template = Environment().from_string(path)
-        return template.render(**template_context)
-    return path
+def get_django_js_path() -> Path:
+    warnings.warn(
+        "get_django_js_path is deprecated. Use DjangoProjectManager().js_path instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return Path.joinpath(get_django_static_path(), "js")
 
 
 def copy_template_files(
@@ -112,108 +137,127 @@ def copy_template_files(
     template_context: dict,
     excluede_files: List[Path] = [],
 ):
-    dest_dir.mkdir(parents=True, exist_ok=True)
-    jinja_env = Environment(loader=FileSystemLoader(source_dir))
-
-    for source_path in source_dir.rglob("*"):
-        if any(source_path.match(str(exclude)) for exclude in excluede_files):
-            continue
-
-        rel_path = source_path.relative_to(source_dir)
-
-        rendered_parts = [
-            render_template_string(part, template_context) for part in rel_path.parts
-        ]
-        dest_path = dest_dir / Path(*rendered_parts)
-
-        if source_path.is_dir():
-            dest_path.mkdir(parents=True, exist_ok=True)
-        else:
-            if source_path.suffix == ".j2":
-                filename = render_template_string(dest_path.stem, template_context)
-                dest_path = dest_path.parent / filename
-                template = jinja_env.get_template(str(rel_path))
-                rendered_content = template.render(**template_context)
-                rendered_content = rendered_content.rstrip("\n") + "\n"
-
-                dest_path.write_text(rendered_content)
-            else:
-                filename = render_template_string(dest_path.name, template_context)
-                dest_path = dest_path.parent / filename
-
-                shutil.copy2(source_path, dest_path)
+    """Legacy wrapper. Use DjangoProjectManager().copy_templates() instead."""
+    warnings.warn(
+        "copy_template_files is deprecated. Use DjangoProjectManager().copy_templates() instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    template_manager = TemplateManager()
+    template_manager.copy_templates(
+        source_dir=source_dir,
+        dest_dir=dest_dir,
+        template_context=template_context,
+        exclude_files=excluede_files,
+    )
 
 
 def copy_template_file(
     source_file: Path, dest_dir: Path, template_context: dict
 ) -> Path:
-    dest_dir.mkdir(parents=True, exist_ok=True)
-
-    jinja_env = Environment(loader=FileSystemLoader(source_file.parent))
-
-    filename = render_template_string(source_file.name, template_context)
-    dest_path = dest_dir / filename
-
-    if source_file.suffix == ".j2":
-        template = jinja_env.get_template(source_file.name)
-        rendered_content = template.render(**template_context)
-        rendered_content = rendered_content.rstrip("\n") + "\n"
-
-        if dest_path.suffix == ".j2":
-            dest_path = dest_path.with_suffix("")
-
-        dest_path.write_text(rendered_content)
-    else:
-        shutil.copy2(source_file, dest_path)
-
-    return dest_path
+    """Legacy wrapper. Use DjangoProjectManager().copy_template() instead."""
+    warnings.warn(
+        "copy_template_file is deprecated. Use DjangoProjectManager().copy_template() instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    template_manager = TemplateManager()
+    return template_manager.copy_template(
+        source_file=source_file,
+        dest_dir=dest_dir,
+        template_context=template_context,
+    )
 
 
-def is_project_exists_or_raise():
-    if not Path.exists(get_project_path()):
-        print_error(
+def is_django_backend_exist_or_raise():
+    warnings.warn(
+        "is_django_backend_exist_or_raise is deprecated. Use DjangoProjectManager().validate_django_project() instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    if not Path.exists(get_django_project_path()):
+        console.error(
             "Could not find pyproject.toml. Are you running from the project directory?"
         )
-        raise typer.Abort()
+        raise typer.Exit(code=1)
 
 
-def add_env_varibles(
-    key: str, value: str, file_path: Path = get_devcontainer_env_devcontainer_path()
-):
-    remove_env_varibles(key)
-    with open(file_path, "a") as f:
-        f.write(f"{key}={value}\n")
-
-
-def remove_env_varibles(
-    key: str, file_path: Path = get_devcontainer_env_devcontainer_path()
-):
-    with fileinput.input(files=[file_path], inplace=True) as f:
-        for line in f:
-            if not line.startswith(f"{key}="):
-                print(line, end="")
-
-
-def get_models(app_name):
+def get_django_models(app_name):
     """Parse models.py file and extract model information."""
+    warnings.warn(
+        "get_django_models is deprecated. Use DjangoProjectManager().get_models() instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
 
-    models_file = get_models_path(app_name)
+    models_file = get_django_models_path(app_name)
 
     if not models_file.exists():
-        print_error(f"Could not find {models_file}")
+        console.error(f"Could not find {models_file}")
         raise typer.Exit(code=1)
 
     try:
         with open(models_file, "r", encoding="utf-8") as f:
             tree = ast.parse(f.read(), filename=str(models_file))
     except SyntaxError as e:
-        print_error(f"Syntax error in {models_file}: {e}")
+        console.error(f"Syntax error in {models_file}: {e}")
         raise typer.Exit(code=1)
 
     visitor = ModelVisitor()
     visitor.visit(tree)
 
     return visitor.models
+
+
+def get_project_root_dir() -> Path:
+    """Legacy wrapper. Use DjdevxConfig().project_root_dir instead."""
+    config = DjdevxConfig()
+    return config.project_root_dir
+
+
+def get_devcontainer_path() -> Path:
+    """Legacy wrapper. Use DjdevxConfig().devcontainer_path instead."""
+    config = DjdevxConfig()
+    return config.devcontainer_path
+
+
+def get_devcontainer_env_path() -> Path:
+    """Legacy wrapper. Use DjdevxConfig().devcontainer_env_path instead."""
+    config = DjdevxConfig()
+    return config.devcontainer_env_path
+
+
+def get_devcontainer_env_devcontainer_path() -> Path:
+    """Legacy wrapper. Use DjdevxConfig().devcontainer_env_devcontainer_path instead."""
+    config = DjdevxConfig()
+    return config.devcontainer_env_devcontainer_path
+
+
+def add_env_varibles(key: str, value: str, file_path: Path | None = None):
+    """Legacy wrapper. Use DjangoProjectManager().add_env_variable() instead."""
+    warnings.warn(
+        "add_env_varibles is deprecated. Use DjangoProjectManager().add_env_variable() instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    if file_path is None:
+        file_path = get_devcontainer_env_devcontainer_path()
+    remove_env_varibles(key, file_path)
+    with open(file_path, "a") as f:
+        f.write(f"{key}={value}\n")
+
+
+def remove_env_varibles(key: str, file_path: Path | None = None):
+    """Legacy wrapper. Use DjangoProjectManager().remove_env_variable() instead."""
+    warnings.warn(
+        "remove_env_varibles is deprecated. Use DjangoProjectManager().remove_env_variable() instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    if file_path is None:
+        file_path = get_devcontainer_env_devcontainer_path()
+    template_manager = TemplateManager()
+    template_manager.remove_lines_from_file(file_path, [f"{key}="])
 
 
 class ModelVisitor(ast.NodeVisitor):

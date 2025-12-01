@@ -138,7 +138,9 @@ def install():
     is_project_exists_or_raise()
 
     print_step("Installing django-extensions package ...")
-    subprocess.check_call(["uv", "add", "django-extensions"])
+
+    uv = UvRunner()
+    uv.add_package("django-extensions")
 
     current_dir = Path(__file__).resolve().parent
     source_dir = current_dir.parent / "templates" / "django-extensions"
@@ -158,8 +160,10 @@ def remove():
     """
     print_step("Removing django-extensions package ...")
 
+    uv = UvRunner()
+
     if has_dependency("django-extensions"):
-        subprocess.check_call(["uv", "remove", "django-extensions"])
+        uv.remove_package("django-extensions")
 
     # Remove generated settings file
     settings_path = Path.joinpath(get_packages_settings_path(), "django_extensions.py")
@@ -208,8 +212,10 @@ if __name__ == "__main__":
    @app.command()
    def install():
        # Install multiple related packages
-       subprocess.check_call(["uv", "add", "main-package", "helper-package"])
-       subprocess.check_call(["uv", "add", "dev-package", "--group", "dev"])
+       uv = UvRunner()
+       uv.add_package("main-package")
+       uv.add_package("helper-package")
+       uv.add_package("dev-package", group="dev")
    ```
 
 ### Step 5: Register CLI Command
@@ -580,7 +586,8 @@ CLI: `djdevx/packages/django_humanize.py`
 ```python
 @app.command()
 def install():
-    subprocess.check_call(["uv", "add", "django"])  # Already included
+    uv = UvRunner()
+    uv.add_package("django")  # Already included
     copy_template_files(source_dir=source_dir, dest_dir=project_dir, template_context={})
 ```
 

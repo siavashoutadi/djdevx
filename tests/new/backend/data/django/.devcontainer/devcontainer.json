@@ -1,0 +1,58 @@
+{
+    "name": "Python devcontainer",
+    "dockerComposeFile": [
+        "docker-compose.yaml"
+    ],
+    "service": "devcontainer",
+    "workspaceFolder": "/home/devuser/workspace",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "donjayamanne.python-extension-pack",
+                "batisteo.vscode-django",
+                "charliermarsh.ruff",
+                "bradlc.vscode-tailwindcss",
+                "vscode-icons-team.vscode-icons",
+                "SimonSiefke.svg-preview",
+                "qwtel.sqlite-viewer",
+                "Cardinal90.multi-cursor-case-preserve",
+                "yzhang.markdown-all-in-one",
+                "oderwat.indent-rainbow",
+                "timonwong.shellcheck",
+                "biomejs.biome"
+            ],
+            "settings": {
+                "files.trimTrailingWhitespace": true,
+                "editor.formatOnPaste": true,
+                "editor.formatOnSave": true,
+                "files.insertFinalNewline": true,
+                "files.trimFinalNewlines": true,
+                "editor.tabSize": 4,
+                "[python]": {
+                    "editor.defaultFormatter": "charliermarsh.ruff",
+                    "editor.formatOnSave": true,
+                    "editor.codeActionsOnSave": {
+                        "source.organizeImports": "explicit"
+                    }
+                },
+                "files.associations": {
+                    "**/templates/**/*.html": "django-html",
+                    "**/templates/**/*": "django-txt",
+                    "**/requirements{/**,*}.{txt,in}": "pip-requirements"
+                },
+                "emmet.includeLanguages": {
+                    "django-html": "html"
+                }
+            },
+            "editor.guides.bracketPairs": "active",
+            "workbench.iconTheme": "vscode-icons",
+            "workbench.tree.indent": 8,
+            "workbench.tree.renderIndentGuides": "always",
+            "workbench.colorCustomizations": {
+                "tree.indentGuidesStroke": "#ff0000",
+                "tree.inactiveIndentGuidesStroke": "#51b8e1"
+            }
+        }
+    },
+    "postStartCommand": "uv sync && uv run pre-commit install"
+}

@@ -1,0 +1,17 @@
+.devcontainer
+.env
+.environments
+.venv
+.dockerignore
+.editorconfig
+.git
+.gitignore
+.pre-commit-config.yaml
+README.md
+biome.jsonc
+devbox.json
+devbox.lock
+devbox.d
+Dockerfile
+staticfiles
+.django_tailwind_cli

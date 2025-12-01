@@ -1,0 +1,19 @@
+from settings.utils.env import get_env
+
+env = get_env()
+
+ANYMAIL = {
+    "MAILGUN_API_KEY": env("ANYMAIL_MAILGUN_API_KEY", default=""),
+    {% if is_europe %}
+    "MAILGUN_API_URL": "https://api.eu.mailgun.net/v3",
+    {% else %}
+    "MAILGUN_API_URL": "https://api.mailgun.net/v3",
+    {% endif %}
+    "MAILGUN_SENDER_DOMAIN": env("ANYMAIL_MAILGUN_SENDER_DOMAIN", default=""),
+}
+
+EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
+
+INSTALLED_APPS = [
+    "anymail",
+]

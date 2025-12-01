@@ -35,7 +35,7 @@ app.add_typer(create_app, name="create", help="Create new Django applications or
 
 ### 2. Template System Architecture
 
-**Jinja2 Template Processing** (`djdevx/utils/project_files.py`):
+**Jinja2 Template Processing** (`djdevx/utils/django/project_manager.py`):
 
 The system uses a sophisticated template processing pipeline:
 
@@ -193,7 +193,8 @@ djdevx packages django-cors-headers install
     ↓
 django_cors_headers.py:install() function
     ↓
-subprocess.check_call(["uv", "add", "django-cors-headers"])
+uv = UvRunner()
+uv.add_package("django-cors-headers")
     ↓
 copy_template_files(
     source_dir="djdevx/templates/django-cors-headers",

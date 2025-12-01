@@ -97,12 +97,12 @@ Always look for existing single-action packages for reference such as `django_me
 Create `djdevx/packages/{package_name}.py`:
 
 ```python
-import subprocess
 import typer
 from pathlib import Path
 
+from ...utils.django.uv_runner import UvRunner
 from ..utils.print_console import print_step, print_success, print_error, print_info
-from ..utils.project_info import has_dependency
+from ..utils.django.project_manager import DjangoProjectManager
 from ..utils.project_files import (
     copy_template_files,
     is_project_exists_or_raise,
@@ -122,17 +122,19 @@ def install():
 
     # Check for dependencies (if needed)
     # print_step("Checking if required-package is installed ...")
-    # if not has_dependency("required-package"):
+    # if not DjangoProjectManager().has_dependency("required-package"):
     #     print_error("'required-package' is not installed. Please install it first.")
     #     print_info("\n> ddx packages required-package install")
     #     raise typer.Exit(1)
 
     print_step("Installing {package-name} package ...")
 
+    uv = UvRunner()
+
     # Install via uv - adjust as needed:
-    # For dev dependencies: ["uv", "add", "{package-name}", "--dev"]
-    # For extras: ["uv", "add", "{package-name}[extra]"]
-    subprocess.check_call(["uv", "add", "{package-name}"])
+    # For dev dependencies: uv.add_package("{package-name}", dev=True)
+    # For extras: uv.add_package("{package-name}[extra]")
+    uv.add_package("{package-name}")
 
     # Copy template files (settings, urls, etc.)
     current_dir = Path(__file__).resolve().parent
@@ -154,10 +156,12 @@ def remove():
     """
     print_step("Removing {package-name} package ...")
 
+    uv = UvRunner()
+
     # Remove package if installed
-    if has_dependency("{package-name}"):
-        # For dev dependencies: ["uv", "remove", "{package-name}", "--group", "dev"]
-        subprocess.check_call(["uv", "remove", "{package-name}"])
+    if DjangoProjectManager().has_dependency("{package-name}"):
+        # For dev dependencies: uv.remove_package("{package-name}", group="dev")
+        uv.remove_package("{package-name}")
 
     # Remove generated URL file (if exists)
     url_path = Path.joinpath(get_packages_url_path(), "{package_name}.py")
@@ -414,7 +418,7 @@ Some packages require additional files beyond settings/URLs:
 ```python
 # In install() command
 print_step("Checking if djangorestframework is installed ...")
-if not has_dependency("djangorestframework"):
+if not DjangoProjectManager().has_dependency("djangorestframework"):
     print_error("'djangorestframework' package is not installed. Please install that package first.")
     print_info("\n> ddx packages djangorestframework install")
     raise typer.Exit(1)
@@ -422,16 +426,19 @@ if not has_dependency("djangorestframework"):
 
 **Package with extras:**
 ```python
-subprocess.check_call(["uv", "add", "drf-spectacular[sidecar]"])
+uv = UvRunner()
+uv.add_package("drf-spectacular[sidecar]")
 ```
 
 **Dev-only package:**
 ```python
+uv = UvRunner()
+
 # Install
-subprocess.check_call(["uv", "add", "django-debug-toolbar", "--group", "dev"])
+uv.add_package("django-debug-toolbar", group="dev")
 
 # Remove
-subprocess.check_call(["uv", "remove", "django-debug-toolbar", "--group", "dev"])
+uv.remove_package("django-debug-toolbar", group="dev")
 ```
 
 **Multi-backend package structure** (like django-storages):

@@ -2,24 +2,16 @@ import typer
 
 from .version import app as version_app
 from .requirement import app as requirement_app
-from .init import app as init_app
-from .packages import app as packages_app
-from .feature import app as feature_app
-from .create import app as create_app
+from .new import app as new_app
+from .backend import app as backend_app
 
 
 app = typer.Typer(no_args_is_help=True)
 
 app.add_typer(version_app)
 app.add_typer(requirement_app)
-app.add_typer(init_app)
-app.add_typer(
-    packages_app, name="packages", help="Install and configure django packages"
-)
-app.add_typer(feature_app, name="feature", help="Add features to your project")
-app.add_typer(
-    create_app, name="create", help="Create new Django applications or components"
-)
+app.add_typer(new_app, name="new", help="Create a new project")
+app.add_typer(backend_app, name="backend", help="Backend development tools")
 
 if __name__ == "__main__":
     app()
