@@ -64,15 +64,8 @@ def test_django_allauth_account_install_and_remove(temp_dir):
     auth_app_file = backend_dir / "authentication" / "__init__.py"
     assert auth_app_file.exists(), "Authentication app __init__.py not created"
 
-    auth_forms_file = backend_dir / "authentication" / "forms.py"
-    assert auth_forms_file.exists(), "Authentication forms.py not created"
-
     auth_apps_file = backend_dir / "authentication" / "apps.py"
     assert auth_apps_file.exists(), "Authentication apps.py not created"
-
-    # Check static CSS file
-    css_file = backend_dir / "static" / "css" / "vendor" / "auth.css"
-    assert css_file.exists(), "CSS file not created"
 
     # Check dependencies
     assert DjangoProjectManager().has_dependency("django-allauth"), (
@@ -82,7 +75,20 @@ def test_django_allauth_account_install_and_remove(temp_dir):
         "better-profanity dependency not found after installation"
     )
 
-    # Test removal
+    data_account_dir = DATA_DIR / "account"
+    for expected_file in data_account_dir.rglob("*"):
+        if expected_file.is_file():
+            relative_path = expected_file.relative_to(data_account_dir)
+            actual_file = backend_dir / relative_path
+
+            assert actual_file.exists(), f"Expected file {relative_path} not created"
+
+            expected_content = expected_file.read_text()
+            actual_content = actual_file.read_text()
+            assert actual_content == expected_content, (
+                f"Content mismatch in {relative_path}"
+            )
+
     os.chdir(temp_dir)
     result = runner.invoke(
         app,
@@ -103,9 +109,7 @@ def test_django_allauth_account_install_and_remove(temp_dir):
     # Note: URLs file is not removed due to bug in remove.py using wrong path
     # assert not urls_file.exists(), "URLs file not removed"
     assert not auth_app_file.parent.exists(), "Authentication directory not removed"
-    assert not css_file.exists(), (
-        "CSS file not removed"
-    )  # Check dependencies are removed
+    # Check dependencies are removed
     assert not DjangoProjectManager().has_dependency("django-allauth"), (
         "django-allauth dependency found after removal"
     )

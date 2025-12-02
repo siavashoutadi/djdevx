@@ -37,14 +37,3 @@ ACCOUNT_EMAIL_SUBJECT_PREFIX = "{{ email_subject_prefix }}"
 {% if is_profanity_for_username_enabled -%}
 ACCOUNT_USERNAME_BLACKLIST = [str(word) for word in profanity.CENSOR_WORDSET]
 {% endif -%}
-ACCOUNT_FORMS = {
-    "add_email": "authentication.forms.AuthAddEmailForm",
-    "change_password": "authentication.forms.AuthChangePasswordForm",
-    "login": "authentication.forms.AuthLoginForm",
-    "reset_password": "authentication.forms.AuthResetPasswordForm",
-    "reset_password_from_key": "authentication.forms.AuthResetPasswordKeyForm",
-    "set_password": "authentication.forms.AuthSetPasswordForm",
-    "signup": "authentication.forms.AuthSignupForm",
-    "user_token": "authentication.forms.AuthUserTokenForm",
-    "reauthenticate": "authentication.forms.AuthReauthenticateForm",
-}

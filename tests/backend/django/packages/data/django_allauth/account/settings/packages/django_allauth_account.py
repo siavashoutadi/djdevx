@@ -35,14 +35,3 @@ ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_USERNAME_MIN_LENGTH = 3
 ACCOUNT_EMAIL_SUBJECT_PREFIX = "[Test Site] "
 ACCOUNT_USERNAME_BLACKLIST = [str(word) for word in profanity.CENSOR_WORDSET]
-ACCOUNT_FORMS = {
-    "add_email": "authentication.forms.AuthAddEmailForm",
-    "change_password": "authentication.forms.AuthChangePasswordForm",
-    "login": "authentication.forms.AuthLoginForm",
-    "reset_password": "authentication.forms.AuthResetPasswordForm",
-    "reset_password_from_key": "authentication.forms.AuthResetPasswordKeyForm",
-    "set_password": "authentication.forms.AuthSetPasswordForm",
-    "signup": "authentication.forms.AuthSignupForm",
-    "user_token": "authentication.forms.AuthUserTokenForm",
-    "reauthenticate": "authentication.forms.AuthReauthenticateForm",
-}
