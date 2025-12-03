@@ -1,0 +1,29 @@
+{% extends "./base.html" %}
+{% load i18n %}
+{% load allauth %}
+{% block title %}
+    {% trans "Deactivate Authenticator App" %}
+{% endblock title %}
+{% block content %}
+    {% element h1 %}
+        {% trans "Deactivate Authenticator App" %}
+    {% endelement %}
+    {% element p %}
+        {% trans "Are you sure you want to deactivate the authenticator app?" %}
+    {% endelement %}
+    {% element form form=form method="post" %}
+        {% slot body %}
+            {% csrf_token %}
+            {% element fields form=form %}
+            {% endelement %}
+        {% endslot %}
+        {% slot actions %}
+            {% element button type="submit" tags="danger" %}
+                {% trans "Deactivate" %}
+            {% endelement %}
+            {% element button href=back_url tags="secondary" %}
+                {% trans "Cancel" %}
+            {% endelement %}
+        {% endslot %}
+    {% endelement %}
+{% endblock content %}

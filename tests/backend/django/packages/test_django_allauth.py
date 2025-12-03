@@ -116,3 +116,381 @@ def test_django_allauth_account_install_and_remove(temp_dir):
     assert not DjangoProjectManager().has_dependency("better-profanity"), (
         "better-profanity dependency found after removal"
     )
+
+
+def test_django_allauth_mfa_install_basic(temp_dir):
+    """
+    Test django-allauth MFA package installation with basic options (TOTP + recovery codes).
+    """
+    backend_dir = create_test_django_backend(temp_dir, runner)
+
+    os.chdir(temp_dir)
+
+    # First install account functionality
+    result = runner.invoke(
+        app,
+        [
+            "backend",
+            "django",
+            "packages",
+            "django-allauth",
+            "account",
+            "install",
+            "--email-subject-prefix",
+            "[Test Site] ",
+            "--is-profanity-for-username-enabled",
+            "--account-url-prefix",
+            "auth",
+        ],
+    )
+    assert result.exit_code == 0, f"Account install failed: {result.output}"
+
+    # Test MFA install with basic options
+    result = runner.invoke(
+        app,
+        [
+            "backend",
+            "django",
+            "packages",
+            "django-allauth",
+            "mfa",
+            "install",
+            "--totp-issuer",
+            "Test App",
+        ],
+    )
+
+    assert result.exit_code == 0, f"MFA install failed: {result.output}"
+    assert (
+        "django-allauth with MFA functionality is installed successfully"
+        in result.output
+    )
+
+    # Check if package is upgraded to include MFA
+    assert DjangoProjectManager().has_dependency("django-allauth")
+
+    # Check if MFA settings file is created
+    mfa_settings_file = backend_dir / "settings" / "packages" / "django_allauth_mfa.py"
+    assert mfa_settings_file.exists(), "MFA settings file not created"
+
+    # Verify settings content for basic install
+    expected_mfa_settings_file = (
+        DATA_DIR / "mfa" / "basic" / "settings" / "packages" / "django_allauth_mfa.py"
+    )
+    expected_content = expected_mfa_settings_file.read_text()
+    actual_content = mfa_settings_file.read_text()
+    assert actual_content == expected_content, "MFA settings content mismatch"
+
+    # Check if authentication templates are created
+    mfa_index_template = (
+        backend_dir / "authentication" / "templates" / "mfa" / "index.html"
+    )
+    assert mfa_index_template.exists(), "MFA index template not created"
+
+    mfa_auth_template = (
+        backend_dir / "authentication" / "templates" / "mfa" / "authenticate.html"
+    )
+    assert mfa_auth_template.exists(), "MFA authenticate template not created"
+
+
+def test_django_allauth_mfa_install_with_webauthn(temp_dir):
+    """
+    Test django-allauth MFA package installation with WebAuthn enabled.
+    """
+    backend_dir = create_test_django_backend(temp_dir, runner)
+
+    os.chdir(temp_dir)
+
+    # First install account functionality
+    result = runner.invoke(
+        app,
+        [
+            "backend",
+            "django",
+            "packages",
+            "django-allauth",
+            "account",
+            "install",
+            "--email-subject-prefix",
+            "[Test Site] ",
+            "--no-is-profanity-for-username-enabled",
+            "--account-url-prefix",
+            "auth",
+        ],
+    )
+    assert result.exit_code == 0, f"Account install failed: {result.output}"
+
+    # Test MFA install with WebAuthn enabled
+    result = runner.invoke(
+        app,
+        [
+            "backend",
+            "django",
+            "packages",
+            "django-allauth",
+            "mfa",
+            "install",
+            "--enable-webauthn",
+            "--totp-issuer",
+            "Test App",
+            "--recovery-code-count",
+            "12",
+        ],
+    )
+
+    assert result.exit_code == 0, f"MFA install failed: {result.output}"
+
+    # Check if MFA settings file is created with WebAuthn
+    mfa_settings_file = backend_dir / "settings" / "packages" / "django_allauth_mfa.py"
+    assert mfa_settings_file.exists(), "MFA settings file not created"
+
+    # Verify WebAuthn is included in settings
+    settings_content = mfa_settings_file.read_text()
+    assert "webauthn" in settings_content, "WebAuthn not enabled in settings"
+    assert "MFA_PASSKEY_LOGIN_ENABLED = True" in settings_content, (
+        "WebAuthn login not enabled"
+    )
+    assert "MFA_RECOVERY_CODE_COUNT = 12" in settings_content, (
+        "Recovery code count not set"
+    )
+
+
+def test_django_allauth_mfa_install_with_trust(temp_dir):
+    """
+    Test django-allauth MFA package installation with trust functionality enabled.
+    """
+    backend_dir = create_test_django_backend(temp_dir, runner)
+
+    os.chdir(temp_dir)
+
+    # First install account functionality
+    result = runner.invoke(
+        app,
+        [
+            "backend",
+            "django",
+            "packages",
+            "django-allauth",
+            "account",
+            "install",
+            "--email-subject-prefix",
+            "[Test Site] ",
+            "--no-is-profanity-for-username-enabled",
+            "--account-url-prefix",
+            "auth",
+        ],
+    )
+    assert result.exit_code == 0, f"Account install failed: {result.output}"
+
+    # Test MFA install with trust enabled
+    result = runner.invoke(
+        app,
+        [
+            "backend",
+            "django",
+            "packages",
+            "django-allauth",
+            "mfa",
+            "install",
+            "--enable-trust",
+            "--totp-issuer",
+            "Test App",
+            "--trust-cookie-age-days",
+            "30",
+        ],
+    )
+
+    assert result.exit_code == 0, f"MFA install failed: {result.output}"
+
+    # Check if MFA settings file is created with trust
+    mfa_settings_file = backend_dir / "settings" / "packages" / "django_allauth_mfa.py"
+    assert mfa_settings_file.exists(), "MFA settings file not created"
+
+    # Verify trust functionality is included in settings
+    settings_content = mfa_settings_file.read_text()
+    assert "MFA_TRUST_ENABLED = True" in settings_content, (
+        "Trust functionality not enabled"
+    )
+    assert "MFA_TRUST_COOKIE_AGE = 2592000" in settings_content, (
+        "Trust cookie age not set (30 days)"
+    )
+
+
+def test_django_allauth_mfa_install_without_account(temp_dir):
+    """
+    Test django-allauth MFA installation fails when account is not installed first.
+    """
+    create_test_django_backend(temp_dir, runner)
+
+    os.chdir(temp_dir)
+
+    # Try to install MFA without account functionality
+    result = runner.invoke(
+        app,
+        [
+            "backend",
+            "django",
+            "packages",
+            "django-allauth",
+            "mfa",
+            "install",
+            "--totp-issuer",
+            "Test App",
+        ],
+    )
+
+    assert result.exit_code == 1, "MFA install should fail without account"
+    assert "django-allauth" in result.output and "not installed" in result.output
+
+
+def test_django_allauth_mfa_remove(temp_dir):
+    """
+    Test django-allauth MFA package removal.
+    """
+    backend_dir = create_test_django_backend(temp_dir, runner)
+
+    os.chdir(temp_dir)
+
+    # First install account functionality
+    result = runner.invoke(
+        app,
+        [
+            "backend",
+            "django",
+            "packages",
+            "django-allauth",
+            "account",
+            "install",
+            "--email-subject-prefix",
+            "[Test Site] ",
+            "--no-is-profanity-for-username-enabled",
+            "--account-url-prefix",
+            "auth",
+        ],
+    )
+    assert result.exit_code == 0, f"Account install failed: {result.output}"
+
+    # Install MFA
+    result = runner.invoke(
+        app,
+        [
+            "backend",
+            "django",
+            "packages",
+            "django-allauth",
+            "mfa",
+            "install",
+            "--totp-issuer",
+            "Test App",
+        ],
+    )
+    assert result.exit_code == 0, f"MFA install failed: {result.output}"
+
+    # Test MFA removal
+    result = runner.invoke(
+        app,
+        [
+            "backend",
+            "django",
+            "packages",
+            "django-allauth",
+            "mfa",
+            "remove",
+        ],
+    )
+
+    assert result.exit_code == 0, f"MFA remove failed: {result.output}"
+    assert "django-allauth MFA configuration is removed successfully" in result.output
+
+    # Verify MFA settings file is removed
+    mfa_settings_file = backend_dir / "settings" / "packages" / "django_allauth_mfa.py"
+    assert not mfa_settings_file.exists(), "MFA settings file not removed"
+
+    # Verify django-allauth package is still installed (only MFA config removed)
+    assert DjangoProjectManager().has_dependency("django-allauth"), (
+        "django-allauth package should remain installed after MFA removal"
+    )
+
+
+def test_django_allauth_mfa_install_full_options(temp_dir):
+    """
+    Test django-allauth MFA package installation with all options enabled.
+    """
+    backend_dir = create_test_django_backend(temp_dir, runner)
+
+    os.chdir(temp_dir)
+
+    # First install account functionality
+    result = runner.invoke(
+        app,
+        [
+            "backend",
+            "django",
+            "packages",
+            "django-allauth",
+            "account",
+            "install",
+            "--email-subject-prefix",
+            "[Test Site] ",
+            "--no-is-profanity-for-username-enabled",
+            "--account-url-prefix",
+            "auth",
+        ],
+    )
+    assert result.exit_code == 0, f"Account install failed: {result.output}"
+
+    # Test MFA install with all features
+    result = runner.invoke(
+        app,
+        [
+            "backend",
+            "django",
+            "packages",
+            "django-allauth",
+            "mfa",
+            "install",
+            "--enable-webauthn",
+            "--enable-trust",
+            "--totp-issuer",
+            "Full Featured App",
+            "--recovery-code-count",
+            "15",
+            "--trust-cookie-age-days",
+            "7",
+        ],
+    )
+
+    assert result.exit_code == 0, f"MFA install failed: {result.output}"
+
+    # Check if MFA settings file is created with all options
+    mfa_settings_file = backend_dir / "settings" / "packages" / "django_allauth_mfa.py"
+    assert mfa_settings_file.exists(), "MFA settings file not created"
+
+    # Verify all features are included in settings
+    settings_content = mfa_settings_file.read_text()
+
+    # Check TOTP settings
+    assert "totp" in settings_content, "TOTP not enabled"
+    assert 'MFA_TOTP_ISSUER = "Full Featured App"' in settings_content, (
+        "TOTP issuer not set"
+    )
+
+    # Check recovery codes settings
+    assert "recovery_codes" in settings_content, "Recovery codes not enabled"
+    assert "MFA_RECOVERY_CODE_COUNT = 15" in settings_content, (
+        "Recovery code count not set"
+    )
+
+    # Check WebAuthn settings
+    assert "webauthn" in settings_content, "WebAuthn not enabled"
+    assert "MFA_PASSKEY_LOGIN_ENABLED = True" in settings_content, (
+        "WebAuthn login not enabled"
+    )
+
+    # Check trust settings
+    assert "MFA_TRUST_ENABLED = True" in settings_content, (
+        "Trust functionality not enabled"
+    )
+    assert "MFA_TRUST_COOKIE_AGE = 604800" in settings_content, (
+        "Trust cookie age not set (7 days)"
+    )

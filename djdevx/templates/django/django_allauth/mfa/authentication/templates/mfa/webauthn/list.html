@@ -1,0 +1,50 @@
+{% extends "./base.html" %}
+{% load i18n %}
+{% load allauth %}
+{% block title %}
+    {% trans "Manage Security Keys" %}
+{% endblock title %}
+{% block content %}
+    {% element h1 %}
+        {% trans "Security Keys" %}
+    {% endelement %}
+    {% if authenticators %}
+        {% element table %}
+            {% slot header %}
+                <tr>
+                    <th>{% trans "Name" %}</th>
+                    <th>{% trans "Created" %}</th>
+                    <th>{% trans "Last Used" %}</th>
+                    <th>{% trans "Actions" %}</th>
+                </tr>
+            {% endslot %}
+            {% slot body %}
+                {% for authenticator in authenticators %}
+                    <tr>
+                        <td>{{ authenticator.data.name|default:_('Security Key') }}</td>
+                        <td>{{ authenticator.created_at|date }}</td>
+                        <td>{{ authenticator.last_used_at|date|default:_('Never') }}</td>
+                        <td>
+                            {% element button href=authenticator.get_delete_url tags="danger,small" %}
+                                {% trans "Remove" %}
+                            {% endelement %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endslot %}
+        {% endelement %}
+    {% else %}
+        {% element p %}
+            {% trans "No security keys have been added." %}
+        {% endelement %}
+    {% endif %}
+    {% element button_group %}
+        {% url 'mfa_add_webauthn' as add_url %}
+        {% element button href=add_url tags="primary" %}
+            {% trans "Add Security Key" %}
+        {% endelement %}
+        {% element button href=back_url tags="secondary" %}
+            {% trans "Back" %}
+        {% endelement %}
+    {% endelement %}
+{% endblock content %}

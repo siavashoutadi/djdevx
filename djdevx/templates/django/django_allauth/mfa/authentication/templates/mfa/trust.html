@@ -1,0 +1,38 @@
+{% extends "../allauth_base.html" %}
+{% load i18n %}
+{% load allauth %}
+{% block title %}
+    {% trans "Trust This Browser" %}
+{% endblock title %}
+{% block content %}
+    {% element h1 %}
+        {% trans "Trust This Browser?" %}
+    {% endelement %}
+    {% element p %}
+        {% blocktranslate with trust_from=trust_from trust_until=trust_until %}You can choose to trust this browser for {{ trust_until|timeuntil:trust_from }}, skipping two-factor authentication on this device.{% endblocktranslate %}
+    {% endelement %}
+    {% element form method="post" %}
+        {% slot body %}
+            {% csrf_token %}
+        {% endslot %}
+        {% slot actions %}
+            {% element button_group %}
+                {% element button name="action" value="trust" type="submit" tags="primary,mfa,trust" %}
+                    {% trans "Trust This Browser" %}
+                {% endelement %}
+                {% element button name="action" value="skip" type="submit" tags="outline,mfa,trust" %}
+                    {% trans "Don't Trust" %}
+                {% endelement %}
+                {% element button type="submit" form="logout-from-stage" tags="outline,mfa,trust,cancel" %}
+                    {% trans "Cancel" %}
+                {% endelement %}
+            {% endelement %}
+        {% endslot %}
+    {% endelement %}
+    <form id="logout-from-stage"
+          method="post"
+          action="{% url 'account_logout' %}">
+        <input type="hidden" name="next" value="{% url 'account_login' %}">
+        {% csrf_token %}
+    </form>
+{% endblock content %}

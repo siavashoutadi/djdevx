@@ -1,0 +1,32 @@
+{% extends "../../allauth_base.html" %}
+{% load i18n %}
+{% load allauth %}
+{% block title %}
+    {% trans "Recovery Codes" %}
+{% endblock title %}
+{% block content %}
+    {% element h1 %}
+        {% trans "Recovery Codes" %}
+    {% endelement %}
+    {% element p %}
+        {% trans "Keep these recovery codes safe. Each code can be used once to access your account if you lose access to your authenticator app." %}
+    {% endelement %}
+    {% element h2 %}
+        {% trans "Unused codes" %}
+    {% endelement %}
+    {% element ul %}
+        {% for code in unused_codes %}
+            <li><code>{{ code }}</code></li>
+        {% endfor %}
+    {% endelement %}
+    {% element button_group %}
+        {% url 'mfa_download_recovery_codes' as download_url %}
+        {% element button href=download_url %}
+            {% translate "Download codes" %}
+        {% endelement %}
+        {% url 'mfa_generate_recovery_codes' as generate_url %}
+        {% element button href=generate_url %}
+            {% translate "Generate new codes" %}
+        {% endelement %}
+    {% endelement %}
+{% endblock content %}

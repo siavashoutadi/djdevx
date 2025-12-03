@@ -1,0 +1,29 @@
+{% extends "./base.html" %}
+{% load i18n %}
+{% load allauth %}
+{% block title %}
+    {% trans "Add Security Key" %}
+{% endblock title %}
+{% block content %}
+    {% element h1 %}
+        {% trans "Add Security Key" %}
+    {% endelement %}
+    {% element p %}
+        {% trans "Connect your security key to your device and press the button below to register it." %}
+    {% endelement %}
+    {% element form form=form method="post" %}
+        {% slot body %}
+            {% csrf_token %}
+            {% element fields form=form %}
+            {% endelement %}
+        {% endslot %}
+        {% slot actions %}
+            {% element button type="submit" id="webauthn_add" tags="primary" %}
+                {% trans "Add Security Key" %}
+            {% endelement %}
+            {% element button href=back_url tags="secondary" %}
+                {% trans "Cancel" %}
+            {% endelement %}
+        {% endslot %}
+    {% endelement %}
+{% endblock content %}

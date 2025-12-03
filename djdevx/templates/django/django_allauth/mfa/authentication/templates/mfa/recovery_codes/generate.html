@@ -1,0 +1,33 @@
+{% extends "../../allauth_base.html" %}
+{% load i18n %}
+{% load allauth %}
+{% block title %}
+    {% trans "Generate Recovery Codes" %}
+{% endblock title %}
+{% block content %}
+    {% element h1 %}
+        {% trans "Generate Recovery Codes" %}
+    {% endelement %}
+    {% element p %}
+        {% trans "You are about to generate a new set of recovery codes for your account." %}
+    {% endelement %}
+    {% element p %}
+        {% trans "This action will invalidate your existing codes." %}
+    {% endelement %}
+    {% element p %}
+        {% trans "Are you sure?" %}
+    {% endelement %}
+    {% element form form=form method="post" %}
+        {% slot body %}
+            {% csrf_token %}
+        {% endslot %}
+        {% slot actions %}
+            {% element button type="submit" tags="danger" %}
+                {% trans "Generate" %}
+            {% endelement %}
+            {% element button href=back_url tags="secondary" %}
+                {% trans "Cancel" %}
+            {% endelement %}
+        {% endslot %}
+    {% endelement %}
+{% endblock content %}
