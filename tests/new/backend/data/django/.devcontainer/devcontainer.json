@@ -53,6 +53,5 @@
                 "tree.inactiveIndentGuidesStroke": "#51b8e1"
             }
         }
-    },
-    "postStartCommand": "uv sync && uv run pre-commit install"
+    }
 }
