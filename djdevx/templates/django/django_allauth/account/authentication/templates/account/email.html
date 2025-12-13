@@ -1,4 +1,4 @@
-{% extends "./account_base.html" %}
+{% extends "../allauth_base.html" %}
 {% load i18n %}
 {% load static %}
 {% load allauth account %}
@@ -6,10 +6,10 @@
 {% block content %}
   <main class="mx-auto container sm:mt-32">
     <div class="flex flex-1 flex-col justify-center px-6 py-12 lg:px-8 mb-10">
-      <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+      <div class="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 class="mt-10 text-center text-2xl font-bold leading-9 tracking-tight">{% trans "Email Addresses" %}</h2>
       </div>
-      <div class="mt-4 sm:mx-auto sm:w-full sm:max-w-sm">
+      <div class="mt-4 sm:mx-auto sm:w-full sm:max-w-md">
         {% if emailaddresses %}
           <p>{% trans 'The following email addresses are associated with your account:' %}</p>
           {% url 'account_email' as email_url %}

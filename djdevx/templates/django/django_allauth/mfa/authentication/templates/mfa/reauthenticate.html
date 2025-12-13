@@ -1,0 +1,28 @@
+{% extends "../allauth_base.html" %}
+{% load i18n %}
+{% load allauth %}
+{% block title %}
+    {% trans "Reauthenticate" %}
+{% endblock title %}
+{% block content %}
+<div class="flex flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+  <div class="sm:mx-auto sm:w-full sm:max-w-md">
+    <h1 class="text-center text-2xl font-bold leading-9 tracking-tight">{% trans "Reauthenticate" %}</h1>
+    <p class="mt-4 text-center text-gray-700 dark:text-gray-200">{% blocktranslate %}Enter an authenticator code:{% endblocktranslate %}</p>
+  </div>
+  <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+    {% url 'mfa_reauthenticate' as action_url %}
+    <form method="post" action="{{ action_url }}" class="space-y-6">
+      {% csrf_token %}
+      {{ form.as_p }}
+      {{ redirect_field }}
+      <div class="my-4">
+        <button type="submit"
+                class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm bg-black text-white hover:bg-slate-900 dark:bg-transparent dark:outline dark:outline-white dark:text-white dark:hover:text-gray-400 dark:hover:outline-gray-400">
+          {% trans "Confirm" %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

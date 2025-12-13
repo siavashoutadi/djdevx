@@ -1,0 +1,44 @@
+{% extends "../allauth_base.html" %}
+{% load i18n %}
+{% load static %}
+{% load allauth account %}
+{% block title %}{% trans "Email Verification" %}{% endblock title %}
+{% url 'account_email_verification_sent' as action_url %}
+{% block content %}
+  <main class="mx-auto container">
+    <div class="flex flex-1 flex-col justify-center px-6 py-4 lg:px-8">
+      <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 class="text-center text-2xl font-bold leading-9 tracking-tight">{% trans "Email Verification" %}</h2>
+      </div>
+      <div class="mt-4 sm:mx-auto sm:w-full sm:max-w-md">
+        <p class="text-center text-sm text-gray-600 dark:text-gray-400 mb-2">
+          {% blocktranslate %}We've sent a verification code to <a href="mailto:{{ email }}" class="font-semibold hover:text-blue-500">{{ email }}</a>. Please enter it below.{% endblocktranslate %}
+        </p>
+        <form method="post" class="space-y-6" id="email_verification_form">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <div class="my-2">
+            <button type="submit"
+                    class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm bg-black text-white hover:bg-slate-900 dark:bg-transparent dark:outline dark:outline-white dark:text-white dark:hover:text-gray-400 dark:hover:outline-gray-400">
+              {% trans "Verify" %}
+            </button>
+          </div>
+          {% if redirect_field_value %}
+            <input type="hidden"
+                   name="{{ redirect_field_name }}"
+                   value="{{ redirect_field_value }}" />
+          {% endif %}
+        </form>
+
+        <form method="post" action="{% url 'account_logout' %}" class="mt-4">
+          {% csrf_token %}
+          <input type="hidden" name="{{ redirect_field_name }}" value="{% url 'account_login' %}" />
+          <button type="submit"
+                  class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm border border-gray-300 bg-white text-black hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+            {% trans "Cancel" %}
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+{% endblock content %}

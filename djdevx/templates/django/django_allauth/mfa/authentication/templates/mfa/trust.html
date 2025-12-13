@@ -1,0 +1,37 @@
+{% extends "../allauth_base.html" %}
+{% load i18n %}
+{% load allauth %}
+{% block title %}
+    {% trans "Trust This Browser" %}
+{% endblock title %}
+{% block content %}
+<div class="flex flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+  <div class="sm:mx-auto sm:w-full sm:max-w-md">
+    <h1 class="text-center text-2xl font-bold leading-9 tracking-tight">{% trans "Trust This Browser?" %}</h1>
+    <p class="mt-4 text-center text-gray-700 dark:text-gray-200">{% blocktranslate with trust_from=trust_from trust_until=trust_until %}You can choose to trust this browser for {{ trust_until|timeuntil:trust_from }}, skipping two-factor authentication on this device.{% endblocktranslate %}</p>
+  </div>
+  <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+    <form method="post" class="space-y-3">
+      {% csrf_token %}
+      <button name="action" value="trust" type="submit"
+              class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm bg-black text-white hover:bg-slate-900 dark:bg-transparent dark:outline dark:outline-white dark:text-white dark:hover:text-gray-400 dark:hover:outline-gray-400">
+        {% trans "Trust This Browser" %}
+      </button>
+      <button name="action" value="skip" type="submit"
+              class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm border border-gray-300 bg-white text-black hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+        {% trans "Don't Trust" %}
+      </button>
+      <button type="submit" form="logout-from-stage"
+              class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm border border-gray-300 bg-white text-black hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+        {% trans "Cancel" %}
+      </button>
+    </form>
+  </div>
+</div>
+<form id="logout-from-stage"
+      method="post"
+      action="{% url 'account_logout' %}">
+  <input type="hidden" name="next" value="{% url 'account_login' %}">
+  {% csrf_token %}
+</form>
+{% endblock content %}

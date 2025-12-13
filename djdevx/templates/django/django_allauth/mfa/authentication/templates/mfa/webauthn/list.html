@@ -1,0 +1,58 @@
+{% extends "../../allauth_base.html" %}
+{% load i18n %}
+{% load allauth %}
+{% block title %}
+    {% trans "Manage Security Keys" %}
+{% endblock title %}
+{% block content %}
+<div class="flex flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+  <div class="sm:mx-auto sm:w-full sm:max-w-2xl">
+    <h1 class="text-center text-2xl font-bold leading-9 tracking-tight">{% trans "Security Keys" %}</h1>
+  </div>
+  <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
+    {% if authenticators %}
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="border-b border-gray-300 dark:border-gray-600">
+              <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">{% trans "Name" %}</th>
+              <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">{% trans "Created" %}</th>
+              <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">{% trans "Last Used" %}</th>
+              <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white">{% trans "Actions" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for authenticator in authenticators %}
+              <tr class="border-b border-gray-200 dark:border-gray-700">
+                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-200">{{ authenticator.data.name|default:_('Security Key') }}</td>
+                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-200">{{ authenticator.created_at|date }}</td>
+                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-200">{{ authenticator.last_used_at|date|default:_('Never') }}</td>
+                <td class="px-6 py-4 text-sm">
+                  <a href="{{ authenticator.get_delete_url }}"
+                     class="inline-block rounded px-3 py-1.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800">
+                    {% trans "Remove" %}
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="rounded-md border border-gray-300 bg-gray-50 p-6 dark:border-gray-600 dark:bg-gray-800 text-center">
+        <p class="text-gray-700 dark:text-gray-200">{% trans "No security keys have been added." %}</p>
+      </div>
+    {% endif %}
+    <div class="mt-8 flex gap-3 justify-center">
+      <a href="{% url 'mfa_add_webauthn' %}"
+         class="inline-block rounded-md px-6 py-2 text-sm font-semibold shadow-sm bg-black text-white hover:bg-slate-900 dark:bg-transparent dark:outline dark:outline-white dark:text-white dark:hover:text-gray-400 dark:hover:outline-gray-400">
+        {% trans "Add Security Key" %}
+      </a>
+      <a href="{{ back_url }}"
+         class="inline-block rounded-md px-6 py-2 text-sm font-semibold shadow-sm border border-gray-300 bg-white text-black hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+        {% trans "Back" %}
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock content %}

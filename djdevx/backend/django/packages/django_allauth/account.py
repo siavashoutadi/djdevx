@@ -19,6 +19,13 @@ def install(
             prompt="Please enter the Subject-line prefix to use for email messages sent. e.g. '[example.com] - '",
         ),
     ] = "",
+    enable_login_by_code: Annotated[
+        bool,
+        typer.Option(
+            help="Enable login by code",
+            prompt="Enable login by code",
+        ),
+    ] = True,
     is_profanity_for_username_enabled: Annotated[
         bool,
         typer.Option(
@@ -59,6 +66,7 @@ def install(
         source_dir=source_dir,
         template_context={
             "email_subject_prefix": email_subject_prefix,
+            "enable_login_by_code": enable_login_by_code,
             "is_profanity_for_username_enabled": is_profanity_for_username_enabled,
             "account_url_prefix": account_url_prefix,
         },
@@ -83,7 +91,7 @@ def remove():
     )
     settings_path.unlink(missing_ok=True)
 
-    url_path = Path.joinpath(pm.urls_path, "django_allauth_account.py")
+    url_path = Path.joinpath(pm.packages_urls_path, "django_allauth_account.py")
     url_path.unlink(missing_ok=True)
 
     authentication_path = Path.joinpath(pm.project_path, "authentication")

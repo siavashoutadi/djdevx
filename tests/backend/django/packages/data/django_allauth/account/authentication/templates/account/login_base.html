@@ -1,0 +1,45 @@
+{% extends "../allauth_base.html" %}
+{% load i18n %}
+{% load static %}
+{% load auth_settings %}
+
+{% block title %} {% trans "Sign In" %}{% endblock title %}
+
+{% block content %}
+  <main class="mx-auto container">
+    <div class="flex flex-1 flex-col justify-center px-6 py-4 lg:px-8">
+      <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 class="text-center text-2xl font-bold leading-9 tracking-tight">{% trans "Sign In" %}</h2>
+      </div>
+      <div class="mt-4 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="tab-nav">
+          <a href="{% url 'account_login' %}"
+             class="tab-button {% if request.path == '/auth/login/' %}active{% endif %}"
+             data-tab="email-tab">
+            {% trans "Email" %}
+          </a>
+          {% login_by_code_enabled as code_enabled %}
+          {% if code_enabled %}
+          <a href="{% url 'account_request_login_code' %}"
+              class="tab-button {% if request.path == '/auth/login/code/' %}active{% endif %}"
+              data-tab="code-tab">
+            {% trans "One Time Code" %}
+          </a>
+          {% endif %}
+          {% passkey_login_enabled as passkey_enabled %}
+          {% if passkey_enabled %}
+          <a href="{% url 'passkey_login' %}"
+              class="tab-button {% if request.path == '/auth/login/passkey/' %}active{% endif %}"
+              data-tab="passkey-tab">
+            {% trans "Passkey" %}
+          </a>
+          {% endif %}
+        </div>
+
+        <div class="tab-content">
+          {% block login_content %}{% endblock login_content %}
+        </div>
+      </div>
+    </div>
+  </main>
+{% endblock content %}

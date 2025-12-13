@@ -1,4 +1,4 @@
-{% extends "./account_base.html" %}
+{% extends "../allauth_base.html" %}
 {% load i18n %}
 {% load static %}
 {% load allauth account %}
@@ -7,11 +7,11 @@
 {% block content %}
   <main class="mx-auto container sm:mt-24">
     <div class="flex flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-      <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+      <div class="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 class="mt-10 text-center text-2xl font-bold leading-9 tracking-tight">{% trans "Confirm Access" %}</h2>
         <p class="pt-6 text-center">{% blocktranslate %}Please reauthenticate to safeguard your account.{% endblocktranslate %}</p>
       </div>
-      <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+      <div class="sm:mx-auto sm:w-full sm:max-w-md">
         <form method="post" action="{{ action_url }}" class="space-y-6">
           {% csrf_token %}
           {{ form.as_p }}

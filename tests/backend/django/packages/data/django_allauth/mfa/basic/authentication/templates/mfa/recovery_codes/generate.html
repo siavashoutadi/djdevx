@@ -1,0 +1,31 @@
+{% extends "../../allauth_base.html" %}
+{% load i18n %}
+{% load allauth %}
+{% block title %}
+    {% trans "Generate Recovery Codes" %}
+{% endblock title %}
+{% block content %}
+<div class="flex flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+  <div class="sm:mx-auto sm:w-full sm:max-w-md">
+    <h1 class="text-center text-2xl font-bold leading-9 tracking-tight">{% trans "Generate Recovery Codes" %}</h1>
+  </div>
+  <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+    <div class="rounded-md border border-yellow-300 bg-yellow-50 p-6 dark:border-yellow-800 dark:bg-yellow-900 mb-6">
+      <p class="text-sm text-gray-700 dark:text-gray-200 mb-2">{% trans "You are about to generate a new set of recovery codes for your account." %}</p>
+      <p class="text-sm text-gray-700 dark:text-gray-200">{% trans "This action will invalidate your existing codes." %}</p>
+      <p class="text-sm font-semibold text-gray-900 dark:text-white mt-3">{% trans "Are you sure?" %}</p>
+    </div>
+    <form method="post" class="space-y-3">
+      {% csrf_token %}
+      <button type="submit"
+              class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm bg-red-600 text-white hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800">
+        {% trans "Generate" %}
+      </button>
+      <a href="{% url 'mfa_index' %}"
+         class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm border border-gray-300 bg-white text-black hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+        {% trans "Cancel" %}
+      </a>
+    </form>
+  </div>
+</div>
+{% endblock content %}

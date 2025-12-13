@@ -1,0 +1,31 @@
+{% extends "account/signup_base.html" %}
+{% load i18n %}
+{% load allauth account %}
+
+{% block title %}{% trans "Passkey Sign Up" %}{% endblock title %}
+
+{% block signup_content %}
+  <div id="passkey-tab" class="tab-pane active">
+    {% url 'account_signup_by_passkey' as action_url %}
+    <form method="post" action="{{ action_url }}" class="space-y-6" id="signup_by_passkey_form">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <div class="my-2">
+        <button type="submit"
+                class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm bg-black text-white hover:bg-slate-900 dark:bg-transparent dark:outline dark:outline-white dark:text-white dark:hover:text-gray-400 dark:hover:outline-gray-400">
+          {% trans "Sign Up" %}
+        </button>
+      </div>
+      {% if redirect_field_value %}
+        <input type="hidden"
+               name="{{ redirect_field_name }}"
+               value="{{ redirect_field_value }}" />
+      {% endif %}
+    </form>
+
+    <p class="mt-4 text-center text-sm">
+      {% url 'account_login' as login_url %}
+      {% blocktranslate %}Already have an account? Then please <a href="{{ login_url }}" class="font-semibold hover:text-blue-500">sign in</a>.{% endblocktranslate %}
+    </p>
+  </div>
+{% endblock signup_content %}

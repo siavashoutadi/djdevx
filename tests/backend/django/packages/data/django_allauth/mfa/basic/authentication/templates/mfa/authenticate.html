@@ -1,0 +1,64 @@
+{% extends "../allauth_base.html" %}
+{% load i18n %}
+{% load allauth %}
+{% load allauth static %}
+{% block title %}
+    {% trans "Sign In" %}
+{% endblock title %}
+{% block content %}
+<div class="flex flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+  <div class="sm:mx-auto sm:w-full sm:max-w-md">
+    <h1 class="text-center text-2xl font-bold leading-9 tracking-tight">{% trans "Two-Factor Authentication" %}</h1>
+    <p class="mt-4 text-center text-gray-700 dark:text-gray-200">{% blocktranslate %}Your account is protected by two-factor authentication. Please enter an authenticator code:{% endblocktranslate %}</p>
+  </div>
+  <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+    {% url 'mfa_authenticate' as action_url %}
+    <form method="post" action="{{ action_url }}" class="space-y-6">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <div class="my-4">
+        <button type="submit"
+                class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm bg-black text-white hover:bg-slate-900 dark:bg-transparent dark:outline dark:outline-white dark:text-white dark:hover:text-gray-400 dark:hover:outline-gray-400">
+          {% trans "Sign In" %}
+        </button>
+      </div>
+      {% if "webauthn" not in MFA_SUPPORTED_TYPES %}
+        <div class="my-4">
+          <button type="submit" form="logout-from-stage"
+                  class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm bg-gray-200 text-black hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">
+            {% trans "Cancel" %}
+          </button>
+        </div>
+      {% endif %}
+    </form>
+    {% if "webauthn" in MFA_SUPPORTED_TYPES %}
+      <div class="mt-8">
+        <div class="relative">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+          </div>
+          <div class="relative flex justify-center text-sm">
+            <span class="bg-white px-2 text-gray-500 dark:bg-slate-900 dark:text-gray-400">{% trans "Alternative options" %}</span>
+          </div>
+        </div>
+        <div class="mt-6 space-y-3">
+          <button form="webauthn_form" id="mfa_webauthn_authenticate" type="button"
+                  class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm border border-gray-300 bg-white text-black hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+            {% trans "Use a security key" %}
+          </button>
+          <button type="submit" form="logout-from-stage"
+                  class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm border border-gray-300 bg-white text-black hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+            {% trans "Cancel" %}
+          </button>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+<form id="logout-from-stage"
+      method="post"
+      action="{% url 'account_logout' %}">
+  <input type="hidden" name="next" value="{% url 'account_login' %}">
+  {% csrf_token %}
+</form>
+{% endblock content %}

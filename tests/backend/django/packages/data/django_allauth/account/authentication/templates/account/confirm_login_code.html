@@ -1,0 +1,68 @@
+{% extends "../allauth_base.html" %}
+{% load i18n %}
+{% load static %}
+{% load allauth account %}
+{% block title %}{% trans "Enter Sign-In Code" %}{% endblock title %}
+{% url 'account_confirm_login_code' as action_url %}
+{% block content %}
+  <main class="mx-auto container">
+    <div class="flex flex-1 flex-col justify-center px-6 py-4 lg:px-8">
+      <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 class="text-center text-2xl font-bold leading-9 tracking-tight">{% trans "Enter Sign-In Code" %}</h2>
+      </div>
+      <div class="mt-4 sm:mx-auto sm:w-full sm:max-w-md">
+        <p class="text-center text-sm text-gray-600 dark:text-gray-400 mb-2">
+          {% if email %}
+            {% blocktranslate %}We've sent a code to <a href="mailto:{{ email }}" class="font-semibold hover:text-blue-500">{{ email }}</a>. The code expires shortly, so please enter it soon.{% endblocktranslate %}
+          {% else %}
+            {% blocktranslate %}We've sent a code to <a href="tel:{{ phone }}" class="font-semibold hover:text-blue-500">{{ phone }}</a>. The code expires shortly, so please enter it soon.{% endblocktranslate %}
+          {% endif %}
+        </p>
+        <form method="post" action="{{ action_url }}" class="space-y-6" id="confirm_code_form">
+          {% csrf_token %}
+          {{ verify_form.as_p }}
+          <div class="my-2">
+            <button type="submit"
+                    class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm bg-black text-white hover:bg-slate-900 dark:bg-transparent dark:outline dark:outline-white dark:text-white dark:hover:text-gray-400 dark:hover:outline-gray-400">
+              {% trans "Confirm" %}
+            </button>
+          </div>
+          {% if redirect_field_value %}
+            <input type="hidden"
+                   name="{{ redirect_field_name }}"
+                   value="{{ redirect_field_value }}" />
+          {% endif %}
+        </form>
+
+        <!-- Additional Actions -->
+        <div class="mt-4 flex gap-2 justify-center flex-wrap">
+          {% if can_resend %}
+            <form method="post" id="resend" style="display: inline;">
+              {% csrf_token %}
+              <button type="submit"
+                      class="px-3 py-1.5 text-sm font-semibold text-black dark:text-white border border-black dark:border-white rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                {% trans "Request new code" %}
+              </button>
+            </form>
+          {% endif %}
+          {% if cancel_url %}
+            <a href="{{ cancel_url }}"
+               class="px-3 py-1.5 text-sm font-semibold text-black dark:text-white border border-black dark:border-white rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+              {% trans "Cancel" %}
+            </a>
+          {% endif %}
+        </div>
+
+        <p class="mt-4 text-center text-sm">
+          {% setvar link %}
+            <a href="{{ signup_url }}" class="font-semibold hover:text-blue-500">
+            {% endsetvar %}
+            {% setvar end_link %}
+            </a>
+          {% endsetvar %}
+          {% blocktranslate %}Don't have an account? Then please {{ link }}sign up{{ end_link }} first.{% endblocktranslate %}
+        </p>
+      </div>
+    </div>
+  </main>
+{% endblock content %}

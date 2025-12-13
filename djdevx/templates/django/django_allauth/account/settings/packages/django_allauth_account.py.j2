@@ -37,3 +37,6 @@ ACCOUNT_EMAIL_SUBJECT_PREFIX = "{{ email_subject_prefix }}"
 {% if is_profanity_for_username_enabled -%}
 ACCOUNT_USERNAME_BLACKLIST = [str(word) for word in profanity.CENSOR_WORDSET]
 {% endif -%}
+{% if enable_login_by_code %}
+ACCOUNT_LOGIN_BY_CODE_ENABLED = True
+{% endif -%}

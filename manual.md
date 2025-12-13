@@ -264,6 +264,7 @@ $ djdevx backend django packages django-allauth [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `account`: Manage django-allauth with account...
+* `mfa`: Manage django-allauth with MFA functionality
 
 ###### `djdevx backend django packages django-allauth account`
 
@@ -298,6 +299,7 @@ $ djdevx backend django packages django-allauth account install [OPTIONS]
 **Options**:
 
 * `--email-subject-prefix TEXT`: Subject-line prefix to use for email messages sent
+* `--enable-login-by-code / --no-enable-login-by-code`: Enable login by code  [default: enable-login-by-code]
 * `--is-profanity-for-username-enabled / --no-is-profanity-for-username-enabled`: Enable profanity filter for username  [default: is-profanity-for-username-enabled]
 * `--account-url-prefix TEXT`: URL prefix for account related URLs  [default: auth]
 * `--help`: Show this message and exit.
@@ -324,6 +326,71 @@ Configure environment variables for django-allauth
 
 ```console
 $ djdevx backend django packages django-allauth account env [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+###### `djdevx backend django packages django-allauth mfa`
+
+Manage django-allauth with MFA functionality
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-allauth mfa [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install django-allauth package with MFA...
+* `remove`: Remove django-allauth MFA configuration
+
+####### `djdevx backend django packages django-allauth mfa install`
+
+Install django-allauth package with MFA functionality
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-allauth mfa install [OPTIONS]
+```
+
+**Options**:
+
+* `--enable-totp / --no-enable-totp`: Enable TOTP authentication  [default: enable-totp]
+* `--enable-recovery-codes / --no-enable-recovery-codes`: Enable recovery codes  [default: enable-recovery-codes]
+* `--enable-webauthn / --no-enable-webauthn`: Enable WebAuthn/passkeys authentication  [default: no-enable-webauthn]
+* `--enable-trust / --no-enable-trust`: Enable &#x27;trust this browser&#x27; functionality  [default: no-enable-trust]
+* `--totp-issuer TEXT`: Issuer name for TOTP QR codes
+* `--totp-period INTEGER RANGE`: TOTP token validity period in seconds  [default: 30; 15&lt;=x&lt;=300]
+* `--totp-digits INTEGER RANGE`: Number of digits in TOTP tokens  [default: 6; 6&lt;=x&lt;=8]
+* `--totp-tolerance INTEGER RANGE`: TOTP time tolerance (number of periods to allow)  [default: 0; 0&lt;=x&lt;=5]
+* `--recovery-code-count INTEGER RANGE`: Number of recovery codes to generate  [default: 10; 5&lt;=x&lt;=20]
+* `--recovery-code-digits INTEGER RANGE`: Number of digits in each recovery code  [default: 8; 6&lt;=x&lt;=16]
+* `--passkey-login / --no-passkey-login`: Enable passkey login  [default: no-passkey-login]
+* `--passkey-signup / --no-passkey-signup`: Enable passkey signup  [default: no-passkey-signup]
+* `--webauthn-allow-insecure / --no-webauthn-allow-insecure`: Allow WebAuthn over insecure origins (for development)  [default: no-webauthn-allow-insecure]
+* `--trust-cookie-age-days INTEGER RANGE`: Trust cookie validity period in days  [default: 14; 1&lt;=x&lt;=365]
+* `--help`: Show this message and exit.
+
+####### `djdevx backend django packages django-allauth mfa remove`
+
+Remove django-allauth MFA configuration
+
+Note: This removes MFA configuration but keeps the django-allauth
+package installed with its dependencies. To completely remove django-allauth,
+use the account remove command.
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-allauth mfa remove [OPTIONS]
 ```
 
 **Options**:

@@ -1,0 +1,28 @@
+{% extends "./login_base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Sign In One Time Code" %}{% endblock title %}
+
+{% block login_content %}
+  <div id="code-tab" class="tab-pane active">
+    <form method="post" action="{% url 'account_request_login_code' %}" class="space-y-6" id="request_code_form">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <div class="my-2">
+        <button type="submit"
+                class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm bg-black text-white hover:bg-slate-900 dark:bg-transparent dark:outline dark:outline-white dark:text-white dark:hover:text-gray-400 dark:hover:outline-gray-400">
+          {% trans "Request Code" %}
+        </button>
+      </div>
+      {% if redirect_field_value %}
+        <input type="hidden"
+               name="{{ redirect_field_name }}"
+               value="{{ redirect_field_value }}" />
+      {% endif %}
+    </form>
+    <p class="mt-4 text-center text-sm">
+      {% url 'account_signup' as signup_url %}
+      {% blocktranslate %}Don't have an account? Then please <a href="{{ signup_url }}" class="font-semibold hover:text-blue-500">sign up</a>.{% endblocktranslate %}
+    </p>
+  </div>
+{% endblock login_content %}

@@ -1,0 +1,53 @@
+from settings import INSTALLED_APPS, MIDDLEWARE
+{%- if enable_webauthn %}
+from settings.django.base import DEBUG
+{%- endif %}
+
+
+INSTALLED_APPS += [
+    "allauth.mfa",
+    {%- if enable_webauthn %}"django.contrib.humanize",{%- endif %}
+]
+
+MIDDLEWARE.insert(
+    MIDDLEWARE.index("django.contrib.auth.middleware.AuthenticationMiddleware") + 1,
+    "authentication.middleware.MFARequiredMiddleware",
+)
+
+# MFA Configuration
+MFA_SUPPORTED_TYPES = [
+    "recovery_codes",
+{%- if enable_totp %}
+    "totp",
+{%- endif %}
+{%- if enable_webauthn %}
+    "webauthn",
+{%- endif %}
+]
+{%- if enable_totp %}
+
+MFA_TOTP_ISSUER = "{{ totp_issuer }}"
+MFA_TOTP_PERIOD = {{ totp_period }}
+MFA_TOTP_DIGITS = {{ totp_digits }}
+MFA_TOTP_TOLERANCE = {{ totp_tolerance }}
+{%- endif %}
+
+MFA_RECOVERY_CODE_COUNT = {{ recovery_code_count }}
+MFA_RECOVERY_CODE_DIGITS = {{ recovery_code_digits }}
+{%- if enable_webauthn %}
+
+MFA_PASSKEY_LOGIN_ENABLED = {{ 'True' if passkey_login else 'False' }}
+MFA_PASSKEY_SIGNUP_ENABLED = {{ 'True' if passkey_signup else 'False' }}
+ACCOUNT_EMAIL_VERIFICATION_BY_CODE_ENABLED = {{ 'True' if passkey_signup else 'False' }}
+
+if DEBUG:
+    MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN = {{ 'True' if webauthn_allow_insecure else 'False' }}
+
+{%- endif %}
+{%- if enable_trust %}
+
+MFA_TRUST_ENABLED = True
+MFA_TRUST_COOKIE_AGE = {{ trust_cookie_age_days * 24 * 60 * 60 }}  # {{ trust_cookie_age_days }} days in seconds
+{%- endif %}
+
+MFA_ALLOW_UNVERIFIED_EMAIL = False
