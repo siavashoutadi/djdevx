@@ -1,0 +1,23 @@
+{% extends "../../allauth_base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Device Denied" %}{% endblock %}
+
+{% block content %}
+  <main class="mx-auto container">
+    <div class="flex flex-1 flex-col justify-center px-6 py-4 lg:px-8">
+      <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 class="text-center text-2xl font-bold leading-9 tracking-tight">{% trans "Device Denied" %}</h2>
+      </div>
+      <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="p-4 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-md">
+          <p class="text-red-800 dark:text-red-100 text-sm leading-6">
+            {% blocktranslate with client_name=client.name %}
+            Authorization for your {{ client_name }} device has been denied.
+            {% endblocktranslate %}
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+{% endblock %}

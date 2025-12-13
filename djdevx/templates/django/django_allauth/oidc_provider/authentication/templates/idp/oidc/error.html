@@ -1,0 +1,29 @@
+{% extends "../../allauth_base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Error" %}{% endblock %}
+
+{% block content %}
+  <div class="error-page">
+    <div class="error-content">
+      <h1>{% trans "Something went wrong" %}</h1>
+
+      {% if error_form %}
+        <div>
+          {{ error_form.errors }}
+        </div>
+      {% else %}
+        <p>{{ error.description }}</p>
+      {% endif %}
+
+      <div class="error-actions">
+        <a href="{% url 'account_login' %}" class="error-action-link">
+          {% trans "Return to Login" %}
+        </a>
+        <a href="/" class="error-action-link secondary">
+          {% trans "Go to Home" %}
+        </a>
+      </div>
+    </div>
+  </div>
+{% endblock %}

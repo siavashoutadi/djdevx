@@ -451,6 +451,106 @@
     .tab-pane.active {
       display: block;
     }
+
+    /* Error page styling */
+    .error-page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      padding: 2rem;
+      gap: 2rem;
+    }
+
+    .error-content {
+      text-align: center;
+      max-width: 32rem;
+    }
+
+    .error-icon {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .error-page h1 {
+      font-size: 2.25rem;
+      font-weight: 700;
+      line-height: 2.5rem;
+      margin-bottom: 1rem;
+      color: rgb(17 24 39);
+    }
+
+    .dark .error-page h1 {
+      color: rgb(243 244 246);
+    }
+
+    .error-page p {
+      font-size: 1rem;
+      line-height: 1.5rem;
+      color: rgb(75 85 99);
+      margin-bottom: 1.5rem;
+    }
+
+    .dark .error-page p {
+      color: rgb(209 213 219);
+    }
+
+    .error-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .error-action-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.625rem 1.5rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 0.375rem;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+      background-color: rgb(0 0 0);
+      color: rgb(255 255 255);
+    }
+
+    .error-action-link:hover {
+      background-color: rgb(31 41 55);
+    }
+
+    .error-action-link.secondary {
+      background-color: rgb(229 231 235);
+      color: rgb(17 24 39);
+    }
+
+    .error-action-link.secondary:hover {
+      background-color: rgb(209 213 219);
+    }
+
+    .dark .error-action-link {
+      background-color: transparent;
+      border: 1px solid rgb(255 255 255);
+      color: rgb(255 255 255);
+    }
+
+    .dark .error-action-link:hover {
+      background-color: rgb(55 65 81);
+    }
+
+    .dark .error-action-link.secondary {
+      background-color: rgb(55 65 81);
+      color: rgb(255 255 255);
+      border: none;
+    }
+
+    .dark .error-action-link.secondary:hover {
+      background-color: rgb(75 85 99);
+    }
     </style>
     <script>
       // Toast notification system

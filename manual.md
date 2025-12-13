@@ -265,6 +265,7 @@ $ djdevx backend django packages django-allauth [OPTIONS] COMMAND [ARGS]...
 
 * `account`: Manage django-allauth with account...
 * `mfa`: Manage django-allauth with MFA functionality
+* `oidc-provider`: Manage django-allauth with OIDC provider...
 
 ###### `djdevx backend django packages django-allauth account`
 
@@ -391,6 +392,76 @@ use the account remove command.
 
 ```console
 $ djdevx backend django packages django-allauth mfa remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+###### `djdevx backend django packages django-allauth oidc-provider`
+
+Manage django-allauth with OIDC provider functionality
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-allauth oidc-provider [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure django-allauth OIDC...
+* `remove`: Remove OIDC provider configuration.
+* `env`: Configure environment variables for OIDC...
+
+####### `djdevx backend django packages django-allauth oidc-provider install`
+
+Install and configure django-allauth OIDC provider.
+
+Note: Requires django-allauth account to be installed first.
+Configure environment variables using the &#x27;env&#x27; command.
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-allauth oidc-provider install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+####### `djdevx backend django packages django-allauth oidc-provider remove`
+
+Remove OIDC provider configuration.
+
+Note: This removes OIDC configuration but keeps django-allauth
+package installed. To completely remove django-allauth, use the account remove command.
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-allauth oidc-provider remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+####### `djdevx backend django packages django-allauth oidc-provider env`
+
+Configure environment variables for OIDC provider.
+
+Auto-generates a private key for signing ID tokens.
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-allauth oidc-provider env [OPTIONS]
 ```
 
 **Options**:

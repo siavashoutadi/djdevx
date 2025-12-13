@@ -1,0 +1,42 @@
+{% extends "../../allauth_base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Authorize" %}{% endblock %}
+
+{% block content %}
+  <main class="mx-auto container">
+    <div class="flex flex-1 flex-col justify-center px-6 py-4 lg:px-8">
+      <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 class="text-center text-2xl font-bold leading-9 tracking-tight">{% trans "Authorize" %} {{ client.name }}</h2>
+      </div>
+      <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <p class="text-gray-700 dark:text-gray-300 text-sm leading-6 mb-6">
+          {% blocktranslate with client_name=client.name site_name=site.name %}
+          {{ client_name }} wants to access your {{ site_name }} account.
+          {% endblocktranslate %}
+        </p>
+
+        {% url 'idp:openid_connect:authorize' as authorize_url %}
+        <form method="post" action="{{ authorize_url }}" class="space-y-6">
+          {% csrf_token %}
+          {{ form }}
+
+          <div class="flex gap-3 items-center justify-between">
+            <button type="submit"
+                    name="action"
+                    value="grant"
+                    class="flex-1 flex justify-center rounded-md px-3 py-2 text-sm font-semibold leading-6 shadow-sm bg-black text-white hover:bg-slate-900 dark:bg-transparent dark:outline dark:outline-white dark:text-white dark:hover:text-gray-400 dark:hover:outline-gray-400">
+              {% trans "Authorize" %}
+            </button>
+            <button type="submit"
+                    name="action"
+                    value="cancel"
+                    class="flex-1 flex justify-center rounded-md px-3 py-2 text-sm font-semibold leading-6 shadow-sm bg-gray-200 text-gray-900 hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">
+              {% trans "Cancel" %}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+{% endblock %}

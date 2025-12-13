@@ -109,6 +109,15 @@ def test_django_allauth_account_install_and_remove(temp_dir):
     assert not settings_file.exists(), "Settings file not removed"
     assert not urls_file.exists(), "URLs file not removed"
     assert not auth_app_file.parent.exists(), "Authentication directory not removed"
+
+    # Verify all account files are removed
+    data_account_dir = DATA_DIR / "account"
+    for expected_file in data_account_dir.rglob("*"):
+        if expected_file.is_file():
+            relative_path = expected_file.relative_to(data_account_dir)
+            actual_file = backend_dir / relative_path
+            assert not actual_file.exists(), f"File {relative_path} was not removed"
+
     # Check dependencies are removed
     assert not DjangoProjectManager().has_dependency("django-allauth"), (
         "django-allauth dependency found after removal"
@@ -504,6 +513,14 @@ def test_django_allauth_mfa_remove(temp_dir):
     mfa_templates_dir = backend_dir / "authentication" / "templates" / "mfa"
     assert not mfa_templates_dir.exists(), "MFA templates directory not removed"
 
+    # Verify all MFA files are removed
+    data_mfa_dir = DATA_DIR / "mfa" / "basic"
+    for expected_file in data_mfa_dir.rglob("*"):
+        if expected_file.is_file():
+            relative_path = expected_file.relative_to(data_mfa_dir)
+            actual_file = backend_dir / relative_path
+            assert not actual_file.exists(), f"File {relative_path} was not removed"
+
     # Verify django-allauth package is still installed (only MFA config removed)
     assert DjangoProjectManager().has_dependency("django-allauth"), (
         "django-allauth package should remain installed after MFA removal"
@@ -605,4 +622,214 @@ def test_django_allauth_mfa_install_full_options(temp_dir):
     )
     assert "MFA_TRUST_COOKIE_AGE = 604800" in settings_content, (
         "Trust cookie age not set (7 days)"
+    )
+
+
+def test_django_allauth_oidc_provider_install_without_account(temp_dir):
+    """
+    Test OIDC provider installation fails if account is not installed first.
+    """
+    create_test_django_backend(temp_dir, runner)
+
+    os.chdir(temp_dir)
+
+    result = runner.invoke(
+        app,
+        [
+            "backend",
+            "django",
+            "packages",
+            "django-allauth",
+            "oidc-provider",
+            "install",
+        ],
+    )
+
+    assert result.exit_code == 1, "OIDC provider install should fail without account"
+    assert "account functionality is not configured" in result.output
+
+
+def test_django_allauth_oidc_provider_install_remove(temp_dir):
+    """
+    Test OIDC provider installation and removal with default settings.
+    """
+    backend_dir = create_test_django_backend(temp_dir, runner)
+
+    os.chdir(temp_dir)
+
+    result = runner.invoke(
+        app,
+        [
+            "backend",
+            "django",
+            "packages",
+            "django-allauth",
+            "account",
+            "install",
+            "--email-subject-prefix",
+            "[Test Site] ",
+            "--enable-login-by-code",
+            "--no-is-profanity-for-username-enabled",
+            "--account-url-prefix",
+            "auth",
+        ],
+    )
+    assert result.exit_code == 0, f"Account install failed: {result.output}"
+
+    result = runner.invoke(
+        app,
+        [
+            "backend",
+            "django",
+            "packages",
+            "django-allauth",
+            "oidc-provider",
+            "install",
+        ],
+    )
+
+    assert result.exit_code == 0, f"OIDC provider install failed: {result.output}"
+    assert "django-allauth OIDC provider is installed successfully" in result.output
+
+    # Check settings file
+    settings_file = (
+        backend_dir / "settings" / "packages" / "django_allauth_oidc_provider.py"
+    )
+    assert settings_file.exists(), "OIDC provider settings file not created"
+
+    expected_settings_file = (
+        DATA_DIR
+        / "oidc_provider"
+        / "settings"
+        / "packages"
+        / "django_allauth_oidc_provider.py"
+    )
+    expected_content = expected_settings_file.read_text()
+    actual_content = settings_file.read_text()
+    assert actual_content == expected_content, "OIDC provider settings content mismatch"
+
+    # Check URLs file
+    urls_file = backend_dir / "urls" / "packages" / "django_allauth_oidc_provider.py"
+    assert urls_file.exists(), "OIDC provider URLs file not created"
+
+    expected_urls_file = (
+        DATA_DIR
+        / "oidc_provider"
+        / "urls"
+        / "packages"
+        / "django_allauth_oidc_provider.py"
+    )
+    expected_urls_content = expected_urls_file.read_text()
+    actual_urls_content = urls_file.read_text()
+    assert actual_urls_content == expected_urls_content, (
+        "OIDC provider URLs content mismatch"
+    )
+
+    # Check that private key was added to .env file
+    env_file = backend_dir.parent / ".devcontainer" / ".env" / "devcontainer"
+    assert env_file.exists(), f".env devcontainer file not found at {env_file}"
+
+    env_content = env_file.read_text()
+    assert "IDP_OIDC_PRIVATE_KEY=" in env_content, (
+        "IDP_OIDC_PRIVATE_KEY not added to .env file"
+    )
+    assert "-----BEGIN PRIVATE KEY-----" in env_content, (
+        "Private key content not found in .env file"
+    )
+    assert "-----END PRIVATE KEY-----" in env_content, (
+        "Private key end marker not found in .env file"
+    )
+
+    # Check OIDC provider templates are created
+    test_templates_dir = DATA_DIR / "oidc_provider" / "authentication" / "templates"
+    for expected_file in test_templates_dir.rglob("*"):
+        if expected_file.is_file():
+            relative_path = expected_file.relative_to(test_templates_dir)
+            actual_file = backend_dir / "authentication" / "templates" / relative_path
+
+            assert actual_file.exists(), f"Template file {relative_path} not created"
+
+            expected_content = expected_file.read_text()
+            actual_content = actual_file.read_text()
+            assert actual_content == expected_content, (
+                f"Template content mismatch in {relative_path}"
+            )
+
+    # Check OIDC provider management commands are created
+    test_management_dir = DATA_DIR / "oidc_provider" / "authentication" / "management"
+    for expected_file in test_management_dir.rglob("*"):
+        if expected_file.is_file():
+            relative_path = expected_file.relative_to(test_management_dir)
+            actual_file = backend_dir / "authentication" / "management" / relative_path
+
+            assert actual_file.exists(), (
+                f"Management command file {relative_path} not created"
+            )
+
+            expected_content = expected_file.read_text()
+            actual_content = actual_file.read_text()
+            assert actual_content == expected_content, (
+                f"Management command content mismatch in {relative_path}"
+            )
+
+    result = runner.invoke(
+        app,
+        [
+            "backend",
+            "django",
+            "packages",
+            "django-allauth",
+            "oidc-provider",
+            "remove",
+        ],
+    )
+
+    assert result.exit_code == 0, f"OIDC provider remove failed: {result.output}"
+    assert (
+        "django-allauth OIDC provider configuration is removed successfully"
+        in result.output
+    )
+
+    settings_file = (
+        backend_dir / "settings" / "packages" / "django_allauth_oidc_provider.py"
+    )
+    assert not settings_file.exists(), "OIDC provider settings file not removed"
+
+    urls_file = backend_dir / "urls" / "packages" / "django_allauth_oidc_provider.py"
+    assert not urls_file.exists(), "OIDC provider URLs file not removed"
+
+    # Check that private key was removed from .env file
+    env_content = env_file.read_text()
+    assert "IDP_OIDC_PRIVATE_KEY=" not in env_content, (
+        "IDP_OIDC_PRIVATE_KEY not removed from .env file"
+    )
+    assert "-----BEGIN PRIVATE KEY-----" not in env_content, (
+        "Private key content still in .env file"
+    )
+    assert "-----END PRIVATE KEY-----" not in env_content, (
+        "Private key end marker still in .env file"
+    )
+
+    # Verify OIDC provider templates are removed
+    test_templates_dir = DATA_DIR / "oidc_provider" / "authentication" / "templates"
+    for expected_file in test_templates_dir.rglob("*"):
+        if expected_file.is_file():
+            relative_path = expected_file.relative_to(test_templates_dir)
+            actual_file = backend_dir / "authentication" / "templates" / relative_path
+            assert not actual_file.exists(), (
+                f"Template file {relative_path} was not removed"
+            )
+
+    # Verify OIDC provider management commands are removed
+    test_management_dir = DATA_DIR / "oidc_provider" / "authentication" / "management"
+    for expected_file in test_management_dir.rglob("*"):
+        if expected_file.is_file():
+            relative_path = expected_file.relative_to(test_management_dir)
+            actual_file = backend_dir / "authentication" / "management" / relative_path
+            assert not actual_file.exists(), (
+                f"Management command file {relative_path} was not removed"
+            )
+
+    assert DjangoProjectManager().has_dependency("django-allauth"), (
+        "django-allauth package should remain installed after OIDC provider removal"
     )
