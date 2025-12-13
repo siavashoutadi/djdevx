@@ -39,4 +39,5 @@ ACCOUNT_USERNAME_BLACKLIST = [str(word) for word in profanity.CENSOR_WORDSET]
 {% endif -%}
 {% if enable_login_by_code %}
 ACCOUNT_LOGIN_BY_CODE_ENABLED = True
+ACCOUNT_LOGIN_BY_CODE_REQUIRED = {"password"}
 {% endif -%}
