@@ -3,6 +3,7 @@ import typer
 from .whitenoise import app as whitenoise
 from .django_browser_reload import app as browser_reload
 from .django_debug_toolbar import app as debug_toolbar
+from .django_extensions import app as extensions
 from .django_tailwind_cli import app as tailwind_cli
 from .django_health_check import app as healthcheck
 from .django_storages import app as storages
@@ -75,6 +76,11 @@ app.add_typer(
     defender,
     name="django-defender",
     help="Manage django-defender package",
+)
+app.add_typer(
+    extensions,
+    name="django-extensions",
+    help="Manage django-extensions package",
 )
 app.add_typer(
     filter,

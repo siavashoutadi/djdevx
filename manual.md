@@ -166,6 +166,7 @@ $ djdevx backend django packages [OPTIONS] COMMAND [ARGS]...
 * `django-csp`: Manage django-csp package
 * `django-debug-toolbar`: Manage django-debug-toolbar package
 * `django-defender`: Manage django-defender package
+* `django-extensions`: Manage django-extensions package
 * `django-filter`: Manage django-filter package
 * `django-guardian`: Manage django-guardian package
 * `django-health-check`: Manage django-health-check package
@@ -1110,6 +1111,53 @@ Remove django-defender package
 
 ```console
 $ djdevx backend django packages django-defender remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+##### `djdevx backend django packages django-extensions`
+
+Manage django-extensions package
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-extensions [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure django-extensions
+* `remove`: Remove django-extensions
+
+###### `djdevx backend django packages django-extensions install`
+
+Install and configure django-extensions
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-extensions install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+###### `djdevx backend django packages django-extensions remove`
+
+Remove django-extensions
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-extensions remove [OPTIONS]
 ```
 
 **Options**:
