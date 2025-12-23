@@ -8,4 +8,4 @@ INSTALLED_APPS += [
 env = get_env()
 
 # Private key for signing ID tokens - REQUIRED
-IDP_OIDC_PRIVATE_KEY = env("IDP_OIDC_PRIVATE_KEY", default="")
+IDP_OIDC_PRIVATE_KEY = env("IDP_OIDC_PRIVATE_KEY", default="", multiline=True)
