@@ -113,6 +113,7 @@ def install_dependencies(backend_root: Path):
         "ipython",
         "ipdb",
         "uvicorn",
+        "python-dotenv",
     ]
     for pkg in dependencies:
         console.step(f"Installing {pkg} ...")

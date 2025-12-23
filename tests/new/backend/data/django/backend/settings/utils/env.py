@@ -1,5 +1,6 @@
 import os
 import environ
+from dotenv import load_dotenv
 
 from settings import BASE_DIR
 
@@ -10,9 +11,9 @@ SWARM_ENV_FILE = os.path.join("run", "secrets", "my_django_project-secret")
 def get_env():
     env = environ.Env()
     if is_local():
-        environ.Env.read_env(LOCAL_ENV_FILE)
+        load_dotenv(LOCAL_ENV_FILE)
     elif is_swarm():
-        environ.Env.read_env(SWARM_ENV_FILE)
+        load_dotenv(SWARM_ENV_FILE)
 
     return env
 
