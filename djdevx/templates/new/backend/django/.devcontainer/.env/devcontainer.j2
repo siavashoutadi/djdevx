@@ -1,6 +1,7 @@
 SECRET_KEY="{{ django_secret_key }}"
 DEBUG=True
 ALLOWED_HOSTS=127.0.0.1,localhost,0.0.0.0
+CSRF_TRUSTED_ORIGINS=http://localhost:8000,https://localhost:8000,http://127.0.0.1:8000,https://127.0.0.1:8000
 POSTGRES_SERVER=db
 POSTGRES_PORT=5432
 POSTGRES_USER=postgres
