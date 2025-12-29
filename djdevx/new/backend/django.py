@@ -12,7 +12,7 @@ from ...requirement import requirement
 
 app = typer.Typer(no_args_is_help=True)
 
-DJANGO_VERSION = "5.2"
+DJANGO_VERSION = "6.0"
 
 
 @app.command()
