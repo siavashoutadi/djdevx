@@ -91,7 +91,9 @@ def django(
         console.step("Initializing the git repository ...")
         init_git(dest_dir)
 
-    update_precommit_hooks(backend_root=backend_root_path, project_dir=dest_dir)
+    update_precommit_hooks(
+        backend_root=backend_root_path, project_dir=dest_dir, git_init=git_init
+    )
 
     console.success("Project is initialized successfully.")
 
@@ -134,12 +136,15 @@ def install_dependencies(backend_root: Path):
         console.success(f"{pkg} is installed successfully.")
 
 
-def update_precommit_hooks(backend_root: Path, project_dir: Path):
+def update_precommit_hooks(backend_root: Path, project_dir: Path, git_init: bool):
     console.step("Updating pre-commit hooks ...")
     uv = UvRunner(backend_root=backend_root)
     uv.run_uv_command("run", "pre-commit", "autoupdate")
-    subprocess.check_call(["git", "add", "."], cwd=project_dir)
-    subprocess.check_call(["git", "commit", "--amend", "--no-edit"], cwd=project_dir)
+    if git_init and is_git_repository(project_dir):
+        subprocess.check_call(["git", "add", "."], cwd=project_dir)
+        subprocess.check_call(
+            ["git", "commit", "--amend", "--no-edit"], cwd=project_dir
+        )
 
 
 def is_git_repository(project_dir: Path) -> bool:
