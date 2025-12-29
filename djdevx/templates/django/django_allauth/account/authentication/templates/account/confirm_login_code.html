@@ -39,6 +39,11 @@
           {% if can_resend %}
             <form method="post" id="resend" style="display: inline;">
               {% csrf_token %}
+              {% if redirect_field_value %}
+                <input type="hidden"
+                       name="{{ redirect_field_name }}"
+                       value="{{ redirect_field_value }}" />
+              {% endif %}
               <button type="submit"
                       class="px-3 py-1.5 text-sm font-semibold text-black dark:text-white border border-black dark:border-white rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition">
                 {% trans "Request new code" %}
