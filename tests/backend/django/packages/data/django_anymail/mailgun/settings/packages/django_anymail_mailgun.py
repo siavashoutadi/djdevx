@@ -4,11 +4,12 @@ from settings.utils.env import get_env
 env = get_env()
 
 ANYMAIL = {
-    "MAILJET_API_KEY": env("ANYMAIL_MAILJET_API_KEY", default=""),
-    "MAILJET_SECRET_KEY": env("ANYMAIL_MAILJET_SECRET_KEY", default=""),
+    "MAILGUN_API_KEY": env("ANYMAIL_MAILGUN_API_KEY", default=""),
+    "MAILGUN_API_URL": "https://api.mailgun.net/v3",
+    "MAILGUN_SENDER_DOMAIN": env("ANYMAIL_MAILGUN_SENDER_DOMAIN", default=""),
 }
 
-EMAIL_BACKEND = "anymail.backends.mailjet.EmailBackend"
+EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 
 INSTALLED_APPS += [
     "anymail",

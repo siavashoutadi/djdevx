@@ -1,19 +1,23 @@
+from settings.django.base import INSTALLED_APPS
 from settings.utils.env import get_env
 
 env = get_env()
 
 ANYMAIL = {
     "MAILGUN_API_KEY": env("ANYMAIL_MAILGUN_API_KEY", default=""),
-    {% if is_europe %}
+    {%- if is_europe %}
     "MAILGUN_API_URL": "https://api.eu.mailgun.net/v3",
-    {% else %}
+    {%- else %}
     "MAILGUN_API_URL": "https://api.mailgun.net/v3",
-    {% endif %}
+    {%- endif %}
     "MAILGUN_SENDER_DOMAIN": env("ANYMAIL_MAILGUN_SENDER_DOMAIN", default=""),
 }
 
 EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 
-INSTALLED_APPS = [
+INSTALLED_APPS += [
     "anymail",
 ]
+
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="")
+SERVER_EMAIL = env("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)

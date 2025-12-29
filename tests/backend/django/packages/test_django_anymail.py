@@ -178,6 +178,13 @@ def test_django_anymail_mailgun_install_and_remove(temp_dir):
     settings_file = backend_dir / "settings" / "packages" / "django_anymail_mailgun.py"
     assert settings_file.exists()
 
+    # Check settings content with expected Mailgun configuration
+    settings_content = settings_file.read_text()
+    expected_settings = (
+        DATA_DIR / "mailgun" / "settings" / "packages" / "django_anymail_mailgun.py"
+    ).read_text()
+    assert settings_content.strip() == expected_settings.strip()
+
     # Check if env file is updated
     env_file = temp_dir / ".devcontainer" / ".env" / "devcontainer"
     env_content = env_file.read_text()
@@ -238,6 +245,13 @@ def test_django_anymail_mailjet_install_and_remove(temp_dir):
     settings_file = backend_dir / "settings" / "packages" / "django_anymail_mailjet.py"
     assert settings_file.exists()
 
+    # Check settings content with expected Mailjet configuration
+    settings_content = settings_file.read_text()
+    expected_settings = (
+        DATA_DIR / "mailjet" / "settings" / "packages" / "django_anymail_mailjet.py"
+    ).read_text()
+    assert settings_content.strip() == expected_settings.strip()
+
     # Check if env file is updated
     env_file = temp_dir / ".devcontainer" / ".env" / "devcontainer"
     env_content = env_file.read_text()
@@ -294,6 +308,13 @@ def test_django_anymail_resend_install_and_remove(temp_dir):
     # Check if settings file is created
     settings_file = backend_dir / "settings" / "packages" / "django_anymail_resend.py"
     assert settings_file.exists()
+
+    # Check settings content with expected Resend configuration
+    settings_content = settings_file.read_text()
+    expected_settings = (
+        DATA_DIR / "resend" / "settings" / "packages" / "django_anymail_resend.py"
+    ).read_text()
+    assert settings_content.strip() == expected_settings.strip()
 
     # Check if env file is updated
     env_file = temp_dir / ".devcontainer" / ".env" / "devcontainer"

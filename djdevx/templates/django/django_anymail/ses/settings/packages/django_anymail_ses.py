@@ -1,3 +1,4 @@
+from settings.django.base import INSTALLED_APPS
 from settings.utils.env import get_env
 
 env = get_env()
@@ -12,6 +13,9 @@ ANYMAIL = {
 
 EMAIL_BACKEND = "anymail.backends.amazon_ses.EmailBackend"
 
-INSTALLED_APPS = [
+INSTALLED_APPS += [
     "anymail",
 ]
+
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="")
+SERVER_EMAIL = env("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
