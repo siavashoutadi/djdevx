@@ -1,4 +1,4 @@
-from settings import INSTALLED_APPS
+from settings.django.base import INSTALLED_APPS
 from settings.django.auth import AUTHENTICATION_BACKENDS
 
 

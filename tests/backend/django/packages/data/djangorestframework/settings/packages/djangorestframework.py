@@ -1,5 +1,4 @@
-from settings.django.base import DEBUG
-from settings import INSTALLED_APPS
+from settings.django.base import INSTALLED_APPS, DEBUG
 
 
 INSTALLED_APPS += [

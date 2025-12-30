@@ -1,5 +1,5 @@
-from settings import BASE_DIR, INSTALLED_APPS
-
+from settings import BASE_DIR
+from settings.django.base import INSTALLED_APPS
 
 INSTALLED_APPS += [
     "django_tailwind_cli",

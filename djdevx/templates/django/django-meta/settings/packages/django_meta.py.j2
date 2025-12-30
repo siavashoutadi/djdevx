@@ -1,4 +1,4 @@
-from settings import INSTALLED_APPS
+from settings.django.base import INSTALLED_APPS
 
 # Add django-meta to INSTALLED_APPS
 INSTALLED_APPS += [

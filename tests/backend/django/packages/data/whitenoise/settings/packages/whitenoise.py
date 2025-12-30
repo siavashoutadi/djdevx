@@ -1,4 +1,4 @@
-from settings import INSTALLED_APPS, MIDDLEWARE
+from settings.django.base import INSTALLED_APPS, MIDDLEWARE
 from settings.django.storages import STORAGES
 
 INSTALLED_APPS.insert(0, "whitenoise.runserver_nostatic")

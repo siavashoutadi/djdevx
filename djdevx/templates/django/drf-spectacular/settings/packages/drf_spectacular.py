@@ -1,5 +1,5 @@
-from settings import INSTALLED_APPS
-from settings import REST_FRAMEWORK
+from settings.django.base import INSTALLED_APPS
+from settings.packages.djangorestframework import REST_FRAMEWORK
 
 INSTALLED_APPS += ["drf_spectacular", "drf_spectacular_sidecar"]
 

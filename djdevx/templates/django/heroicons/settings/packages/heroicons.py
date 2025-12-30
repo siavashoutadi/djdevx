@@ -1,4 +1,4 @@
-from settings import INSTALLED_APPS, TEMPLATES
+from settings.django.base import INSTALLED_APPS, TEMPLATES
 
 
 INSTALLED_APPS += [

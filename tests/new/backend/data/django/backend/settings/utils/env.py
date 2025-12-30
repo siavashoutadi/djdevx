@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from settings import BASE_DIR
 
 LOCAL_ENV_FILE = os.path.join(BASE_DIR, ".environments", "dev")
-SWARM_ENV_FILE = os.path.join("run", "secrets", "my_django_project-secret")
+SWARM_ENV_FILE = os.path.join(os.path.sep, "run", "secrets", "my_django_project-secret")
 
 
 def get_env():

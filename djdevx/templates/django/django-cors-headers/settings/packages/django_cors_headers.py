@@ -1,5 +1,4 @@
-from settings import INSTALLED_APPS, MIDDLEWARE
-from settings.django.base import DEBUG
+from settings.django.base import DEBUG, INSTALLED_APPS, MIDDLEWARE
 from settings.utils.env import get_env
 
 

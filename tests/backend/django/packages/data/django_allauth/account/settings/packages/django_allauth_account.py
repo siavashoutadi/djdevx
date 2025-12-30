@@ -1,4 +1,4 @@
-from settings import INSTALLED_APPS, MIDDLEWARE
+from settings.django.base import INSTALLED_APPS, MIDDLEWARE
 from settings.django.auth import AUTHENTICATION_BACKENDS
 
 from better_profanity import profanity

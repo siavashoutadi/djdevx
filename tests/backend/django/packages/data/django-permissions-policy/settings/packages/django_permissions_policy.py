@@ -1,4 +1,4 @@
-from settings import MIDDLEWARE
+from settings.django.base import MIDDLEWARE
 from typing import Dict, List
 
 permission_policy_middleware = "django_permissions_policy.PermissionsPolicyMiddleware"

@@ -1,6 +1,5 @@
-from settings import INSTALLED_APPS, MIDDLEWARE
+from settings.django.base import INSTALLED_APPS, MIDDLEWARE, DEBUG
 from settings.django.auth import AUTHENTICATION_BACKENDS
-from settings.django.base import DEBUG
 
 
 INSTALLED_APPS += [

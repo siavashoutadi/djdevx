@@ -1,4 +1,4 @@
-from settings import INSTALLED_APPS, MIDDLEWARE
+from settings.django.base import INSTALLED_APPS, MIDDLEWARE
 from settings.utils.env import get_env
 
 
