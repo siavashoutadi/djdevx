@@ -33,6 +33,13 @@ def install(
             prompt="Please enter the AWS region",
         ),
     ],
+    default_from_email: Annotated[
+        str,
+        typer.Option(
+            help="The default from email address",
+            prompt="Please enter the default from email address",
+        ),
+    ],
 ):
     """
     Install django-anymail with SES backend
@@ -55,10 +62,12 @@ def install(
 
     pm.copy_templates(source_dir=source_dir, template_context={})
 
-    # Set environment variables
-    pm.add_env_variable(key="ANYMAIL_SES_ACCESS_KEY", value=access_key)
-    pm.add_env_variable(key="ANYMAIL_SES_SECRET_KEY", value=secret_key)
-    pm.add_env_variable(key="ANYMAIL_SES_REGION_NAME", value=region_name)
+    env(
+        access_key=access_key,
+        secret_key=secret_key,
+        region_name=region_name,
+        default_from_email=default_from_email,
+    )
 
     console.success("django-anymail with SES backend is installed successfully.")
 
@@ -83,6 +92,7 @@ def remove():
     pm.remove_env_variable("ANYMAIL_SES_ACCESS_KEY")
     pm.remove_env_variable("ANYMAIL_SES_SECRET_KEY")
     pm.remove_env_variable("ANYMAIL_SES_REGION_NAME")
+    pm.remove_env_variable("DEFAULT_FROM_EMAIL")
 
     console.success("django-anymail SES backend is removed successfully.")
 
@@ -111,6 +121,13 @@ def env(
             prompt="Please enter the AWS region",
         ),
     ],
+    default_from_email: Annotated[
+        str,
+        typer.Option(
+            help="The default from email address",
+            prompt="Please enter the default from email address",
+        ),
+    ],
 ):
     """
     Configure environment variables for django-anymail SES backend
@@ -122,6 +139,7 @@ def env(
     pm.add_env_variable(key="ANYMAIL_SES_ACCESS_KEY", value=access_key)
     pm.add_env_variable(key="ANYMAIL_SES_SECRET_KEY", value=secret_key)
     pm.add_env_variable(key="ANYMAIL_SES_REGION_NAME", value=region_name)
+    pm.add_env_variable(key="DEFAULT_FROM_EMAIL", value=default_from_email)
 
     console.success(
         "django-anymail SES environment variables are configured successfully."

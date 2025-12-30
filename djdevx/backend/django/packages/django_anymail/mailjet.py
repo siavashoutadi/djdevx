@@ -26,6 +26,13 @@ def install(
             hide_input=True,
         ),
     ],
+    default_from_email: Annotated[
+        str,
+        typer.Option(
+            help="The default from email address",
+            prompt="Please enter the default from email address",
+        ),
+    ],
 ):
     """
     Install django-anymail with Mailjet backend
@@ -48,9 +55,7 @@ def install(
 
     pm.copy_templates(source_dir=source_dir, template_context={})
 
-    # Set environment variables
-    pm.add_env_variable(key="ANYMAIL_MAILJET_API_KEY", value=api_key)
-    pm.add_env_variable(key="ANYMAIL_MAILJET_SECRET_KEY", value=secret_key)
+    env(api_key=api_key, secret_key=secret_key, default_from_email=default_from_email)
 
     console.success("django-anymail with Mailjet backend is installed successfully.")
 
@@ -76,6 +81,7 @@ def remove():
 
     pm.remove_env_variable("ANYMAIL_MAILJET_API_KEY")
     pm.remove_env_variable("ANYMAIL_MAILJET_SECRET_KEY")
+    pm.remove_env_variable("DEFAULT_FROM_EMAIL")
 
     console.success("django-anymail Mailjet backend is removed successfully.")
 
@@ -97,6 +103,13 @@ def env(
             hide_input=True,
         ),
     ],
+    default_from_email: Annotated[
+        str,
+        typer.Option(
+            help="The default from email address",
+            prompt="Please enter the default from email address",
+        ),
+    ],
 ):
     """
     Configure environment variables for django-anymail Mailjet backend
@@ -109,6 +122,7 @@ def env(
 
     pm.add_env_variable(key="ANYMAIL_MAILJET_API_KEY", value=api_key)
     pm.add_env_variable(key="ANYMAIL_MAILJET_SECRET_KEY", value=secret_key)
+    pm.add_env_variable(key="DEFAULT_FROM_EMAIL", value=default_from_email)
 
     console.success(
         "django-anymail Mailjet environment variables are configured successfully."

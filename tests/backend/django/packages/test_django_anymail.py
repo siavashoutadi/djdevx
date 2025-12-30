@@ -34,6 +34,8 @@ def test_django_anymail_ses_install_and_remove(temp_dir):
             "test-secret-key",
             "--region-name",
             "us-east-1",
+            "--default-from-email",
+            "noreply@example.com",
         ],
     )
 
@@ -60,6 +62,7 @@ def test_django_anymail_ses_install_and_remove(temp_dir):
     assert "ANYMAIL_SES_ACCESS_KEY=test-access-key" in env_content
     assert "ANYMAIL_SES_SECRET_KEY=test-secret-key" in env_content
     assert "ANYMAIL_SES_REGION_NAME=us-east-1" in env_content
+    assert "DEFAULT_FROM_EMAIL=noreply@example.com" in env_content
 
     # Test remove
     result = runner.invoke(
@@ -97,6 +100,8 @@ def test_django_anymail_brevo_install_and_remove(temp_dir):
             "install",
             "--api-key",
             "test-brevo-api-key",
+            "--default-from-email",
+            "noreply@example.com",
         ],
     )
 
@@ -123,6 +128,7 @@ def test_django_anymail_brevo_install_and_remove(temp_dir):
     env_file = temp_dir / ".devcontainer" / ".env" / "devcontainer"
     env_content = env_file.read_text()
     assert "ANYMAIL_BREVO_API_KEY=test-brevo-api-key" in env_content
+    assert "DEFAULT_FROM_EMAIL=noreply@example.com" in env_content
 
     # Test remove
     result = runner.invoke(
@@ -162,6 +168,8 @@ def test_django_anymail_mailgun_install_and_remove(temp_dir):
             "test-mailgun-api-key",
             "--domain",
             "test-domain.com",
+            "--default-from-email",
+            "noreply@example.com",
         ],
     )
 
@@ -190,6 +198,7 @@ def test_django_anymail_mailgun_install_and_remove(temp_dir):
     env_content = env_file.read_text()
     assert "ANYMAIL_MAILGUN_API_KEY=test-mailgun-api-key" in env_content
     assert "ANYMAIL_MAILGUN_SENDER_DOMAIN=test-domain.com" in env_content
+    assert "DEFAULT_FROM_EMAIL=noreply@example.com" in env_content
 
     # Test remove
     result = runner.invoke(
@@ -229,6 +238,8 @@ def test_django_anymail_mailjet_install_and_remove(temp_dir):
             "test-mailjet-api-key",
             "--secret-key",
             "test-mailjet-secret-key",
+            "--default-from-email",
+            "noreply@example.com",
         ],
     )
 
@@ -257,6 +268,7 @@ def test_django_anymail_mailjet_install_and_remove(temp_dir):
     env_content = env_file.read_text()
     assert "ANYMAIL_MAILJET_API_KEY=test-mailjet-api-key" in env_content
     assert "ANYMAIL_MAILJET_SECRET_KEY=test-mailjet-secret-key" in env_content
+    assert "DEFAULT_FROM_EMAIL=noreply@example.com" in env_content
 
     # Test remove
     result = runner.invoke(
@@ -294,6 +306,8 @@ def test_django_anymail_resend_install_and_remove(temp_dir):
             "install",
             "--api-key",
             "test-resend-api-key",
+            "--default-from-email",
+            "noreply@example.com",
         ],
     )
 
@@ -320,6 +334,7 @@ def test_django_anymail_resend_install_and_remove(temp_dir):
     env_file = temp_dir / ".devcontainer" / ".env" / "devcontainer"
     env_content = env_file.read_text()
     assert "ANYMAIL_RESEND_API_KEY=test-resend-api-key" in env_content
+    assert "DEFAULT_FROM_EMAIL=noreply@example.com" in env_content
 
     # Test remove
     result = runner.invoke(

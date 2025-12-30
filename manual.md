@@ -526,6 +526,7 @@ $ djdevx backend django packages django-anymail ses install [OPTIONS]
 * `--access-key TEXT`: The AWS access key for authentication  [required]
 * `--secret-key TEXT`: The AWS Secret key for authentication  [required]
 * `--region-name TEXT`: The AWS region  [required]
+* `--default-from-email TEXT`: The default from email address  [required]
 * `--help`: Show this message and exit.
 
 ####### `djdevx backend django packages django-anymail ses remove`
@@ -557,6 +558,7 @@ $ djdevx backend django packages django-anymail ses env [OPTIONS]
 * `--access-key TEXT`: The AWS access key for authentication  [required]
 * `--secret-key TEXT`: The AWS Secret key for authentication  [required]
 * `--region-name TEXT`: The AWS region  [required]
+* `--default-from-email TEXT`: The default from email address  [required]
 * `--help`: Show this message and exit.
 
 ###### `djdevx backend django packages django-anymail brevo`
@@ -592,6 +594,7 @@ $ djdevx backend django packages django-anymail brevo install [OPTIONS]
 **Options**:
 
 * `--api-key TEXT`: The Brevo API key for authentication  [required]
+* `--default-from-email TEXT`: The default from email address  [required]
 * `--help`: Show this message and exit.
 
 ####### `djdevx backend django packages django-anymail brevo remove`
@@ -621,6 +624,7 @@ $ djdevx backend django packages django-anymail brevo env [OPTIONS]
 **Options**:
 
 * `--api-key TEXT`: The Brevo API key for authentication  [required]
+* `--default-from-email TEXT`: The default from email address  [required]
 * `--help`: Show this message and exit.
 
 ###### `djdevx backend django packages django-anymail mailgun`
@@ -657,6 +661,7 @@ $ djdevx backend django packages django-anymail mailgun install [OPTIONS]
 
 * `--api-key TEXT`: The Mailgun API key for authentication  [required]
 * `--domain TEXT`: The Mailgun domain  [required]
+* `--default-from-email TEXT`: The default from email address  [required]
 * `--is-europe / --no-is-europe`: Flag to use Europe region for Mailgun  [default: no-is-europe]
 * `--help`: Show this message and exit.
 
@@ -688,6 +693,7 @@ $ djdevx backend django packages django-anymail mailgun env [OPTIONS]
 
 * `--api-key TEXT`: The Mailgun API key for authentication  [required]
 * `--domain TEXT`: The Mailgun domain  [required]
+* `--default-from-email TEXT`: The default from email address  [required]
 * `--help`: Show this message and exit.
 
 ###### `djdevx backend django packages django-anymail mailjet`
@@ -724,6 +730,7 @@ $ djdevx backend django packages django-anymail mailjet install [OPTIONS]
 
 * `--api-key TEXT`: The Mailjet API key for authentication  [required]
 * `--secret-key TEXT`: The Mailjet Secret key for authentication  [required]
+* `--default-from-email TEXT`: The default from email address  [required]
 * `--help`: Show this message and exit.
 
 ####### `djdevx backend django packages django-anymail mailjet remove`
@@ -754,6 +761,7 @@ $ djdevx backend django packages django-anymail mailjet env [OPTIONS]
 
 * `--api-key TEXT`: The Mailjet API key for authentication  [required]
 * `--secret-key TEXT`: The Mailjet Secret key for authentication  [required]
+* `--default-from-email TEXT`: The default from email address  [required]
 * `--help`: Show this message and exit.
 
 ###### `djdevx backend django packages django-anymail resend`
@@ -789,6 +797,7 @@ $ djdevx backend django packages django-anymail resend install [OPTIONS]
 **Options**:
 
 * `--api-key TEXT`: The Resend API key for authentication  [required]
+* `--default-from-email TEXT`: The default from email address  [required]
 * `--help`: Show this message and exit.
 
 ####### `djdevx backend django packages django-anymail resend remove`
@@ -818,6 +827,7 @@ $ djdevx backend django packages django-anymail resend env [OPTIONS]
 **Options**:
 
 * `--api-key TEXT`: The Resend API key for authentication  [required]
+* `--default-from-email TEXT`: The default from email address  [required]
 * `--help`: Show this message and exit.
 
 ##### `djdevx backend django packages django-auditlog`

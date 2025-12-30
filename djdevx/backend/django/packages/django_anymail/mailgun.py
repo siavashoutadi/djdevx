@@ -26,6 +26,13 @@ def install(
             prompt="Please enter the Mailgun domain",
         ),
     ],
+    default_from_email: Annotated[
+        str,
+        typer.Option(
+            help="The default from email address",
+            prompt="Please enter the default from email address",
+        ),
+    ],
     is_europe: Annotated[
         bool,
         typer.Option(
@@ -59,9 +66,7 @@ def install(
         },
     )
 
-    # Set environment variables
-    pm.add_env_variable(key="ANYMAIL_MAILGUN_API_KEY", value=api_key)
-    pm.add_env_variable(key="ANYMAIL_MAILGUN_SENDER_DOMAIN", value=domain)
+    env(api_key=api_key, domain=domain, default_from_email=default_from_email)
 
     console.success("django-anymail with Mailgun backend is installed successfully.")
 
@@ -87,6 +92,7 @@ def remove():
 
     pm.remove_env_variable("ANYMAIL_MAILGUN_API_KEY")
     pm.remove_env_variable("ANYMAIL_MAILGUN_SENDER_DOMAIN")
+    pm.remove_env_variable("DEFAULT_FROM_EMAIL")
 
     console.success("django-anymail Mailgun backend is removed successfully.")
 
@@ -108,6 +114,13 @@ def env(
             prompt="Please enter the Mailgun domain",
         ),
     ],
+    default_from_email: Annotated[
+        str,
+        typer.Option(
+            help="The default from email address",
+            prompt="Please enter the default from email address",
+        ),
+    ],
 ):
     """
     Configure environment variables for django-anymail Mailgun backend
@@ -120,6 +133,7 @@ def env(
 
     pm.add_env_variable(key="ANYMAIL_MAILGUN_API_KEY", value=api_key)
     pm.add_env_variable(key="ANYMAIL_MAILGUN_SENDER_DOMAIN", value=domain)
+    pm.add_env_variable(key="DEFAULT_FROM_EMAIL", value=default_from_email)
 
     console.success(
         "django-anymail Mailgun environment variables are configured successfully."
