@@ -177,6 +177,7 @@ $ djdevx backend django packages [OPTIONS] COMMAND [ARGS]...
 * `django-simple-history`: Manage django-simple-history package
 * `django-snakeoil`: Manage django-snakeoil package
 * `django-storages`: Manage django-storages package
+* `django-taggit`: Manage django-taggit package
 * `django-tailwind-cli`: Manage django-tailwind-cli package
 * `heroicons`: Manage heroicons package
 * `djangochannelsrestframework`: Manage djangochannelsrestframework package
@@ -1846,6 +1847,53 @@ $ djdevx backend django packages django-storages google env [OPTIONS]
 
 * `--credentials-file-path PATH`: The path to the google credential file  [required]
 * `--bucket-name TEXT`: The Google bucket name to store the files in  [required]
+* `--help`: Show this message and exit.
+
+##### `djdevx backend django packages django-taggit`
+
+Manage django-taggit package
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-taggit [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure django-taggit
+* `remove`: Remove django-taggit
+
+###### `djdevx backend django packages django-taggit install`
+
+Install and configure django-taggit
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-taggit install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+###### `djdevx backend django packages django-taggit remove`
+
+Remove django-taggit
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-taggit remove [OPTIONS]
+```
+
+**Options**:
+
 * `--help`: Show this message and exit.
 
 ##### `djdevx backend django packages django-tailwind-cli`

@@ -28,6 +28,7 @@ from .drf_flex_fields import app as flex_fields
 from .channels import app as channels_app
 from .djangochannelsrestframework import app as channelrest
 from .heroicons import app as heroicons
+from .django_taggit import app as taggit
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -131,6 +132,11 @@ app.add_typer(
     storages,
     name="django-storages",
     help="Manage django-storages package",
+)
+app.add_typer(
+    taggit,
+    name="django-taggit",
+    help="Manage django-taggit package",
 )
 app.add_typer(
     tailwind_cli,
