@@ -168,6 +168,7 @@ $ djdevx backend django packages [OPTIONS] COMMAND [ARGS]...
 * `django-defender`: Manage django-defender package
 * `django-extensions`: Manage django-extensions package
 * `django-filter`: Manage django-filter package
+* `django-import-export`: Manage django-import-export package
 * `django-guardian`: Manage django-guardian package
 * `django-health-check`: Manage django-health-check package
 * `django-meta`: Manage django-meta package
@@ -1216,6 +1217,53 @@ Remove django-filter package
 
 ```console
 $ djdevx backend django packages django-filter remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+##### `djdevx backend django packages django-import-export`
+
+Manage django-import-export package
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-import-export [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure django-import-export
+* `remove`: Remove django-import-export package
+
+###### `djdevx backend django packages django-import-export install`
+
+Install and configure django-import-export
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-import-export install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+###### `djdevx backend django packages django-import-export remove`
+
+Remove django-import-export package
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-import-export remove [OPTIONS]
 ```
 
 **Options**:
