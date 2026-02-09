@@ -2386,6 +2386,7 @@ $ djdevx backend django feature css [OPTIONS] COMMAND [ARGS]...
 * `bootstrap`: Manage bootstrap css framework
 * `frankenui`: Manage Franken UI css framework
 * `semantic`: Manage Semantic css framework
+* `starting-point-ui`: Manage Starting Point UI css framework
 
 ###### `djdevx backend django feature css bootstrap`
 
@@ -2531,6 +2532,58 @@ Remove Semantic css framework from the project.
 
 ```console
 $ djdevx backend django feature css semantic remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+###### `djdevx backend django feature css starting-point-ui`
+
+Manage Starting Point UI css framework
+
+**Usage**:
+
+```console
+$ djdevx backend django feature css starting-point-ui [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Add Starting Point UI CSS framework to the...
+* `remove`: Remove Starting Point UI CSS framework...
+
+####### `djdevx backend django feature css starting-point-ui install`
+
+Add Starting Point UI CSS framework to the project.
+
+Downloads the specified version (or latest) of Starting Point UI&#x27;s minified CSS
+and JavaScript files, then saves them to the static directory.
+
+Starting Point UI is a Tailwind CSS v4+ component library.
+
+**Usage**:
+
+```console
+$ djdevx backend django feature css starting-point-ui install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+####### `djdevx backend django feature css starting-point-ui remove`
+
+Remove Starting Point UI CSS framework from the project.
+
+**Usage**:
+
+```console
+$ djdevx backend django feature css starting-point-ui remove [OPTIONS]
 ```
 
 **Options**:
