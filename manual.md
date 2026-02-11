@@ -168,9 +168,10 @@ $ djdevx backend django packages [OPTIONS] COMMAND [ARGS]...
 * `django-defender`: Manage django-defender package
 * `django-extensions`: Manage django-extensions package
 * `django-filter`: Manage django-filter package
-* `django-import-export`: Manage django-import-export package
 * `django-guardian`: Manage django-guardian package
 * `django-health-check`: Manage django-health-check package
+* `django-htmx`: Manage django-htmx package
+* `django-import-export`: Manage django-import-export package
 * `django-meta`: Manage django-meta package
 * `django-oauth-toolkit`: Manage django-oauth-toolkit package
 * `django-permissions-policy`: Manage django-permissions-policy package
@@ -180,12 +181,12 @@ $ djdevx backend django packages [OPTIONS] COMMAND [ARGS]...
 * `django-storages`: Manage django-storages package
 * `django-taggit`: Manage django-taggit package
 * `django-tailwind-cli`: Manage django-tailwind-cli package
-* `heroicons`: Manage heroicons package
 * `djangochannelsrestframework`: Manage djangochannelsrestframework package
 * `djangorestframework`: Manage djangorestframework package
 * `drf-nested-routers`: Manage drf-nested-routers package
 * `drf-flex-fields`: Manage drf-flex-fields package
 * `drf-spectacular`: Manage drf-spectacular package
+* `heroicons`: Manage heroicons package
 * `whitenoise`: Manage whitenoise package
 
 ##### `djdevx backend django packages channels`
@@ -1223,53 +1224,6 @@ $ djdevx backend django packages django-filter remove [OPTIONS]
 
 * `--help`: Show this message and exit.
 
-##### `djdevx backend django packages django-import-export`
-
-Manage django-import-export package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-import-export [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-import-export
-* `remove`: Remove django-import-export package
-
-###### `djdevx backend django packages django-import-export install`
-
-Install and configure django-import-export
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-import-export install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-###### `djdevx backend django packages django-import-export remove`
-
-Remove django-import-export package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-import-export remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
 ##### `djdevx backend django packages django-guardian`
 
 Manage django-guardian package
@@ -1358,6 +1312,100 @@ Remove django-health-check
 
 ```console
 $ djdevx backend django packages django-health-check remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+##### `djdevx backend django packages django-htmx`
+
+Manage django-htmx package
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-htmx [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure django-htmx
+* `remove`: Remove django-htmx
+
+###### `djdevx backend django packages django-htmx install`
+
+Install and configure django-htmx
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-htmx install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+###### `djdevx backend django packages django-htmx remove`
+
+Remove django-htmx
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-htmx remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+##### `djdevx backend django packages django-import-export`
+
+Manage django-import-export package
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-import-export [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure django-import-export
+* `remove`: Remove django-import-export package
+
+###### `djdevx backend django packages django-import-export install`
+
+Install and configure django-import-export
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-import-export install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+###### `djdevx backend django packages django-import-export remove`
+
+Remove django-import-export package
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-import-export remove [OPTIONS]
 ```
 
 **Options**:
@@ -1991,53 +2039,6 @@ $ djdevx backend django packages django-tailwind-cli remove [OPTIONS]
 
 * `--help`: Show this message and exit.
 
-##### `djdevx backend django packages heroicons`
-
-Manage heroicons package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages heroicons [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure heroicons
-* `remove`: Remove heroicons
-
-###### `djdevx backend django packages heroicons install`
-
-Install and configure heroicons
-
-**Usage**:
-
-```console
-$ djdevx backend django packages heroicons install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-###### `djdevx backend django packages heroicons remove`
-
-Remove heroicons
-
-**Usage**:
-
-```console
-$ djdevx backend django packages heroicons remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
 ##### `djdevx backend django packages djangochannelsrestframework`
 
 Manage djangochannelsrestframework package
@@ -2267,6 +2268,53 @@ Remove drf-spectacular package
 
 ```console
 $ djdevx backend django packages drf-spectacular remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+##### `djdevx backend django packages heroicons`
+
+Manage heroicons package
+
+**Usage**:
+
+```console
+$ djdevx backend django packages heroicons [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure heroicons
+* `remove`: Remove heroicons
+
+###### `djdevx backend django packages heroicons install`
+
+Install and configure heroicons
+
+**Usage**:
+
+```console
+$ djdevx backend django packages heroicons install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+###### `djdevx backend django packages heroicons remove`
+
+Remove heroicons
+
+**Usage**:
+
+```console
+$ djdevx backend django packages heroicons remove [OPTIONS]
 ```
 
 **Options**:

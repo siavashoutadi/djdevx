@@ -30,6 +30,7 @@ from .channels import app as channels_app
 from .djangochannelsrestframework import app as channelrest
 from .heroicons import app as heroicons
 from .django_taggit import app as taggit
+from .django_htmx import app as htmx
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -90,11 +91,6 @@ app.add_typer(
     help="Manage django-filter package",
 )
 app.add_typer(
-    import_export,
-    name="django-import-export",
-    help="Manage django-import-export package",
-)
-app.add_typer(
     guardian,
     name="django-guardian",
     help="Manage django-guardian package",
@@ -103,6 +99,16 @@ app.add_typer(
     healthcheck,
     name="django-health-check",
     help="Manage django-health-check package",
+)
+app.add_typer(
+    htmx,
+    name="django-htmx",
+    help="Manage django-htmx package",
+)
+app.add_typer(
+    import_export,
+    name="django-import-export",
+    help="Manage django-import-export package",
 )
 app.add_typer(
     meta,
@@ -150,11 +156,6 @@ app.add_typer(
     help="Manage django-tailwind-cli package",
 )
 app.add_typer(
-    heroicons,
-    name="heroicons",
-    help="Manage heroicons package",
-)
-app.add_typer(
     channelrest,
     name="djangochannelsrestframework",
     help="Manage djangochannelsrestframework package",
@@ -178,6 +179,11 @@ app.add_typer(
     drf_spectacular,
     name="drf-spectacular",
     help="Manage drf-spectacular package",
+)
+app.add_typer(
+    heroicons,
+    name="heroicons",
+    help="Manage heroicons package",
 )
 app.add_typer(
     whitenoise,
