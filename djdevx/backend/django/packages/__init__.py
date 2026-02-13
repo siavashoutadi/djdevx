@@ -31,6 +31,7 @@ from .djangochannelsrestframework import app as channelrest
 from .heroicons import app as heroicons
 from .django_taggit import app as taggit
 from .django_htmx import app as htmx
+from .django_silk import app as silk
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -104,6 +105,11 @@ app.add_typer(
     htmx,
     name="django-htmx",
     help="Manage django-htmx package",
+)
+app.add_typer(
+    silk,
+    name="django-silk",
+    help="Manage django-silk package",
 )
 app.add_typer(
     import_export,

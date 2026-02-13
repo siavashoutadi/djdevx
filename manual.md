@@ -171,6 +171,7 @@ $ djdevx backend django packages [OPTIONS] COMMAND [ARGS]...
 * `django-guardian`: Manage django-guardian package
 * `django-health-check`: Manage django-health-check package
 * `django-htmx`: Manage django-htmx package
+* `django-silk`: Manage django-silk package
 * `django-import-export`: Manage django-import-export package
 * `django-meta`: Manage django-meta package
 * `django-oauth-toolkit`: Manage django-oauth-toolkit package
@@ -1359,6 +1360,53 @@ Remove django-htmx
 
 ```console
 $ djdevx backend django packages django-htmx remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+##### `djdevx backend django packages django-silk`
+
+Manage django-silk package
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-silk [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure django-silk
+* `remove`: Remove django-silk
+
+###### `djdevx backend django packages django-silk install`
+
+Install and configure django-silk
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-silk install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+###### `djdevx backend django packages django-silk remove`
+
+Remove django-silk
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-silk remove [OPTIONS]
 ```
 
 **Options**:
