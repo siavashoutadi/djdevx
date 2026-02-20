@@ -203,6 +203,7 @@ dependencies = [
     { name = "requests" },
     { name = "tomlkit" },
     { name = "typer" },
+    { name = "typing-extensions" },
 ]
 
 [package.dev-dependencies]
@@ -221,6 +222,7 @@ requires-dist = [
     { name = "requests", specifier = ">=2.32.5" },
     { name = "tomlkit", specifier = ">=0.13.3" },
     { name = "typer", specifier = ">=0.15.1" },
+    { name = "typing-extensions", specifier = ">=4.5.0" },
 ]
 provides-extras = ["dev"]
 
