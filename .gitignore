@@ -166,3 +166,7 @@ cython_debug/
 /tests/new/backend/data/django/backend/.pre-commit-config.yaml
 /tests/new/backend/data/django/backend/pyproject.toml
 /tests/new/backend/data/django/backend/uv.lock
+
+
+# A directory for AI agents to use for temporary files, logs, and other data. This should not be committed to version control.
+/.ai-agents
