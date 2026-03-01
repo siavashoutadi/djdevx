@@ -3,7 +3,7 @@ import typer
 
 from pathlib import Path
 
-from ....utils.print_console import console
+from ....utils.console.print import print_console
 from ....utils.django.project_manager import DjangoProjectManager
 
 app = typer.Typer(no_args_is_help=True)
@@ -16,13 +16,13 @@ def install():
     """
     pm = DjangoProjectManager()
     if not pm.has_dependency("channels"):
-        console.error(
+        print_console.error(
             "'channels' package is a dependency for djangochannelsrestframework. Please install that frist."
         )
-        console.info("\n> ddx packages channels install")
+        print_console.info("\n> ddx packages channels install")
         raise typer.Exit(code=1)
 
-    console.step("Installing djangochannelsrestframework package ...")
+    print_console.step("Installing djangochannelsrestframework package ...")
     uv_runner = UvRunner()
     uv_runner.add_package("djangochannelsrestframework")
 
@@ -36,7 +36,7 @@ def install():
 
     pm.copy_templates(source_dir=source_dir, template_context={})
 
-    console.success("djangochannelsrestframework is installed successfully.")
+    print_console.success("djangochannelsrestframework is installed successfully.")
 
 
 @app.command()
@@ -44,7 +44,7 @@ def remove():
     """
     Remove djangochannelsrestframework package
     """
-    console.step("Removing djangochannelsrestframework package ...")
+    print_console.step("Removing djangochannelsrestframework package ...")
 
     pm = DjangoProjectManager()
     uv_runner = UvRunner()
@@ -56,4 +56,4 @@ def remove():
     )
     settings_url.unlink(missing_ok=True)
 
-    console.success("djangochannelsrestframework is removed successfully.")
+    print_console.success("djangochannelsrestframework is removed successfully.")

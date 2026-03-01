@@ -3,7 +3,7 @@ import typer
 
 from pathlib import Path
 
-from ....utils.print_console import console
+from ....utils.console.print import print_console
 from ....utils.django.project_manager import DjangoProjectManager
 
 app = typer.Typer(no_args_is_help=True)
@@ -16,7 +16,7 @@ def install():
     """
     pm = DjangoProjectManager()
 
-    console.step("Installing django-permissions-policy package ...")
+    print_console.step("Installing django-permissions-policy package ...")
     uv_runner = UvRunner()
     uv_runner.add_package("django-permissions-policy")
 
@@ -30,7 +30,7 @@ def install():
 
     pm.copy_templates(source_dir=source_dir, template_context={})
 
-    console.success("django-permissions-policy is installed successfully.")
+    print_console.success("django-permissions-policy is installed successfully.")
 
 
 @app.command()
@@ -38,7 +38,7 @@ def remove():
     """
     Remove django-permissions-policy package
     """
-    console.step("Removing django-permissions-policy package ...")
+    print_console.step("Removing django-permissions-policy package ...")
 
     pm = DjangoProjectManager()
     if pm.has_dependency("django-permissions-policy"):
@@ -53,4 +53,4 @@ def remove():
     )
     settings_url.unlink(missing_ok=True)
 
-    console.success("django-permissions-policy is removed successfully.")
+    print_console.success("django-permissions-policy is removed successfully.")

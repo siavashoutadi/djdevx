@@ -3,7 +3,7 @@ import typer
 
 from pathlib import Path
 
-from ....utils.print_console import console
+from ....utils.console.print import print_console
 from ....utils.django.project_manager import DjangoProjectManager
 
 app = typer.Typer(no_args_is_help=True)
@@ -16,7 +16,7 @@ def install():
     """
     pm = DjangoProjectManager()
 
-    console.step("Installing heroicons package ...")
+    print_console.step("Installing heroicons package ...")
     uv_runner = UvRunner()
     uv_runner.add_package("heroicons[django]")
 
@@ -25,7 +25,7 @@ def install():
 
     pm.copy_templates(source_dir=source_dir, template_context={})
 
-    console.success("heroicons is installed successfully.")
+    print_console.success("heroicons is installed successfully.")
 
 
 @app.command()
@@ -33,7 +33,7 @@ def remove():
     """
     Remove heroicons
     """
-    console.step("Removing heroicons package ...")
+    print_console.step("Removing heroicons package ...")
 
     pm = DjangoProjectManager()
     uv_runner = UvRunner()
@@ -43,4 +43,4 @@ def remove():
     settings_path = Path.joinpath(pm.packages_settings_path, "heroicons.py")
     settings_path.unlink(missing_ok=True)
 
-    console.success("heroicons is removed successfully.")
+    print_console.success("heroicons is removed successfully.")

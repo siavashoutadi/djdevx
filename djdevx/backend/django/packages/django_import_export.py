@@ -3,7 +3,7 @@ import typer
 
 from pathlib import Path
 
-from ....utils.print_console import console
+from ....utils.console.print import print_console
 from ....utils.django.project_manager import DjangoProjectManager
 
 app = typer.Typer(no_args_is_help=True)
@@ -16,7 +16,7 @@ def install():
     """
     pm = DjangoProjectManager()
 
-    console.step("Installing django-import-export package ...")
+    print_console.step("Installing django-import-export package ...")
     uv_runner = UvRunner()
     uv_runner.add_package("django-import-export")
 
@@ -30,7 +30,7 @@ def install():
 
     pm.copy_templates(source_dir=source_dir, template_context={})
 
-    console.success("django-import-export is installed successfully.")
+    print_console.success("django-import-export is installed successfully.")
 
 
 @app.command()
@@ -38,7 +38,7 @@ def remove():
     """
     Remove django-import-export package
     """
-    console.step("Removing django-import-export package ...")
+    print_console.step("Removing django-import-export package ...")
 
     pm = DjangoProjectManager()
     if pm.has_dependency("django-import-export"):

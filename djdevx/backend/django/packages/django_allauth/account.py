@@ -4,7 +4,7 @@ from pathlib import Path
 from typing_extensions import Annotated
 
 from .....utils.django.uv_runner import UvRunner
-from .....utils.print_console import console
+from .....utils.console.print import print_console
 from .....utils.django.project_manager import DjangoProjectManager
 
 app = typer.Typer(no_args_is_help=True)
@@ -46,7 +46,9 @@ def install(
     """
     pm = DjangoProjectManager()
 
-    console.step("Installing django-allauth package with account functionality ...")
+    print_console.step(
+        "Installing django-allauth package with account functionality ..."
+    )
 
     uv = UvRunner()
     uv.add_package("django-allauth")
@@ -72,7 +74,7 @@ def install(
         },
     )
 
-    console.success(
+    print_console.success(
         "django-allauth with account functionality is installed successfully."
     )
 
@@ -84,7 +86,7 @@ def remove():
     """
     pm = DjangoProjectManager()
 
-    console.step("Removing django-allauth package ...")
+    print_console.step("Removing django-allauth package ...")
 
     settings_path = Path.joinpath(
         pm.packages_settings_path, "django_allauth_account.py"
@@ -105,7 +107,9 @@ def remove():
         if pm.has_dependency(dep):
             uv.remove_package(dep)
 
-    console.success("django-allauth account functionality is removed successfully.")
+    print_console.success(
+        "django-allauth account functionality is removed successfully."
+    )
 
 
 @app.command()
@@ -113,7 +117,9 @@ def env():
     """
     Configure environment variables for django-allauth
     """
-    console.step(
+    print_console.step(
         "No additional environment variables needed for django-allauth account functionality"
     )
-    console.success("django-allauth account functionality uses Django settings only.")
+    print_console.success(
+        "django-allauth account functionality uses Django settings only."
+    )

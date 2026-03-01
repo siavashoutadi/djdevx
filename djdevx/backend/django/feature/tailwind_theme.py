@@ -6,9 +6,9 @@ from pathlib import Path
 
 from ....utils.django.project_manager import DjangoProjectManager
 
-from ....utils.print_console import console
-from ....utils.color_conversion import generate_palette
-from ....utils.file_operations import TemplateManager
+from ....utils.console.print import print_console
+from ....utils.color.converter import color_converter
+from ....utils.templates.manager import TemplateManager
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -24,7 +24,7 @@ def process_color(color: str) -> str:
 def generate_color_palette(base_color: str) -> dict:
     """Generate color palette from base color if it's a hex color"""
     if base_color.startswith("#"):
-        return generate_palette(base_color)
+        return color_converter.generate_palette(base_color)
     raise ValueError("Color palettes can only be generated from hex color codes.")
 
 
@@ -198,10 +198,10 @@ def install(
     neutral_palette = generate_color_palette(neutral_color)
 
     if not pm.has_dependency("django-tailwind-cli"):
-        console.error(
+        print_console.error(
             "django-tailwind-cli package is not set up in this project. Please install it by running:\n"
         )
-        console.info("ddx backend django packages django-tailwind-cli install")
+        print_console.info("ddx backend django packages django-tailwind-cli install")
         raise typer.Exit(code=1)
 
     current_dir = Path(__file__).resolve().parent
@@ -257,7 +257,7 @@ def install(
 
     input_css_path.write_text(input_content, encoding="utf-8")
 
-    console.success("Tailwind theme installed successfully.")
+    print_console.success("Tailwind theme installed successfully.")
 
 
 @app.command()
@@ -281,4 +281,4 @@ def remove():
             ['@import "./theme.css";'],
         )
 
-    console.success("Tailwind theme removed successfully.")
+    print_console.success("Tailwind theme removed successfully.")

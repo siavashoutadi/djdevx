@@ -4,7 +4,7 @@ import typer
 from pathlib import Path
 from typing_extensions import Annotated
 
-from ....utils.print_console import console
+from ....utils.console.print import print_console
 from ....utils.django.project_manager import DjangoProjectManager
 
 app = typer.Typer(no_args_is_help=True)
@@ -170,7 +170,7 @@ def install(
                 "Twitter card type", default="summary_large_image"
             )
 
-    console.step("Installing django-meta package ...")
+    print_console.step("Installing django-meta package ...")
     uv_runner = UvRunner()
     uv_runner.add_package("django-meta")
 
@@ -201,7 +201,7 @@ def install(
 
     pm.copy_templates(source_dir=source_dir, template_context=template_context)
 
-    console.success("django-meta is installed successfully.")
+    print_console.success("django-meta is installed successfully.")
 
 
 @app.command()
@@ -209,7 +209,7 @@ def remove():
     """
     Remove django-meta package
     """
-    console.step("Removing django-meta package ...")
+    print_console.step("Removing django-meta package ...")
 
     pm = DjangoProjectManager()
     if pm.has_dependency("django-meta"):
@@ -219,4 +219,4 @@ def remove():
     settings_path = Path.joinpath(pm.packages_settings_path, "django_meta.py")
     settings_path.unlink(missing_ok=True)
 
-    console.success("django-meta is removed successfully.")
+    print_console.success("django-meta is removed successfully.")

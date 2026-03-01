@@ -5,8 +5,8 @@ import typer
 from typing_extensions import Annotated
 from pathlib import Path
 
-from ...utils.print_console import console
-from ...utils.file_operations import TemplateManager
+from ...utils.console.print import print_console
+from ...utils.templates.manager import TemplateManager
 from ...utils.django.uv_runner import UvRunner
 from ...requirement import requirement
 
@@ -64,7 +64,7 @@ def django(
 
     requirement()
 
-    console.step("Initializing the project ...")
+    print_console.step("Initializing the project ...")
 
     current_dir = Path(__file__).resolve().parent
     source_dir = current_dir / ".." / ".." / "templates" / "new" / "backend" / "django"
@@ -88,14 +88,14 @@ def django(
     install_dependencies(backend_root_path)
 
     if git_init and not is_git_repository(dest_dir):
-        console.step("Initializing the git repository ...")
+        print_console.step("Initializing the git repository ...")
         init_git(dest_dir)
 
     update_precommit_hooks(
         backend_root=backend_root_path, project_dir=dest_dir, git_init=git_init
     )
 
-    console.success("Project is initialized successfully.")
+    print_console.success("Project is initialized successfully.")
 
 
 def generate_secret():
@@ -118,9 +118,9 @@ def install_dependencies(backend_root: Path):
         "python-dotenv",
     ]
     for pkg in dependencies:
-        console.step(f"Installing {pkg} ...")
+        print_console.step(f"Installing {pkg} ...")
         uv.add_package(pkg)
-        console.success(f"{pkg} is installed successfully.")
+        print_console.success(f"{pkg} is installed successfully.")
 
     dev_dependencies: list[str] = [
         "factory_boy",
@@ -131,13 +131,13 @@ def install_dependencies(backend_root: Path):
     ]
 
     for pkg in dev_dependencies:
-        console.step(f"Installing {pkg} ...")
+        print_console.step(f"Installing {pkg} ...")
         uv.add_package(pkg, group="dev")
-        console.success(f"{pkg} is installed successfully.")
+        print_console.success(f"{pkg} is installed successfully.")
 
 
 def update_precommit_hooks(backend_root: Path, project_dir: Path, git_init: bool):
-    console.step("Updating pre-commit hooks ...")
+    print_console.step("Updating pre-commit hooks ...")
     uv = UvRunner(backend_root=backend_root)
     uv.run_uv_command("run", "pre-commit", "autoupdate")
     if git_init and is_git_repository(project_dir):

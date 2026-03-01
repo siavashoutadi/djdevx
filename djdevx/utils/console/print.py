@@ -51,5 +51,4 @@ class PrintConsole:
                 self._console.print("  " + body)
 
 
-# Create default instance for easy importing
-console = PrintConsole()
+print_console = PrintConsole()

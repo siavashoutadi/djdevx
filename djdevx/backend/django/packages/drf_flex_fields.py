@@ -3,7 +3,7 @@ import typer
 
 from pathlib import Path
 
-from ....utils.print_console import console
+from ....utils.console.print import print_console
 from ....utils.django.project_manager import DjangoProjectManager
 
 app = typer.Typer(no_args_is_help=True)
@@ -16,7 +16,7 @@ def install():
     """
     pm = DjangoProjectManager()
 
-    console.step("Installing drf-flex-fields package ...")
+    print_console.step("Installing drf-flex-fields package ...")
     uv_runner = UvRunner()
     uv_runner.add_package("drf-flex-fields")
 
@@ -27,7 +27,7 @@ def install():
 
     pm.copy_templates(source_dir=source_dir, template_context={})
 
-    console.success("drf-flex-fields is installed successfully.")
+    print_console.success("drf-flex-fields is installed successfully.")
 
 
 @app.command()
@@ -35,7 +35,7 @@ def remove():
     """
     Remove drf-flex-fields package
     """
-    console.step("Removing drf-flex-fields package ...")
+    print_console.step("Removing drf-flex-fields package ...")
 
     pm = DjangoProjectManager()
     uv_runner = UvRunner()
@@ -48,4 +48,4 @@ def remove():
     settings_url = Path.joinpath(pm.packages_settings_path, "drf_flex_fields.py")
     settings_url.unlink(missing_ok=True)
 
-    console.success("drf-flex-fields is removed successfully.")
+    print_console.success("drf-flex-fields is removed successfully.")

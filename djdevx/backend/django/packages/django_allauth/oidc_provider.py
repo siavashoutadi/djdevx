@@ -7,9 +7,8 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import default_backend
 
 from .....utils.django.uv_runner import UvRunner
-from .....utils.print_console import console
+from .....utils.console.print import print_console
 from .....utils.django.project_manager import DjangoProjectManager
-from .....utils.djdevx_config import DjdevxConfig
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -56,20 +55,22 @@ def install():
     """
     pm = DjangoProjectManager()
 
-    console.step("Checking if django-allauth account is installed ...")
+    print_console.step("Checking if django-allauth account is installed ...")
 
     account_settings_path = Path.joinpath(
         pm.packages_settings_path, "django_allauth_account.py"
     )
 
     if not account_settings_path.exists():
-        console.error(
+        print_console.error(
             "django-allauth account functionality is not configured. Please install it first."
         )
-        console.info("\n> ddx backend django packages django-allauth account install")
+        print_console.info(
+            "\n> ddx backend django packages django-allauth account install"
+        )
         raise typer.Exit(1)
 
-    console.step("Installing django-allauth OIDC provider ...")
+    print_console.step("Installing django-allauth OIDC provider ...")
 
     uv = UvRunner()
     uv.add_package("django-allauth[idp-oidc]")
@@ -90,7 +91,7 @@ def install():
 
     env()
 
-    console.success("django-allauth OIDC provider is installed successfully.")
+    print_console.success("django-allauth OIDC provider is installed successfully.")
 
 
 @app.command()
@@ -103,9 +104,7 @@ def remove():
     """
     pm = DjangoProjectManager()
 
-    console.step("Removing django-allauth OIDC provider configuration ...")
-
-    # Remove OIDC provider settings file
+    print_console.step("Removing django-allauth OIDC provider configuration ...")
     oidc_settings_path = Path.joinpath(
         pm.packages_settings_path, "django_allauth_oidc_provider.py"
     )
@@ -134,14 +133,14 @@ def remove():
     )
     management_init_path.unlink(missing_ok=True)
 
-    djdevx_config = DjdevxConfig()
-    devcontainer_env_path = djdevx_config.devcontainer_env_devcontainer_path
-    remove_env_variable_from_file(devcontainer_env_path, "IDP_OIDC_PRIVATE_KEY")
+    remove_env_variable_from_file(
+        pm.devcontainer_env_devcontainer_path, "IDP_OIDC_PRIVATE_KEY"
+    )
 
-    console.success(
+    print_console.success(
         "django-allauth OIDC provider configuration is removed successfully."
     )
-    console.info(
+    print_console.info(
         "Note: django-allauth[idp-oidc] package remains installed. Use 'ddx backend django packages django-allauth account remove' to remove the entire package."
     )
 
@@ -154,8 +153,8 @@ def env():
     Auto-generates a private key for signing ID tokens.
     """
 
-    console.step("Configuring environment variables for OIDC provider ...")
-    console.step("Generating RSA 2048-bit private key ...")
+    print_console.step("Configuring environment variables for OIDC provider ...")
+    print_console.step("Generating RSA 2048-bit private key ...")
 
     private_key_obj = rsa.generate_private_key(
         public_exponent=65537,
@@ -170,10 +169,12 @@ def env():
         encryption_algorithm=serialization.NoEncryption(),
     ).decode("utf-8")
 
-    console.success("Private key generated successfully.")
+    print_console.success("Private key generated successfully.")
 
     pm = DjangoProjectManager()
     pm.add_env_variable(key="IDP_OIDC_PRIVATE_KEY", value=f"'{private_key}'")
 
-    console.success("OIDC provider environment variables configured successfully.")
-    console.info("Private key has been saved to .env as IDP_OIDC_PRIVATE_KEY")
+    print_console.success(
+        "OIDC provider environment variables configured successfully."
+    )
+    print_console.info("Private key has been saved to .env as IDP_OIDC_PRIVATE_KEY")

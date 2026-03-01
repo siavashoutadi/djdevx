@@ -3,7 +3,7 @@ from pathlib import Path
 from typing_extensions import Annotated
 
 from .....utils.django.uv_runner import UvRunner
-from .....utils.print_console import console
+from .....utils.console.print import print_console
 from .....utils.django.project_manager import DjangoProjectManager
 
 app = typer.Typer(no_args_is_help=True)
@@ -46,7 +46,7 @@ def install(
     """
     pm = DjangoProjectManager()
 
-    console.step("Installing django-anymail with SES backend ...")
+    print_console.step("Installing django-anymail with SES backend ...")
 
     uv = UvRunner()
     uv.add_package("django-anymail[amazon-ses]")
@@ -69,7 +69,7 @@ def install(
         default_from_email=default_from_email,
     )
 
-    console.success("django-anymail with SES backend is installed successfully.")
+    print_console.success("django-anymail with SES backend is installed successfully.")
 
 
 @app.command()
@@ -79,7 +79,7 @@ def remove():
     """
     pm = DjangoProjectManager()
 
-    console.step("Removing django-anymail package ...")
+    print_console.step("Removing django-anymail package ...")
 
     pm = DjangoProjectManager()
     uv = UvRunner()
@@ -94,7 +94,7 @@ def remove():
     pm.remove_env_variable("ANYMAIL_SES_REGION_NAME")
     pm.remove_env_variable("DEFAULT_FROM_EMAIL")
 
-    console.success("django-anymail SES backend is removed successfully.")
+    print_console.success("django-anymail SES backend is removed successfully.")
 
 
 @app.command()
@@ -134,13 +134,15 @@ def env(
     """
     pm = DjangoProjectManager()
 
-    console.step("Configuring environment variables for django-anymail SES backend ...")
+    print_console.step(
+        "Configuring environment variables for django-anymail SES backend ..."
+    )
 
     pm.add_env_variable(key="ANYMAIL_SES_ACCESS_KEY", value=access_key)
     pm.add_env_variable(key="ANYMAIL_SES_SECRET_KEY", value=secret_key)
     pm.add_env_variable(key="ANYMAIL_SES_REGION_NAME", value=region_name)
     pm.add_env_variable(key="DEFAULT_FROM_EMAIL", value=default_from_email)
 
-    console.success(
+    print_console.success(
         "django-anymail SES environment variables are configured successfully."
     )

@@ -4,8 +4,8 @@ import typer
 from pathlib import Path
 
 from ....utils.django.uv_runner import UvRunner
-from ....utils.file_operations import TemplateManager
-from ....utils.print_console import console
+from ....utils.templates.manager import TemplateManager
+from ....utils.console.print import print_console
 from ....utils.django.project_manager import DjangoProjectManager
 
 app = typer.Typer(no_args_is_help=True)
@@ -18,13 +18,13 @@ def env():
     """
     pm = DjangoProjectManager()
 
-    console.step("Creating environment variables for channels ...")
+    print_console.step("Creating environment variables for channels ...")
     pm.add_env_variable(
         key="CHANNEL_LAYERS_REDIS_HOST",
         value="redis://default:${REDIS_PASSWORD}@cache:6379/1",
     )
 
-    console.success("channels environment variables are configured successfully.")
+    print_console.success("channels environment variables are configured successfully.")
 
 
 @app.command()
@@ -34,7 +34,7 @@ def install():
     """
     pm = DjangoProjectManager()
 
-    console.step("Installing channels package ...")
+    print_console.step("Installing channels package ...")
 
     uv = UvRunner()
     uv.add_package("channels[daphne]")
@@ -48,7 +48,7 @@ def install():
 
     env()
 
-    console.success("channels is installed successfully.")
+    print_console.success("channels is installed successfully.")
 
 
 @app.command()
@@ -56,7 +56,7 @@ def remove():
     """
     Remove channels package
     """
-    console.step("Removing channels package ...")
+    print_console.step("Removing channels package ...")
 
     pm = DjangoProjectManager()
 
@@ -97,4 +97,4 @@ def remove():
         template_context={"backend_root": "backend"},
     )
 
-    console.success("channels is removed successfully.")
+    print_console.success("channels is removed successfully.")

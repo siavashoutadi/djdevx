@@ -2,7 +2,7 @@ import subprocess
 from pathlib import Path
 from typing import List, Optional
 
-from ..djdevx_config import DjdevxConfig
+from ..djdevx_config.backend.django import DjangoConfig
 
 
 class UvRunner:
@@ -14,7 +14,7 @@ class UvRunner:
         if backend_root:
             self.backend_root = backend_root
         else:
-            config = DjdevxConfig()
+            config = DjangoConfig()
             self.backend_root = config.django_backend_root
 
     def run_manage_command(

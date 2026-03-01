@@ -3,7 +3,7 @@ from pathlib import Path
 from typing_extensions import Annotated
 
 from .....utils.django.uv_runner import UvRunner
-from .....utils.print_console import console
+from .....utils.console.print import print_console
 from .....utils.django.project_manager import DjangoProjectManager
 
 app = typer.Typer(no_args_is_help=True)
@@ -39,7 +39,7 @@ def install(
     """
     pm = DjangoProjectManager()
 
-    console.step("Installing django-anymail with Mailjet backend ...")
+    print_console.step("Installing django-anymail with Mailjet backend ...")
 
     uv = UvRunner()
     uv.add_package("django-anymail")
@@ -57,7 +57,9 @@ def install(
 
     env(api_key=api_key, secret_key=secret_key, default_from_email=default_from_email)
 
-    console.success("django-anymail with Mailjet backend is installed successfully.")
+    print_console.success(
+        "django-anymail with Mailjet backend is installed successfully."
+    )
 
 
 @app.command()
@@ -67,7 +69,7 @@ def remove():
     """
     pm = DjangoProjectManager()
 
-    console.step("Removing django-anymail package ...")
+    print_console.step("Removing django-anymail package ...")
 
     pm = DjangoProjectManager()
     uv = UvRunner()
@@ -83,7 +85,7 @@ def remove():
     pm.remove_env_variable("ANYMAIL_MAILJET_SECRET_KEY")
     pm.remove_env_variable("DEFAULT_FROM_EMAIL")
 
-    console.success("django-anymail Mailjet backend is removed successfully.")
+    print_console.success("django-anymail Mailjet backend is removed successfully.")
 
 
 @app.command()
@@ -116,7 +118,7 @@ def env(
     """
     pm = DjangoProjectManager()
 
-    console.step(
+    print_console.step(
         "Configuring environment variables for django-anymail Mailjet backend ..."
     )
 
@@ -124,6 +126,6 @@ def env(
     pm.add_env_variable(key="ANYMAIL_MAILJET_SECRET_KEY", value=secret_key)
     pm.add_env_variable(key="DEFAULT_FROM_EMAIL", value=default_from_email)
 
-    console.success(
+    print_console.success(
         "django-anymail Mailjet environment variables are configured successfully."
     )

@@ -6,8 +6,8 @@ from pathlib import Path
 
 from ....utils.django.project_manager import DjangoProjectManager
 
-from ....utils.print_console import console
-from ....utils.file_operations import TemplateManager
+from ....utils.console.print import print_console
+from ....utils.templates.manager import TemplateManager
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -19,7 +19,7 @@ def install():
     pm = DjangoProjectManager()
 
     if not pm.has_dependency("heroicons"):
-        console.error(
+        print_console.error(
             "Heroicons is not installed. Please install it first by running: ddx packages heroicons install"
         )
         raise typer.Exit(code=1)
@@ -33,7 +33,7 @@ def install():
     theme_css_path = project_path / "tailwind" / "src" / "css" / "theme.css"
 
     if not theme_css_path.exists():
-        console.error(
+        print_console.error(
             "Tailwind theme is not installed. Please install Tailwind theme first.\nInstall it by running: djdevx feature tailwind-theme install"
         )
         raise typer.Exit(code=1)
@@ -56,7 +56,7 @@ def install():
 
     input_css_path.write_text(input_content, encoding="utf-8")
 
-    console.success("Tailwind UI installed successfully.")
+    print_console.success("Tailwind UI installed successfully.")
 
 
 @app.command()
@@ -85,4 +85,4 @@ def remove():
             ["tailwind-ui"],
         )
 
-    console.success("Tailwind UI removed successfully.")
+    print_console.success("Tailwind UI removed successfully.")

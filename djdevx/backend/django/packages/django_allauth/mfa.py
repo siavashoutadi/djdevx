@@ -4,7 +4,7 @@ from typing_extensions import Annotated
 import shutil
 
 from .....utils.django.uv_runner import UvRunner
-from .....utils.print_console import console
+from .....utils.console.print import print_console
 from .....utils.django.project_manager import DjangoProjectManager
 
 app = typer.Typer(no_args_is_help=True)
@@ -123,12 +123,14 @@ def install(
     """
     pm = DjangoProjectManager()
 
-    console.step("Checking if django-allauth account is installed ...")
+    print_console.step("Checking if django-allauth account is installed ...")
     if not pm.has_dependency("django-allauth"):
-        console.error(
+        print_console.error(
             "'django-allauth' package is not installed. Please install django-allauth account functionality first."
         )
-        console.info("\n> ddx backend django packages django-allauth account install")
+        print_console.info(
+            "\n> ddx backend django packages django-allauth account install"
+        )
         raise typer.Exit(1)
 
     # Check if account settings exist
@@ -136,13 +138,15 @@ def install(
         pm.packages_settings_path, "django_allauth_account.py"
     )
     if not account_settings_path.exists():
-        console.error(
+        print_console.error(
             "django-allauth account functionality is not configured. Please install it first."
         )
-        console.info("\n> ddx backend django packages django-allauth account install")
+        print_console.info(
+            "\n> ddx backend django packages django-allauth account install"
+        )
         raise typer.Exit(1)
 
-    console.step("Installing django-allauth package with MFA functionality ...")
+    print_console.step("Installing django-allauth package with MFA functionality ...")
 
     uv = UvRunner()
     uv.add_package("django-allauth[mfa]")
@@ -176,7 +180,9 @@ def install(
         },
     )
 
-    console.success("django-allauth with MFA functionality is installed successfully.")
+    print_console.success(
+        "django-allauth with MFA functionality is installed successfully."
+    )
 
 
 @app.command()
@@ -190,7 +196,7 @@ def remove():
     """
     pm = DjangoProjectManager()
 
-    console.step("Removing django-allauth MFA configuration ...")
+    print_console.step("Removing django-allauth MFA configuration ...")
 
     # Remove MFA settings file
     mfa_settings_path = Path.joinpath(
@@ -206,7 +212,7 @@ def remove():
 
     shutil.rmtree(templates_dir, ignore_errors=True)
 
-    console.success("django-allauth MFA configuration is removed successfully.")
-    console.info(
+    print_console.success("django-allauth MFA configuration is removed successfully.")
+    print_console.info(
         "Note: django-allauth[mfa] package remains installed. Use 'ddx backend django packages django-allauth account remove' to remove the entire package."
     )

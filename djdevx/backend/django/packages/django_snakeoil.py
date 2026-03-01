@@ -3,7 +3,7 @@ from pathlib import Path
 from typing_extensions import Annotated
 
 from ....utils.django.uv_runner import UvRunner
-from ....utils.print_console import console
+from ....utils.console.print import print_console
 from ....utils.django.project_manager import DjangoProjectManager
 
 app = typer.Typer(no_args_is_help=True)
@@ -133,7 +133,7 @@ def install(
     """
     pm = DjangoProjectManager()
 
-    console.step("Installing django-snakeoil package ...")
+    print_console.step("Installing django-snakeoil package ...")
 
     uv_runner = UvRunner()
     uv_runner.add_package("django-snakeoil")
@@ -163,7 +163,7 @@ def install(
 
     add_snakeoil_to_base_template()
 
-    console.success("django-snakeoil is installed successfully.")
+    print_console.success("django-snakeoil is installed successfully.")
 
 
 @app.command()
@@ -171,7 +171,7 @@ def remove():
     """
     Remove django-snakeoil
     """
-    console.step("Removing django-snakeoil package ...")
+    print_console.step("Removing django-snakeoil package ...")
 
     pm = DjangoProjectManager()
     uv_runner = UvRunner()
@@ -183,4 +183,4 @@ def remove():
 
     remove_snakeoil_from_base_template()
 
-    console.success("django-snakeoil is removed successfully.")
+    print_console.success("django-snakeoil is removed successfully.")

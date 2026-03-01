@@ -44,9 +44,9 @@ app = typer.Typer(no_args_is_help=True)
 @app.command()
 def install():
     """Install and configure django-debug-toolbar"""
-    console.step("Installing django-debug-toolbar...")
+    print_console.step("Installing django-debug-toolbar...")
     # Implementation here
-    console.success("django-debug-toolbar installed successfully.")
+    print_console.success("django-debug-toolbar installed successfully.")
 ```
 
 **Register in parent: `djdevx/backend/django/packages/__init__.py`**
@@ -72,13 +72,13 @@ app = typer.Typer(no_args_is_help=True)
 @app.command()
 def install():
     """Install channels"""
-    console.step("Installing channels...")
+    print_console.step("Installing channels...")
     # Implementation
 
 @app.command()
 def remove():
     """Remove channels"""
-    console.step("Removing channels...")
+    print_console.step("Removing channels...")
     # Implementation
 ```
 

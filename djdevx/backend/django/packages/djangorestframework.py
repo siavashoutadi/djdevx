@@ -3,7 +3,7 @@ import typer
 
 from pathlib import Path
 
-from ....utils.print_console import console
+from ....utils.console.print import print_console
 from ....utils.django.project_manager import DjangoProjectManager
 
 app = typer.Typer(no_args_is_help=True)
@@ -16,7 +16,7 @@ def install():
     """
     pm = DjangoProjectManager()
 
-    console.step("Installing djangorestframework package ...")
+    print_console.step("Installing djangorestframework package ...")
     uv_runner = UvRunner()
     uv_runner.add_package("djangorestframework")
 
@@ -30,7 +30,7 @@ def install():
 
     pm.copy_templates(source_dir=source_dir, template_context={})
 
-    console.success("djangorestframework is installed successfully.")
+    print_console.success("djangorestframework is installed successfully.")
 
 
 @app.command()
@@ -38,7 +38,7 @@ def remove():
     """
     Remove djangorestframework
     """
-    console.step("Removing djangorestframework package ...")
+    print_console.step("Removing djangorestframework package ...")
 
     pm = DjangoProjectManager()
     uv_runner = UvRunner()
@@ -51,4 +51,4 @@ def remove():
     settings_url = Path.joinpath(pm.packages_settings_path, "djangorestframework.py")
     settings_url.unlink(missing_ok=True)
 
-    console.success("djangorestframework is removed successfully.")
+    print_console.success("djangorestframework is removed successfully.")

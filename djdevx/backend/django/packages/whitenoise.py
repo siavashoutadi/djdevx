@@ -3,7 +3,7 @@ import typer
 
 from pathlib import Path
 
-from ....utils.print_console import console
+from ....utils.console.print import print_console
 from ....utils.django.project_manager import DjangoProjectManager
 
 app = typer.Typer(no_args_is_help=True)
@@ -16,7 +16,7 @@ def install():
     """
     pm = DjangoProjectManager()
 
-    console.step("Installing whitenoise package ...")
+    print_console.step("Installing whitenoise package ...")
     uv_runner = UvRunner()
     uv_runner.add_package("whitenoise")
 
@@ -27,7 +27,7 @@ def install():
 
     pm.copy_templates(source_dir=source_dir, template_context={})
 
-    console.success("whitenoise is installed successfully.")
+    print_console.success("whitenoise is installed successfully.")
 
 
 @app.command()
@@ -35,7 +35,7 @@ def remove():
     """
     Remove whitenoise
     """
-    console.step("Removing whitenoise package ...")
+    print_console.step("Removing whitenoise package ...")
 
     pm = DjangoProjectManager()
     if pm.has_dependency("whitenoise"):
@@ -45,4 +45,4 @@ def remove():
     settings_url = Path.joinpath(pm.packages_settings_path, "whitenoise.py")
     settings_url.unlink(missing_ok=True)
 
-    console.success("whitenoise is removed successfully.")
+    print_console.success("whitenoise is removed successfully.")

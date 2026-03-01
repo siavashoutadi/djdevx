@@ -3,7 +3,7 @@ import typer
 
 from pathlib import Path
 
-from ....utils.print_console import console
+from ....utils.console.print import print_console
 from ....utils.django.project_manager import DjangoProjectManager
 
 app = typer.Typer(no_args_is_help=True)
@@ -16,7 +16,7 @@ def install():
     """
     pm = DjangoProjectManager()
 
-    console.step("Installing django-guardian package ...")
+    print_console.step("Installing django-guardian package ...")
     uv_runner = UvRunner()
     uv_runner.add_package("django-guardian")
 
@@ -42,7 +42,7 @@ def install():
             )
             user_mode_file.write_text(updated_content)
 
-    console.success("django-guardian is installed successfully.")
+    print_console.success("django-guardian is installed successfully.")
 
 
 @app.command()
@@ -50,7 +50,7 @@ def remove():
     """
     Remove django-guardian
     """
-    console.step("Removing django-guardian package ...")
+    print_console.step("Removing django-guardian package ...")
 
     pm = DjangoProjectManager()
     if pm.has_dependency("django-guardian"):
@@ -82,4 +82,4 @@ def remove():
     settings_url = Path.joinpath(pm.packages_settings_path, "django_guardian.py")
     settings_url.unlink(missing_ok=True)
 
-    console.success("django-guardian is removed successfully.")
+    print_console.success("django-guardian is removed successfully.")

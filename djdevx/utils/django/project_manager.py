@@ -4,9 +4,10 @@ import typer
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
-from ..print_console import console
-from ..djdevx_config import DjdevxConfig
-from ..file_operations import TemplateManager
+from ..djdevx_config.backend.django import DjangoConfig
+from ..templates.manager import TemplateManager
+from ..devcontainer.manager import DevcontainerManager
+from ..console.print import print_console
 
 
 class DjangoProjectManager:
@@ -17,14 +18,15 @@ class DjangoProjectManager:
 
     def __init__(self):
         """Initialize and validate Django project."""
-        self._config = DjdevxConfig()
+        self._config = DjangoConfig()
         self._template_manager = TemplateManager()
+        self._devcontainer = DevcontainerManager(self._config.project_root_dir)
         self.validate_django_project()
 
     def validate_django_project(self) -> None:
         """Validate that this is a Django project managed by djdevx."""
         if not self.project_path.exists():
-            console.error(
+            print_console.error(
                 "Could not find pyproject.toml. Are you running from the project directory?"
             )
             raise typer.Exit(code=1)
@@ -133,17 +135,16 @@ class DjangoProjectManager:
         self, key: str, value: str, file_path: Optional[Path] = None
     ) -> None:
         """Add Django environment variable."""
-        if file_path is None:
-            file_path = self._config.devcontainer_env_devcontainer_path
-        self.remove_env_variable(key, file_path)
-        with open(file_path, "a") as f:
-            f.write(f"{key}={value}\n")
+        self._devcontainer.add_env_variable(key, value, file_path)
 
     def remove_env_variable(self, key: str, file_path: Optional[Path] = None) -> None:
         """Remove Django environment variable."""
-        if file_path is None:
-            file_path = self._config.devcontainer_env_devcontainer_path
-        self._template_manager.remove_lines_from_file(file_path, [f"{key}="])
+        self._devcontainer.remove_env_variable(key, file_path)
+
+    @property
+    def devcontainer_env_devcontainer_path(self) -> Path:
+        """Path to the devcontainer env file."""
+        return self._devcontainer.env_devcontainer_path
 
     # Django Model Operations
     def get_models(self, app_name: str):
@@ -151,14 +152,14 @@ class DjangoProjectManager:
         models_file = self.get_model_path(app_name)
 
         if not models_file.exists():
-            console.error(f"Could not find {models_file}")
+            print_console.error(f"Could not find {models_file}")
             raise typer.Exit(code=1)
 
         try:
             with open(models_file, "r", encoding="utf-8") as f:
                 tree = ast.parse(f.read(), filename=str(models_file))
         except SyntaxError as e:
-            console.error(f"Syntax error in {models_file}: {e}")
+            print_console.error(f"Syntax error in {models_file}: {e}")
             raise typer.Exit(code=1)
 
         visitor = ModelVisitor()

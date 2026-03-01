@@ -3,7 +3,7 @@ import typer
 from pathlib import Path
 
 from ....utils.django.uv_runner import UvRunner
-from ....utils.print_console import console
+from ....utils.console.print import print_console
 from ....utils.django.project_manager import DjangoProjectManager
 
 app = typer.Typer(no_args_is_help=True)
@@ -16,7 +16,7 @@ def install():
     """
     pm = DjangoProjectManager()
 
-    console.step("Installing django-silk package ...")
+    print_console.step("Installing django-silk package ...")
 
     uv = UvRunner()
     uv.add_package("django-silk", group="dev")
@@ -28,7 +28,7 @@ def install():
 
     pm.copy_templates(source_dir=source_dir, template_context={})
 
-    console.success("django-silk is installed successfully.")
+    print_console.success("django-silk is installed successfully.")
 
 
 @app.command()
@@ -36,7 +36,7 @@ def remove():
     """
     Remove django-silk
     """
-    console.step("Removing django-silk package ...")
+    print_console.step("Removing django-silk package ...")
 
     pm = DjangoProjectManager()
     uv = UvRunner()
@@ -49,4 +49,4 @@ def remove():
     settings_url = Path.joinpath(pm.packages_settings_path, "django_silk.py")
     settings_url.unlink(missing_ok=True)
 
-    console.success("django-silk is removed successfully.")
+    print_console.success("django-silk is removed successfully.")

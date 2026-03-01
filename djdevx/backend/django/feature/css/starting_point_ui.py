@@ -4,7 +4,7 @@ import requests
 from pathlib import Path
 
 from .....utils.django.project_manager import DjangoProjectManager
-from .....utils.print_console import console
+from .....utils.console.print import print_console
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -38,10 +38,10 @@ def install():
     pm = DjangoProjectManager()  # Validates Django project
 
     if not pm.has_dependency("django-tailwind-cli"):
-        console.error(
+        print_console.error(
             "django-tailwind-cli package is not set up in this project. Please install it by running:\n"
         )
-        console.info("ddx backend django packages django-tailwind-cli install")
+        print_console.info("ddx backend django packages django-tailwind-cli install")
         raise typer.Exit(code=1)
 
     version = get_latest_version()
@@ -49,7 +49,7 @@ def install():
     add_import_to_input_css()
     add_links_to_base_template()
 
-    console.success(
+    print_console.success(
         f"Starting Point UI {version} with all dependencies successfully installed!"
     )
 
@@ -68,7 +68,7 @@ def remove():
     remove_import_from_input_css()
     remove_links_from_base_template()
 
-    console.success("Starting Point UI removed successfully!")
+    print_console.success("Starting Point UI removed successfully!")
 
 
 def get_latest_version() -> str:
@@ -77,10 +77,10 @@ def get_latest_version() -> str:
         response = requests.get(api_url)
         response.raise_for_status()
         version = response.json()["tags"]["latest"]
-        console.info(f"Latest Starting Point UI version found: {version}")
+        print_console.info(f"Latest Starting Point UI version found: {version}")
         return version
     except Exception as e:
-        console.error(f"An error occurred finding the latest version: {e}")
+        print_console.error(f"An error occurred finding the latest version: {e}")
         raise typer.Exit(code=1)
 
 
@@ -112,17 +112,17 @@ def download_starting_point_ui(version: str) -> None:
         tailwind_css_dir.mkdir(parents=True, exist_ok=True)
         js_path.mkdir(parents=True, exist_ok=True)
         for file_info in files_to_download:
-            console.step(f"Downloading {file_info['description']} ...")
+            print_console.step(f"Downloading {file_info['description']} ...")
 
             response = requests.get(str(file_info["url"]))
             response.raise_for_status()
 
             Path(file_info["output_path"]).write_text(response.text)
-            console.success(
+            print_console.success(
                 f"{file_info['description']} saved to {file_info['output_path']}"
             )
     except Exception as e:
-        console.error(f"Error downloading Starting Point UI: {e}")
+        print_console.error(f"Error downloading Starting Point UI: {e}")
         raise typer.Exit(code=1)
 
 
@@ -191,7 +191,7 @@ def add_import_to_input_css() -> None:
     )
 
     input_css_path.write_text(content)
-    console.success(f"Added import to {input_css_path}")
+    print_console.success(f"Added import to {input_css_path}")
 
 
 def remove_import_from_input_css() -> None:
@@ -208,4 +208,4 @@ def remove_import_from_input_css() -> None:
         content = content.replace(import_statement + "\n", "")
         content = content.replace(import_statement, "")
         input_css_path.write_text(content)
-        console.success(f"Removed import from {input_css_path}")
+        print_console.success(f"Removed import from {input_css_path}")

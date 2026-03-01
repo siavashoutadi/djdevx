@@ -3,7 +3,7 @@ import typer
 
 from pathlib import Path
 
-from ....utils.print_console import console
+from ....utils.console.print import print_console
 from ....utils.django.project_manager import DjangoProjectManager
 
 app = typer.Typer(no_args_is_help=True)
@@ -16,13 +16,13 @@ def env():
     """
     pm = DjangoProjectManager()
 
-    console.step("Creating environment variables for django-defender ...")
+    print_console.step("Creating environment variables for django-defender ...")
     pm.add_env_variable(
         key="DEFENDER_REDIS_URL",
         value="redis://default:${REDIS_PASSWORD}@cache:6379/1",
     )
 
-    console.success(
+    print_console.success(
         "django-defender environment variables are configured successfully."
     )
 
@@ -34,7 +34,7 @@ def install():
     """
     pm = DjangoProjectManager()
 
-    console.step("Installing django-defender package ...")
+    print_console.step("Installing django-defender package ...")
     uv_runner = UvRunner()
     uv_runner.add_package("django-defender")
 
@@ -47,7 +47,7 @@ def install():
 
     env()
 
-    console.success("django-defender is installed successfully.")
+    print_console.success("django-defender is installed successfully.")
 
 
 @app.command()
@@ -55,7 +55,7 @@ def remove():
     """
     Remove django-defender package
     """
-    console.step("Removing django-defender package ...")
+    print_console.step("Removing django-defender package ...")
 
     pm = DjangoProjectManager()
     if pm.has_dependency("django-defender"):
@@ -70,4 +70,4 @@ def remove():
 
     pm.remove_env_variable("DEFENDER_REDIS_URL")
 
-    console.success("django-defender is removed successfully.")
+    print_console.success("django-defender is removed successfully.")

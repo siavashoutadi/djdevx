@@ -3,7 +3,7 @@ import typer
 from pathlib import Path
 
 from ....utils.django.uv_runner import UvRunner
-from ....utils.print_console import console
+from ....utils.console.print import print_console
 from ....utils.django.project_manager import DjangoProjectManager
 
 app = typer.Typer(no_args_is_help=True)
@@ -64,7 +64,7 @@ def remove_input_css_to_git_ignore():
 
 
 def add_tailwind_build_to_docker_file():
-    console.step("Updating Dockerfile ...")
+    print_console.step("Updating Dockerfile ...")
     build_static_line = "uv run manage.py collectstatic --noinput && \\"
     tailwind_build_line = "uv run manage.py tailwind build --force && \\"
 
@@ -96,7 +96,7 @@ def install():
     """
     pm = DjangoProjectManager()
 
-    console.step("Installing django-tailwind-cli package ...")
+    print_console.step("Installing django-tailwind-cli package ...")
     uv_runner = UvRunner()
     uv_runner.add_package("django-tailwind-cli")
 
@@ -114,7 +114,7 @@ def install():
     add_input_css_to_git_ignore()
     add_tailwind_build_to_docker_file()
 
-    console.success("django-tailwind-cli is installed successfully.")
+    print_console.success("django-tailwind-cli is installed successfully.")
 
 
 @app.command()
@@ -122,7 +122,7 @@ def remove():
     """
     Remove django-tailwind-cli
     """
-    console.step("Removing django-tailwind-cli package ...")
+    print_console.step("Removing django-tailwind-cli package ...")
 
     pm = DjangoProjectManager()
     uv_runner = UvRunner()
@@ -154,4 +154,4 @@ def remove():
     remove_input_css_to_git_ignore()
     remove_tailwind_build_to_docker_file()
 
-    console.success("django-tailwind-cli is removed successfully.")
+    print_console.success("django-tailwind-cli is removed successfully.")

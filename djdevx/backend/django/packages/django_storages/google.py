@@ -3,7 +3,7 @@ from pathlib import Path
 from typing_extensions import Annotated
 
 from .....utils.django.uv_runner import UvRunner
-from .....utils.print_console import console
+from .....utils.console.print import print_console
 from .....utils.django.project_manager import DjangoProjectManager
 
 app = typer.Typer(no_args_is_help=True)
@@ -31,7 +31,7 @@ def install(
     """
     pm = DjangoProjectManager()
 
-    console.step("Installing django-storages package with Google backend ...")
+    print_console.step("Installing django-storages package with Google backend ...")
 
     uv = UvRunner()
     uv.add_package("django-storages[google]")
@@ -53,7 +53,9 @@ def install(
     )
     pm.add_env_variable(key="STORAGES_GOOGLE_BUCKET_NAME", value=bucket_name)
 
-    console.success("django-storages with Google backend is installed successfully.")
+    print_console.success(
+        "django-storages with Google backend is installed successfully."
+    )
 
 
 @app.command()
@@ -63,7 +65,7 @@ def remove():
     """
     pm = DjangoProjectManager()
 
-    console.step("Removing django-storages package ...")
+    print_console.step("Removing django-storages package ...")
 
     pm = DjangoProjectManager()
     uv = UvRunner()
@@ -78,7 +80,7 @@ def remove():
     pm.remove_env_variable(key="STORAGES_GOOGLE_CREDENTIALS")
     pm.remove_env_variable(key="STORAGES_GOOGLE_BUCKET_NAME")
 
-    console.success("django-storages Google backend is removed successfully.")
+    print_console.success("django-storages Google backend is removed successfully.")
 
 
 @app.command()
@@ -103,7 +105,7 @@ def env(
     """
     pm = DjangoProjectManager()
 
-    console.step(
+    print_console.step(
         "Configuring environment variables for django-storages Google backend ..."
     )
 
@@ -112,6 +114,6 @@ def env(
     )
     pm.add_env_variable(key="STORAGES_GOOGLE_BUCKET_NAME", value=bucket_name)
 
-    console.success(
+    print_console.success(
         "django-storages Google environment variables are configured successfully."
     )

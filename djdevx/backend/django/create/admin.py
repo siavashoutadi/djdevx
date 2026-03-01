@@ -9,7 +9,7 @@ from ....utils.django.uv_runner import UvRunner
 
 from ....utils.django.project_manager import DjangoProjectManager
 
-from ....utils.print_console import console
+from ....utils.console.print import print_console
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -130,7 +130,7 @@ def generate_admin_file_content(app_name: str) -> Tuple[Path, str] | Tuple[None,
     model_names = [m["name"] for m in models]
 
     if not model_names:
-        console.warning("No model found. Nothing to do.")
+        print_console.warning("No model found. Nothing to do.")
         return (None, None)
 
     imports = [
@@ -190,13 +190,13 @@ def handle_admin_file_content(application_name: str, new_content: str) -> bool:
         admin_file.write_text(new_content)
         return True
 
-    console.info(f"admin.py already exists at {admin_file}")
+    print_console.info(f"admin.py already exists at {admin_file}")
 
     if content == new_content:
-        console.warning("No changes detected in admin.py. Skipping file write.")
+        print_console.warning("No changes detected in admin.py. Skipping file write.")
         return True
 
-    console.diff(
+    print_console.diff(
         content,
         new_content,
         title_old="admin.py (current)",
@@ -205,9 +205,9 @@ def handle_admin_file_content(application_name: str, new_content: str) -> bool:
 
     overwrite = typer.confirm("Overwrite file with the new content?", default=False)
     if overwrite:
-        console.step("Writing updated content to admin.py ...")
+        print_console.step("Writing updated content to admin.py ...")
         admin_file.write_text(new_content, encoding="utf-8")
-        console.success("admin.py file has been updated successfully.")
+        print_console.success("admin.py file has been updated successfully.")
         return True
 
     delete = typer.confirm("Delete the temporary file?", default=True)
@@ -227,7 +227,7 @@ def create_admin(
     """
     Create admin.py from application
     """
-    console.step(f"Creating admin.py for {application_name} application ...")
+    print_console.step(f"Creating admin.py for {application_name} application ...")
 
     DjangoProjectManager()  # Validates Django project
 

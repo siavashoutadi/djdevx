@@ -4,7 +4,7 @@ import requests
 from pathlib import Path
 
 from .....utils.django.project_manager import DjangoProjectManager
-from .....utils.print_console import console
+from .....utils.console.print import print_console
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -38,7 +38,7 @@ def install():
     download_bootstrap(version)
     add_links_to_base_template()
 
-    console.success(
+    print_console.success(
         f"Bootstrap {version} with all dependencies successfully installed!"
     )
 
@@ -52,7 +52,7 @@ def remove():
     get_bootstrap_js_path().unlink(missing_ok=True)
     remove_links_from_base_template()
 
-    console.success("Bootstrap removed successfully!")
+    print_console.success("Bootstrap removed successfully!")
 
 
 def get_latest_version() -> str:
@@ -61,10 +61,10 @@ def get_latest_version() -> str:
         response = requests.get(api_url)
         response.raise_for_status()
         version = response.json()["tags"]["latest"]
-        console.info(f"Latest Bootstrap version found: {version}")
+        print_console.info(f"Latest Bootstrap version found: {version}")
         return version
     except Exception as e:
-        console.error(f"An error occurred finding the latest version: {e}")
+        print_console.error(f"An error occurred finding the latest version: {e}")
         raise typer.Exit(code=1)
 
 
@@ -92,17 +92,17 @@ def download_bootstrap(version: str) -> None:
         css_path.mkdir(parents=True, exist_ok=True)
         js_path.mkdir(parents=True, exist_ok=True)
         for file_info in files_to_download:
-            console.step(f"Downloading {file_info['description']} ...")
+            print_console.step(f"Downloading {file_info['description']} ...")
 
             response = requests.get(file_info["url"])
             response.raise_for_status()
 
             Path(file_info["output_path"]).write_text(response.text)
-            console.success(
+            print_console.success(
                 f"{file_info['description']} saved to {file_info['output_path']}"
             )
     except Exception as e:
-        console.error(f"Error downloading Bootstrap: {e}")
+        print_console.error(f"Error downloading Bootstrap: {e}")
         raise typer.Exit(code=1)
 
 
