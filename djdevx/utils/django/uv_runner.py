@@ -73,20 +73,20 @@ class UvRunner:
 
         return subprocess.check_call(cmd, cwd=self.backend_root)
 
-    def remove_package(self, package_name: str, group: str | None = None) -> int:
+    def remove_package(self, package_name: str, group: str = "") -> int:
         """
         Remove a package using uv in the backend root.
 
         Args:
             package_name: Name of the package to remove
-            group: Dependency group name (optional)
+            group: Dependency group name (optional, default is "")
 
         Returns:
             int: The result of the command execution
         """
         cmd = ["uv", "remove", package_name]
 
-        if group:
+        if group != "":
             cmd.extend(["--group", group])
 
         return subprocess.check_call(cmd, cwd=self.backend_root)

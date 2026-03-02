@@ -40,7 +40,7 @@ def install():
 
     current_dir = Path(__file__).resolve().parent
     source_dir = (
-        current_dir.parent.parent.parent / "templates" / "django" / "django-defender"
+        current_dir.parent.parent.parent / "templates" / "django" / "django_defender"
     )
 
     pm.copy_templates(source_dir=source_dir, template_context={})

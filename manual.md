@@ -851,7 +851,7 @@ $ djdevx backend django packages django-auditlog [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `install`: Install and configure django-auditlog
-* `remove`: Remove django-auditlog
+* `remove`: Remove django-auditlog package
 
 ###### `djdevx backend django packages django-auditlog install`
 
@@ -869,7 +869,7 @@ $ djdevx backend django packages django-auditlog install [OPTIONS]
 
 ###### `djdevx backend django packages django-auditlog remove`
 
-Remove django-auditlog
+Remove django-auditlog package
 
 **Usage**:
 
@@ -898,7 +898,7 @@ $ djdevx backend django packages django-browser-reload [OPTIONS] COMMAND [ARGS].
 **Commands**:
 
 * `install`: Install and configure django-browser-reload
-* `remove`: Remove django-browser-reload
+* `remove`: Remove django-browser-reload package
 
 ###### `djdevx backend django packages django-browser-reload install`
 
@@ -916,7 +916,7 @@ $ djdevx backend django packages django-browser-reload install [OPTIONS]
 
 ###### `djdevx backend django packages django-browser-reload remove`
 
-Remove django-browser-reload
+Remove django-browser-reload package
 
 **Usage**:
 
@@ -1039,7 +1039,7 @@ $ djdevx backend django packages django-debug-toolbar [OPTIONS] COMMAND [ARGS]..
 **Commands**:
 
 * `install`: Install and configure django-debug-toolbar
-* `remove`: Remove django-debug-toolbar
+* `remove`: Remove django-debug-toolbar package
 
 ###### `djdevx backend django packages django-debug-toolbar install`
 
@@ -1057,7 +1057,7 @@ $ djdevx backend django packages django-debug-toolbar install [OPTIONS]
 
 ###### `djdevx backend django packages django-debug-toolbar remove`
 
-Remove django-debug-toolbar
+Remove django-debug-toolbar package
 
 **Usage**:
 
@@ -1148,7 +1148,7 @@ $ djdevx backend django packages django-extensions [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `install`: Install and configure django-extensions
-* `remove`: Remove django-extensions
+* `remove`: Remove django-extensions package
 
 ###### `djdevx backend django packages django-extensions install`
 
@@ -1166,7 +1166,7 @@ $ djdevx backend django packages django-extensions install [OPTIONS]
 
 ###### `djdevx backend django packages django-extensions remove`
 
-Remove django-extensions
+Remove django-extensions package
 
 **Usage**:
 
@@ -1289,7 +1289,7 @@ $ djdevx backend django packages django-health-check [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `install`: Install and configure django-health-check
-* `remove`: Remove django-health-check
+* `remove`: Remove django-health-check package
 
 ###### `djdevx backend django packages django-health-check install`
 
@@ -1307,7 +1307,7 @@ $ djdevx backend django packages django-health-check install [OPTIONS]
 
 ###### `djdevx backend django packages django-health-check remove`
 
-Remove django-health-check
+Remove django-health-check package
 
 **Usage**:
 
@@ -1383,7 +1383,7 @@ $ djdevx backend django packages django-silk [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `install`: Install and configure django-silk
-* `remove`: Remove django-silk
+* `remove`: Remove django-silk package
 
 ###### `djdevx backend django packages django-silk install`
 
@@ -1401,7 +1401,7 @@ $ djdevx backend django packages django-silk install [OPTIONS]
 
 ###### `djdevx backend django packages django-silk remove`
 
-Remove django-silk
+Remove django-silk package
 
 **Usage**:
 
@@ -1541,7 +1541,7 @@ $ djdevx backend django packages django-oauth-toolkit [OPTIONS] COMMAND [ARGS]..
 **Commands**:
 
 * `install`: Install and configure django-oauth-toolkit
-* `remove`: Remove django-oauth-toolkit
+* `remove`: Remove django-oauth-toolkit package
 
 ###### `djdevx backend django packages django-oauth-toolkit install`
 
@@ -1559,7 +1559,7 @@ $ djdevx backend django packages django-oauth-toolkit install [OPTIONS]
 
 ###### `djdevx backend django packages django-oauth-toolkit remove`
 
-Remove django-oauth-toolkit
+Remove django-oauth-toolkit package
 
 **Usage**:
 
@@ -2010,7 +2010,7 @@ $ djdevx backend django packages django-taggit [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `install`: Install and configure django-taggit
-* `remove`: Remove django-taggit
+* `remove`: Remove django-taggit package
 
 ###### `djdevx backend django packages django-taggit install`
 
@@ -2028,7 +2028,7 @@ $ djdevx backend django packages django-taggit install [OPTIONS]
 
 ###### `djdevx backend django packages django-taggit remove`
 
-Remove django-taggit
+Remove django-taggit package
 
 **Usage**:
 
@@ -2150,12 +2150,12 @@ $ djdevx backend django packages djangorestframework [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `install`: Install and configure djangorestframework
-* `remove`: Remove djangorestframework
+* `install`: Install and configure Django REST Framework
+* `remove`: Remove Django REST Framework package
 
 ###### `djdevx backend django packages djangorestframework install`
 
-Install and configure djangorestframework
+Install and configure Django REST Framework
 
 **Usage**:
 
@@ -2169,7 +2169,7 @@ $ djdevx backend django packages djangorestframework install [OPTIONS]
 
 ###### `djdevx backend django packages djangorestframework remove`
 
-Remove djangorestframework
+Remove Django REST Framework package
 
 **Usage**:
 
@@ -2339,7 +2339,7 @@ $ djdevx backend django packages heroicons [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `install`: Install and configure heroicons
-* `remove`: Remove heroicons
+* `remove`: Remove heroicons package
 
 ###### `djdevx backend django packages heroicons install`
 
@@ -2357,7 +2357,7 @@ $ djdevx backend django packages heroicons install [OPTIONS]
 
 ###### `djdevx backend django packages heroicons remove`
 
-Remove heroicons
+Remove heroicons package
 
 **Usage**:
 
@@ -2386,7 +2386,7 @@ $ djdevx backend django packages whitenoise [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `install`: Install and configure whitenoise
-* `remove`: Remove whitenoise
+* `remove`: Remove whitenoise package
 
 ###### `djdevx backend django packages whitenoise install`
 
@@ -2404,7 +2404,7 @@ $ djdevx backend django packages whitenoise install [OPTIONS]
 
 ###### `djdevx backend django packages whitenoise remove`
 
-Remove whitenoise
+Remove whitenoise package
 
 **Usage**:
 

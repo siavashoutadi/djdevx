@@ -176,7 +176,7 @@ def install(
 
     current_dir = Path(__file__).resolve().parent
     source_dir = (
-        current_dir.parent.parent.parent / "templates" / "django" / "django-meta"
+        current_dir.parent.parent.parent / "templates" / "django" / "django_meta"
     )
 
     template_context = {

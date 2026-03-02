@@ -1,50 +1,10 @@
-from ....utils.django.uv_runner import UvRunner
-import typer
-
-from pathlib import Path
-
-from ....utils.console.print import print_console
-from ....utils.django.project_manager import DjangoProjectManager
-
-app = typer.Typer(no_args_is_help=True)
+from ._base import BasePackage
 
 
-@app.command()
-def install():
-    """
-    Install and configure django-csp
-    """
-    pm = DjangoProjectManager()
-
-    print_console.step("Installing django-csp package ...")
-    uv_runner = UvRunner()
-    uv_runner.add_package("django-csp")
-
-    current_dir = Path(__file__).resolve().parent
-    source_dir = (
-        current_dir.parent.parent.parent / "templates" / "django" / "django-csp"
-    )
-
-    pm.copy_templates(source_dir=source_dir, template_context={})
-
-    print_console.success("django-csp is installed successfully.")
+class DjangoCspPackage(BasePackage):
+    name = "django-csp"
+    packages = ["django-csp"]
 
 
-@app.command()
-def remove():
-    """
-    Remove django-csp package
-    """
-    print_console.step("Removing django-csp package ...")
-    pm = DjangoProjectManager()
-    if pm.has_dependency("django-csp"):
-        uv_runner = UvRunner()
-        uv_runner.remove_package("django-csp")
-
-    url_path = Path.joinpath(pm.packages_urls_path, "django_csp.py")
-    url_path.unlink(missing_ok=True)
-
-    settings_url = Path.joinpath(pm.packages_settings_path, "django_csp.py")
-    settings_url.unlink(missing_ok=True)
-
-    print_console.success("django-csp is removed successfully.")
+_pkg = DjangoCspPackage(__file__)
+app = _pkg.app

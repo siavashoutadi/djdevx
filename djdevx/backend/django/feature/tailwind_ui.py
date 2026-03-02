@@ -26,7 +26,7 @@ def install():
 
     current_dir = Path(__file__).resolve().parent
     source_dir = (
-        current_dir.parent.parent.parent / "templates" / "django" / "tailwind-ui"
+        current_dir.parent.parent.parent / "templates" / "django" / "tailwind_ui"
     )
     project_path = pm.project_path
 

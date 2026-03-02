@@ -140,7 +140,7 @@ def install(
 
     current_dir = Path(__file__).resolve().parent
     source_dir = (
-        current_dir.parent.parent.parent / "templates" / "django" / "django-snakeoil"
+        current_dir.parent.parent.parent / "templates" / "django" / "django_snakeoil"
     )
 
     template_context = {
