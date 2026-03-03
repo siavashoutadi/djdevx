@@ -1,180 +1,109 @@
-import typer
 import shutil
+import typer
 from pathlib import Path
-
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import default_backend
-
-from .....utils.django.uv_runner import UvRunner
 from .....utils.console.print import print_console
-from .....utils.django.project_manager import DjangoProjectManager
+
+from .._base import BasePackage
 
 
-app = typer.Typer(no_args_is_help=True)
+class OidcProviderPackage(BasePackage):
+    name = "django-allauth OIDC provider"
+    packages = ["django-allauth[idp-oidc]"]
+    env_vars = {}
 
+    def install(self) -> None:
+        """Install OIDC provider with account dependency check."""
+        account_settings_path = (
+            self.pm.packages_settings_path / "django_allauth_account.py"
+        )
+        if not account_settings_path.exists():
+            print_console.error(
+                "django-allauth account functionality is not configured. "
+                "Please install it first."
+            )
+            print_console.info(
+                "\n> ddx backend django packages django-allauth account install"
+            )
+            raise typer.Exit(code=1)
 
-def remove_env_variable_from_file(file_path: Path, key: str) -> None:
-    """Remove an environment variable from a .env file, handling multiline values."""
-    if not file_path.exists():
-        return
+        self._uv_add_all()
+        self._copy_templates()
+        self.env()
 
-    with open(file_path, "r", encoding="utf-8") as f:
-        lines = f.readlines()
+    def remove(self) -> None:
+        """Remove OIDC provider configuration."""
+        # Only remove configuration files, not django-allauth package (account depends on it)
+        self._cleanup_files()
+        self._remove_env_vars()
+        shutil.rmtree(
+            self.pm.project_path / "authentication" / "templates" / "idp" / "oidc",
+            ignore_errors=True,
+        )
+        (
+            self.pm.project_path
+            / "authentication"
+            / "management"
+            / "commands"
+            / "pkce_oauth.py"
+        ).unlink(missing_ok=True)
+        (
+            self.pm.project_path
+            / "authentication"
+            / "management"
+            / "commands"
+            / "__init__.py"
+        ).unlink(missing_ok=True)
+        self._remove_env_variable_from_file(
+            self.pm.devcontainer_env_devcontainer_path, "IDP_OIDC_PRIVATE_KEY"
+        )
 
-    new_lines: list[str] = []
-    i = 0
-    while i < len(lines):
-        line = lines[i]
+    def env(self) -> None:
+        """Generate RSA key for OIDC provider."""
+        private_key_obj = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=2048,
+            backend=default_backend(),
+        )
+        private_key = private_key_obj.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption(),
+        ).decode("utf-8")
 
-        if line.startswith(f"{key}="):
-            i += 1
-            while i < len(lines):
-                current_line = lines[i]
-                if "-----END" in current_line:
-                    i += 1
-                    if i < len(lines) and lines[i].strip() == "'":
-                        i += 1
-                    break
+        self.pm.add_env_variable(key="IDP_OIDC_PRIVATE_KEY", value=f"'{private_key}'")
+
+    def _remove_env_variable_from_file(self, file_path: Path, key: str) -> None:
+        """Remove environment variable from .env file."""
+        if not file_path.exists():
+            return
+
+        with open(file_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+
+        new_lines = []
+        i = 0
+        while i < len(lines):
+            line = lines[i]
+            if line.startswith(f"{key}="):
                 i += 1
-        else:
-            new_lines.append(line)
-            i += 1
+                while i < len(lines):
+                    current_line = lines[i]
+                    if "-----END" in current_line:
+                        i += 1
+                        if i < len(lines) and lines[i].strip() == "'":
+                            i += 1
+                        break
+                    i += 1
+            else:
+                new_lines.append(line)
+                i += 1
 
-    with open(file_path, "w", encoding="utf-8") as f:
-        f.writelines(new_lines)
-
-
-@app.command()
-def install():
-    """
-    Install and configure django-allauth OIDC provider.
-
-    Note: Requires django-allauth account to be installed first.
-    Configure environment variables using the 'env' command.
-    """
-    pm = DjangoProjectManager()
-
-    print_console.step("Checking if django-allauth account is installed ...")
-
-    account_settings_path = Path.joinpath(
-        pm.packages_settings_path, "django_allauth_account.py"
-    )
-
-    if not account_settings_path.exists():
-        print_console.error(
-            "django-allauth account functionality is not configured. Please install it first."
-        )
-        print_console.info(
-            "\n> ddx backend django packages django-allauth account install"
-        )
-        raise typer.Exit(1)
-
-    print_console.step("Installing django-allauth OIDC provider ...")
-
-    uv = UvRunner()
-    uv.add_package("django-allauth[idp-oidc]")
-
-    current_dir = Path(__file__).resolve().parent
-    source_dir = (
-        current_dir.parent.parent.parent.parent
-        / "templates"
-        / "django"
-        / "django_allauth"
-        / "oidc_provider"
-    )
-
-    pm.copy_templates(
-        source_dir=source_dir,
-        template_context={},
-    )
-
-    env()
-
-    print_console.success("django-allauth OIDC provider is installed successfully.")
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.writelines(new_lines)
 
 
-@app.command()
-def remove():
-    """
-    Remove OIDC provider configuration.
-
-    Note: This removes OIDC configuration but keeps django-allauth[idp-oidc]
-    package installed. To completely remove django-allauth, use the account remove command.
-    """
-    pm = DjangoProjectManager()
-
-    print_console.step("Removing django-allauth OIDC provider configuration ...")
-    oidc_settings_path = Path.joinpath(
-        pm.packages_settings_path, "django_allauth_oidc_provider.py"
-    )
-    oidc_settings_path.unlink(missing_ok=True)
-
-    oidc_urls_path = Path.joinpath(
-        pm.packages_urls_path, "django_allauth_oidc_provider.py"
-    )
-    oidc_urls_path.unlink(missing_ok=True)
-
-    # Remove OIDC provider templates
-    oidc_templates_path = Path.joinpath(
-        pm.project_path, "authentication", "templates", "idp", "oidc"
-    )
-    shutil.rmtree(oidc_templates_path, ignore_errors=True)
-
-    # Remove OIDC provider management commands
-    oidc_management_path = Path.joinpath(
-        pm.project_path, "authentication", "management", "commands", "pkce_oauth.py"
-    )
-    oidc_management_path.unlink(missing_ok=True)
-
-    # Remove management commands __init__.py if it exists and is empty
-    management_init_path = Path.joinpath(
-        pm.project_path, "authentication", "management", "commands", "__init__.py"
-    )
-    management_init_path.unlink(missing_ok=True)
-
-    remove_env_variable_from_file(
-        pm.devcontainer_env_devcontainer_path, "IDP_OIDC_PRIVATE_KEY"
-    )
-
-    print_console.success(
-        "django-allauth OIDC provider configuration is removed successfully."
-    )
-    print_console.info(
-        "Note: django-allauth[idp-oidc] package remains installed. Use 'ddx backend django packages django-allauth account remove' to remove the entire package."
-    )
-
-
-@app.command()
-def env():
-    """
-    Configure environment variables for OIDC provider.
-
-    Auto-generates a private key for signing ID tokens.
-    """
-
-    print_console.step("Configuring environment variables for OIDC provider ...")
-    print_console.step("Generating RSA 2048-bit private key ...")
-
-    private_key_obj = rsa.generate_private_key(
-        public_exponent=65537,
-        key_size=2048,
-        backend=default_backend(),
-    )
-
-    # Serialize to PEM format
-    private_key = private_key_obj.private_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.NoEncryption(),
-    ).decode("utf-8")
-
-    print_console.success("Private key generated successfully.")
-
-    pm = DjangoProjectManager()
-    pm.add_env_variable(key="IDP_OIDC_PRIVATE_KEY", value=f"'{private_key}'")
-
-    print_console.success(
-        "OIDC provider environment variables configured successfully."
-    )
-    print_console.info("Private key has been saved to .env as IDP_OIDC_PRIVATE_KEY")
+_pkg = OidcProviderPackage(__file__)
+app = _pkg.app

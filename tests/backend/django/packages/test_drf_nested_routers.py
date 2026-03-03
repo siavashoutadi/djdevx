@@ -16,6 +16,20 @@ def test_drf_nested_routers_install_and_remove(temp_dir):
 
     os.chdir(temp_dir)
 
+    # First install djangorestframework since it's a dependency
+    result = runner.invoke(
+        app,
+        [
+            "backend",
+            "django",
+            "packages",
+            "djangorestframework",
+            "install",
+        ],
+    )
+    assert result.exit_code == 0, f"DRF install failed: {result.output}"
+
+    # Now install drf-nested-routers
     result = runner.invoke(
         app,
         [
@@ -32,6 +46,9 @@ def test_drf_nested_routers_install_and_remove(temp_dir):
     # This package doesn't create any files, just installs the dependency
     assert DjangoProjectManager().has_dependency("drf-nested-routers"), (
         "drf-nested-routers dependency not found after installation"
+    )
+    assert DjangoProjectManager().has_dependency("djangorestframework"), (
+        "djangorestframework dependency not found after installation"
     )
 
     os.chdir(temp_dir)
@@ -50,4 +67,9 @@ def test_drf_nested_routers_install_and_remove(temp_dir):
 
     assert not DjangoProjectManager().has_dependency("drf-nested-routers"), (
         "drf-nested-routers dependency found after removal"
+    )
+
+    # Verify that djangorestframework is still installed after removing drf-nested-routers
+    assert DjangoProjectManager().has_dependency("djangorestframework"), (
+        "djangorestframework dependency was removed along with drf-nested-routers"
     )

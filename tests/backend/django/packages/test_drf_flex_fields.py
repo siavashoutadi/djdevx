@@ -18,6 +18,20 @@ def test_drf_flex_fields_install_and_remove(temp_dir):
 
     os.chdir(temp_dir)
 
+    # First install djangorestframework since it's a dependency
+    result = runner.invoke(
+        app,
+        [
+            "backend",
+            "django",
+            "packages",
+            "djangorestframework",
+            "install",
+        ],
+    )
+    assert result.exit_code == 0, f"DRF install failed: {result.output}"
+
+    # Now install drf-flex-fields
     result = runner.invoke(
         app,
         [
@@ -33,6 +47,9 @@ def test_drf_flex_fields_install_and_remove(temp_dir):
 
     assert DjangoProjectManager().has_dependency("drf-flex-fields"), (
         "drf-flex-fields dependency not found after installation"
+    )
+    assert DjangoProjectManager().has_dependency("djangorestframework"), (
+        "djangorestframework dependency not found after installation"
     )
 
     os.chdir(temp_dir)
@@ -51,4 +68,9 @@ def test_drf_flex_fields_install_and_remove(temp_dir):
 
     assert not DjangoProjectManager().has_dependency("drf-flex-fields"), (
         "drf-flex-fields dependency found after removal"
+    )
+
+    # Verify that djangorestframework is still installed after removing drf-flex-fields
+    assert DjangoProjectManager().has_dependency("djangorestframework"), (
+        "djangorestframework dependency was removed along with drf-flex-fields"
     )

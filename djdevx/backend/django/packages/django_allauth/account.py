@@ -1,125 +1,71 @@
-import typer
 import shutil
-from pathlib import Path
+import typer
 from typing_extensions import Annotated
 
-from .....utils.django.uv_runner import UvRunner
-from .....utils.console.print import print_console
-from .....utils.django.project_manager import DjangoProjectManager
-
-app = typer.Typer(no_args_is_help=True)
+from .._base import BasePackage
 
 
-@app.command()
-def install(
-    email_subject_prefix: Annotated[
-        str,
-        typer.Option(
-            help="Subject-line prefix to use for email messages sent",
-            prompt="Please enter the Subject-line prefix to use for email messages sent. e.g. '[example.com] - '",
-        ),
-    ] = "",
-    enable_login_by_code: Annotated[
-        bool,
-        typer.Option(
-            help="Enable login by code",
-            prompt="Enable login by code",
-        ),
-    ] = True,
-    is_profanity_for_username_enabled: Annotated[
-        bool,
-        typer.Option(
-            help="Enable profanity filter for username",
-            prompt="Enable profanity filter for username",
-        ),
-    ] = True,
-    account_url_prefix: Annotated[
-        str,
-        typer.Option(
-            help="URL prefix for account related URLs",
-            prompt="Please enter the URL prefix for account related URLs",
-        ),
-    ] = "auth",
-):
-    """
-    Install django-allauth package with account functionality
-    """
-    pm = DjangoProjectManager()
+class AllauthAccountPackage(BasePackage):
+    name = "django-allauth account"
+    packages = ["django-allauth"]
 
-    print_console.step(
-        "Installing django-allauth package with account functionality ..."
-    )
+    def install(
+        self,
+        email_subject_prefix: Annotated[
+            str,
+            typer.Option(
+                help="Subject-line prefix for emails (e.g., '[example.com] - ')",
+                prompt="Subject prefix for email messages",
+            ),
+        ] = "",
+        enable_login_by_code: Annotated[
+            bool,
+            typer.Option(
+                help="Enable login by code",
+                prompt="Enable login by code",
+            ),
+        ] = True,
+        is_profanity_for_username_enabled: Annotated[
+            bool,
+            typer.Option(
+                help="Enable profanity filter for usernames",
+                prompt="Enable profanity filter for username",
+            ),
+        ] = True,
+        account_url_prefix: Annotated[
+            str,
+            typer.Option(
+                help="URL prefix for account URLs",
+                prompt="URL prefix for account related URLs",
+            ),
+        ] = "auth",
+    ) -> None:
+        """Install django-allauth with account functionality."""
 
-    uv = UvRunner()
-    uv.add_package("django-allauth")
-    if is_profanity_for_username_enabled:
-        uv.add_package("better-profanity")
+        if is_profanity_for_username_enabled:
+            self.packages.append("better-profanity")
 
-    current_dir = Path(__file__).resolve().parent
-    source_dir = (
-        current_dir.parent.parent.parent.parent
-        / "templates"
-        / "django"
-        / "django_allauth"
-        / "account"
-    )
+        self._uv_add_all()
+        self._copy_templates(
+            context={
+                "email_subject_prefix": email_subject_prefix,
+                "enable_login_by_code": enable_login_by_code,
+                "is_profanity_for_username_enabled": is_profanity_for_username_enabled,
+                "account_url_prefix": account_url_prefix,
+            }
+        )
 
-    pm.copy_templates(
-        source_dir=source_dir,
-        template_context={
-            "email_subject_prefix": email_subject_prefix,
-            "enable_login_by_code": enable_login_by_code,
-            "is_profanity_for_username_enabled": is_profanity_for_username_enabled,
-            "account_url_prefix": account_url_prefix,
-        },
-    )
+    def remove(self) -> None:
+        """Remove django-allauth account and related dependencies."""
+        super().remove()
+        shutil.rmtree(self.pm.project_path / "authentication", ignore_errors=True)
+        (self.pm.project_path / "static" / "css" / "vendor" / "auth.css").unlink(
+            missing_ok=True
+        )
 
-    print_console.success(
-        "django-allauth with account functionality is installed successfully."
-    )
+        if self.pm.has_dependency("better-profanity"):
+            self.uv.remove_package("better-profanity")
 
 
-@app.command()
-def remove():
-    """
-    Remove django-allauth account functionality
-    """
-    pm = DjangoProjectManager()
-
-    print_console.step("Removing django-allauth package ...")
-
-    settings_path = Path.joinpath(
-        pm.packages_settings_path, "django_allauth_account.py"
-    )
-    settings_path.unlink(missing_ok=True)
-
-    url_path = Path.joinpath(pm.packages_urls_path, "django_allauth_account.py")
-    url_path.unlink(missing_ok=True)
-
-    authentication_path = Path.joinpath(pm.project_path, "authentication")
-    shutil.rmtree(authentication_path, ignore_errors=True)
-
-    css_path = Path.joinpath(pm.project_path, "static", "css", "vendor", "auth.css")
-    css_path.unlink(missing_ok=True)
-
-    uv = UvRunner()
-    for dep in ["django-allauth", "better-profanity"]:
-        if pm.has_dependency(dep):
-            uv.remove_package(dep)
-
-    print_console.success(
-        "django-allauth account functionality is removed successfully."
-    )
-
-
-@app.command()
-def env():
-    """
-    Configure environment variables for django-allauth
-    """
-    print_console.step(
-        "No additional environment variables needed for django-allauth account functionality"
-    )
-    print_console.success(
-        "django-allauth account functionality uses Django settings only."
-    )
+_pkg = AllauthAccountPackage(__file__)
+app = _pkg.app

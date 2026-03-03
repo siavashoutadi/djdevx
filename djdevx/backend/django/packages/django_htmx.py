@@ -1,100 +1,57 @@
-import typer
+import re
 
-from pathlib import Path
-
-from ....utils.django.uv_runner import UvRunner
-from ....utils.console.print import print_console
-from ....utils.django.project_manager import DjangoProjectManager
-
-app = typer.Typer(no_args_is_help=True)
+from ._base import BasePackage
 
 
-def add_htmx_snippets():
-    """Add HTMX script and CSRF headers to base template."""
-    import re
+class DjangoHtmxPackage(BasePackage):
+    name = "django-htmx"
+    packages = ["django-htmx"]
 
-    pm = DjangoProjectManager()
-    base_template = pm.base_template_path
-    content = base_template.read_text()
+    def install(self) -> None:
+        """Install django-htmx and add snippets to base template."""
+        self._uv_add_all()
+        self._copy_templates()
+        self._add_htmx_snippets()
 
-    if "{% load django_htmx %}" not in content:
-        content = "{% load django_htmx %}\n" + content
+    def remove(self) -> None:
+        """Remove django-htmx and remove snippets from base template."""
+        super().remove()
+        self._remove_htmx_snippets()
 
-    if "{% htmx_script %}" not in content:
-        content = content.replace("</head>", "  {% htmx_script %}\n  </head>")
+    def _add_htmx_snippets(self) -> None:
+        """Add HTMX script and CSRF headers to base template."""
+        pm = self.pm
+        base_template = pm.base_template_path
+        content = base_template.read_text()
 
-    if "hx-headers=" not in content:
-        # Find the opening body tag and add hx-headers attribute while preserving existing attributes
-        body_pattern = r"<body([^>]*)>"
-        replacement = r'<body\1 hx-headers=\'{"x-csrftoken": "{{ csrf_token }}"}\'>'
-        content = re.sub(body_pattern, replacement, content)
+        if "{% load django_htmx %}" not in content:
+            content = "{% load django_htmx %}\n" + content
 
-    base_template.write_text(content)
+        if "{% htmx_script %}" not in content:
+            content = content.replace("</head>", "  {% htmx_script %}\n  </head>")
 
+        if "hx-headers=" not in content:
+            body_pattern = r"<body([^>]*)>"
+            replacement = r'<body\1 hx-headers=\'{"x-csrftoken": "{{ csrf_token }}"}\'>'
+            content = re.sub(body_pattern, replacement, content)
 
-def remove_htmx_snippets():
-    """Remove HTMX script and CSRF headers from base template."""
-    import re
+        base_template.write_text(content)
 
-    pm = DjangoProjectManager()
-    base_template = pm.base_template_path
-    content = base_template.read_text()
+    def _remove_htmx_snippets(self) -> None:
+        """Remove HTMX script and CSRF headers from base template."""
+        pm = self.pm
+        base_template = pm.base_template_path
+        content = base_template.read_text()
 
-    # Remove load tag
-    content = content.replace("{% load django_htmx %}\n", "")
+        content = content.replace("{% load django_htmx %}\n", "")
+        content = content.replace("  {% htmx_script %}\n", "")
+        hx_headers_pattern = (
+            r' hx-headers=\\?\'{"x-csrftoken": "{{ csrf_token }}"}\\?\'(?=[\s>])'
+        )
+        content = re.sub(hx_headers_pattern, "", content)
 
-    # Remove htmx_script tag
-    content = content.replace("  {% htmx_script %}\n", "")
-
-    # Remove hx-headers attribute from body tag while preserving other attributes
-    # Pattern handles both regular and escaped quotes
-    hx_headers_pattern = (
-        r' hx-headers=\\?\'{"x-csrftoken": "{{ csrf_token }}"}\\?\'(?=[\s>])'
-    )
-    content = re.sub(hx_headers_pattern, "", content)
-
-    base_template.write_text(content)
-
-
-@app.command()
-def install():
-    """
-    Install and configure django-htmx
-    """
-    pm = DjangoProjectManager()
-
-    print_console.step("Installing django-htmx package ...")
-
-    uv = UvRunner()
-    uv.add_package("django-htmx")
-
-    current_dir = Path(__file__).resolve().parent
-    source_dir = (
-        current_dir.parent.parent.parent / "templates" / "django" / "django_htmx"
-    )
-
-    pm.copy_templates(source_dir=source_dir, template_context={})
-
-    add_htmx_snippets()
-
-    print_console.success("django-htmx is installed successfully.")
+        base_template.write_text(content)
 
 
-@app.command()
-def remove():
-    """
-    Remove django-htmx
-    """
-    print_console.step("Removing django-htmx package ...")
-
-    pm = DjangoProjectManager()
-    uv = UvRunner()
-    if pm.has_dependency("django-htmx"):
-        uv.remove_package("django-htmx")
-
-    settings_path = Path.joinpath(pm.packages_settings_path, "django_htmx.py")
-    settings_path.unlink(missing_ok=True)
-
-    remove_htmx_snippets()
-
-    print_console.success("django-htmx is removed successfully.")
+_pkg = DjangoHtmxPackage(__file__)
+app = _pkg.app

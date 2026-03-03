@@ -106,7 +106,7 @@ def test_djangochannelsrestframework_install_without_channels(temp_dir):
 
     # Should fail with exit code 1
     assert result.exit_code == 1, f"Expected failure, but got: {result.output}"
-    assert "'channels' package is a dependency" in result.output, (
+    assert "'channels' package is required for" in result.output, (
         "Missing dependency error not shown"
     )
 

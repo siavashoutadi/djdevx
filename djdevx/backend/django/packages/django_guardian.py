@@ -1,85 +1,59 @@
-from ....utils.django.uv_runner import UvRunner
-import typer
-
-from pathlib import Path
-
-from ....utils.console.print import print_console
-from ....utils.django.project_manager import DjangoProjectManager
-
-app = typer.Typer(no_args_is_help=True)
+from ._base import BasePackage
 
 
-@app.command()
-def install():
-    """
-    Install and configure django-guardian
-    """
-    pm = DjangoProjectManager()
+class DjangoGuardianPackage(BasePackage):
+    name = "django-guardian"
+    packages = ["django-guardian"]
 
-    print_console.step("Installing django-guardian package ...")
-    uv_runner = UvRunner()
-    uv_runner.add_package("django-guardian")
+    def install(self) -> None:
+        """Install django-guardian and add mixin to User model."""
+        self._uv_add_all()
+        self._copy_templates()
+        self._add_guardian_mixin()
 
-    current_dir = Path(__file__).resolve().parent
-    source_dir = (
-        current_dir.parent.parent.parent / "templates" / "django" / "django_guardian"
-    )
+    def remove(self) -> None:
+        """Remove django-guardian and remove mixin from User model."""
+        self._remove_guardian_mixin()
+        super().remove()
 
-    pm.copy_templates(source_dir=source_dir, template_context={})
+    def _add_guardian_mixin(self) -> None:
+        """Add GuardianUserMixin to User model."""
+        project_dir = self.pm.project_path
+        user_model_file = project_dir / "users" / "models.py"
 
-    project_dir = pm.project_path
-    user_mode_file = project_dir / "users" / "models.py"
-
-    if user_mode_file.exists():
-        content = user_mode_file.read_text()
-        if "GuardianUserMixin" not in content:
-            updated_content = content.replace(
-                "from django.contrib.auth.models import AbstractUser",
-                "from django.contrib.auth.models import AbstractUser\nfrom guardian.mixins import GuardianUserMixin",
-            ).replace(
-                "class User(AbstractUser):",
-                "class User(AbstractUser, GuardianUserMixin):",
-            )
-            user_mode_file.write_text(updated_content)
-
-    print_console.success("django-guardian is installed successfully.")
-
-
-@app.command()
-def remove():
-    """
-    Remove django-guardian
-    """
-    print_console.step("Removing django-guardian package ...")
-
-    pm = DjangoProjectManager()
-    if pm.has_dependency("django-guardian"):
-        uv_runner = UvRunner()
-        uv_runner.remove_package("django-guardian")
-
-    project_dir = pm.project_path
-    user_mode_file = project_dir / "users" / "models.py"
-
-    if user_mode_file.exists():
-        content = user_mode_file.read_text()
-        if "GuardianUserMixin" in content:
-            updated_content = (
-                "\n".join(
-                    line
-                    for line in content.splitlines()
-                    if "from guardian.mixins import GuardianUserMixin" not in line
+        if user_model_file.exists():
+            content = user_model_file.read_text()
+            if "GuardianUserMixin" not in content:
+                updated_content = content.replace(
+                    "from django.contrib.auth.models import AbstractUser",
+                    "from django.contrib.auth.models import AbstractUser\nfrom guardian.mixins import GuardianUserMixin",
                 ).replace(
-                    "class User(AbstractUser, GuardianUserMixin):",
                     "class User(AbstractUser):",
+                    "class User(AbstractUser, GuardianUserMixin):",
                 )
-                + "\n"
-            )
-            user_mode_file.write_text(updated_content)
+                user_model_file.write_text(updated_content)
 
-    url_path = Path.joinpath(pm.packages_urls_path, "django_guardian.py")
-    url_path.unlink(missing_ok=True)
+    def _remove_guardian_mixin(self) -> None:
+        """Remove GuardianUserMixin from User model."""
+        project_dir = self.pm.project_path
+        user_model_file = project_dir / "users" / "models.py"
 
-    settings_url = Path.joinpath(pm.packages_settings_path, "django_guardian.py")
-    settings_url.unlink(missing_ok=True)
+        if user_model_file.exists():
+            content = user_model_file.read_text()
+            if "GuardianUserMixin" in content:
+                updated_content = (
+                    "\n".join(
+                        line
+                        for line in content.splitlines()
+                        if "from guardian.mixins import GuardianUserMixin" not in line
+                    ).replace(
+                        "class User(AbstractUser, GuardianUserMixin):",
+                        "class User(AbstractUser):",
+                    )
+                    + "\n"
+                )
+                user_model_file.write_text(updated_content)
 
-    print_console.success("django-guardian is removed successfully.")
+
+_pkg = DjangoGuardianPackage(__file__)
+app = _pkg.app

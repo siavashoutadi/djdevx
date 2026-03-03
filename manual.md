@@ -206,23 +206,9 @@ $ djdevx backend django packages channels [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `env`: Creating environment variables for channels
 * `install`: Install and configure channels
 * `remove`: Remove channels package
-
-###### `djdevx backend django packages channels env`
-
-Creating environment variables for channels
-
-**Usage**:
-
-```console
-$ djdevx backend django packages channels env [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
+* `env`: Configure environment variables.
 
 ###### `djdevx backend django packages channels install`
 
@@ -246,6 +232,20 @@ Remove channels package
 
 ```console
 $ djdevx backend django packages channels remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+###### `djdevx backend django packages channels env`
+
+Configure environment variables.
+
+**Usage**:
+
+```console
+$ djdevx backend django packages channels env [OPTIONS]
 ```
 
 **Options**:
@@ -288,13 +288,12 @@ $ djdevx backend django packages django-allauth account [OPTIONS] COMMAND [ARGS]
 
 **Commands**:
 
-* `install`: Install django-allauth package with...
-* `remove`: Remove django-allauth account functionality
-* `env`: Configure environment variables for...
+* `install`: Install and configure django-allauth account
+* `remove`: Remove django-allauth account package
 
 ####### `djdevx backend django packages django-allauth account install`
 
-Install django-allauth package with account functionality
+Install and configure django-allauth account
 
 **Usage**:
 
@@ -304,34 +303,20 @@ $ djdevx backend django packages django-allauth account install [OPTIONS]
 
 **Options**:
 
-* `--email-subject-prefix TEXT`: Subject-line prefix to use for email messages sent
+* `--email-subject-prefix TEXT`: Subject-line prefix for emails (e.g., &#x27; - &#x27;)
 * `--enable-login-by-code / --no-enable-login-by-code`: Enable login by code  [default: enable-login-by-code]
-* `--is-profanity-for-username-enabled / --no-is-profanity-for-username-enabled`: Enable profanity filter for username  [default: is-profanity-for-username-enabled]
-* `--account-url-prefix TEXT`: URL prefix for account related URLs  [default: auth]
+* `--is-profanity-for-username-enabled / --no-is-profanity-for-username-enabled`: Enable profanity filter for usernames  [default: is-profanity-for-username-enabled]
+* `--account-url-prefix TEXT`: URL prefix for account URLs  [default: auth]
 * `--help`: Show this message and exit.
 
 ####### `djdevx backend django packages django-allauth account remove`
 
-Remove django-allauth account functionality
+Remove django-allauth account package
 
 **Usage**:
 
 ```console
 $ djdevx backend django packages django-allauth account remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-####### `djdevx backend django packages django-allauth account env`
-
-Configure environment variables for django-allauth
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-allauth account env [OPTIONS]
 ```
 
 **Options**:
@@ -354,12 +339,12 @@ $ djdevx backend django packages django-allauth mfa [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `install`: Install django-allauth package with MFA...
-* `remove`: Remove django-allauth MFA configuration
+* `install`: Install and configure django-allauth MFA
+* `remove`: Remove django-allauth MFA package
 
 ####### `djdevx backend django packages django-allauth mfa install`
 
-Install django-allauth package with MFA functionality
+Install and configure django-allauth MFA
 
 **Usage**:
 
@@ -369,29 +354,25 @@ $ djdevx backend django packages django-allauth mfa install [OPTIONS]
 
 **Options**:
 
-* `--enable-totp / --no-enable-totp`: Enable TOTP authentication  [default: enable-totp]
+* `--enable-totp / --no-enable-totp`: Enable TOTP (Time-based One-Time Password)  [default: enable-totp]
 * `--enable-recovery-codes / --no-enable-recovery-codes`: Enable recovery codes  [default: enable-recovery-codes]
-* `--enable-webauthn / --no-enable-webauthn`: Enable WebAuthn/passkeys authentication  [default: no-enable-webauthn]
+* `--enable-webauthn / --no-enable-webauthn`: Enable WebAuthn/passkeys  [default: no-enable-webauthn]
 * `--enable-trust / --no-enable-trust`: Enable &#x27;trust this browser&#x27; functionality  [default: no-enable-trust]
 * `--totp-issuer TEXT`: Issuer name for TOTP QR codes
-* `--totp-period INTEGER RANGE`: TOTP token validity period in seconds  [default: 30; 15&lt;=x&lt;=300]
-* `--totp-digits INTEGER RANGE`: Number of digits in TOTP tokens  [default: 6; 6&lt;=x&lt;=8]
-* `--totp-tolerance INTEGER RANGE`: TOTP time tolerance (number of periods to allow)  [default: 0; 0&lt;=x&lt;=5]
-* `--recovery-code-count INTEGER RANGE`: Number of recovery codes to generate  [default: 10; 5&lt;=x&lt;=20]
-* `--recovery-code-digits INTEGER RANGE`: Number of digits in each recovery code  [default: 8; 6&lt;=x&lt;=16]
-* `--passkey-login / --no-passkey-login`: Enable passkey login  [default: no-passkey-login]
-* `--passkey-signup / --no-passkey-signup`: Enable passkey signup  [default: no-passkey-signup]
-* `--webauthn-allow-insecure / --no-webauthn-allow-insecure`: Allow WebAuthn over insecure origins (for development)  [default: no-webauthn-allow-insecure]
-* `--trust-cookie-age-days INTEGER RANGE`: Trust cookie validity period in days  [default: 14; 1&lt;=x&lt;=365]
+* `--totp-period INTEGER RANGE`: [default: 30; 15&lt;=x&lt;=300]
+* `--totp-digits INTEGER RANGE`: [default: 6; 6&lt;=x&lt;=8]
+* `--totp-tolerance INTEGER RANGE`: [default: 0; 0&lt;=x&lt;=5]
+* `--recovery-code-count INTEGER RANGE`: [default: 10; 5&lt;=x&lt;=20]
+* `--recovery-code-digits INTEGER RANGE`: [default: 8; 6&lt;=x&lt;=16]
+* `--passkey-login / --no-passkey-login`: [default: no-passkey-login]
+* `--passkey-signup / --no-passkey-signup`: [default: no-passkey-signup]
+* `--webauthn-allow-insecure / --no-webauthn-allow-insecure`: [default: no-webauthn-allow-insecure]
+* `--trust-cookie-age-days INTEGER RANGE`: [default: 14; 1&lt;=x&lt;=365]
 * `--help`: Show this message and exit.
 
 ####### `djdevx backend django packages django-allauth mfa remove`
 
-Remove django-allauth MFA configuration
-
-Note: This removes MFA configuration but keeps the django-allauth
-package installed with its dependencies. To completely remove django-allauth,
-use the account remove command.
+Remove django-allauth MFA package
 
 **Usage**:
 
@@ -420,15 +401,12 @@ $ djdevx backend django packages django-allauth oidc-provider [OPTIONS] COMMAND 
 **Commands**:
 
 * `install`: Install and configure django-allauth OIDC...
-* `remove`: Remove OIDC provider configuration.
-* `env`: Configure environment variables for OIDC...
+* `remove`: Remove django-allauth OIDC provider package
+* `env`: Generate RSA key for OIDC provider.
 
 ####### `djdevx backend django packages django-allauth oidc-provider install`
 
-Install and configure django-allauth OIDC provider.
-
-Note: Requires django-allauth account to be installed first.
-Configure environment variables using the &#x27;env&#x27; command.
+Install and configure django-allauth OIDC provider
 
 **Usage**:
 
@@ -442,10 +420,7 @@ $ djdevx backend django packages django-allauth oidc-provider install [OPTIONS]
 
 ####### `djdevx backend django packages django-allauth oidc-provider remove`
 
-Remove OIDC provider configuration.
-
-Note: This removes OIDC configuration but keeps django-allauth
-package installed. To completely remove django-allauth, use the account remove command.
+Remove django-allauth OIDC provider package
 
 **Usage**:
 
@@ -459,9 +434,7 @@ $ djdevx backend django packages django-allauth oidc-provider remove [OPTIONS]
 
 ####### `djdevx backend django packages django-allauth oidc-provider env`
 
-Configure environment variables for OIDC provider.
-
-Auto-generates a private key for signing ID tokens.
+Generate RSA key for OIDC provider.
 
 **Usage**:
 
@@ -511,13 +484,13 @@ $ djdevx backend django packages django-anymail ses [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `install`: Install django-anymail with SES backend
-* `remove`: Remove django-anymail SES backend
+* `install`: Install and configure django-anymail SES
+* `remove`: Remove django-anymail SES package
 * `env`: Configure environment variables for...
 
 ####### `djdevx backend django packages django-anymail ses install`
 
-Install django-anymail with SES backend
+Install and configure django-anymail SES
 
 **Usage**:
 
@@ -527,15 +500,15 @@ $ djdevx backend django packages django-anymail ses install [OPTIONS]
 
 **Options**:
 
-* `--access-key TEXT`: The AWS access key for authentication  [required]
-* `--secret-key TEXT`: The AWS Secret key for authentication  [required]
-* `--region-name TEXT`: The AWS region  [required]
-* `--default-from-email TEXT`: The default from email address  [required]
+* `--access-key TEXT`: The AWS access key for authentication
+* `--secret-key TEXT`: The AWS Secret key for authentication
+* `--region-name TEXT`: The AWS region
+* `--default-from-email TEXT`: The default from email address
 * `--help`: Show this message and exit.
 
 ####### `djdevx backend django packages django-anymail ses remove`
 
-Remove django-anymail SES backend
+Remove django-anymail SES package
 
 **Usage**:
 
@@ -549,7 +522,7 @@ $ djdevx backend django packages django-anymail ses remove [OPTIONS]
 
 ####### `djdevx backend django packages django-anymail ses env`
 
-Configure environment variables for django-anymail SES backend
+Configure environment variables for django-anymail SES backend.
 
 **Usage**:
 
@@ -559,10 +532,10 @@ $ djdevx backend django packages django-anymail ses env [OPTIONS]
 
 **Options**:
 
-* `--access-key TEXT`: The AWS access key for authentication  [required]
-* `--secret-key TEXT`: The AWS Secret key for authentication  [required]
-* `--region-name TEXT`: The AWS region  [required]
-* `--default-from-email TEXT`: The default from email address  [required]
+* `--access-key TEXT`: The AWS access key for authentication
+* `--secret-key TEXT`: The AWS Secret key for authentication
+* `--region-name TEXT`: The AWS region
+* `--default-from-email TEXT`: The default from email address
 * `--help`: Show this message and exit.
 
 ###### `djdevx backend django packages django-anymail brevo`
@@ -581,13 +554,13 @@ $ djdevx backend django packages django-anymail brevo [OPTIONS] COMMAND [ARGS]..
 
 **Commands**:
 
-* `install`: Install django-anymail with Brevo backend
-* `remove`: Remove django-anymail Brevo backend
+* `install`: Install and configure django-anymail Brevo
+* `remove`: Remove django-anymail Brevo package
 * `env`: Configure environment variables for...
 
 ####### `djdevx backend django packages django-anymail brevo install`
 
-Install django-anymail with Brevo backend
+Install and configure django-anymail Brevo
 
 **Usage**:
 
@@ -597,13 +570,13 @@ $ djdevx backend django packages django-anymail brevo install [OPTIONS]
 
 **Options**:
 
-* `--api-key TEXT`: The Brevo API key for authentication  [required]
-* `--default-from-email TEXT`: The default from email address  [required]
+* `--api-key TEXT`: The Brevo API key for authentication
+* `--default-from-email TEXT`: The default from email address
 * `--help`: Show this message and exit.
 
 ####### `djdevx backend django packages django-anymail brevo remove`
 
-Remove django-anymail Brevo backend
+Remove django-anymail Brevo package
 
 **Usage**:
 
@@ -617,7 +590,7 @@ $ djdevx backend django packages django-anymail brevo remove [OPTIONS]
 
 ####### `djdevx backend django packages django-anymail brevo env`
 
-Configure environment variables for django-anymail Brevo backend
+Configure environment variables for django-anymail Brevo backend.
 
 **Usage**:
 
@@ -627,8 +600,8 @@ $ djdevx backend django packages django-anymail brevo env [OPTIONS]
 
 **Options**:
 
-* `--api-key TEXT`: The Brevo API key for authentication  [required]
-* `--default-from-email TEXT`: The default from email address  [required]
+* `--api-key TEXT`: The Brevo API key for authentication
+* `--default-from-email TEXT`: The default from email address
 * `--help`: Show this message and exit.
 
 ###### `djdevx backend django packages django-anymail mailgun`
@@ -647,13 +620,13 @@ $ djdevx backend django packages django-anymail mailgun [OPTIONS] COMMAND [ARGS]
 
 **Commands**:
 
-* `install`: Install django-anymail with Mailgun backend
-* `remove`: Remove django-anymail Mailgun backend
+* `install`: Install and configure django-anymail Mailgun
+* `remove`: Remove django-anymail Mailgun package
 * `env`: Configure environment variables for...
 
 ####### `djdevx backend django packages django-anymail mailgun install`
 
-Install django-anymail with Mailgun backend
+Install and configure django-anymail Mailgun
 
 **Usage**:
 
@@ -663,15 +636,15 @@ $ djdevx backend django packages django-anymail mailgun install [OPTIONS]
 
 **Options**:
 
-* `--api-key TEXT`: The Mailgun API key for authentication  [required]
-* `--domain TEXT`: The Mailgun domain  [required]
-* `--default-from-email TEXT`: The default from email address  [required]
+* `--api-key TEXT`: The Mailgun API key for authentication
+* `--domain TEXT`: The Mailgun domain
+* `--default-from-email TEXT`: The default from email address
 * `--is-europe / --no-is-europe`: Flag to use Europe region for Mailgun  [default: no-is-europe]
 * `--help`: Show this message and exit.
 
 ####### `djdevx backend django packages django-anymail mailgun remove`
 
-Remove django-anymail Mailgun backend
+Remove django-anymail Mailgun package
 
 **Usage**:
 
@@ -685,7 +658,7 @@ $ djdevx backend django packages django-anymail mailgun remove [OPTIONS]
 
 ####### `djdevx backend django packages django-anymail mailgun env`
 
-Configure environment variables for django-anymail Mailgun backend
+Configure environment variables for django-anymail Mailgun backend.
 
 **Usage**:
 
@@ -695,9 +668,9 @@ $ djdevx backend django packages django-anymail mailgun env [OPTIONS]
 
 **Options**:
 
-* `--api-key TEXT`: The Mailgun API key for authentication  [required]
-* `--domain TEXT`: The Mailgun domain  [required]
-* `--default-from-email TEXT`: The default from email address  [required]
+* `--api-key TEXT`: The Mailgun API key for authentication
+* `--domain TEXT`: The Mailgun domain
+* `--default-from-email TEXT`: The default from email address
 * `--help`: Show this message and exit.
 
 ###### `djdevx backend django packages django-anymail mailjet`
@@ -716,13 +689,13 @@ $ djdevx backend django packages django-anymail mailjet [OPTIONS] COMMAND [ARGS]
 
 **Commands**:
 
-* `install`: Install django-anymail with Mailjet backend
-* `remove`: Remove django-anymail Mailjet backend
+* `install`: Install and configure django-anymail Mailjet
+* `remove`: Remove django-anymail Mailjet package
 * `env`: Configure environment variables for...
 
 ####### `djdevx backend django packages django-anymail mailjet install`
 
-Install django-anymail with Mailjet backend
+Install and configure django-anymail Mailjet
 
 **Usage**:
 
@@ -732,14 +705,14 @@ $ djdevx backend django packages django-anymail mailjet install [OPTIONS]
 
 **Options**:
 
-* `--api-key TEXT`: The Mailjet API key for authentication  [required]
-* `--secret-key TEXT`: The Mailjet Secret key for authentication  [required]
-* `--default-from-email TEXT`: The default from email address  [required]
+* `--api-key TEXT`: The Mailjet API key for authentication
+* `--secret-key TEXT`: The Mailjet Secret key for authentication
+* `--default-from-email TEXT`: The default from email address
 * `--help`: Show this message and exit.
 
 ####### `djdevx backend django packages django-anymail mailjet remove`
 
-Remove django-anymail Mailjet backend
+Remove django-anymail Mailjet package
 
 **Usage**:
 
@@ -753,7 +726,7 @@ $ djdevx backend django packages django-anymail mailjet remove [OPTIONS]
 
 ####### `djdevx backend django packages django-anymail mailjet env`
 
-Configure environment variables for django-anymail Mailjet backend
+Configure environment variables for django-anymail Mailjet backend.
 
 **Usage**:
 
@@ -763,9 +736,9 @@ $ djdevx backend django packages django-anymail mailjet env [OPTIONS]
 
 **Options**:
 
-* `--api-key TEXT`: The Mailjet API key for authentication  [required]
-* `--secret-key TEXT`: The Mailjet Secret key for authentication  [required]
-* `--default-from-email TEXT`: The default from email address  [required]
+* `--api-key TEXT`: The Mailjet API key for authentication
+* `--secret-key TEXT`: The Mailjet Secret key for authentication
+* `--default-from-email TEXT`: The default from email address
 * `--help`: Show this message and exit.
 
 ###### `djdevx backend django packages django-anymail resend`
@@ -784,13 +757,13 @@ $ djdevx backend django packages django-anymail resend [OPTIONS] COMMAND [ARGS].
 
 **Commands**:
 
-* `install`: Install django-anymail with Resend backend
-* `remove`: Remove django-anymail Resend backend
+* `install`: Install and configure django-anymail Resend
+* `remove`: Remove django-anymail Resend package
 * `env`: Configure environment variables for...
 
 ####### `djdevx backend django packages django-anymail resend install`
 
-Install django-anymail with Resend backend
+Install and configure django-anymail Resend
 
 **Usage**:
 
@@ -800,13 +773,13 @@ $ djdevx backend django packages django-anymail resend install [OPTIONS]
 
 **Options**:
 
-* `--api-key TEXT`: The Resend API key for authentication  [required]
-* `--default-from-email TEXT`: The default from email address  [required]
+* `--api-key TEXT`: The Resend API key for authentication
+* `--default-from-email TEXT`: The default from email address
 * `--help`: Show this message and exit.
 
 ####### `djdevx backend django packages django-anymail resend remove`
 
-Remove django-anymail Resend backend
+Remove django-anymail Resend package
 
 **Usage**:
 
@@ -820,7 +793,7 @@ $ djdevx backend django packages django-anymail resend remove [OPTIONS]
 
 ####### `djdevx backend django packages django-anymail resend env`
 
-Configure environment variables for django-anymail Resend backend
+Configure environment variables for django-anymail Resend backend.
 
 **Usage**:
 
@@ -830,8 +803,8 @@ $ djdevx backend django packages django-anymail resend env [OPTIONS]
 
 **Options**:
 
-* `--api-key TEXT`: The Resend API key for authentication  [required]
-* `--default-from-email TEXT`: The default from email address  [required]
+* `--api-key TEXT`: The Resend API key for authentication
+* `--default-from-email TEXT`: The default from email address
 * `--help`: Show this message and exit.
 
 ##### `djdevx backend django packages django-auditlog`
@@ -1085,23 +1058,9 @@ $ djdevx backend django packages django-defender [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `env`: Creating environment variables for...
 * `install`: Install and configure django-defender
 * `remove`: Remove django-defender package
-
-###### `djdevx backend django packages django-defender env`
-
-Creating environment variables for django-defender
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-defender env [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
+* `env`: Configure environment variables.
 
 ###### `djdevx backend django packages django-defender install`
 
@@ -1125,6 +1084,20 @@ Remove django-defender package
 
 ```console
 $ djdevx backend django packages django-defender remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+###### `djdevx backend django packages django-defender env`
+
+Configure environment variables.
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-defender env [OPTIONS]
 ```
 
 **Options**:
@@ -1242,7 +1215,7 @@ $ djdevx backend django packages django-guardian [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `install`: Install and configure django-guardian
-* `remove`: Remove django-guardian
+* `remove`: Remove django-guardian package
 
 ###### `djdevx backend django packages django-guardian install`
 
@@ -1260,7 +1233,7 @@ $ djdevx backend django packages django-guardian install [OPTIONS]
 
 ###### `djdevx backend django packages django-guardian remove`
 
-Remove django-guardian
+Remove django-guardian package
 
 **Usage**:
 
@@ -1336,7 +1309,7 @@ $ djdevx backend django packages django-htmx [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `install`: Install and configure django-htmx
-* `remove`: Remove django-htmx
+* `remove`: Remove django-htmx package
 
 ###### `djdevx backend django packages django-htmx install`
 
@@ -1354,7 +1327,7 @@ $ djdevx backend django packages django-htmx install [OPTIONS]
 
 ###### `djdevx backend django packages django-htmx remove`
 
-Remove django-htmx
+Remove django-htmx package
 
 **Usage**:
 
@@ -1728,12 +1701,12 @@ $ djdevx backend django packages django-snakeoil [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `install`: Install and configure django-snakeoil for...
-* `remove`: Remove django-snakeoil
+* `install`: Install and configure django-snakeoil
+* `remove`: Remove django-snakeoil package
 
 ###### `djdevx backend django packages django-snakeoil install`
 
-Install and configure django-snakeoil for SEO metadata management
+Install and configure django-snakeoil
 
 **Usage**:
 
@@ -1757,7 +1730,7 @@ $ djdevx backend django packages django-snakeoil install [OPTIONS]
 
 ###### `djdevx backend django packages django-snakeoil remove`
 
-Remove django-snakeoil
+Remove django-snakeoil package
 
 **Usage**:
 
@@ -1805,13 +1778,13 @@ $ djdevx backend django packages django-storages s3 [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `install`: Install django-storages package with S3...
-* `remove`: Remove django-storages S3 backend
+* `install`: Install and configure django-storages S3
+* `remove`: Remove django-storages S3 package
 * `env`: Configure environment variables for...
 
 ####### `djdevx backend django packages django-storages s3 install`
 
-Install django-storages package with S3 backend
+Install and configure django-storages S3
 
 **Usage**:
 
@@ -1821,15 +1794,15 @@ $ djdevx backend django packages django-storages s3 install [OPTIONS]
 
 **Options**:
 
-* `--access-key TEXT`: The AWS access key for authentication  [required]
-* `--secret-key TEXT`: The AWS Secret key for authentication  [required]
-* `--region-name TEXT`: The AWS region  [required]
-* `--bucket-name TEXT`: The AWS bucket name to store the files in  [required]
+* `--access-key TEXT`: The AWS access key for authentication
+* `--secret-key TEXT`: The AWS Secret key for authentication
+* `--region-name TEXT`: The AWS region
+* `--bucket-name TEXT`: The AWS bucket name to store the files in
 * `--help`: Show this message and exit.
 
 ####### `djdevx backend django packages django-storages s3 remove`
 
-Remove django-storages S3 backend
+Remove django-storages S3 package
 
 **Usage**:
 
@@ -1843,7 +1816,7 @@ $ djdevx backend django packages django-storages s3 remove [OPTIONS]
 
 ####### `djdevx backend django packages django-storages s3 env`
 
-Configure environment variables for django-storages S3 backend
+Configure environment variables for django-storages S3 backend.
 
 **Usage**:
 
@@ -1853,10 +1826,10 @@ $ djdevx backend django packages django-storages s3 env [OPTIONS]
 
 **Options**:
 
-* `--access-key TEXT`: The AWS access key for authentication  [required]
-* `--secret-key TEXT`: The AWS Secret key for authentication  [required]
-* `--region-name TEXT`: The AWS region  [required]
-* `--bucket-name TEXT`: The AWS bucket name to store the files in  [required]
+* `--access-key TEXT`: The AWS access key for authentication
+* `--secret-key TEXT`: The AWS Secret key for authentication
+* `--region-name TEXT`: The AWS region
+* `--bucket-name TEXT`: The AWS bucket name to store the files in
 * `--help`: Show this message and exit.
 
 ###### `djdevx backend django packages django-storages azure`
@@ -1875,13 +1848,13 @@ $ djdevx backend django packages django-storages azure [OPTIONS] COMMAND [ARGS].
 
 **Commands**:
 
-* `install`: Install django-storages package with Azure...
-* `remove`: Remove django-storages Azure backend
+* `install`: Install and configure django-storages Azure
+* `remove`: Remove django-storages Azure package
 * `env`: Configure environment variables for...
 
 ####### `djdevx backend django packages django-storages azure install`
 
-Install django-storages package with Azure backend
+Install and configure django-storages Azure
 
 **Usage**:
 
@@ -1891,14 +1864,14 @@ $ djdevx backend django packages django-storages azure install [OPTIONS]
 
 **Options**:
 
-* `--account-key TEXT`: The Azure account key for authentication  [required]
-* `--account-name TEXT`: The Azure account name for authentication  [required]
-* `--container-name TEXT`: The Azure container name to store the files in  [required]
+* `--account-key TEXT`: The Azure account key for authentication
+* `--account-name TEXT`: The Azure account name for authentication
+* `--container-name TEXT`: The Azure container name to store the files in
 * `--help`: Show this message and exit.
 
 ####### `djdevx backend django packages django-storages azure remove`
 
-Remove django-storages Azure backend
+Remove django-storages Azure package
 
 **Usage**:
 
@@ -1912,7 +1885,7 @@ $ djdevx backend django packages django-storages azure remove [OPTIONS]
 
 ####### `djdevx backend django packages django-storages azure env`
 
-Configure environment variables for django-storages Azure backend
+Configure environment variables for django-storages Azure backend.
 
 **Usage**:
 
@@ -1922,9 +1895,9 @@ $ djdevx backend django packages django-storages azure env [OPTIONS]
 
 **Options**:
 
-* `--account-key TEXT`: The Azure account key for authentication  [required]
-* `--account-name TEXT`: The Azure account name for authentication  [required]
-* `--container-name TEXT`: The Azure container name to store the files in  [required]
+* `--account-key TEXT`: The Azure account key for authentication
+* `--account-name TEXT`: The Azure account name for authentication
+* `--container-name TEXT`: The Azure container name to store the files in
 * `--help`: Show this message and exit.
 
 ###### `djdevx backend django packages django-storages google`
@@ -1943,13 +1916,13 @@ $ djdevx backend django packages django-storages google [OPTIONS] COMMAND [ARGS]
 
 **Commands**:
 
-* `install`: Install django-storages package with...
-* `remove`: Remove django-storages Google backend
+* `install`: Install and configure django-storages...
+* `remove`: Remove django-storages Google Cloud...
 * `env`: Configure environment variables for...
 
 ####### `djdevx backend django packages django-storages google install`
 
-Install django-storages package with Google backend
+Install and configure django-storages Google Cloud Storage
 
 **Usage**:
 
@@ -1959,13 +1932,13 @@ $ djdevx backend django packages django-storages google install [OPTIONS]
 
 **Options**:
 
-* `--credentials-file-path PATH`: The path to the google credential file  [required]
-* `--bucket-name TEXT`: The Google bucket name to store the files in  [required]
+* `--credentials-file-path PATH`: The path to the google credential file
+* `--bucket-name TEXT`: The Google bucket name to store the files in
 * `--help`: Show this message and exit.
 
 ####### `djdevx backend django packages django-storages google remove`
 
-Remove django-storages Google backend
+Remove django-storages Google Cloud Storage package
 
 **Usage**:
 
@@ -1979,7 +1952,7 @@ $ djdevx backend django packages django-storages google remove [OPTIONS]
 
 ####### `djdevx backend django packages django-storages google env`
 
-Configure environment variables for django-storages Google backend
+Configure environment variables for django-storages Google backend.
 
 **Usage**:
 
@@ -1989,8 +1962,8 @@ $ djdevx backend django packages django-storages google env [OPTIONS]
 
 **Options**:
 
-* `--credentials-file-path PATH`: The path to the google credential file  [required]
-* `--bucket-name TEXT`: The Google bucket name to store the files in  [required]
+* `--credentials-file-path PATH`: The path to the google credential file
+* `--bucket-name TEXT`: The Google bucket name to store the files in
 * `--help`: Show this message and exit.
 
 ##### `djdevx backend django packages django-taggit`
@@ -2057,7 +2030,7 @@ $ djdevx backend django packages django-tailwind-cli [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `install`: Install and configure django-tailwind-cli
-* `remove`: Remove django-tailwind-cli
+* `remove`: Remove django-tailwind-cli package
 
 ###### `djdevx backend django packages django-tailwind-cli install`
 
@@ -2075,7 +2048,7 @@ $ djdevx backend django packages django-tailwind-cli install [OPTIONS]
 
 ###### `djdevx backend django packages django-tailwind-cli remove`
 
-Remove django-tailwind-cli
+Remove django-tailwind-cli package
 
 **Usage**:
 

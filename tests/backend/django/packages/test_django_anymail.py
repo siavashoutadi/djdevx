@@ -40,7 +40,7 @@ def test_django_anymail_ses_install_and_remove(temp_dir):
     )
 
     assert result.exit_code == 0
-    assert "django-anymail with SES backend is installed successfully." in result.stdout
+    assert "django-anymail SES installed successfully." in result.stdout
 
     # Check if package is installed
     assert DjangoProjectManager().has_dependency("django-anymail")
@@ -70,7 +70,7 @@ def test_django_anymail_ses_install_and_remove(temp_dir):
     )
 
     assert result.exit_code == 0
-    assert "django-anymail SES backend is removed successfully." in result.stdout
+    assert "django-anymail SES removed successfully." in result.stdout
 
     # Check if package is removed
     assert not DjangoProjectManager().has_dependency("django-anymail")
@@ -106,9 +106,7 @@ def test_django_anymail_brevo_install_and_remove(temp_dir):
     )
 
     assert result.exit_code == 0
-    assert (
-        "django-anymail with Brevo backend is installed successfully." in result.stdout
-    )
+    assert "django-anymail Brevo installed successfully." in result.stdout
 
     # Check if package is installed
     assert DjangoProjectManager().has_dependency("django-anymail")
@@ -136,7 +134,7 @@ def test_django_anymail_brevo_install_and_remove(temp_dir):
     )
 
     assert result.exit_code == 0
-    assert "django-anymail Brevo backend is removed successfully." in result.stdout
+    assert "django-anymail Brevo removed successfully." in result.stdout
 
     # Check if package is removed
     assert not DjangoProjectManager().has_dependency("django-anymail")
@@ -174,10 +172,7 @@ def test_django_anymail_mailgun_install_and_remove(temp_dir):
     )
 
     assert result.exit_code == 0
-    assert (
-        "django-anymail with Mailgun backend is installed successfully."
-        in result.stdout
-    )
+    assert "django-anymail Mailgun installed successfully." in result.stdout
 
     # Check if package is installed
     assert DjangoProjectManager().has_dependency("django-anymail")
@@ -206,7 +201,7 @@ def test_django_anymail_mailgun_install_and_remove(temp_dir):
     )
 
     assert result.exit_code == 0
-    assert "django-anymail Mailgun backend is removed successfully." in result.stdout
+    assert "django-anymail Mailgun removed successfully." in result.stdout
 
     # Check if package is removed
     assert not DjangoProjectManager().has_dependency("django-anymail")
@@ -244,10 +239,7 @@ def test_django_anymail_mailjet_install_and_remove(temp_dir):
     )
 
     assert result.exit_code == 0
-    assert (
-        "django-anymail with Mailjet backend is installed successfully."
-        in result.stdout
-    )
+    assert "django-anymail Mailjet installed successfully." in result.stdout
 
     # Check if package is installed
     assert DjangoProjectManager().has_dependency("django-anymail")
@@ -276,7 +268,7 @@ def test_django_anymail_mailjet_install_and_remove(temp_dir):
     )
 
     assert result.exit_code == 0
-    assert "django-anymail Mailjet backend is removed successfully." in result.stdout
+    assert "django-anymail Mailjet removed successfully." in result.stdout
 
     # Check if package is removed
     assert not DjangoProjectManager().has_dependency("django-anymail")
@@ -312,9 +304,7 @@ def test_django_anymail_resend_install_and_remove(temp_dir):
     )
 
     assert result.exit_code == 0
-    assert (
-        "django-anymail with Resend backend is installed successfully." in result.stdout
-    )
+    assert "django-anymail Resend installed successfully." in result.stdout
 
     # Check if package is installed
     assert DjangoProjectManager().has_dependency("django-anymail")
@@ -342,7 +332,7 @@ def test_django_anymail_resend_install_and_remove(temp_dir):
     )
 
     assert result.exit_code == 0
-    assert "django-anymail Resend backend is removed successfully." in result.stdout
+    assert "django-anymail Resend removed successfully." in result.stdout
 
     # Check if package is removed
     assert not DjangoProjectManager().has_dependency("django-anymail")

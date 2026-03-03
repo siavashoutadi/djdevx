@@ -190,10 +190,7 @@ def test_django_allauth_mfa_install_basic(temp_dir):
     )
 
     assert result.exit_code == 0, f"MFA install failed: {result.output}"
-    assert (
-        "django-allauth with MFA functionality is installed successfully"
-        in result.output
-    )
+    assert "django-allauth MFA installed successfully" in result.output
 
     # Check if package is upgraded to include MFA
     assert DjangoProjectManager().has_dependency("django-allauth")
@@ -502,7 +499,7 @@ def test_django_allauth_mfa_remove(temp_dir):
     )
 
     assert result.exit_code == 0, f"MFA remove failed: {result.output}"
-    assert "django-allauth MFA configuration is removed successfully" in result.output
+    assert "django-allauth MFA removed successfully" in result.output
 
     mfa_settings_file = backend_dir / "settings" / "packages" / "django_allauth_mfa.py"
     assert not mfa_settings_file.exists(), "MFA settings file not removed"
@@ -689,7 +686,7 @@ def test_django_allauth_oidc_provider_install_remove(temp_dir):
     )
 
     assert result.exit_code == 0, f"OIDC provider install failed: {result.output}"
-    assert "django-allauth OIDC provider is installed successfully" in result.output
+    assert "django-allauth OIDC provider installed successfully" in result.output
 
     # Check settings file
     settings_file = (
@@ -785,10 +782,7 @@ def test_django_allauth_oidc_provider_install_remove(temp_dir):
     )
 
     assert result.exit_code == 0, f"OIDC provider remove failed: {result.output}"
-    assert (
-        "django-allauth OIDC provider configuration is removed successfully"
-        in result.output
-    )
+    assert "django-allauth OIDC provider removed successfully" in result.output
 
     settings_file = (
         backend_dir / "settings" / "packages" / "django_allauth_oidc_provider.py"

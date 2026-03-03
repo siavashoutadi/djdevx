@@ -1,7 +1,6 @@
 """BasePackage class for standardized Django package installation management."""
 
 import functools
-import shutil
 from pathlib import Path
 from typing import Any, Callable, Optional
 
@@ -86,15 +85,6 @@ class PathDeriver:
         # Get path relative to packages directory (without .py extension)
         return str(self.file_path.relative_to(current).with_suffix(""))
 
-    def derive_ws_url_dirs(self, override: Optional[str]) -> str:
-        """Auto-derive WebSocket URL directory from file name.
-
-        If override is set, returns it. Otherwise uses the same logic as derive_url_file
-        but without the .py extension.
-        """
-        filename = self._derive_filename(override)
-        return filename.replace(".py", "")
-
 
 class BasePackage:
     """
@@ -119,7 +109,7 @@ class BasePackage:
     name: str = ""
     packages: list[str] = []
     dev_packages: list[str] = []
-    ws_url_dirs: Optional[str] = None
+    required_dependencies: list[str] = []
     env_vars: dict[str, str] = {}
     settings_file: Optional[str] = None
     url_file: Optional[str] = None
@@ -140,7 +130,6 @@ class BasePackage:
         self._settings_file = deriver.derive_settings_file(self.settings_file)
         self._url_file = deriver.derive_url_file(self.url_file)
         self._template_path = deriver.derive_template_path(self.template_path)
-        self._ws_url_dirs = deriver.derive_ws_url_dirs(self.ws_url_dirs)
 
         self._pm: Optional[DjangoProjectManager] = None
         self._uv: Optional[UvRunner] = None
@@ -235,15 +224,12 @@ class BasePackage:
             pass
 
     def _cleanup_files(self) -> None:
-        """Clean up auto-derived settings/URL files and ws_url_dirs."""
+        """Clean up auto-derived settings and URL files."""
         settings_path = self.pm.packages_settings_path / self._settings_file
         settings_path.unlink(missing_ok=True)
 
         url_path = self.pm.packages_urls_path / self._url_file
         url_path.unlink(missing_ok=True)
-
-        dir_path = self.pm.ws_urls_path / self._ws_url_dirs
-        shutil.rmtree(dir_path, ignore_errors=True)
 
     def _sync_env_vars(self, operation: str = "add") -> None:
         """
@@ -267,8 +253,25 @@ class BasePackage:
         """Remove all environment variables from env_vars dict."""
         self._sync_env_vars("remove")
 
+    def _check_required_dependencies(self) -> None:
+        """
+        Check if all required dependencies are installed.
+
+        Raises:
+            typer.Exit: If any required dependency is missing.
+        """
+        for dep in self.required_dependencies:
+            if not self.pm.has_dependency(dep):
+                print_console.error(
+                    f"'{dep}' package is required for '{self.name}'. "
+                    f"Please install that first."
+                )
+                print_console.info(f"\n> ddx backend django packages {dep} install")
+                raise typer.Exit(code=1)
+
     def install(self) -> None:
         """Install the package."""
+        self._check_required_dependencies()
         self._uv_add_all()
         self._copy_templates()
         self._add_env_vars()
@@ -330,6 +333,12 @@ class BasePackage:
 
         @functools.wraps(method)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
+            # Reset lazy-loaded project manager and uv runner so each command
+            # invocation re-discovers the project path from the current working
+            # directory. This is essential when the module-level _pkg instance is
+            # shared across multiple test calls in the same process.
+            self._pm = None
+            self._uv = None
             print_console.step(step_msg)
             result = method(*args, **kwargs)
             print_console.success(success_msg)

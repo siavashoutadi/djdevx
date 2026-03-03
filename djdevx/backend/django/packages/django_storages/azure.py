@@ -1,130 +1,86 @@
 import typer
-from pathlib import Path
 from typing_extensions import Annotated
 
-from .....utils.django.uv_runner import UvRunner
-from .....utils.console.print import print_console
-from .....utils.django.project_manager import DjangoProjectManager
-
-app = typer.Typer(no_args_is_help=True)
+from .._base import BasePackage
 
 
-@app.command()
-def install(
-    account_key: Annotated[
-        str,
-        typer.Option(
-            help="The Azure account key for authentication",
-            prompt="Please enter the Azure account key for authentication",
-        ),
-    ],
-    account_name: Annotated[
-        str,
-        typer.Option(
-            help="The Azure account name for authentication",
-            prompt="Please enter the Azure account name for authentication",
-        ),
-    ],
-    container_name: Annotated[
-        str,
-        typer.Option(
-            help="The Azure container name to store the files in",
-            prompt="Please enter the Azure container name to store the files in",
-        ),
-    ],
-):
-    """
-    Install django-storages package with Azure backend
-    """
-    pm = DjangoProjectManager()
+class AzureStoragePackage(BasePackage):
+    name = "django-storages Azure"
+    packages = ["django-storages[azure]"]
 
-    print_console.step("Installing django-storages package with Azure backend ...")
+    def install(
+        self,
+        account_key: Annotated[
+            str,
+            typer.Option(
+                help="The Azure account key for authentication",
+                prompt="Please enter the Azure account key for authentication",
+            ),
+        ] = "",
+        account_name: Annotated[
+            str,
+            typer.Option(
+                help="The Azure account name for authentication",
+                prompt="Please enter the Azure account name for authentication",
+            ),
+        ] = "",
+        container_name: Annotated[
+            str,
+            typer.Option(
+                help="The Azure container name to store the files in",
+                prompt="Please enter the Azure container name to store the files in",
+            ),
+        ] = "",
+    ) -> None:
+        """Install django-storages with Azure backend."""
+        self._uv_add_all()
+        self._copy_templates()
 
-    uv = UvRunner()
-    uv.add_package("django-storages[azure]")
+        # Set environment variables
+        self.pm.add_env_variable(key="STORAGES_AZURE_ACCOUNT_KEY", value=account_key)
+        self.pm.add_env_variable(key="STORAGES_AZURE_ACCOUNT_NAME", value=account_name)
+        self.pm.add_env_variable(
+            key="STORAGES_AZURE_CONTAINER_NAME", value=container_name
+        )
 
-    current_dir = Path(__file__).resolve().parent
-    source_dir = (
-        current_dir.parent.parent.parent.parent
-        / "templates"
-        / "django"
-        / "django_storages"
-        / "azure"
-    )
+    def remove(self) -> None:
+        """Remove django-storages Azure backend and its env vars."""
+        super().remove()
+        self.pm.remove_env_variable(key="STORAGES_AZURE_ACCOUNT_KEY")
+        self.pm.remove_env_variable(key="STORAGES_AZURE_ACCOUNT_NAME")
+        self.pm.remove_env_variable(key="STORAGES_AZURE_CONTAINER_NAME")
 
-    pm.copy_templates(source_dir=source_dir, template_context={})
-
-    # Set environment variables
-    pm.add_env_variable(key="STORAGES_AZURE_ACCOUNT_KEY", value=account_key)
-    pm.add_env_variable(key="STORAGES_AZURE_ACCOUNT_NAME", value=account_name)
-    pm.add_env_variable(key="STORAGES_AZURE_CONTAINER_NAME", value=container_name)
-
-    print_console.success(
-        "django-storages with Azure backend is installed successfully."
-    )
-
-
-@app.command()
-def remove():
-    """
-    Remove django-storages Azure backend
-    """
-    pm = DjangoProjectManager()
-
-    print_console.step("Removing django-storages package ...")
-
-    pm = DjangoProjectManager()
-    uv = UvRunner()
-    if pm.has_dependency("django-storages"):
-        uv.remove_package("django-storages")
-
-    settings_path = Path.joinpath(pm.packages_settings_path, "django_storages_azure.py")
-    settings_path.unlink(missing_ok=True)
-
-    pm.remove_env_variable(key="STORAGES_AZURE_ACCOUNT_KEY")
-    pm.remove_env_variable(key="STORAGES_AZURE_ACCOUNT_NAME")
-    pm.remove_env_variable(key="STORAGES_AZURE_CONTAINER_NAME")
-
-    print_console.success("django-storages Azure backend is removed successfully.")
+    def env(
+        self,
+        account_key: Annotated[
+            str,
+            typer.Option(
+                help="The Azure account key for authentication",
+                prompt="Please enter the Azure account key for authentication",
+            ),
+        ] = "",
+        account_name: Annotated[
+            str,
+            typer.Option(
+                help="The Azure account name for authentication",
+                prompt="Please enter the Azure account name for authentication",
+            ),
+        ] = "",
+        container_name: Annotated[
+            str,
+            typer.Option(
+                help="The Azure container name to store the files in",
+                prompt="Please enter the Azure container name to store the files in",
+            ),
+        ] = "",
+    ) -> None:
+        """Configure environment variables for django-storages Azure backend."""
+        self.pm.add_env_variable(key="STORAGES_AZURE_ACCOUNT_KEY", value=account_key)
+        self.pm.add_env_variable(key="STORAGES_AZURE_ACCOUNT_NAME", value=account_name)
+        self.pm.add_env_variable(
+            key="STORAGES_AZURE_CONTAINER_NAME", value=container_name
+        )
 
 
-@app.command()
-def env(
-    account_key: Annotated[
-        str,
-        typer.Option(
-            help="The Azure account key for authentication",
-            prompt="Please enter the Azure account key for authentication",
-        ),
-    ],
-    account_name: Annotated[
-        str,
-        typer.Option(
-            help="The Azure account name for authentication",
-            prompt="Please enter the Azure account name for authentication",
-        ),
-    ],
-    container_name: Annotated[
-        str,
-        typer.Option(
-            help="The Azure container name to store the files in",
-            prompt="Please enter the Azure container name to store the files in",
-        ),
-    ],
-):
-    """
-    Configure environment variables for django-storages Azure backend
-    """
-    pm = DjangoProjectManager()
-
-    print_console.step(
-        "Configuring environment variables for django-storages Azure backend ..."
-    )
-
-    pm.add_env_variable(key="STORAGES_AZURE_ACCOUNT_KEY", value=account_key)
-    pm.add_env_variable(key="STORAGES_AZURE_ACCOUNT_NAME", value=account_name)
-    pm.add_env_variable(key="STORAGES_AZURE_CONTAINER_NAME", value=container_name)
-
-    print_console.success(
-        "django-storages Azure environment variables are configured successfully."
-    )
+_pkg = AzureStoragePackage(__file__)
+app = _pkg.app

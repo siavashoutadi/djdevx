@@ -1,119 +1,71 @@
-import typer
 from pathlib import Path
+
+import typer
 from typing_extensions import Annotated
 
-from .....utils.django.uv_runner import UvRunner
-from .....utils.console.print import print_console
-from .....utils.django.project_manager import DjangoProjectManager
-
-app = typer.Typer(no_args_is_help=True)
+from .._base import BasePackage
 
 
-@app.command()
-def install(
-    credentials_file_path: Annotated[
-        Path,
-        typer.Option(
-            help="The path to the google credential file",
-            prompt="Please enter the path to the google credential file",
-        ),
-    ],
-    bucket_name: Annotated[
-        str,
-        typer.Option(
-            help="The Google bucket name to store the files in",
-            prompt="Please enter the Google bucket name to store the files in",
-        ),
-    ],
-):
-    """
-    Install django-storages package with Google backend
-    """
-    pm = DjangoProjectManager()
+class GoogleStoragePackage(BasePackage):
+    name = "django-storages Google Cloud Storage"
+    packages = ["django-storages[google]"]
 
-    print_console.step("Installing django-storages package with Google backend ...")
+    def install(
+        self,
+        credentials_file_path: Annotated[
+            Path,
+            typer.Option(
+                help="The path to the google credential file",
+                prompt="Please enter the path to the google credential file",
+            ),
+        ] = None,
+        bucket_name: Annotated[
+            str,
+            typer.Option(
+                help="The Google bucket name to store the files in",
+                prompt="Please enter the Google bucket name to store the files in",
+            ),
+        ] = "",
+    ) -> None:
+        """Install django-storages with Google Cloud Storage backend."""
+        self._uv_add_all()
+        self._copy_templates()
 
-    uv = UvRunner()
-    uv.add_package("django-storages[google]")
+        # Set environment variables
+        self.pm.add_env_variable(
+            key="STORAGES_GOOGLE_CREDENTIALS", value=str(credentials_file_path)
+        )
+        self.pm.add_env_variable(key="STORAGES_GOOGLE_BUCKET_NAME", value=bucket_name)
 
-    current_dir = Path(__file__).resolve().parent
-    source_dir = (
-        current_dir.parent.parent.parent.parent
-        / "templates"
-        / "django"
-        / "django_storages"
-        / "google"
-    )
+    def remove(self) -> None:
+        """Remove django-storages Google backend and its env vars."""
+        super().remove()
+        self.pm.remove_env_variable(key="STORAGES_GOOGLE_CREDENTIALS")
+        self.pm.remove_env_variable(key="STORAGES_GOOGLE_BUCKET_NAME")
 
-    pm.copy_templates(source_dir=source_dir, template_context={})
-
-    # Set environment variables
-    pm.add_env_variable(
-        key="STORAGES_GOOGLE_CREDENTIALS", value=str(credentials_file_path)
-    )
-    pm.add_env_variable(key="STORAGES_GOOGLE_BUCKET_NAME", value=bucket_name)
-
-    print_console.success(
-        "django-storages with Google backend is installed successfully."
-    )
-
-
-@app.command()
-def remove():
-    """
-    Remove django-storages Google backend
-    """
-    pm = DjangoProjectManager()
-
-    print_console.step("Removing django-storages package ...")
-
-    pm = DjangoProjectManager()
-    uv = UvRunner()
-    if pm.has_dependency("django-storages"):
-        uv.remove_package("django-storages")
-
-    settings_path = Path.joinpath(
-        pm.packages_settings_path, "django_storages_google.py"
-    )
-    settings_path.unlink(missing_ok=True)
-
-    pm.remove_env_variable(key="STORAGES_GOOGLE_CREDENTIALS")
-    pm.remove_env_variable(key="STORAGES_GOOGLE_BUCKET_NAME")
-
-    print_console.success("django-storages Google backend is removed successfully.")
+    def env(
+        self,
+        credentials_file_path: Annotated[
+            Path,
+            typer.Option(
+                help="The path to the google credential file",
+                prompt="Please enter the path to the google credential file",
+            ),
+        ] = None,
+        bucket_name: Annotated[
+            str,
+            typer.Option(
+                help="The Google bucket name to store the files in",
+                prompt="Please enter the Google bucket name to store the files in",
+            ),
+        ] = "",
+    ) -> None:
+        """Configure environment variables for django-storages Google backend."""
+        self.pm.add_env_variable(
+            key="STORAGES_GOOGLE_CREDENTIALS", value=str(credentials_file_path)
+        )
+        self.pm.add_env_variable(key="STORAGES_GOOGLE_BUCKET_NAME", value=bucket_name)
 
 
-@app.command()
-def env(
-    credentials_file_path: Annotated[
-        Path,
-        typer.Option(
-            help="The path to the google credential file",
-            prompt="Please enter the path to the google credential file",
-        ),
-    ],
-    bucket_name: Annotated[
-        str,
-        typer.Option(
-            help="The Google bucket name to store the files in",
-            prompt="Please enter the Google bucket name to store the files in",
-        ),
-    ],
-):
-    """
-    Configure environment variables for django-storages Google backend
-    """
-    pm = DjangoProjectManager()
-
-    print_console.step(
-        "Configuring environment variables for django-storages Google backend ..."
-    )
-
-    pm.add_env_variable(
-        key="STORAGES_GOOGLE_CREDENTIALS", value=str(credentials_file_path)
-    )
-    pm.add_env_variable(key="STORAGES_GOOGLE_BUCKET_NAME", value=bucket_name)
-
-    print_console.success(
-        "django-storages Google environment variables are configured successfully."
-    )
+_pkg = GoogleStoragePackage(__file__)
+app = _pkg.app

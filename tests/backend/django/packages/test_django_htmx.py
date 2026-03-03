@@ -84,10 +84,7 @@ def test_django_htmx_with_body_class(temp_dir):
     """
     Test django-htmx installation with existing body class attribute.
     """
-    from djdevx.backend.django.packages.django_htmx import (
-        add_htmx_snippets,
-        remove_htmx_snippets,
-    )
+    from djdevx.backend.django.packages.django_htmx import _pkg
 
     backend_dir = create_test_django_backend(temp_dir, runner)
 
@@ -100,7 +97,7 @@ def test_django_htmx_with_body_class(temp_dir):
     base_template.write_text(content)
 
     # Add HTMX snippets
-    add_htmx_snippets()
+    _pkg._add_htmx_snippets()
 
     # Verify hx-headers was added while preserving the class
     template_content = base_template.read_text()
@@ -108,7 +105,7 @@ def test_django_htmx_with_body_class(temp_dir):
     assert "hx-headers=" in template_content, "hx-headers attribute was not added"
 
     # Remove HTMX snippets
-    remove_htmx_snippets()
+    _pkg._remove_htmx_snippets()
 
     # Verify hx-headers was removed but class remains
     template_content = base_template.read_text()
@@ -122,10 +119,7 @@ def test_django_htmx_with_body_attributes(temp_dir):
     """
     Test django-htmx installation with existing body attributes (id, data-*, etc).
     """
-    from djdevx.backend.django.packages.django_htmx import (
-        add_htmx_snippets,
-        remove_htmx_snippets,
-    )
+    from djdevx.backend.django.packages.django_htmx import _pkg
 
     backend_dir = create_test_django_backend(temp_dir, runner)
 
@@ -140,7 +134,7 @@ def test_django_htmx_with_body_attributes(temp_dir):
     base_template.write_text(content)
 
     # Add HTMX snippets
-    add_htmx_snippets()
+    _pkg._add_htmx_snippets()
 
     # Verify hx-headers was added while preserving all attributes
     template_content = base_template.read_text()
@@ -150,7 +144,7 @@ def test_django_htmx_with_body_attributes(temp_dir):
     assert "hx-headers=" in template_content, "hx-headers attribute was not added"
 
     # Remove HTMX snippets
-    remove_htmx_snippets()
+    _pkg._remove_htmx_snippets()
 
     # Verify hx-headers was removed but all attributes remain
     template_content = base_template.read_text()
@@ -168,10 +162,7 @@ def test_django_htmx_with_complex_body(temp_dir):
     """
     Test django-htmx installation with complex body tag (multiple spaces, newlines, etc).
     """
-    from djdevx.backend.django.packages.django_htmx import (
-        add_htmx_snippets,
-        remove_htmx_snippets,
-    )
+    from djdevx.backend.django.packages.django_htmx import _pkg
 
     backend_dir = create_test_django_backend(temp_dir, runner)
 
@@ -187,7 +178,7 @@ def test_django_htmx_with_complex_body(temp_dir):
     base_template.write_text(content)
 
     # Add HTMX snippets
-    add_htmx_snippets()
+    _pkg._add_htmx_snippets()
 
     # Verify hx-headers was added while preserving all formatting and attributes
     template_content = base_template.read_text()
@@ -197,7 +188,7 @@ def test_django_htmx_with_complex_body(temp_dir):
     assert "hx-headers=" in template_content, "hx-headers attribute was not added"
 
     # Remove HTMX snippets
-    remove_htmx_snippets()
+    _pkg._remove_htmx_snippets()
 
     # Verify hx-headers was removed but all attributes remain
     template_content = base_template.read_text()

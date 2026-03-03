@@ -40,7 +40,7 @@ def test_django_storages_s3_install_and_remove(temp_dir):
     )
 
     assert result.exit_code == 0
-    assert "django-storages with S3 backend is installed successfully." in result.stdout
+    assert "django-storages S3 installed successfully." in result.stdout
 
     # Check if package is installed
     assert DjangoProjectManager().has_dependency("django-storages")
@@ -70,7 +70,7 @@ def test_django_storages_s3_install_and_remove(temp_dir):
     )
 
     assert result.exit_code == 0
-    assert "django-storages S3 backend is removed successfully." in result.stdout
+    assert "django-storages S3 removed successfully." in result.stdout
 
     # Check if package is removed
     assert not DjangoProjectManager().has_dependency("django-storages")
@@ -108,9 +108,7 @@ def test_django_storages_azure_install_and_remove(temp_dir):
     )
 
     assert result.exit_code == 0
-    assert (
-        "django-storages with Azure backend is installed successfully." in result.stdout
-    )
+    assert "django-storages Azure installed successfully." in result.stdout
 
     # Check if package is installed
     assert DjangoProjectManager().has_dependency("django-storages")
@@ -139,7 +137,7 @@ def test_django_storages_azure_install_and_remove(temp_dir):
     )
 
     assert result.exit_code == 0
-    assert "django-storages Azure backend is removed successfully." in result.stdout
+    assert "django-storages Azure removed successfully." in result.stdout
 
     # Check if package is removed
     assert not DjangoProjectManager().has_dependency("django-storages")
@@ -176,8 +174,7 @@ def test_django_storages_google_install_and_remove(temp_dir):
 
     assert result.exit_code == 0
     assert (
-        "django-storages with Google backend is installed successfully."
-        in result.stdout
+        "django-storages Google Cloud Storage installed successfully." in result.stdout
     )
 
     # Check if package is installed
@@ -206,7 +203,7 @@ def test_django_storages_google_install_and_remove(temp_dir):
     )
 
     assert result.exit_code == 0
-    assert "django-storages Google backend is removed successfully." in result.stdout
+    assert "django-storages Google Cloud Storage removed successfully." in result.stdout
 
     # Check if package is removed
     assert not DjangoProjectManager().has_dependency("django-storages")

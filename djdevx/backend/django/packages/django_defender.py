@@ -1,73 +1,13 @@
-from ....utils.django.uv_runner import UvRunner
-import typer
-
-from pathlib import Path
-
-from ....utils.console.print import print_console
-from ....utils.django.project_manager import DjangoProjectManager
-
-app = typer.Typer(no_args_is_help=True)
+from ._base import BasePackage
 
 
-@app.command()
-def env():
-    """
-    Creating environment variables for django-defender
-    """
-    pm = DjangoProjectManager()
-
-    print_console.step("Creating environment variables for django-defender ...")
-    pm.add_env_variable(
-        key="DEFENDER_REDIS_URL",
-        value="redis://default:${REDIS_PASSWORD}@cache:6379/1",
-    )
-
-    print_console.success(
-        "django-defender environment variables are configured successfully."
-    )
+class DjangoDefenderPackage(BasePackage):
+    name = "django-defender"
+    packages = ["django-defender"]
+    env_vars = {
+        "DEFENDER_REDIS_URL": "redis://default:${REDIS_PASSWORD}@cache:6379/1",
+    }
 
 
-@app.command()
-def install():
-    """
-    Install and configure django-defender
-    """
-    pm = DjangoProjectManager()
-
-    print_console.step("Installing django-defender package ...")
-    uv_runner = UvRunner()
-    uv_runner.add_package("django-defender")
-
-    current_dir = Path(__file__).resolve().parent
-    source_dir = (
-        current_dir.parent.parent.parent / "templates" / "django" / "django_defender"
-    )
-
-    pm.copy_templates(source_dir=source_dir, template_context={})
-
-    env()
-
-    print_console.success("django-defender is installed successfully.")
-
-
-@app.command()
-def remove():
-    """
-    Remove django-defender package
-    """
-    print_console.step("Removing django-defender package ...")
-
-    pm = DjangoProjectManager()
-    if pm.has_dependency("django-defender"):
-        uv_runner = UvRunner()
-        uv_runner.remove_package("django-defender")
-
-    url_path = Path.joinpath(pm.packages_urls_path, "django_defender.py")
-    url_path.unlink(missing_ok=True)
-
-    settings_url = Path.joinpath(pm.packages_settings_path, "django_defender.py")
-    settings_url.unlink(missing_ok=True)
-
-    pm.remove_env_variable("DEFENDER_REDIS_URL")
-
-    print_console.success("django-defender is removed successfully.")
+_pkg = DjangoDefenderPackage(__file__)
+app = _pkg.app
