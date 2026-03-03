@@ -1,5 +1,5 @@
 ---
-name: django package
+name: django-packages
 description: Guide for adding support for new django packages to djdevx
 ---
 

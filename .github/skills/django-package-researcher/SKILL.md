@@ -1,5 +1,5 @@
 ---
-name: Django Package Researcher
+name: django-package-researcher
 description: Guide for researching Django packages from the internet
 ---
 
