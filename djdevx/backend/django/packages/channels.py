@@ -12,13 +12,9 @@ class ChannelsPackage(BasePackage):
         "CHANNEL_LAYERS_REDIS_HOST": "redis://default:${REDIS_PASSWORD}@cache:6379/1",
     }
 
-    def remove(self) -> None:
-        """Remove channels and restore original ASGI file."""
-        super().remove()
-
-        # Remove the entire ws_urls directory
-        ws_url_path = self.pm.ws_urls_path
-        shutil.rmtree(ws_url_path, ignore_errors=True)
+    def after_uv_remove(self) -> None:
+        """Remove ws_urls directory and restore original ASGI file."""
+        shutil.rmtree(self.pm.ws_urls_path, ignore_errors=True)
 
         # Restore original ASGI file without channels
         template_asgi_path = (

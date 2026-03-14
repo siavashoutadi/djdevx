@@ -5,16 +5,11 @@ class DjangoGuardianPackage(BasePackage):
     name = "django-guardian"
     packages = ["django-guardian"]
 
-    def install(self) -> None:
-        """Install django-guardian and add mixin to User model."""
-        self._uv_add_all()
-        self._copy_templates()
+    def after_copy_templates(self) -> None:
         self._add_guardian_mixin()
 
-    def remove(self) -> None:
-        """Remove django-guardian and remove mixin from User model."""
+    def before_uv_remove(self) -> None:
         self._remove_guardian_mixin()
-        super().remove()
 
     def _add_guardian_mixin(self) -> None:
         """Add GuardianUserMixin to User model."""

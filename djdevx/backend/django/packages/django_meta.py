@@ -1,196 +1,124 @@
-import typer
-from typing_extensions import Annotated
-
-from ._base import BasePackage
+from ._base import BasePackage, InstallParam
 
 
 class DjangoMetaPackage(BasePackage):
     name = "django-meta"
     packages = ["django-meta"]
 
-    def install(
-        self,
-        site_protocol: Annotated[
-            str,
-            typer.Option(
-                help="Protocol for your site URL: 'http' or 'https' (use https for production)",
-                prompt="Please enter your site protocol (http/https)",
-            ),
-        ] = "https",
-        site_domain: Annotated[
-            str,
-            typer.Option(
-                help="Your website domain without protocol (e.g., 'example.com' or 'blog.example.com')",
-                prompt="Please enter your site domain (e.g., example.com)",
-            ),
-        ] = "",
-        site_name: Annotated[
-            str,
-            typer.Option(
-                help="Display name of your website (e.g., 'My Awesome Blog')",
-                prompt="Please enter your site name",
-            ),
-        ] = "",
-        site_type: Annotated[
-            str,
-            typer.Option(
-                help="OpenGraph type (website, article, blog, product). See: https://ogp.me/#types",
-                prompt="Please enter your site type (website/article/blog/product)",
-            ),
-        ] = "website",
-        use_og_properties: Annotated[
-            bool,
-            typer.Option(
-                help="Enable OpenGraph meta tags for rich previews on Facebook, LinkedIn, WhatsApp, etc.",
-                prompt="Enable OpenGraph properties (Facebook, LinkedIn, WhatsApp)?",
-            ),
-        ] = True,
-        use_twitter_properties: Annotated[
-            bool,
-            typer.Option(
-                help="Enable Twitter Card meta tags for rich previews when links are shared on Twitter/X",
-                prompt="Enable Twitter Card properties for rich previews on Twitter/X?",
-            ),
-        ] = True,
-        use_schemaorg_properties: Annotated[
-            bool,
-            typer.Option(
-                help="Enable Schema.org structured data for better SEO and search engine understanding",
-                prompt="Enable Schema.org properties for better SEO?",
-            ),
-        ] = True,
-        use_title_tag: Annotated[
-            bool,
-            typer.Option(
-                help="Auto-render <title> tags in templates (disable if you manage titles manually)",
-                prompt="Render <title> tag automatically?",
-            ),
-        ] = True,
-        configure_facebook: Annotated[
-            bool,
-            typer.Option(
-                help="Configure Facebook-specific settings (App ID, Pages, Publisher). Info: https://developers.facebook.com/docs/sharing/webmasters",
-                prompt="Do you want to configure Facebook/OpenGraph settings?",
-            ),
-        ] = False,
-        fb_app_id: Annotated[
-            str,
-            typer.Option(
-                help="Facebook App ID from https://developers.facebook.com/apps/ (numeric ID, e.g., '123456789012345')",
-            ),
-        ] = "",
-        fb_pages: Annotated[
-            str,
-            typer.Option(
-                help="Facebook Page ID for your business page (numeric ID, find at facebook.com/your-page/about)",
-            ),
-        ] = "",
-        fb_publisher: Annotated[
-            str,
-            typer.Option(
-                help="Full Facebook Page URL (e.g., 'https://www.facebook.com/YourPageName')",
-            ),
-        ] = "",
-        configure_twitter: Annotated[
-            bool,
-            typer.Option(
-                help="Configure Twitter Card settings for rich previews. Guide: https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/abouts-cards",
-                prompt="Do you want to configure Twitter Card settings?",
-            ),
-        ] = False,
-        twitter_site: Annotated[
-            str,
-            typer.Option(
-                help="Your website's Twitter/X handle including @ (e.g., '@YourSite')",
-            ),
-        ] = "",
-        twitter_author: Annotated[
-            str,
-            typer.Option(
-                help="Default author Twitter/X handle with @ (e.g., '@AuthorName')",
-            ),
-        ] = "",
-        twitter_type: Annotated[
-            str,
-            typer.Option(
-                help="Twitter Card type: 'summary' (small image) or 'summary_large_image' (large image, recommended)",
-            ),
-        ] = "summary_large_image",
-        default_image_url: Annotated[
-            str,
-            typer.Option(
-                help="Full URL to default share image (1200x630px recommended, e.g., 'https://example.com/share.jpg')",
-                prompt="Enter default image URL for social sharing (leave empty to skip)",
-            ),
-        ] = "",
-    ) -> None:
-        """Install and configure django-meta."""
-        # Prompt for Facebook details if user wants to configure
-        if configure_facebook:
-            if not fb_app_id:
-                typer.echo(
-                    "\nGet your App ID from: https://developers.facebook.com/apps/"
-                )
-                fb_app_id = typer.prompt(
-                    "Enter your Facebook App ID (numeric, e.g., 123456789012345) or leave empty",
-                    default="",
-                )
-            if not fb_pages:
-                typer.echo("\nFind your Page ID at: facebook.com/your-page/about")
-                fb_pages = typer.prompt(
-                    "Enter your Facebook Page ID (numeric) or leave empty", default=""
-                )
-            if not fb_publisher:
-                typer.echo("\nUse your full Facebook Page URL")
-                fb_publisher = typer.prompt(
-                    "Enter your Facebook Page URL (e.g., https://www.facebook.com/YourPage) or leave empty",
-                    default="",
-                )
-
-        # Prompt for Twitter details if user wants to configure
-        if configure_twitter:
-            if not twitter_site:
-                typer.echo("\nEnter your website's Twitter/X handle")
-                twitter_site = typer.prompt(
-                    "Your site's Twitter handle (e.g., @YourSite)"
-                )
-            if not twitter_author:
-                typer.echo("\nDefault author handle for content attribution")
-                twitter_author = typer.prompt(
-                    "Default author Twitter handle (e.g., @AuthorName) or leave empty",
-                    default="",
-                )
-            if not twitter_type:
-                typer.echo(
-                    "\nCard types: 'summary' (small image) or 'summary_large_image' (large image, recommended)"
-                )
-                twitter_type = typer.prompt(
-                    "Twitter card type", default="summary_large_image"
-                )
-
-        self._uv_add_all()
-
-        template_context = {
-            "site_protocol": site_protocol,
-            "site_domain": site_domain,
-            "site_name": site_name,
-            "site_type": site_type,
-            "use_og_properties": use_og_properties,
-            "use_twitter_properties": use_twitter_properties,
-            "use_schemaorg_properties": use_schemaorg_properties,
-            "use_title_tag": use_title_tag,
-            "configure_facebook": configure_facebook,
-            "fb_app_id": fb_app_id,
-            "fb_pages": fb_pages,
-            "fb_publisher": fb_publisher,
-            "configure_twitter": configure_twitter,
-            "twitter_site": twitter_site,
-            "twitter_author": twitter_author,
-            "twitter_type": twitter_type,
-            "default_image_url": default_image_url,
-        }
-
-        self._copy_templates(context=template_context)
+    install_params = [
+        InstallParam(
+            name="site_protocol",
+            default="https",
+            help="Protocol for your site URL: 'http' or 'https' (use https for production)",
+            prompt="Please enter your site protocol (http/https)",
+        ),
+        InstallParam(
+            name="site_domain",
+            help="Your website domain without protocol (e.g., 'example.com' or 'blog.example.com')",
+            prompt="Please enter your site domain (e.g., example.com)",
+        ),
+        InstallParam(
+            name="site_name",
+            help="Display name of your website (e.g., 'My Awesome Blog')",
+            prompt="Please enter your site name",
+        ),
+        InstallParam(
+            name="site_type",
+            default="website",
+            help="OpenGraph type (website, article, blog, product). See: https://ogp.me/#types",
+            prompt="Please enter your site type (website/article/blog/product)",
+        ),
+        InstallParam(
+            name="use_og_properties",
+            type_=bool,
+            default=True,
+            help="Enable OpenGraph meta tags for rich previews on Facebook, LinkedIn, WhatsApp, etc.",
+            prompt="Enable OpenGraph properties (Facebook, LinkedIn, WhatsApp)?",
+        ),
+        InstallParam(
+            name="use_twitter_properties",
+            type_=bool,
+            default=True,
+            help="Enable Twitter Card meta tags for rich previews when links are shared on Twitter/X",
+            prompt="Enable Twitter Card properties for rich previews on Twitter/X?",
+        ),
+        InstallParam(
+            name="use_schemaorg_properties",
+            type_=bool,
+            default=True,
+            help="Enable Schema.org structured data for better SEO and search engine understanding",
+            prompt="Enable Schema.org properties for better SEO?",
+        ),
+        InstallParam(
+            name="use_title_tag",
+            type_=bool,
+            default=True,
+            help="Auto-render <title> tags in templates (disable if you manage titles manually)",
+            prompt="Render <title> tag automatically?",
+        ),
+        InstallParam(
+            name="configure_facebook",
+            type_=bool,
+            default=False,
+            help="Configure Facebook-specific settings (App ID, Pages, Publisher).",
+            prompt="Do you want to configure Facebook/OpenGraph settings?",
+        ),
+        InstallParam(
+            name="fb_app_id",
+            show_if="configure_facebook",
+            help="Facebook App ID from https://developers.facebook.com/apps/ (numeric ID)",
+            prompt="Enter your Facebook App ID (numeric, e.g., 123456789012345) or leave empty",
+            message_before_prompt="\nGet your App ID from: https://developers.facebook.com/apps/",
+        ),
+        InstallParam(
+            name="fb_pages",
+            show_if="configure_facebook",
+            help="Facebook Page ID for your business page (numeric ID)",
+            prompt="Enter your Facebook Page ID (numeric) or leave empty",
+            message_before_prompt="\nFind your Page ID at: facebook.com/your-page/about",
+        ),
+        InstallParam(
+            name="fb_publisher",
+            show_if="configure_facebook",
+            help="Full Facebook Page URL (e.g., 'https://www.facebook.com/YourPageName')",
+            prompt="Enter your Facebook Page URL (e.g., https://www.facebook.com/YourPage) or leave empty",
+            message_before_prompt="\nUse your full Facebook Page URL",
+        ),
+        InstallParam(
+            name="configure_twitter",
+            type_=bool,
+            default=False,
+            help="Configure Twitter Card settings for rich previews.",
+            prompt="Do you want to configure Twitter Card settings?",
+        ),
+        InstallParam(
+            name="twitter_site",
+            show_if="configure_twitter",
+            help="Your website's Twitter/X handle including @ (e.g., '@YourSite')",
+            prompt="Your site's Twitter handle (e.g., @YourSite)",
+            message_before_prompt="\nEnter your website's Twitter/X handle",
+        ),
+        InstallParam(
+            name="twitter_author",
+            show_if="configure_twitter",
+            help="Default author Twitter/X handle with @ (e.g., '@AuthorName')",
+            prompt="Default author Twitter handle (e.g., @AuthorName) or leave empty",
+            message_before_prompt="\nDefault author handle for content attribution",
+        ),
+        InstallParam(
+            name="twitter_type",
+            default="summary_large_image",
+            show_if="configure_twitter",
+            help="Twitter Card type: 'summary' or 'summary_large_image'",
+            prompt="Twitter card type",
+            message_before_prompt="\nCard types: 'summary' (small image) or 'summary_large_image' (large image, recommended)",
+        ),
+        InstallParam(
+            name="default_image_url",
+            help="Full URL to default share image (1200x630px recommended)",
+            prompt="Enter default image URL for social sharing (leave empty to skip)",
+        ),
+    ]
 
 
 _pkg = DjangoMetaPackage(__file__)

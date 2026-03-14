@@ -7,15 +7,10 @@ class DjangoHtmxPackage(BasePackage):
     name = "django-htmx"
     packages = ["django-htmx"]
 
-    def install(self) -> None:
-        """Install django-htmx and add snippets to base template."""
-        self._uv_add_all()
-        self._copy_templates()
+    def after_copy_templates(self) -> None:
         self._add_htmx_snippets()
 
-    def remove(self) -> None:
-        """Remove django-htmx and remove snippets from base template."""
-        super().remove()
+    def after_uv_remove(self) -> None:
         self._remove_htmx_snippets()
 
     def _add_htmx_snippets(self) -> None:

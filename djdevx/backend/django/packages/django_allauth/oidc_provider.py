@@ -29,8 +29,12 @@ class OidcProviderPackage(BasePackage):
             )
             raise typer.Exit(code=1)
 
+        self.before_uv_install()
         self._uv_add_all()
+        self.after_uv_install()
+        self.before_copy_templates()
         self._copy_templates()
+        self.after_copy_templates()
         self.env()
 
     def remove(self) -> None:

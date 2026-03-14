@@ -76,7 +76,10 @@ class MfaPackage(BasePackage):
             )
             raise typer.Exit(code=1)
 
+        self.before_uv_install()
         self._uv_add_all()
+        self.after_uv_install()
+        self.before_copy_templates()
         self._copy_templates(
             context={
                 "enable_totp": enable_totp,
@@ -96,8 +99,11 @@ class MfaPackage(BasePackage):
             }
         )
 
+        self.after_copy_templates()
+
     def remove(self) -> None:
         """Remove MFA configuration."""
+        self.before_uv_remove()
         # Only remove configuration files, not django-allauth package (account depends on it)
         self._cleanup_files()
         self._remove_env_vars()

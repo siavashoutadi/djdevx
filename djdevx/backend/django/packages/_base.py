@@ -1,8 +1,11 @@
 """BasePackage class for standardized Django package installation management."""
 
 import functools
+import inspect
+import shutil
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Annotated, Any, Callable, Optional
 
 import typer
 
@@ -86,6 +89,33 @@ class PathDeriver:
         return str(self.file_path.relative_to(current).with_suffix(""))
 
 
+@dataclass
+class InstallParam:
+    """Declares a parameter that contributes to template context during install."""
+
+    name: str
+    type_: type = str
+    default: Any = ""
+    help: str = ""
+    prompt: Optional[str] = None
+    show_if: Optional[str] = None
+    message_before_prompt: Optional[str] = None
+    hide_input: bool = False
+
+
+@dataclass
+class EnvParam:
+    """Declares a parameter that sets an environment variable during install and env."""
+
+    name: str
+    env_key: str
+    type_: type = str
+    default: Any = ""
+    help: str = ""
+    prompt: Optional[str] = None
+    hide_input: bool = False
+
+
 class BasePackage:
     """
     Base class for Django packages with auto-registered install/remove/env commands.
@@ -114,6 +144,10 @@ class BasePackage:
     settings_file: Optional[str] = None
     url_file: Optional[str] = None
     template_path: Optional[str] = None
+    install_params: list[InstallParam] = []
+    env_params: list[EnvParam] = []
+    files_to_remove: list[str] = []
+    folders_to_remove: list[str] = []
 
     def __init__(self, file: str) -> None:
         """
@@ -133,6 +167,136 @@ class BasePackage:
 
         self._pm: Optional[DjangoProjectManager] = None
         self._uv: Optional[UvRunner] = None
+        self._install_context: dict[str, Any] = {}
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        """Auto-generate install/env methods for subclasses that declare params."""
+        super().__init_subclass__(**kwargs)
+
+        _install_params: list[InstallParam] = cls.install_params
+        _env_params: list[EnvParam] = cls.env_params
+
+        has_params = bool(_install_params) or bool(_env_params)
+        install_overridden = "install" in cls.__dict__
+        env_overridden = "env" in cls.__dict__
+
+        if has_params and not install_overridden:
+            # Capture for closure
+            ip = list(_install_params)
+            ep = list(_env_params)
+
+            def generated_install(self, **kwargs: Any) -> None:  # type: ignore[override]
+                """Install and configure the package."""
+                self._install_context = {p.name: kwargs[p.name] for p in ip}
+
+                self.before_uv_install()
+                self._check_required_dependencies()
+                self._uv_add_all()
+                self.after_uv_install()
+                self.before_copy_templates()
+
+                for param in ip:
+                    if param.show_if is not None:
+                        gating_value = self._install_context[param.show_if]
+                        if (
+                            gating_value is True
+                            and not self._install_context[param.name]
+                        ):
+                            if param.message_before_prompt:
+                                typer.echo(param.message_before_prompt)
+                            self._install_context[param.name] = typer.prompt(
+                                param.prompt or param.name, default=param.default
+                            )
+
+                self._copy_templates(context=self._install_context)
+                self.after_copy_templates()
+
+                for env_param in ep:
+                    v = kwargs[env_param.name]
+                    value = str(v) if isinstance(v, Path) else v
+                    self.pm.add_env_variable(key=env_param.env_key, value=value)
+
+                self._add_env_vars()
+
+            sig_params = [
+                inspect.Parameter("self", inspect.Parameter.POSITIONAL_OR_KEYWORD)
+            ]
+            for p in ip:
+                if p.show_if is None:
+                    annotation = Annotated[
+                        p.type_,
+                        typer.Option(
+                            help=p.help, prompt=p.prompt, hide_input=p.hide_input
+                        ),
+                    ]
+                else:
+                    annotation = Annotated[p.type_, typer.Option(help=p.help)]
+                sig_params.append(
+                    inspect.Parameter(
+                        p.name,
+                        inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                        default=p.default,
+                        annotation=annotation,
+                    )
+                )
+            for env_param in ep:
+                annotation = Annotated[
+                    env_param.type_,
+                    typer.Option(
+                        help=env_param.help,
+                        prompt=env_param.prompt,
+                        hide_input=env_param.hide_input,
+                    ),
+                ]
+                sig_params.append(
+                    inspect.Parameter(
+                        env_param.name,
+                        inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                        default=env_param.default,
+                        annotation=annotation,
+                    )
+                )
+
+            generated_install.__signature__ = inspect.Signature(sig_params)  # type: ignore[attr-defined]
+            generated_install.__name__ = "install"
+            generated_install.__qualname__ = f"{cls.__name__}.install"
+            cls.install = generated_install  # type: ignore[method-assign]
+
+        if bool(_env_params) and not env_overridden:
+            ep2 = list(_env_params)
+
+            def generated_env(self, **kwargs: Any) -> None:  # type: ignore[override]
+                """Configure environment variables."""
+                for env_param in ep2:
+                    v = kwargs[env_param.name]
+                    value = str(v) if isinstance(v, Path) else v
+                    self.pm.add_env_variable(key=env_param.env_key, value=value)
+
+            sig_params2 = [
+                inspect.Parameter("self", inspect.Parameter.POSITIONAL_OR_KEYWORD)
+            ]
+            for env_param in ep2:
+                annotation = Annotated[
+                    env_param.type_,
+                    typer.Option(
+                        help=env_param.help,
+                        prompt=env_param.prompt,
+                        hide_input=env_param.hide_input,
+                    ),
+                ]
+                sig_params2.append(
+                    inspect.Parameter(
+                        env_param.name,
+                        inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                        default=env_param.default,
+                        annotation=annotation,
+                    )
+                )
+
+            generated_env.__signature__ = inspect.Signature(sig_params2)  # type: ignore[attr-defined]
+            generated_env.__name__ = "env"
+            generated_env.__qualname__ = f"{cls.__name__}.env"
+            cls.env = generated_env  # type: ignore[method-assign]
 
     @property
     def djdevx_root(self) -> Path:
@@ -253,6 +417,18 @@ class BasePackage:
         """Remove all environment variables from env_vars dict."""
         self._sync_env_vars("remove")
 
+    def _cleanup_extra_files(self) -> None:
+        """Remove files and folders declared in files_to_remove / folders_to_remove."""
+        for rel_path in self.files_to_remove:
+            (self.pm.project_path / rel_path).unlink(missing_ok=True)
+        for rel_path in self.folders_to_remove:
+            shutil.rmtree(self.pm.project_path / rel_path, ignore_errors=True)
+
+    def _remove_env_params(self) -> None:
+        """Remove environment variables declared in env_params."""
+        for param in self.env_params:
+            self.pm.remove_env_variable(param.env_key)
+
     def _check_required_dependencies(self) -> None:
         """
         Check if all required dependencies are installed.
@@ -269,18 +445,50 @@ class BasePackage:
                 print_console.info(f"\n> ddx backend django packages {dep} install")
                 raise typer.Exit(code=1)
 
+    def before_uv_install(self) -> None:
+        """Hook called before uv install. Override in subclasses for pre-install logic."""
+        ...
+
+    def after_uv_install(self) -> None:
+        """Hook called after uv install. Override in subclasses for post-install logic."""
+        ...
+
+    def before_copy_templates(self) -> None:
+        """Hook called before templates are copied. Override in subclasses."""
+        ...
+
+    def after_copy_templates(self) -> None:
+        """Hook called after templates are copied. Override in subclasses."""
+        ...
+
+    def before_uv_remove(self) -> None:
+        """Hook called before uv remove. Override in subclasses for pre-remove logic."""
+        ...
+
+    def after_uv_remove(self) -> None:
+        """Hook called after uv remove. Override in subclasses for post-remove logic."""
+        ...
+
     def install(self) -> None:
         """Install the package."""
+        self.before_uv_install()
         self._check_required_dependencies()
         self._uv_add_all()
+        self.after_uv_install()
+        self.before_copy_templates()
         self._copy_templates()
+        self.after_copy_templates()
         self._add_env_vars()
 
     def remove(self) -> None:
         """Remove the package."""
+        self.before_uv_remove()
         self._uv_remove_all()
+        self.after_uv_remove()
         self._cleanup_files()
+        self._cleanup_extra_files()
         self._remove_env_vars()
+        self._remove_env_params()
 
     def env(self) -> None:
         """Configure environment variables."""
@@ -307,14 +515,20 @@ class BasePackage:
         )
         typer_app.command(help=f"Remove {self.name or ''} package")(wrapped_remove)
 
-        has_custom_env = bool(self.env_vars) or type(self).env is not BasePackage.env
+        has_custom_env = (
+            bool(self.env_vars)
+            or bool(self.env_params)
+            or type(self).env is not BasePackage.env
+        )
         if has_custom_env:
             wrapped_env = self._wrap_command(
                 self.env,
                 f"Configuring {self.name or 'package'} environment...",
                 f"{self.name or 'Package'} environment configured successfully.",
             )
-            typer_app.command()(wrapped_env)
+            typer_app.command(
+                help=f"Configure {self.name or 'package'} environment variables."
+            )(wrapped_env)
 
         return typer_app
 
@@ -343,5 +557,12 @@ class BasePackage:
             result = method(*args, **kwargs)
             print_console.success(success_msg)
             return result
+
+        # If the underlying function has an injected __signature__ (from __init_subclass__),
+        # functools.wraps copies it via __func__.__signature__, which includes `self`.
+        # Fix by re-computing the signature from the bound method (which strips `self`).
+        if hasattr(method, "__func__") and hasattr(method.__func__, "__signature__"):
+            bound_sig = inspect.signature(method)
+            wrapper.__signature__ = bound_sig  # type: ignore[attr-defined]
 
         return wrapper

@@ -1,5 +1,4 @@
 import fileinput
-from pathlib import Path
 
 from ._base import BasePackage
 
@@ -8,21 +7,24 @@ class DjangoTailwindCliPackage(BasePackage):
     name = "django-tailwind-cli"
     packages = ["django-tailwind-cli"]
 
-    def install(self) -> None:
-        """Install and configure django-tailwind-cli."""
-        self._uv_add_all()
-        self._copy_templates()
-        self._add_tailwind_snippets()
+    files_to_remove = [
+        "tailwind.config.js",
+        "tailwind/src/css/input.css",
+        "static/css/tailwind.min.css",
+        "templates/_tw_dark_mode.html",
+    ]
+
+    def after_uv_install(self) -> None:
         self._add_input_css_to_git_ignore()
         self._add_tailwind_build_to_docker_file()
 
-    def remove(self) -> None:
-        """Remove django-tailwind-cli."""
+    def after_copy_templates(self) -> None:
+        self._add_tailwind_snippets()
+
+    def before_uv_remove(self) -> None:
         self._remove_tailwind_snippets()
         self._remove_input_css_to_git_ignore()
         self._remove_tailwind_build_to_docker_file()
-        self._cleanup_tailwind_files()
-        super().remove()
 
     def _add_tailwind_snippets(self) -> None:
         """Add tailwind tags to base template."""
@@ -95,26 +97,6 @@ class DjangoTailwindCliPackage(BasePackage):
             for line in f:
                 if "uv run manage.py tailwind build" not in line:
                     print(line, end="")
-
-    def _cleanup_tailwind_files(self) -> None:
-        """Clean up tailwind-specific configuration and CSS files."""
-        tailwind_config = Path.joinpath(self.pm.project_path, "tailwind.config.js")
-        tailwind_config.unlink(missing_ok=True)
-
-        tailwind_css_input = Path.joinpath(
-            self.pm.project_path, "tailwind", "src", "css", "input.css"
-        )
-        tailwind_css_input.unlink(missing_ok=True)
-
-        tailwind_css_output = Path.joinpath(
-            self.pm.project_path, "static", "css", "tailwind.min.css"
-        )
-        tailwind_css_output.unlink(missing_ok=True)
-
-        tailwind_dark_mode = Path.joinpath(
-            self.pm.project_path, "templates", "_tw_dark_mode.html"
-        )
-        tailwind_dark_mode.unlink(missing_ok=True)
 
 
 _pkg = DjangoTailwindCliPackage(__file__)

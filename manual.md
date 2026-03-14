@@ -208,7 +208,7 @@ $ djdevx backend django packages channels [OPTIONS] COMMAND [ARGS]...
 
 * `install`: Install and configure channels
 * `remove`: Remove channels package
-* `env`: Configure environment variables.
+* `env`: Configure channels environment variables.
 
 ###### `djdevx backend django packages channels install`
 
@@ -240,7 +240,7 @@ $ djdevx backend django packages channels remove [OPTIONS]
 
 ###### `djdevx backend django packages channels env`
 
-Configure environment variables.
+Configure channels environment variables.
 
 **Usage**:
 
@@ -402,7 +402,7 @@ $ djdevx backend django packages django-allauth oidc-provider [OPTIONS] COMMAND 
 
 * `install`: Install and configure django-allauth OIDC...
 * `remove`: Remove django-allauth OIDC provider package
-* `env`: Generate RSA key for OIDC provider.
+* `env`: Configure django-allauth OIDC provider...
 
 ####### `djdevx backend django packages django-allauth oidc-provider install`
 
@@ -434,7 +434,7 @@ $ djdevx backend django packages django-allauth oidc-provider remove [OPTIONS]
 
 ####### `djdevx backend django packages django-allauth oidc-provider env`
 
-Generate RSA key for OIDC provider.
+Configure django-allauth OIDC provider environment variables.
 
 **Usage**:
 
@@ -486,7 +486,7 @@ $ djdevx backend django packages django-anymail ses [OPTIONS] COMMAND [ARGS]...
 
 * `install`: Install and configure django-anymail SES
 * `remove`: Remove django-anymail SES package
-* `env`: Configure environment variables for...
+* `env`: Configure django-anymail SES environment...
 
 ####### `djdevx backend django packages django-anymail ses install`
 
@@ -522,7 +522,7 @@ $ djdevx backend django packages django-anymail ses remove [OPTIONS]
 
 ####### `djdevx backend django packages django-anymail ses env`
 
-Configure environment variables for django-anymail SES backend.
+Configure django-anymail SES environment variables.
 
 **Usage**:
 
@@ -556,7 +556,7 @@ $ djdevx backend django packages django-anymail brevo [OPTIONS] COMMAND [ARGS]..
 
 * `install`: Install and configure django-anymail Brevo
 * `remove`: Remove django-anymail Brevo package
-* `env`: Configure environment variables for...
+* `env`: Configure django-anymail Brevo environment...
 
 ####### `djdevx backend django packages django-anymail brevo install`
 
@@ -590,7 +590,7 @@ $ djdevx backend django packages django-anymail brevo remove [OPTIONS]
 
 ####### `djdevx backend django packages django-anymail brevo env`
 
-Configure environment variables for django-anymail Brevo backend.
+Configure django-anymail Brevo environment variables.
 
 **Usage**:
 
@@ -622,7 +622,7 @@ $ djdevx backend django packages django-anymail mailgun [OPTIONS] COMMAND [ARGS]
 
 * `install`: Install and configure django-anymail Mailgun
 * `remove`: Remove django-anymail Mailgun package
-* `env`: Configure environment variables for...
+* `env`: Configure django-anymail Mailgun...
 
 ####### `djdevx backend django packages django-anymail mailgun install`
 
@@ -636,10 +636,10 @@ $ djdevx backend django packages django-anymail mailgun install [OPTIONS]
 
 **Options**:
 
+* `--is-europe / --no-is-europe`: Flag to use Europe region for Mailgun  [default: no-is-europe]
 * `--api-key TEXT`: The Mailgun API key for authentication
 * `--domain TEXT`: The Mailgun domain
 * `--default-from-email TEXT`: The default from email address
-* `--is-europe / --no-is-europe`: Flag to use Europe region for Mailgun  [default: no-is-europe]
 * `--help`: Show this message and exit.
 
 ####### `djdevx backend django packages django-anymail mailgun remove`
@@ -658,7 +658,7 @@ $ djdevx backend django packages django-anymail mailgun remove [OPTIONS]
 
 ####### `djdevx backend django packages django-anymail mailgun env`
 
-Configure environment variables for django-anymail Mailgun backend.
+Configure django-anymail Mailgun environment variables.
 
 **Usage**:
 
@@ -691,7 +691,7 @@ $ djdevx backend django packages django-anymail mailjet [OPTIONS] COMMAND [ARGS]
 
 * `install`: Install and configure django-anymail Mailjet
 * `remove`: Remove django-anymail Mailjet package
-* `env`: Configure environment variables for...
+* `env`: Configure django-anymail Mailjet...
 
 ####### `djdevx backend django packages django-anymail mailjet install`
 
@@ -726,7 +726,7 @@ $ djdevx backend django packages django-anymail mailjet remove [OPTIONS]
 
 ####### `djdevx backend django packages django-anymail mailjet env`
 
-Configure environment variables for django-anymail Mailjet backend.
+Configure django-anymail Mailjet environment variables.
 
 **Usage**:
 
@@ -759,7 +759,7 @@ $ djdevx backend django packages django-anymail resend [OPTIONS] COMMAND [ARGS].
 
 * `install`: Install and configure django-anymail Resend
 * `remove`: Remove django-anymail Resend package
-* `env`: Configure environment variables for...
+* `env`: Configure django-anymail Resend...
 
 ####### `djdevx backend django packages django-anymail resend install`
 
@@ -793,7 +793,7 @@ $ djdevx backend django packages django-anymail resend remove [OPTIONS]
 
 ####### `djdevx backend django packages django-anymail resend env`
 
-Configure environment variables for django-anymail Resend backend.
+Configure django-anymail Resend environment variables.
 
 **Usage**:
 
@@ -1060,7 +1060,7 @@ $ djdevx backend django packages django-defender [OPTIONS] COMMAND [ARGS]...
 
 * `install`: Install and configure django-defender
 * `remove`: Remove django-defender package
-* `env`: Configure environment variables.
+* `env`: Configure django-defender environment...
 
 ###### `djdevx backend django packages django-defender install`
 
@@ -1092,7 +1092,7 @@ $ djdevx backend django packages django-defender remove [OPTIONS]
 
 ###### `djdevx backend django packages django-defender env`
 
-Configure environment variables.
+Configure django-defender environment variables.
 
 **Usage**:
 
@@ -1472,15 +1472,15 @@ $ djdevx backend django packages django-meta install [OPTIONS]
 * `--use-twitter-properties / --no-use-twitter-properties`: Enable Twitter Card meta tags for rich previews when links are shared on Twitter/X  [default: use-twitter-properties]
 * `--use-schemaorg-properties / --no-use-schemaorg-properties`: Enable Schema.org structured data for better SEO and search engine understanding  [default: use-schemaorg-properties]
 * `--use-title-tag / --no-use-title-tag`: Auto-render &lt;title&gt; tags in templates (disable if you manage titles manually)  [default: use-title-tag]
-* `--configure-facebook / --no-configure-facebook`: Configure Facebook-specific settings (App ID, Pages, Publisher). Info: https://developers.facebook.com/docs/sharing/webmasters  [default: no-configure-facebook]
-* `--fb-app-id TEXT`: Facebook App ID from https://developers.facebook.com/apps/ (numeric ID, e.g., &#x27;123456789012345&#x27;)
-* `--fb-pages TEXT`: Facebook Page ID for your business page (numeric ID, find at facebook.com/your-page/about)
+* `--configure-facebook / --no-configure-facebook`: Configure Facebook-specific settings (App ID, Pages, Publisher).  [default: no-configure-facebook]
+* `--fb-app-id TEXT`: Facebook App ID from https://developers.facebook.com/apps/ (numeric ID)
+* `--fb-pages TEXT`: Facebook Page ID for your business page (numeric ID)
 * `--fb-publisher TEXT`: Full Facebook Page URL (e.g., &#x27;https://www.facebook.com/YourPageName&#x27;)
-* `--configure-twitter / --no-configure-twitter`: Configure Twitter Card settings for rich previews. Guide: https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/abouts-cards  [default: no-configure-twitter]
+* `--configure-twitter / --no-configure-twitter`: Configure Twitter Card settings for rich previews.  [default: no-configure-twitter]
 * `--twitter-site TEXT`: Your website&#x27;s Twitter/X handle including @ (e.g., &#x27;@YourSite&#x27;)
 * `--twitter-author TEXT`: Default author Twitter/X handle with @ (e.g., &#x27;@AuthorName&#x27;)
-* `--twitter-type TEXT`: Twitter Card type: &#x27;summary&#x27; (small image) or &#x27;summary_large_image&#x27; (large image, recommended)  [default: summary_large_image]
-* `--default-image-url TEXT`: Full URL to default share image (1200x630px recommended, e.g., &#x27;https://example.com/share.jpg&#x27;)
+* `--twitter-type TEXT`: Twitter Card type: &#x27;summary&#x27; or &#x27;summary_large_image&#x27;  [default: summary_large_image]
+* `--default-image-url TEXT`: Full URL to default share image (1200x630px recommended)
 * `--help`: Show this message and exit.
 
 ###### `djdevx backend django packages django-meta remove`
@@ -1720,7 +1720,7 @@ $ djdevx backend django packages django-snakeoil install [OPTIONS]
 * `--site-description TEXT`: Default description for your website (shown in search results and social shares)
 * `--author TEXT`: Default author name for meta author tag
 * `--og-type TEXT`: OpenGraph type for og:type meta tag (website, article, blog). See: https://ogp.me/#types  [default: website]
-* `--default-image-url TEXT`: Full URL to default share image for social media (1200x630px recommended), or leave as default to use images/logo.svg  [default: images/logo.svg]
+* `--default-image-url TEXT`: Full URL to default share image for social media (1200x630px recommended)  [default: images/logo.svg]
 * `--site-url TEXT`: Your website&#x27;s full URL including protocol (e.g., &#x27;https://example.com&#x27;)
 * `--locale TEXT`: Default locale/language for og:locale (e.g., &#x27;en_US&#x27;, &#x27;en_GB&#x27;, &#x27;es_ES&#x27;)
 * `--twitter-site TEXT`: Twitter/X handle for your website (e.g., &#x27;@yoursite&#x27;)
@@ -1780,7 +1780,7 @@ $ djdevx backend django packages django-storages s3 [OPTIONS] COMMAND [ARGS]...
 
 * `install`: Install and configure django-storages S3
 * `remove`: Remove django-storages S3 package
-* `env`: Configure environment variables for...
+* `env`: Configure django-storages S3 environment...
 
 ####### `djdevx backend django packages django-storages s3 install`
 
@@ -1816,7 +1816,7 @@ $ djdevx backend django packages django-storages s3 remove [OPTIONS]
 
 ####### `djdevx backend django packages django-storages s3 env`
 
-Configure environment variables for django-storages S3 backend.
+Configure django-storages S3 environment variables.
 
 **Usage**:
 
@@ -1850,7 +1850,7 @@ $ djdevx backend django packages django-storages azure [OPTIONS] COMMAND [ARGS].
 
 * `install`: Install and configure django-storages Azure
 * `remove`: Remove django-storages Azure package
-* `env`: Configure environment variables for...
+* `env`: Configure django-storages Azure...
 
 ####### `djdevx backend django packages django-storages azure install`
 
@@ -1885,7 +1885,7 @@ $ djdevx backend django packages django-storages azure remove [OPTIONS]
 
 ####### `djdevx backend django packages django-storages azure env`
 
-Configure environment variables for django-storages Azure backend.
+Configure django-storages Azure environment variables.
 
 **Usage**:
 
@@ -1918,7 +1918,7 @@ $ djdevx backend django packages django-storages google [OPTIONS] COMMAND [ARGS]
 
 * `install`: Install and configure django-storages...
 * `remove`: Remove django-storages Google Cloud...
-* `env`: Configure environment variables for...
+* `env`: Configure django-storages Google Cloud...
 
 ####### `djdevx backend django packages django-storages google install`
 
@@ -1952,7 +1952,7 @@ $ djdevx backend django packages django-storages google remove [OPTIONS]
 
 ####### `djdevx backend django packages django-storages google env`
 
-Configure environment variables for django-storages Google backend.
+Configure django-storages Google Cloud Storage environment variables.
 
 **Usage**:
 
