@@ -178,6 +178,7 @@ $ djdevx backend django packages [OPTIONS] COMMAND [ARGS]...
 * `django-permissions-policy`: Manage django-permissions-policy package
 * `django-role-permissions`: Manage django-role-permissions package
 * `django-simple-history`: Manage django-simple-history package
+* `django-simple-nav`: Manage django-simple-nav package
 * `django-snakeoil`: Manage django-snakeoil package
 * `django-storages`: Manage django-storages package
 * `django-taggit`: Manage django-taggit package
@@ -1679,6 +1680,53 @@ Remove django-simple-history package
 
 ```console
 $ djdevx backend django packages django-simple-history remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+##### `djdevx backend django packages django-simple-nav`
+
+Manage django-simple-nav package
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-simple-nav [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure django-simple-nav
+* `remove`: Remove django-simple-nav package
+
+###### `djdevx backend django packages django-simple-nav install`
+
+Install and configure django-simple-nav
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-simple-nav install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+###### `djdevx backend django packages django-simple-nav remove`
+
+Remove django-simple-nav package
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-simple-nav remove [OPTIONS]
 ```
 
 **Options**:

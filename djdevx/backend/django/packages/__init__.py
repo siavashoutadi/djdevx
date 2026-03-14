@@ -24,6 +24,7 @@ from .django_defender import app as defender
 from .django_permissions_policy import app as permission_policy
 from .django_csp import app as csp
 from .django_simple_history import app as simple_history
+from .django_simple_nav import app as simple_nav
 from .django_snakeoil import app as snakeoil
 from .drf_flex_fields import app as flex_fields
 from .channels import app as channels_app
@@ -140,6 +141,11 @@ app.add_typer(
     simple_history,
     name="django-simple-history",
     help="Manage django-simple-history package",
+)
+app.add_typer(
+    simple_nav,
+    name="django-simple-nav",
+    help="Manage django-simple-nav package",
 )
 app.add_typer(
     snakeoil,
