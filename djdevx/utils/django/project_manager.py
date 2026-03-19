@@ -1,4 +1,5 @@
 import ast
+import re
 import tomllib
 import typer
 from pathlib import Path
@@ -178,8 +179,14 @@ class DjangoProjectManager:
 
         return pyproject_data.get("project", {}).get("dependencies", [])
 
+    @staticmethod
+    def _normalize_pkg_name(name: str) -> str:
+        """Normalize a package name per PEP 503 (hyphens, underscores, dots are equivalent)."""
+        return re.sub(r"[-_.]+", "-", name).lower()
+
     def has_dependency(self, dependency_name: str, group: str = "") -> bool:
         """Check if a specific dependency is installed."""
+        normalized_query = self._normalize_pkg_name(dependency_name)
         dependencies = self.get_dependencies(group)
         for dep in dependencies:
             name_without_version = (
@@ -193,7 +200,7 @@ class DjangoProjectManager:
 
             name_without_extras = name_without_version.split("[")[0].strip()
 
-            if name_without_extras == dependency_name:
+            if self._normalize_pkg_name(name_without_extras) == normalized_query:
                 return True
         return False
 
