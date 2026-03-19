@@ -1,0 +1,5 @@
+[package]
+name = "channels"
+
+[env.CHANNEL_LAYERS_REDIS_HOST]
+type = "user_input"

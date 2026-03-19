@@ -1,4 +1,4 @@
-from .._base import BasePackage, EnvParam, InstallParam
+from .._base import BasePackage, EnvType, EnvVar, InstallParam
 
 
 class MailgunPackage(BasePackage):
@@ -14,21 +14,22 @@ class MailgunPackage(BasePackage):
         ),
     ]
 
-    env_params = [
-        EnvParam(
+    env_vars = [
+        EnvVar(
             name="api_key",
             env_key="ANYMAIL_MAILGUN_API_KEY",
             help="The Mailgun API key for authentication",
             prompt="Please enter the Mailgun API key for authentication",
             hide_input=True,
+            env_type=EnvType.SECRET,
         ),
-        EnvParam(
+        EnvVar(
             name="domain",
             env_key="ANYMAIL_MAILGUN_SENDER_DOMAIN",
             help="The Mailgun domain",
             prompt="Please enter the Mailgun domain",
         ),
-        EnvParam(
+        EnvVar(
             name="default_from_email",
             env_key="DEFAULT_FROM_EMAIL",
             help="The default from email address",

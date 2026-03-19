@@ -1,0 +1,11 @@
+[package]
+name = "django-anymail Mailgun"
+
+[env.ANYMAIL_MAILGUN_API_KEY]
+type = "secret"
+
+[env.ANYMAIL_MAILGUN_SENDER_DOMAIN]
+type = "user_input"
+
+[env.DEFAULT_FROM_EMAIL]
+type = "user_input"

@@ -1,0 +1,11 @@
+[package]
+name = "django-anymail Mailjet"
+
+[env.ANYMAIL_MAILJET_API_KEY]
+type = "user_input"
+
+[env.ANYMAIL_MAILJET_SECRET_KEY]
+type = "secret"
+
+[env.DEFAULT_FROM_EMAIL]
+type = "user_input"

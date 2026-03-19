@@ -1,0 +1,11 @@
+[package]
+name = "django-storages Azure"
+
+[env.STORAGES_AZURE_ACCOUNT_KEY]
+type = "secret"
+
+[env.STORAGES_AZURE_ACCOUNT_NAME]
+type = "user_input"
+
+[env.STORAGES_AZURE_CONTAINER_NAME]
+type = "user_input"

@@ -1,0 +1,14 @@
+[package]
+name = "django-anymail SES"
+
+[env.ANYMAIL_SES_ACCESS_KEY]
+type = "user_input"
+
+[env.ANYMAIL_SES_SECRET_KEY]
+type = "secret"
+
+[env.ANYMAIL_SES_REGION_NAME]
+type = "user_input"
+
+[env.DEFAULT_FROM_EMAIL]
+type = "user_input"

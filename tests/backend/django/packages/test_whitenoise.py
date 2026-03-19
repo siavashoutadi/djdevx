@@ -44,6 +44,21 @@ def test_whitenoise_install_and_remove(temp_dir):
         "whitenoise dependency not found after installation"
     )
 
+    # Check tracking config was created
+    tracking_config = (
+        temp_dir
+        / ".djdevx"
+        / "backend"
+        / "django"
+        / "packages"
+        / "whitenoise"
+        / "config.toml"
+    )
+    assert tracking_config.exists(), "Tracking config.toml not created after install"
+    tracking_content = tracking_config.read_text()
+    assert "[package]" in tracking_content
+    assert 'name = "whitenoise"' in tracking_content
+
     os.chdir(temp_dir)
     result = runner.invoke(
         app,
@@ -63,3 +78,6 @@ def test_whitenoise_install_and_remove(temp_dir):
     assert not DjangoProjectManager().has_dependency("whitenoise"), (
         "whitenoise dependency found after removal"
     )
+
+    # Check tracking config was removed
+    assert not tracking_config.exists(), "Tracking config.toml not removed after remove"

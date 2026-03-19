@@ -1,0 +1,8 @@
+[package]
+name = "django-anymail Resend"
+
+[env.ANYMAIL_RESEND_API_KEY]
+type = "secret"
+
+[env.DEFAULT_FROM_EMAIL]
+type = "user_input"

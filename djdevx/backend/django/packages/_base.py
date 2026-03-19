@@ -4,6 +4,7 @@ import functools
 import inspect
 import shutil
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 from typing import Annotated, Any, Callable, Optional
 
@@ -12,6 +13,7 @@ import typer
 from ....utils.console.print import print_console
 from ....utils.django.project_manager import DjangoProjectManager
 from ....utils.django.uv_runner import UvRunner
+from ....utils.djdevx_config.backend.package_tracker import PackageTracker
 from ....utils.templates.manager import TemplateManager
 
 
@@ -103,17 +105,52 @@ class InstallParam:
     hide_input: bool = False
 
 
-@dataclass
-class EnvParam:
-    """Declares a parameter that sets an environment variable during install and env."""
+class EnvType(str, Enum):
+    """Classification of an environment variable for tracking purposes."""
 
-    name: str
+    USER_INPUT = "user_input"  # plain value entered by the user
+    SECRET = "secret"  # sensitive value (e.g. API key, password)
+    RANDOM_SECRET = "random_secret"  # auto-generated random secret
+    PRIVATE_SSH_KEY = "private_ssh_key"  # SSH private key
+
+
+@dataclass
+class EnvVar:
+    """Declares an environment variable - either static or user-prompted.
+
+    For static values: set ``env_key`` and ``value``.
+    For prompted values: set ``env_key``, ``name``, and ``prompt``.
+
+    Args:
+        env_key: The environment variable key.
+        value: Static value (leave empty for prompted vars).
+        env_type: Classification of the variable (see ``EnvType``).
+        name: CLI parameter name (required when ``prompt`` is set).
+        type_: Python type for the CLI parameter.
+        default: Default value for CLI parameter.
+        help: Help text for CLI parameter.
+        prompt: Prompt text shown to the user (if set, user will be prompted).
+        hide_input: Whether to hide input (e.g. for secrets).
+    """
+
     env_key: str
+    value: str = ""
+    env_type: EnvType = EnvType.USER_INPUT
+    name: str = ""
     type_: type = str
     default: Any = ""
     help: str = ""
     prompt: Optional[str] = None
     hide_input: bool = False
+
+    def __post_init__(self) -> None:
+        """Auto-set hide_input for sensitive env types."""
+        if self.env_type in (
+            EnvType.SECRET,
+            EnvType.RANDOM_SECRET,
+            EnvType.PRIVATE_SSH_KEY,
+        ):
+            self.hide_input = True
 
 
 class BasePackage:
@@ -140,12 +177,11 @@ class BasePackage:
     packages: list[str] = []
     dev_packages: list[str] = []
     required_dependencies: list[str] = []
-    env_vars: dict[str, str] = {}
+    env_vars: list["EnvVar"] = []
     settings_file: Optional[str] = None
     url_file: Optional[str] = None
     template_path: Optional[str] = None
     install_params: list[InstallParam] = []
-    env_params: list[EnvParam] = []
     files_to_remove: list[str] = []
     folders_to_remove: list[str] = []
 
@@ -173,21 +209,27 @@ class BasePackage:
         """Auto-generate install/env methods for subclasses that declare params."""
         super().__init_subclass__(**kwargs)
 
-        _install_params: list[InstallParam] = cls.install_params
-        _env_params: list[EnvParam] = cls.env_params
+        install_params: list[InstallParam] = cls.install_params
+        # Prompted env vars drive CLI parameter generation
+        prompted_env_vars = [
+            env_var for env_var in cls.env_vars if env_var.prompt is not None
+        ]
 
-        has_params = bool(_install_params) or bool(_env_params)
+        has_params = bool(install_params) or bool(prompted_env_vars)
         install_overridden = "install" in cls.__dict__
         env_overridden = "env" in cls.__dict__
 
         if has_params and not install_overridden:
             # Capture for closure
-            ip = list(_install_params)
-            ep = list(_env_params)
+            captured_install_params = list(install_params)
+            captured_prompted_env_vars = list(prompted_env_vars)
 
             def generated_install(self, **kwargs: Any) -> None:  # type: ignore[override]
                 """Install and configure the package."""
-                self._install_context = {p.name: kwargs[p.name] for p in ip}
+                self._install_context = {
+                    install_param.name: kwargs[install_param.name]
+                    for install_param in captured_install_params
+                }
 
                 self.before_uv_install()
                 self._check_required_dependencies()
@@ -195,105 +237,119 @@ class BasePackage:
                 self.after_uv_install()
                 self.before_copy_templates()
 
-                for param in ip:
-                    if param.show_if is not None:
-                        gating_value = self._install_context[param.show_if]
+                for install_param in captured_install_params:
+                    if install_param.show_if is not None:
+                        gating_value = self._install_context[install_param.show_if]
                         if (
                             gating_value is True
-                            and not self._install_context[param.name]
+                            and not self._install_context[install_param.name]
                         ):
-                            if param.message_before_prompt:
-                                typer.echo(param.message_before_prompt)
-                            self._install_context[param.name] = typer.prompt(
-                                param.prompt or param.name, default=param.default
+                            if install_param.message_before_prompt:
+                                typer.echo(install_param.message_before_prompt)
+                            self._install_context[install_param.name] = typer.prompt(
+                                install_param.prompt or install_param.name,
+                                default=install_param.default,
                             )
 
                 self._copy_templates(context=self._install_context)
                 self.after_copy_templates()
 
-                for env_param in ep:
-                    v = kwargs[env_param.name]
-                    value = str(v) if isinstance(v, Path) else v
-                    self.pm.add_env_variable(key=env_param.env_key, value=value)
+                for env_var in captured_prompted_env_vars:
+                    raw_value = kwargs[env_var.name]
+                    value = str(raw_value) if isinstance(raw_value, Path) else raw_value
+                    self.pm.add_env_variable(key=env_var.env_key, value=value)
 
+                self._write_package_tracking()
                 self._add_env_vars()
 
-            sig_params = [
+            cli_params = [
                 inspect.Parameter("self", inspect.Parameter.POSITIONAL_OR_KEYWORD)
             ]
-            for p in ip:
-                if p.show_if is None:
-                    annotation = Annotated[
-                        p.type_,
-                        typer.Option(
-                            help=p.help, prompt=p.prompt, hide_input=p.hide_input
-                        ),
-                    ]
+            for install_param in captured_install_params:
+                if install_param.show_if is None:
+                    if install_param.prompt is not None:
+                        annotation = Annotated[
+                            install_param.type_,
+                            typer.Option(
+                                help=install_param.help,
+                                prompt=install_param.prompt,
+                                hide_input=install_param.hide_input,
+                            ),
+                        ]
+                    else:
+                        annotation = Annotated[
+                            install_param.type_,
+                            typer.Option(help=install_param.help),
+                        ]
                 else:
-                    annotation = Annotated[p.type_, typer.Option(help=p.help)]
-                sig_params.append(
+                    annotation = Annotated[
+                        install_param.type_, typer.Option(help=install_param.help)
+                    ]
+                cli_params.append(
                     inspect.Parameter(
-                        p.name,
+                        install_param.name,
                         inspect.Parameter.POSITIONAL_OR_KEYWORD,
-                        default=p.default,
+                        default=install_param.default,
                         annotation=annotation,
                     )
                 )
-            for env_param in ep:
+            for env_var in captured_prompted_env_vars:
+                assert env_var.prompt is not None
                 annotation = Annotated[
-                    env_param.type_,
+                    env_var.type_,
                     typer.Option(
-                        help=env_param.help,
-                        prompt=env_param.prompt,
-                        hide_input=env_param.hide_input,
+                        help=env_var.help,
+                        prompt=env_var.prompt,
+                        hide_input=env_var.hide_input,
                     ),
                 ]
-                sig_params.append(
+                cli_params.append(
                     inspect.Parameter(
-                        env_param.name,
+                        env_var.name,
                         inspect.Parameter.POSITIONAL_OR_KEYWORD,
-                        default=env_param.default,
+                        default=env_var.default,
                         annotation=annotation,
                     )
                 )
 
-            generated_install.__signature__ = inspect.Signature(sig_params)  # type: ignore[attr-defined]
+            generated_install.__signature__ = inspect.Signature(cli_params)  # type: ignore[attr-defined]
             generated_install.__name__ = "install"
             generated_install.__qualname__ = f"{cls.__name__}.install"
             cls.install = generated_install  # type: ignore[method-assign]
 
-        if bool(_env_params) and not env_overridden:
-            ep2 = list(_env_params)
+        if bool(prompted_env_vars) and not env_overridden:
+            captured_prompted_env_vars_for_env = list(prompted_env_vars)
 
             def generated_env(self, **kwargs: Any) -> None:  # type: ignore[override]
                 """Configure environment variables."""
-                for env_param in ep2:
-                    v = kwargs[env_param.name]
-                    value = str(v) if isinstance(v, Path) else v
-                    self.pm.add_env_variable(key=env_param.env_key, value=value)
+                for env_var in captured_prompted_env_vars_for_env:
+                    raw_value = kwargs[env_var.name]
+                    value = str(raw_value) if isinstance(raw_value, Path) else raw_value
+                    self.pm.add_env_variable(key=env_var.env_key, value=value)
 
-            sig_params2 = [
+            env_cli_params = [
                 inspect.Parameter("self", inspect.Parameter.POSITIONAL_OR_KEYWORD)
             ]
-            for env_param in ep2:
+            for env_var in captured_prompted_env_vars_for_env:
+                assert env_var.prompt is not None
                 annotation = Annotated[
-                    env_param.type_,
+                    env_var.type_,
                     typer.Option(
-                        help=env_param.help,
-                        prompt=env_param.prompt,
-                        hide_input=env_param.hide_input,
+                        help=env_var.help,
+                        prompt=env_var.prompt,
+                        hide_input=env_var.hide_input,
                     ),
                 ]
-                sig_params2.append(
+                env_cli_params.append(
                     inspect.Parameter(
-                        env_param.name,
+                        env_var.name,
                         inspect.Parameter.POSITIONAL_OR_KEYWORD,
-                        default=env_param.default,
+                        default=env_var.default,
                         annotation=annotation,
                     )
                 )
 
-            generated_env.__signature__ = inspect.Signature(sig_params2)  # type: ignore[attr-defined]
+            generated_env.__signature__ = inspect.Signature(env_cli_params)  # type: ignore[attr-defined]
             generated_env.__name__ = "env"
             generated_env.__qualname__ = f"{cls.__name__}.env"
             cls.env = generated_env  # type: ignore[method-assign]
@@ -395,27 +451,23 @@ class BasePackage:
         url_path = self.pm.packages_urls_path / self._url_file
         url_path.unlink(missing_ok=True)
 
-    def _sync_env_vars(self, operation: str = "add") -> None:
-        """
-        Sync environment variables with the project manager.
-
-        Args:
-            operation: Either "add" to add variables or "remove" to remove them.
-        """
-        if operation == "add":
-            for key, value in self.env_vars.items():
-                self.pm.add_env_variable(key, value)
-        elif operation == "remove":
-            for key in self.env_vars.keys():
-                self.pm.remove_env_variable(key)
-
     def _add_env_vars(self) -> None:
-        """Add all environment variables from env_vars dict."""
-        self._sync_env_vars("add")
+        """Add static environment variables from env_vars and write env tracking."""
+        for env_var in self.env_vars:
+            if (
+                env_var.prompt is None
+            ):  # static vars only; prompted vars come from user input
+                self.pm.add_env_variable(env_var.env_key, env_var.value)
+        self._write_env_tracking()
 
     def _remove_env_vars(self) -> None:
-        """Remove all environment variables from env_vars dict."""
-        self._sync_env_vars("remove")
+        """Remove all environment variables from env_vars and remove env tracking."""
+        for env_var in self.env_vars:
+            self.pm.remove_env_variable(env_var.env_key)
+        try:
+            PackageTracker().remove_env_entries(self._template_path)
+        except (Exception, SystemExit):
+            pass
 
     def _cleanup_extra_files(self) -> None:
         """Remove files and folders declared in files_to_remove / folders_to_remove."""
@@ -423,11 +475,6 @@ class BasePackage:
             (self.pm.project_path / rel_path).unlink(missing_ok=True)
         for rel_path in self.folders_to_remove:
             shutil.rmtree(self.pm.project_path / rel_path, ignore_errors=True)
-
-    def _remove_env_params(self) -> None:
-        """Remove environment variables declared in env_params."""
-        for param in self.env_params:
-            self.pm.remove_env_variable(param.env_key)
 
     def _check_required_dependencies(self) -> None:
         """
@@ -469,6 +516,37 @@ class BasePackage:
         """Hook called after uv remove. Override in subclasses for post-remove logic."""
         ...
 
+    def _write_package_tracking(self) -> None:
+        """Write only the [package] section of config.toml under .djdevx/. Silently skipped if not a djdevx project."""
+        try:
+            PackageTracker().write_package_config(
+                template_path=self._template_path,
+                name=self.name,
+            )
+        except (Exception, SystemExit):
+            pass
+
+    def _write_env_tracking(self) -> None:
+        """Write only the [env] section of config.toml under .djdevx/. Silently skipped if not a djdevx project."""
+        try:
+            env_entries: dict[str, str] = {}
+            for env_var in self.env_vars:
+                env_entries[env_var.env_key] = env_var.env_type.value
+            if env_entries:
+                PackageTracker().write_env_entries(
+                    template_path=self._template_path,
+                    env_entries=env_entries,
+                )
+        except (Exception, SystemExit):
+            pass
+
+    def _remove_tracking(self) -> None:
+        """Delete the entire package tracking folder under .djdevx/. Silently skipped if not found."""
+        try:
+            PackageTracker().remove_package_config(self._template_path)
+        except (Exception, SystemExit):
+            pass
+
     def install(self) -> None:
         """Install the package."""
         self.before_uv_install()
@@ -478,6 +556,7 @@ class BasePackage:
         self.before_copy_templates()
         self._copy_templates()
         self.after_copy_templates()
+        self._write_package_tracking()
         self._add_env_vars()
 
     def remove(self) -> None:
@@ -488,7 +567,7 @@ class BasePackage:
         self._cleanup_files()
         self._cleanup_extra_files()
         self._remove_env_vars()
-        self._remove_env_params()
+        self._remove_tracking()
 
     def env(self) -> None:
         """Configure environment variables."""
@@ -515,11 +594,7 @@ class BasePackage:
         )
         typer_app.command(help=f"Remove {self.name or ''} package")(wrapped_remove)
 
-        has_custom_env = (
-            bool(self.env_vars)
-            or bool(self.env_params)
-            or type(self).env is not BasePackage.env
-        )
+        has_custom_env = bool(self.env_vars) or type(self).env is not BasePackage.env
         if has_custom_env:
             wrapped_env = self._wrap_command(
                 self.env,

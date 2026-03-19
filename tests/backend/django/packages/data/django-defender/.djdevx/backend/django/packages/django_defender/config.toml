@@ -1,0 +1,5 @@
+[package]
+name = "django-defender"
+
+[env.DEFENDER_REDIS_URL]
+type = "user_input"

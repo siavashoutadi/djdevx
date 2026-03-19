@@ -1,0 +1,14 @@
+[package]
+name = "django-storages S3"
+
+[env.STORAGES_S3_ACCESS_KEY]
+type = "user_input"
+
+[env.STORAGES_S3_SECRET_KEY]
+type = "secret"
+
+[env.STORAGES_S3_REGION_NAME]
+type = "user_input"
+
+[env.STORAGES_S3_BUCKET_NAME]
+type = "user_input"
