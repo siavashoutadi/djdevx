@@ -64,7 +64,7 @@ class PackageTracker(ProjectConfig):
         self._save_doc(template_path, doc)
 
     def write_env_entries(
-        self, template_path: str, env_entries: dict[str, str]
+        self, template_path: str, env_entries: dict[str, dict[str, str]]
     ) -> None:
         """
         Write or replace the [env] section of the config.toml.
@@ -72,14 +72,17 @@ class PackageTracker(ProjectConfig):
 
         Args:
             template_path: Relative path key (e.g. "whitenoise" or "django_anymail/brevo")
-            env_entries: Mapping of env var key → type string (e.g. {"MY_KEY": "secret"})
+            env_entries: Mapping of env var key → dict with ``type`` and optional ``value``.
+                         Secret values should never be passed.
         """
         doc = self._load_or_create_doc(template_path)
 
         env_table = tomlkit.table(is_super_table=True)
-        for key, env_type in env_entries.items():
+        for key, entry_data in env_entries.items():
             entry = tomlkit.table()
-            entry.add("type", env_type)
+            entry.add("type", entry_data["type"])
+            if "value" in entry_data:
+                entry.add("value", entry_data["value"])
             env_table.add(key, entry)
 
         if "env" in doc:

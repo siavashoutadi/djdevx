@@ -3,3 +3,4 @@ name = "channels"
 
 [env.CHANNEL_LAYERS_REDIS_HOST]
 type = "user_input"
+value = "redis://default:${REDIS_PASSWORD}@cache:6379/1"

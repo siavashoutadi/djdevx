@@ -767,6 +767,8 @@ class TestPackageTracking:
         content = config_path.read_text()
         assert "[env.MY_SECRET]" in content
         assert 'type = "secret"' in content
+        # Secret values must never be stored in config.toml
+        assert "value" not in content
 
     def test_write_env_tracking_defaults_to_user_input(self, tmp_path):
         """EnvVar without explicit env_type defaults to 'user_input'."""
@@ -795,6 +797,8 @@ class TestPackageTracking:
         content = config_path.read_text()
         assert "[env.SOME_URL]" in content
         assert 'type = "user_input"' in content
+        # Static USER_INPUT values are stored so deployments can use them automatically
+        assert 'value = "http://example.com"' in content
 
     def test_write_package_tracking_subpackage_creates_nested_dir(self, tmp_path):
         """Sub-packages (e.g. django_anymail/brevo) create nested folder structure."""

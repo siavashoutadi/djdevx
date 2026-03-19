@@ -529,9 +529,17 @@ class BasePackage:
     def _write_env_tracking(self) -> None:
         """Write only the [env] section of config.toml under .djdevx/. Silently skipped if not a djdevx project."""
         try:
-            env_entries: dict[str, str] = {}
+            env_entries: dict[str, dict[str, str]] = {}
             for env_var in self.env_vars:
-                env_entries[env_var.env_key] = env_var.env_type.value
+                entry: dict[str, str] = {"type": env_var.env_type.value}
+                # Persist static values for USER_INPUT vars (non-prompted, non-secret)
+                if (
+                    env_var.env_type == EnvType.USER_INPUT
+                    and env_var.prompt is None
+                    and env_var.value
+                ):
+                    entry["value"] = env_var.value
+                env_entries[env_var.env_key] = entry
             if env_entries:
                 PackageTracker().write_env_entries(
                     template_path=self._template_path,
