@@ -140,6 +140,7 @@ $ djdevx backend django [OPTIONS] COMMAND [ARGS]...
 * `packages`: Install and configure django packages
 * `feature`: Add features to your Django project
 * `create`: Create new Django applications or components
+* `list`: List installed Django packages and features
 
 #### `djdevx backend django packages`
 
@@ -2864,4 +2865,36 @@ $ djdevx backend django create admin [OPTIONS]
 **Options**:
 
 * `--application-name TEXT`: Application name
+* `--help`: Show this message and exit.
+
+#### `djdevx backend django list`
+
+List installed Django packages and features
+
+**Usage**:
+
+```console
+$ djdevx backend django list [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `packages`: List all installed Django packages
+
+##### `djdevx backend django list packages`
+
+List all installed Django packages
+
+**Usage**:
+
+```console
+$ djdevx backend django list packages [OPTIONS]
+```
+
+**Options**:
+
 * `--help`: Show this message and exit.
