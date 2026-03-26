@@ -2,6 +2,7 @@ import os
 from typer.testing import CliRunner
 from djdevx.main import app
 from tests.test_helpers import create_test_django_backend
+from djdevx.utils.djdevx_config.backend.feature_tracker import FeatureTracker
 
 runner = CliRunner()
 
@@ -79,6 +80,10 @@ def test_tailwind_theme_install_and_remove(temp_dir):
         "Theme import should be added to input.css"
     )
 
+    assert FeatureTracker().is_installed("tailwind_theme"), (
+        "tailwind_theme should be tracked after install"
+    )
+
     result = runner.invoke(
         app, ["backend", "django", "feature", "tailwind-theme", "remove"]
     )
@@ -90,6 +95,10 @@ def test_tailwind_theme_install_and_remove(temp_dir):
     input_content = input_css_file.read_text()
     assert '@import "./theme.css";' not in input_content, (
         "Theme import should be removed from input.css"
+    )
+
+    assert not FeatureTracker().is_installed("tailwind_theme"), (
+        "tailwind_theme tracking should be removed after remove"
     )
 
 

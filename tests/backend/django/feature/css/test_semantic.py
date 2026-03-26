@@ -2,6 +2,7 @@ import os
 from typer.testing import CliRunner
 from djdevx.main import app
 from tests.test_helpers import create_test_django_backend
+from djdevx.utils.djdevx_config.backend.feature_tracker import FeatureTracker
 
 runner = CliRunner()
 
@@ -73,6 +74,10 @@ def test_semantic_install_and_remove(temp_dir):
         "jQuery should be loaded before Semantic UI JS"
     )
 
+    assert FeatureTracker().is_installed("css/semantic"), (
+        "css/semantic should be tracked after install"
+    )
+
     result = runner.invoke(
         app,
         [
@@ -100,6 +105,10 @@ def test_semantic_install_and_remove(temp_dir):
     )
     assert "jquery-3.1.1.min.js" not in base_content_after, (
         "jQuery script not removed from base template"
+    )
+
+    assert not FeatureTracker().is_installed("css/semantic"), (
+        "css/semantic tracking should be removed after remove"
     )
 
 

@@ -2,6 +2,7 @@ import os
 from typer.testing import CliRunner
 from djdevx.main import app
 from tests.test_helpers import create_test_django_backend
+from djdevx.utils.djdevx_config.backend.feature_tracker import FeatureTracker
 
 runner = CliRunner()
 
@@ -49,6 +50,10 @@ def test_bootstrap_install_and_remove(temp_dir):
         "Bootstrap JS script not added to base template"
     )
 
+    assert FeatureTracker().is_installed("css/bootstrap"), (
+        "css/bootstrap should be tracked after install"
+    )
+
     css_position = base_content.find("bootstrap.min.css")
     js_position = base_content.find("bootstrap.bundle.min.js")
     head_end = base_content.find("</head>")
@@ -82,6 +87,10 @@ def test_bootstrap_install_and_remove(temp_dir):
     )
     assert "bootstrap.bundle.min.js" not in base_content_after, (
         "Bootstrap JS script not removed from base template"
+    )
+
+    assert not FeatureTracker().is_installed("css/bootstrap"), (
+        "css/bootstrap tracking should be removed after remove"
     )
 
 

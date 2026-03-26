@@ -10,6 +10,7 @@ from typer.testing import CliRunner
 
 from djdevx.main import app as main_app
 from tests.test_helpers import create_test_django_backend
+from djdevx.utils.djdevx_config.backend.feature_tracker import FeatureTracker
 
 runner = CliRunner()
 
@@ -172,6 +173,11 @@ def test_pwa_comprehensive(temp_dir):
         assert settings_file.exists()
         urls_file = project_dir / "urls" / "apps" / "pwa.py"
         assert urls_file.exists()
+
+        # Verify feature tracking recorded
+        assert FeatureTracker().is_installed("pwa"), (
+            "PWA should be tracked after install"
+        )
 
 
 def test_pwa_invalid_icon_path(temp_dir):

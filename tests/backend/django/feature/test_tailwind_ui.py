@@ -2,6 +2,7 @@ import os
 from typer.testing import CliRunner
 from djdevx.main import app
 from tests.test_helpers import create_test_django_backend
+from djdevx.utils.djdevx_config.backend.feature_tracker import FeatureTracker
 
 runner = CliRunner()
 
@@ -111,6 +112,10 @@ def test_tailwind_ui_install_and_remove(temp_dir):
         "tailwind-ui import not added to input.css"
     )
 
+    assert FeatureTracker().is_installed("tailwind_ui"), (
+        "tailwind_ui should be tracked after install"
+    )
+
     # Test removal
     result = runner.invoke(
         app, ["backend", "django", "feature", "tailwind-ui", "remove"]
@@ -131,6 +136,10 @@ def test_tailwind_ui_install_and_remove(temp_dir):
     input_content_after = input_css_file.read_text()
     assert '@import "./tailwind-ui/all.css";' not in input_content_after, (
         "tailwind-ui import not removed from input.css"
+    )
+
+    assert not FeatureTracker().is_installed("tailwind_ui"), (
+        "tailwind_ui tracking should be removed after remove"
     )
 
 

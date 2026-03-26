@@ -4,6 +4,7 @@ import requests
 from pathlib import Path
 
 from .....utils.django.project_manager import DjangoProjectManager
+from .....utils.djdevx_config.backend.feature_tracker import FeatureTracker
 from .....utils.console.print import print_console
 
 
@@ -45,6 +46,11 @@ def install():
     download_semantic(version)
     add_links_to_base_template()
 
+    try:
+        FeatureTracker().write_feature_config("css/semantic", "Semantic UI")
+    except (Exception, SystemExit):
+        pass
+
     print_console.success(f"Semantic UI {version} with jQuery successfully installed!")
 
 
@@ -57,6 +63,11 @@ def remove():
     get_semantic_js_path().unlink(missing_ok=True)
     get_jquery_path().unlink(missing_ok=True)
     remove_links_from_base_template()
+
+    try:
+        FeatureTracker().remove_feature_config("css/semantic")
+    except (Exception, SystemExit):
+        pass
 
     print_console.success("Semantic UI removed successfully!")
 

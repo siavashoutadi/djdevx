@@ -5,6 +5,7 @@ from typing import Annotated
 from pathlib import Path
 
 from ....utils.django.project_manager import DjangoProjectManager
+from ....utils.djdevx_config.backend.feature_tracker import FeatureTracker
 
 from ....utils.console.print import print_console
 from ....utils.color.converter import color_converter
@@ -257,6 +258,11 @@ def install(
 
     input_css_path.write_text(input_content, encoding="utf-8")
 
+    try:
+        FeatureTracker().write_feature_config("tailwind_theme", "Tailwind Theme")
+    except (Exception, SystemExit):
+        pass
+
     print_console.success("Tailwind theme installed successfully.")
 
 
@@ -280,5 +286,10 @@ def remove():
             input_css_path,
             ['@import "./theme.css";'],
         )
+
+    try:
+        FeatureTracker().remove_feature_config("tailwind_theme")
+    except (Exception, SystemExit):
+        pass
 
     print_console.success("Tailwind theme removed successfully.")

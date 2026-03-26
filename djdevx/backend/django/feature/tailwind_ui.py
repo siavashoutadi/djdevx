@@ -5,6 +5,7 @@ from pathlib import Path
 
 
 from ....utils.django.project_manager import DjangoProjectManager
+from ....utils.djdevx_config.backend.feature_tracker import FeatureTracker
 
 from ....utils.console.print import print_console
 from ....utils.templates.manager import TemplateManager
@@ -56,6 +57,11 @@ def install():
 
     input_css_path.write_text(input_content, encoding="utf-8")
 
+    try:
+        FeatureTracker().write_feature_config("tailwind_ui", "Tailwind UI")
+    except (Exception, SystemExit):
+        pass
+
     print_console.success("Tailwind UI installed successfully.")
 
 
@@ -84,5 +90,10 @@ def remove():
             input_css_path,
             ["tailwind-ui"],
         )
+
+    try:
+        FeatureTracker().remove_feature_config("tailwind_ui")
+    except (Exception, SystemExit):
+        pass
 
     print_console.success("Tailwind UI removed successfully.")

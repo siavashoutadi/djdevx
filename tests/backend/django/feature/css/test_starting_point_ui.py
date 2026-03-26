@@ -2,6 +2,7 @@ import os
 from typer.testing import CliRunner
 from djdevx.main import app
 from tests.test_helpers import create_test_django_backend
+from djdevx.utils.djdevx_config.backend.feature_tracker import FeatureTracker
 
 runner = CliRunner()
 
@@ -87,6 +88,10 @@ def test_starting_point_ui_install_and_remove(temp_dir):
         "Starting Point UI script missing type='module' attribute"
     )
 
+    assert FeatureTracker().is_installed("css/starting_point_ui"), (
+        "css/starting_point_ui should be tracked after install"
+    )
+
     js_position = base_content.find("starting-point-ui.min.js")
     body_end = base_content.find("</body>")
 
@@ -126,6 +131,10 @@ def test_starting_point_ui_install_and_remove(temp_dir):
     base_content_after = base_template_path.read_text()
     assert "starting-point-ui.min.js" not in base_content_after, (
         "Starting Point UI JS script not removed from base template"
+    )
+
+    assert not FeatureTracker().is_installed("css/starting_point_ui"), (
+        "css/starting_point_ui tracking should be removed after remove"
     )
 
 

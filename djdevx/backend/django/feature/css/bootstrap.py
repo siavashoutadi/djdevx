@@ -4,6 +4,7 @@ import requests
 from pathlib import Path
 
 from .....utils.django.project_manager import DjangoProjectManager
+from .....utils.djdevx_config.backend.feature_tracker import FeatureTracker
 from .....utils.console.print import print_console
 
 
@@ -38,6 +39,11 @@ def install():
     download_bootstrap(version)
     add_links_to_base_template()
 
+    try:
+        FeatureTracker().write_feature_config("css/bootstrap", "Bootstrap")
+    except (Exception, SystemExit):
+        pass
+
     print_console.success(
         f"Bootstrap {version} with all dependencies successfully installed!"
     )
@@ -51,6 +57,11 @@ def remove():
     get_bootstrap_css_path().unlink(missing_ok=True)
     get_bootstrap_js_path().unlink(missing_ok=True)
     remove_links_from_base_template()
+
+    try:
+        FeatureTracker().remove_feature_config("css/bootstrap")
+    except (Exception, SystemExit):
+        pass
 
     print_console.success("Bootstrap removed successfully!")
 

@@ -2,6 +2,7 @@ import os
 from typer.testing import CliRunner
 from djdevx.main import app
 from tests.test_helpers import create_test_django_backend
+from djdevx.utils.djdevx_config.backend.feature_tracker import FeatureTracker
 
 runner = CliRunner()
 
@@ -59,6 +60,10 @@ def test_frankenui_install_and_remove(temp_dir):
         "FrankenUI scripts missing type='module' attribute"
     )
 
+    assert FeatureTracker().is_installed("css/frankenui"), (
+        "css/frankenui should be tracked after install"
+    )
+
     module_script_count = base_content.count('type="module"')
     assert module_script_count == 2, (
         f"Expected 2 module scripts, found {module_script_count}"
@@ -99,6 +104,10 @@ def test_frankenui_install_and_remove(temp_dir):
     )
     assert "frankenui-icon.iife.js" not in base_content_after, (
         "FrankenUI Icon JS script not removed from base template"
+    )
+
+    assert not FeatureTracker().is_installed("css/frankenui"), (
+        "css/frankenui tracking should be removed after remove"
     )
 
 

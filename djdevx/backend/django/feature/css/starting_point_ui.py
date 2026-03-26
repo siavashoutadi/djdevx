@@ -4,6 +4,7 @@ import requests
 from pathlib import Path
 
 from .....utils.django.project_manager import DjangoProjectManager
+from .....utils.djdevx_config.backend.feature_tracker import FeatureTracker
 from .....utils.console.print import print_console
 
 
@@ -49,6 +50,13 @@ def install():
     add_import_to_input_css()
     add_links_to_base_template()
 
+    try:
+        FeatureTracker().write_feature_config(
+            "css/starting_point_ui", "Starting Point UI"
+        )
+    except (Exception, SystemExit):
+        pass
+
     print_console.success(
         f"Starting Point UI {version} with all dependencies successfully installed!"
     )
@@ -67,6 +75,11 @@ def remove():
     get_starting_point_ui_js_path().unlink(missing_ok=True)
     remove_import_from_input_css()
     remove_links_from_base_template()
+
+    try:
+        FeatureTracker().remove_feature_config("css/starting_point_ui")
+    except (Exception, SystemExit):
+        pass
 
     print_console.success("Starting Point UI removed successfully!")
 

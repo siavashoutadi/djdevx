@@ -6,6 +6,7 @@ from pathlib import Path
 from PIL import Image
 
 from ....utils.django.project_manager import DjangoProjectManager
+from ....utils.djdevx_config.backend.feature_tracker import FeatureTracker
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -145,6 +146,11 @@ def pwa(
     generate_ios_splash_screens(icon_path, project_dir)
     write_manifest_json(project_dir)
     update_base_html(project_dir)
+
+    try:
+        FeatureTracker().write_feature_config("pwa", "PWA")
+    except (Exception, SystemExit):
+        pass
 
 
 def resize_android_icon(icon_path, project_dir):
