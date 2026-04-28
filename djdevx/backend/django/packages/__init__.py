@@ -16,6 +16,7 @@ from .django_auditlog import app as auditlog
 from .django_guardian import app as guardian
 from .django_role_permissions import app as roles
 from .django_cors_headers import app as cors
+from .django_allow_cidr import app as allow_cidr
 from .django_filter import app as filter
 from .django_import_export import app as import_export
 from .django_meta import app as meta
@@ -46,6 +47,11 @@ app.add_typer(
     allauth,
     name="django-allauth",
     help="Manage django-allauth package",
+)
+app.add_typer(
+    allow_cidr,
+    name="django-allow-cidr",
+    help="Manage django-allow-cidr package",
 )
 app.add_typer(
     anymail,

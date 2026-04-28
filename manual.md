@@ -160,6 +160,7 @@ $ djdevx backend django packages [OPTIONS] COMMAND [ARGS]...
 
 * `channels`: Manage channels package
 * `django-allauth`: Manage django-allauth package
+* `django-allow-cidr`: Manage django-allow-cidr package
 * `django-anymail`: Manage django-anymail package
 * `django-auditlog`: Manage django-auditlog package
 * `django-browser-reload`: Manage django-browser-reload package
@@ -442,6 +443,53 @@ Configure django-allauth OIDC provider environment variables.
 
 ```console
 $ djdevx backend django packages django-allauth oidc-provider env [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+##### `djdevx backend django packages django-allow-cidr`
+
+Manage django-allow-cidr package
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-allow-cidr [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure django-allow-cidr
+* `remove`: Remove django-allow-cidr package
+
+###### `djdevx backend django packages django-allow-cidr install`
+
+Install and configure django-allow-cidr
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-allow-cidr install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+###### `djdevx backend django packages django-allow-cidr remove`
+
+Remove django-allow-cidr package
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-allow-cidr remove [OPTIONS]
 ```
 
 **Options**:
