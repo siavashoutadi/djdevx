@@ -3,7 +3,6 @@ from settings.utils.env import is_local, get_env
 
 env = get_env()
 
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 if is_local():
     DATABASES = {
         "default": {

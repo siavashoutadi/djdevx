@@ -1,6 +1,3 @@
-# https://docs.djangoproject.com/en/5.1/topics/settings/
-# https://docs.djangoproject.com/en/5.1/ref/settings/
-
 from settings import BASE_DIR
 from settings.utils.env import get_env
 
@@ -11,7 +8,6 @@ DEBUG: bool = env.bool("DEBUG", default=False)
 ALLOWED_HOSTS: list[str] = env.list("ALLOWED_HOSTS", default=[])
 CSRF_TRUSTED_ORIGINS: list[str] = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD: str = "django.db.models.BigAutoField"
 ROOT_URLCONF: str = "urls"
 WSGI_APPLICATION: str = "applications.wsgi.application"
