@@ -110,8 +110,6 @@ def install_dependencies(backend_root: Path):
         f"django~={DJANGO_VERSION}.0",
         "django-typer",
         "django-environ",
-        "psycopg2-binary",
-        "django-redis",
         "ipython",
         "ipdb",
         "uvicorn",

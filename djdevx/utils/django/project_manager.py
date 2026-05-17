@@ -6,8 +6,14 @@ from typing import List, Optional
 
 from ..djdevx_config.backend.django import DjangoConfig
 from ..templates.manager import TemplateManager
-from ..devcontainer.manager import DevcontainerManager
+from ..devcontainer import (
+    EnvFileManager,
+    ServiceConfig,
+    VolumeConfig,
+    DockerComposeManager,
+)
 from ..console.print import print_console
+from .uv_runner import UvRunner
 
 
 class DjangoProjectManager:
@@ -20,7 +26,9 @@ class DjangoProjectManager:
         """Initialize and validate Django project."""
         self._config = DjangoConfig()
         self._template_manager = TemplateManager()
-        self._devcontainer = DevcontainerManager(self._config.project_root_dir)
+        self._devcontainer_env = EnvFileManager(self._config.project_root_dir)
+        self._devcontainer_compose = DockerComposeManager(self._config.project_root_dir)
+        self._uv_runner = UvRunner(backend_root=self._config.django_backend_root)
         self.validate_django_project()
 
     def validate_django_project(self) -> None:
@@ -46,6 +54,11 @@ class DjangoProjectManager:
     def settings_path(self) -> Path:
         """Get settings directory path."""
         return Path.joinpath(self.project_path, "settings")
+
+    @property
+    def django_settings_path(self) -> Path:
+        """Get django settings directory path."""
+        return Path.joinpath(self.settings_path, "django")
 
     @property
     def packages_settings_path(self) -> Path:
@@ -97,6 +110,11 @@ class DjangoProjectManager:
         """Get JavaScript directory path."""
         return Path.joinpath(self.static_path, "js")
 
+    @property
+    def devcontainer_env_devcontainer_path(self) -> Path:
+        """Path to the devcontainer env file."""
+        return self._devcontainer_env.env_devcontainer_path
+
     # Template Operations (delegated to TemplateManager)
     def copy_templates(
         self,
@@ -127,16 +145,15 @@ class DjangoProjectManager:
         self, key: str, value: str, file_path: Optional[Path] = None
     ) -> None:
         """Add Django environment variable."""
-        self._devcontainer.add_env_variable(key, value, file_path)
+        self._devcontainer_env.add_env_variable(key, value, file_path)
 
     def remove_env_variable(self, key: str, file_path: Optional[Path] = None) -> None:
         """Remove Django environment variable."""
-        self._devcontainer.remove_env_variable(key, file_path)
+        self._devcontainer_env.remove_env_variable(key, file_path)
 
-    @property
-    def devcontainer_env_devcontainer_path(self) -> Path:
-        """Path to the devcontainer env file."""
-        return self._devcontainer.env_devcontainer_path
+    def remove_env_file(self, file_name: str) -> None:
+        """Remove an environment file."""
+        self._devcontainer_env.remove_env_file(file_name)
 
     # Dependency Management
     def get_dependencies(self, group: str = "") -> list[str]:
@@ -149,10 +166,12 @@ class DjangoProjectManager:
 
         return pyproject_data.get("project", {}).get("dependencies", [])
 
-    @staticmethod
-    def _normalize_pkg_name(name: str) -> str:
-        """Normalize a package name per PEP 503 (hyphens, underscores, dots are equivalent)."""
-        return re.sub(r"[-_.]+", "-", name).lower()
+    def remove_dependency(self, dependency_name: str) -> None:
+        """Remove a dependency"""
+        if not self.has_dependency(dependency_name):
+            return
+
+        self._uv_runner.remove_package(dependency_name)
 
     def has_dependency(self, dependency_name: str, group: str = "") -> bool:
         """Check if a specific dependency is installed."""
@@ -173,3 +192,32 @@ class DjangoProjectManager:
             if self._normalize_pkg_name(name_without_extras) == normalized_query:
                 return True
         return False
+
+    def add_dependency(self, dependency: str) -> None:
+        """Add a dependency to the project."""
+        if self.has_dependency(dependency):
+            print_console.warning(f"Dependency {dependency} already exists.")
+            return
+
+        self._uv_runner.add_package(dependency)
+
+    @staticmethod
+    def _normalize_pkg_name(name: str) -> str:
+        """Normalize a package name per PEP 503 (hyphens, underscores, dots are equivalent)."""
+        return re.sub(r"[-_.]+", "-", name).lower()
+
+    def add_service_to_docker_compose(
+        self,
+        service_config: ServiceConfig,
+        volumes: list[VolumeConfig],
+    ) -> None:
+        """Add a new service to docker-compose.yml."""
+        self._devcontainer_compose.add_service(service_config, volumes)
+
+    def remove_service_from_docker_compose(
+        self,
+        service_config: ServiceConfig,
+        volumes: list[VolumeConfig],
+    ) -> None:
+        """Remove a service from docker-compose.yml."""
+        self._devcontainer_compose.remove_service(service_config, volumes)
