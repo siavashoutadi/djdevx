@@ -1,11 +1,13 @@
+"""Environment file manager for .devcontainer/.env directory."""
+
 import fileinput
 from pathlib import Path
 
 
-class DevcontainerManager:
+class EnvFileManager:
     """
-    Manages files under the .devcontainer/ directory.
-    Handles environment variable files used by devcontainers.
+    Manages environment files under the .devcontainer/.env directory.
+    Handles adding, removing, and updating environment variable files.
     """
 
     def __init__(self, project_root: Path):
@@ -41,3 +43,25 @@ class DevcontainerManager:
             for line in f:
                 if not line.startswith(f"{key}="):
                     print(line, end="")
+
+    def add_env_file(self, filename: str, content: str) -> None:
+        """Create a new .env file under .env directory.
+
+        Args:
+            filename: Name of the file to create (e.g., 'postgres', 'redis').
+            content: Content to write to the file.
+        """
+        env_file = self.env_path / filename
+        env_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(env_file, "w") as f:
+            f.write(content)
+
+    def remove_env_file(self, filename: str) -> None:
+        """Remove a .env file from the .env directory.
+
+        Args:
+            filename: Name of the file to remove.
+        """
+        env_file = self.env_path / filename
+        if env_file.exists():
+            env_file.unlink()

@@ -13,7 +13,7 @@ wheels/
 /staticfiles
 
 # Environment Variables
-/.env/
+.env/
 /.environments
 
 # Devbox Environment Variables

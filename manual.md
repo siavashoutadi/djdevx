@@ -141,6 +141,8 @@ $ djdevx backend django [OPTIONS] COMMAND [ARGS]...
 * `feature`: Add features to your Django project
 * `create`: Create new Django applications or components
 * `list`: List installed Django packages and features
+* `database`: Manage database infrastructure
+* `cache`: Manage cache infrastructure
 
 #### `djdevx backend django packages`
 
@@ -2988,6 +2990,136 @@ List all installed Django features
 
 ```console
 $ djdevx backend django list features [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx backend django database`
+
+Manage database infrastructure
+
+**Usage**:
+
+```console
+$ djdevx backend django database [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `postgres`: PostgreSQL database management
+
+##### `djdevx backend django database postgres`
+
+PostgreSQL database management
+
+**Usage**:
+
+```console
+$ djdevx backend django database postgres [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install PostgreSQL database.
+* `remove`: Remove PostgreSQL database.
+
+###### `djdevx backend django database postgres install`
+
+Install PostgreSQL database.
+
+**Usage**:
+
+```console
+$ djdevx backend django database postgres install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+###### `djdevx backend django database postgres remove`
+
+Remove PostgreSQL database.
+
+**Usage**:
+
+```console
+$ djdevx backend django database postgres remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx backend django cache`
+
+Manage cache infrastructure
+
+**Usage**:
+
+```console
+$ djdevx backend django cache [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `redis`: Redis cache management
+
+##### `djdevx backend django cache redis`
+
+Redis cache management
+
+**Usage**:
+
+```console
+$ djdevx backend django cache redis [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install Redis cache.
+* `remove`: Remove Redis cache.
+
+###### `djdevx backend django cache redis install`
+
+Install Redis cache.
+
+**Usage**:
+
+```console
+$ djdevx backend django cache redis install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+###### `djdevx backend django cache redis remove`
+
+Remove Redis cache.
+
+**Usage**:
+
+```console
+$ djdevx backend django cache redis remove [OPTIONS]
 ```
 
 **Options**:

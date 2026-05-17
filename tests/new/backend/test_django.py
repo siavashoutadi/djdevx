@@ -73,11 +73,9 @@ def test_new_django_backend(temp_dir):
     required_dependencies = [
         "django",
         "django-environ",
-        "django-redis",
         "django-typer",
         "ipdb",
         "ipython",
-        "psycopg2-binary",
         "uvicorn",
     ]
 
