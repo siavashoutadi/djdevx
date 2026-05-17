@@ -182,6 +182,7 @@ $ djdevx backend django packages [OPTIONS] COMMAND [ARGS]...
 * `django-simple-history`: Manage django-simple-history package
 * `django-simple-nav`: Manage django-simple-nav package
 * `django-snakeoil`: Manage django-snakeoil package
+* `django-sp-admin`: Manage django-sp-admin package
 * `django-storages`: Manage django-storages package
 * `django-taggit`: Manage django-taggit package
 * `django-tailwind-cli`: Manage django-tailwind-cli package
@@ -1833,6 +1834,53 @@ Remove django-snakeoil package
 
 ```console
 $ djdevx backend django packages django-snakeoil remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+##### `djdevx backend django packages django-sp-admin`
+
+Manage django-sp-admin package
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-sp-admin [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `install`: Install and configure django-sp-admin
+* `remove`: Remove django-sp-admin package
+
+###### `djdevx backend django packages django-sp-admin install`
+
+Install and configure django-sp-admin
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-sp-admin install [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+###### `djdevx backend django packages django-sp-admin remove`
+
+Remove django-sp-admin package
+
+**Usage**:
+
+```console
+$ djdevx backend django packages django-sp-admin remove [OPTIONS]
 ```
 
 **Options**:

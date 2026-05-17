@@ -34,6 +34,7 @@ from .heroicons import app as heroicons
 from .django_taggit import app as taggit
 from .django_htmx import app as htmx
 from .django_silk import app as silk
+from .django_sp_admin import app as sp_admin
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -157,6 +158,11 @@ app.add_typer(
     snakeoil,
     name="django-snakeoil",
     help="Manage django-snakeoil package",
+)
+app.add_typer(
+    sp_admin,
+    name="django-sp-admin",
+    help="Manage django-sp-admin package",
 )
 app.add_typer(
     storages,
