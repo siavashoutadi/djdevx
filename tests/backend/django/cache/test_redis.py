@@ -3,6 +3,7 @@
 import os
 from pathlib import Path
 from typer.testing import CliRunner
+import tomlkit
 
 from djdevx.main import app
 from djdevx.utils.django.project_manager import DjangoProjectManager
@@ -102,6 +103,46 @@ def test_redis_install_and_remove(temp_dir):
         "Redis volume not found in docker-compose"
     )
 
+    # Check that .djdevx tracking config was written
+    tracking_config = (
+        temp_dir / ".djdevx" / "backend" / "django" / "cache" / "redis" / "config.toml"
+    )
+    assert tracking_config.exists(), (
+        ".djdevx tracking config.toml not created after install"
+    )
+
+    tracking_doc = tomlkit.loads(tracking_config.read_text())
+
+    assert tracking_doc.get("cache", {}).get("name") == "redis", (
+        "[cache].name is not 'redis' in tracking config"
+    )
+
+    env_section = tracking_doc.get("env", {})
+
+    expected_env_vars = ["REDIS_PASSWORD", "CACHE_LOCATION"]
+    for var in expected_env_vars:
+        assert var in env_section, (
+            f"{var} missing from [env] section in tracking config"
+        )
+
+    # REDIS_PASSWORD must be a secret with no stored value
+    password_entry = env_section["REDIS_PASSWORD"]
+    assert password_entry.get("type") == "secret", (
+        "REDIS_PASSWORD should have type 'secret'"
+    )
+    assert "value" not in password_entry, (
+        "REDIS_PASSWORD must not store a value in tracking config"
+    )
+
+    # CACHE_LOCATION must be user_input with its default value
+    location_entry = env_section["CACHE_LOCATION"]
+    assert location_entry.get("type") == "user_input", (
+        "CACHE_LOCATION should have type 'user_input'"
+    )
+    assert location_entry.get("value") == "redis://default@cache:6379/1", (
+        "CACHE_LOCATION value mismatch in tracking config"
+    )
+
     # Test remove command
     os.chdir(temp_dir)
     result = runner.invoke(
@@ -149,4 +190,10 @@ def test_redis_install_and_remove(temp_dir):
     )
     assert "cache-data" not in docker_compose_content, (
         "Redis volume still found in docker-compose after removal"
+    )
+
+    # Check that .djdevx tracking config was removed
+    tracking_dir = temp_dir / ".djdevx" / "backend" / "django" / "cache" / "redis"
+    assert not tracking_dir.exists(), (
+        ".djdevx tracking directory still exists after removal"
     )

@@ -3,6 +3,7 @@ import typer
 from .packages import list_packages
 from .features import list_features
 from .databases import list_databases
+from .caches import list_caches
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -11,3 +12,4 @@ app.command(name="features", help="List all installed Django features")(list_fea
 app.command(name="databases", help="List all installed Django databases")(
     list_databases
 )
+app.command(name="caches", help="List all installed Django caches")(list_caches)

@@ -8,6 +8,7 @@ from djdevx.utils.templates.manager import TemplateManager
 from ....utils.console.print import print_console
 from ....utils.django.project_manager import DjangoProjectManager
 from ....utils.devcontainer import ServiceConfig, VolumeConfig
+from ....utils.djdevx_config.backend import CacheTracker
 
 REDIS_ENV_VARIABLES = {
     "REDIS_PASSWORD": "redis_password",
@@ -59,6 +60,19 @@ def install() -> None:
 
     pm.add_service_to_docker_compose(REDIS_DOCKER_SERVICE, REDIS_VOLUMES)
 
+    tracker = CacheTracker()
+    tracker.write_cache_config("redis", "redis")
+    tracker.write_env_entries(
+        "redis",
+        {
+            "REDIS_PASSWORD": {"type": "secret"},
+            "CACHE_LOCATION": {
+                "type": "user_input",
+                "value": "redis://default@cache:6379/1",
+            },
+        },
+    )
+
     print_console.success("Redis cache installed successfully!")
 
 
@@ -94,5 +108,7 @@ def remove() -> None:
 
     pm.remove_env_file("redis")
     pm.remove_service_from_docker_compose(REDIS_DOCKER_SERVICE, REDIS_VOLUMES)
+
+    CacheTracker().remove_cache_config("redis")
 
     print_console.success("Redis cache removed successfully!")

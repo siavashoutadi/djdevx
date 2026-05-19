@@ -2968,6 +2968,7 @@ $ djdevx backend django list [OPTIONS] COMMAND [ARGS]...
 * `packages`: List all installed Django packages
 * `features`: List all installed Django features
 * `databases`: List all installed Django databases
+* `caches`: List all installed Django caches
 
 ##### `djdevx backend django list packages`
 
@@ -3005,6 +3006,20 @@ List all installed Django databases
 
 ```console
 $ djdevx backend django list databases [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+##### `djdevx backend django list caches`
+
+List all installed Django caches
+
+**Usage**:
+
+```console
+$ djdevx backend django list caches [OPTIONS]
 ```
 
 **Options**:
