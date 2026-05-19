@@ -3,6 +3,7 @@
 import os
 from pathlib import Path
 from typer.testing import CliRunner
+import tomlkit
 
 from djdevx.main import app
 from djdevx.utils.django.project_manager import DjangoProjectManager
@@ -111,6 +112,66 @@ def test_postgres_install_and_remove(temp_dir):
         "Database volume not found in docker-compose"
     )
 
+    # Check that .djdevx tracking config was written
+    tracking_config = (
+        temp_dir
+        / ".djdevx"
+        / "backend"
+        / "django"
+        / "database"
+        / "postgres"
+        / "config.toml"
+    )
+    assert tracking_config.exists(), (
+        ".djdevx tracking config.toml not created after install"
+    )
+
+    tracking_doc = tomlkit.loads(tracking_config.read_text())
+
+    assert tracking_doc.get("database", {}).get("name") == "postgres", (
+        "[database].name is not 'postgres' in tracking config"
+    )
+
+    env_section = tracking_doc.get("env", {})
+
+    # All expected env vars must be tracked
+    expected_env_vars = [
+        "POSTGRES_SERVER",
+        "POSTGRES_PORT",
+        "POSTGRES_USER",
+        "POSTGRES_PASSWORD",
+        "POSTGRES_DB",
+        "PGDATA",
+    ]
+    for var in expected_env_vars:
+        assert var in env_section, (
+            f"{var} missing from [env] section in tracking config"
+        )
+
+    # POSTGRES_PASSWORD must be a secret with no stored value
+    password_entry = env_section["POSTGRES_PASSWORD"]
+    assert password_entry.get("type") == "secret", (
+        "POSTGRES_PASSWORD should have type 'secret'"
+    )
+    assert "value" not in password_entry, (
+        "POSTGRES_PASSWORD must not store a value in tracking config"
+    )
+
+    # All other vars must be user_input with values
+    user_input_vars = {
+        "POSTGRES_SERVER": "db",
+        "POSTGRES_PORT": "5432",
+        "POSTGRES_USER": "postgres",
+        "POSTGRES_DB": "postgres",
+        "PGDATA": "/var/lib/postgresql/data/pgdata",
+    }
+    for var, expected_value in user_input_vars.items():
+        entry = env_section[var]
+        assert entry.get("type") == "user_input", f"{var} should have type 'user_input'"
+        assert entry.get("value") == expected_value, (
+            f"{var} value mismatch: expected '{expected_value}', got '{entry.get('value')}'"
+        )
+
     # Test remove command
     os.chdir(temp_dir)
     result = runner.invoke(
@@ -152,4 +213,10 @@ def test_postgres_install_and_remove(temp_dir):
     )
     assert "pgadmin" not in docker_compose_content, (
         "PgAdmin service still found in docker-compose after removal"
+    )
+
+    # Check that .djdevx tracking config was removed
+    tracking_dir = temp_dir / ".djdevx" / "backend" / "django" / "database" / "postgres"
+    assert not tracking_dir.exists(), (
+        ".djdevx tracking directory still exists after removal"
     )

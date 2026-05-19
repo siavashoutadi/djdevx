@@ -6,6 +6,7 @@ import typer
 from ....utils.console.print import print_console
 from ....utils.django.project_manager import DjangoProjectManager
 from ....utils.devcontainer import ServiceConfig, VolumeConfig
+from ....utils.djdevx_config.backend import DatabaseTracker
 from ....utils.templates.manager import TemplateManager
 
 
@@ -87,6 +88,23 @@ def install() -> None:
     pm.add_service_to_docker_compose(POSTGRES_DOCKER_SERVICE, POSTGRES_VOLUMES)
     pm.add_service_to_docker_compose(PGADMIN_DOCKER_SERVICE, PGADMIN_VOLUMES)
 
+    tracker = DatabaseTracker()
+    tracker.write_database_config("postgres", "postgres")
+    tracker.write_env_entries(
+        "postgres",
+        {
+            "POSTGRES_SERVER": {"type": "user_input", "value": "db"},
+            "POSTGRES_PORT": {"type": "user_input", "value": "5432"},
+            "POSTGRES_USER": {"type": "user_input", "value": "postgres"},
+            "POSTGRES_PASSWORD": {"type": "secret"},
+            "POSTGRES_DB": {"type": "user_input", "value": "postgres"},
+            "PGDATA": {
+                "type": "user_input",
+                "value": "/var/lib/postgresql/data/pgdata",
+            },
+        },
+    )
+
     print_console.success("PostgreSQL database installed successfully!")
 
 
@@ -121,5 +139,7 @@ def remove() -> None:
 
     pm.remove_service_from_docker_compose(POSTGRES_DOCKER_SERVICE, POSTGRES_VOLUMES)
     pm.remove_service_from_docker_compose(PGADMIN_DOCKER_SERVICE, PGADMIN_VOLUMES)
+
+    DatabaseTracker().remove_database_config("postgres")
 
     print_console.success("PostgreSQL database removed successfully!")
