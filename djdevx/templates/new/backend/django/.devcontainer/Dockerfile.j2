@@ -72,6 +72,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
 USER devuser
 
 RUN uv tool install git+https://github.com/siavashoutadi/djdevx
+RUN curl -fsSL https://opencode.ai/install | bash
 
 RUN mkdir -p /home/devuser/.bashrc.d/ /home/devuser/.config/git /home/devuser/.cache/pre-commit && \
     echo 'for f in ~/.bashrc.d/*; do source $f; done' >> /home/devuser/.bashrc
