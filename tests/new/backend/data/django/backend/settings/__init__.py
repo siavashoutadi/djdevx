@@ -10,13 +10,19 @@ APPS_SETTINGS_DIR = SETTINGS_DIR / "apps"
 setting_files = []
 
 setting_files += [
-    str(f) for f in Path(DJANGO_SETTINGS_DIR).rglob("*.py") if f.name != "__init__.py"
+    str(f)
+    for f in sorted(Path(DJANGO_SETTINGS_DIR).rglob("*.py"))
+    if f.name != "__init__.py"
 ]
 setting_files += [
-    str(f) for f in Path(PACKAGES_SETTINGS_DIR).rglob("*.py") if f.name != "__init__.py"
+    str(f)
+    for f in sorted(Path(PACKAGES_SETTINGS_DIR).rglob("*.py"))
+    if f.name != "__init__.py"
 ]
 setting_files += [
-    str(f) for f in Path(APPS_SETTINGS_DIR).rglob("*.py") if f.name != "__init__.py"
+    str(f)
+    for f in sorted(Path(APPS_SETTINGS_DIR).rglob("*.py"))
+    if f.name != "__init__.py"
 ]
 
 
