@@ -22,6 +22,9 @@ earns a passing reliability score (≥ 80/100).
 
 ## Review Dimensions (score each 0–10)
 
+When reviewing this project's code, cross-reference against the `djdevx-standards` skill
+for project-specific patterns (BasePackage conventions, template naming, tracking config, etc.)
+
 | # | Dimension        | What to check                                              |
 |---|------------------|------------------------------------------------------------|
 | 1 | Correctness      | Logic errors, wrong assumptions, off-by-one, null handling |
@@ -30,8 +33,8 @@ earns a passing reliability score (≥ 80/100).
 | 4 | Readability      | Naming, comments, complexity, magic numbers                |
 | 5 | Test Coverage    | Missing edge cases, untested branches, flaky tests         |
 | 6 | Error Handling   | Silent failures, overly broad catches, missing retries     |
-| 7 | Architecture     | SRP violations, tight coupling, wrong abstraction level    |
-| 8 | Maintainability  | Tech debt, duplication, future-proofing                    |
+| 7 | Architecture     | SRP violations, tight coupling, wrong abstraction level. Check BasePackage hook lifecycle, PathDeriver usage, and sub-package layout compliance |
+| 8 | Maintainability  | Tech debt, duplication, future-proofing. Verify template (.j2) conventions and tracking config patterns are followed |
 
 ---
 
