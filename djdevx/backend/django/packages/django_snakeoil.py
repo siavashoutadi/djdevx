@@ -3,7 +3,7 @@ from ._base import BasePackage, InstallParam
 
 class DjangoSnakeoilPackage(BasePackage):
     name = "django-snakeoil"
-    packages = ["django-snakeoil"]
+    packages = ["django-snakeoil<3"]
 
     install_params = [
         InstallParam(

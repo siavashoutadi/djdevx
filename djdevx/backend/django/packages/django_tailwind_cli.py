@@ -5,7 +5,7 @@ from ._base import BasePackage
 
 class DjangoTailwindCliPackage(BasePackage):
     name = "django-tailwind-cli"
-    packages = ["django-tailwind-cli"]
+    packages = ["django-tailwind-cli<5"]
 
     files_to_remove = [
         "tailwind.config.js",

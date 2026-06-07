@@ -3,7 +3,7 @@ from .._base import BasePackage
 
 class AzureStoragePackage(BasePackage):
     name = "django-storages Azure"
-    packages = ["django-storages[azure]"]
+    packages = ["django-storages[azure]<2"]
 
 
 _pkg = AzureStoragePackage(__file__)

@@ -3,7 +3,7 @@ from ._base import BasePackage
 
 class DjangoChannelsRestFrameworkPackage(BasePackage):
     name = "djangochannelsrestframework"
-    packages = ["djangochannelsrestframework"]
+    packages = ["djangochannelsrestframework<2"]
     required_dependencies = ["channels"]
 
 

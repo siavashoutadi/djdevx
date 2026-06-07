@@ -3,7 +3,7 @@ from ._base import BasePackage
 
 class DjangoGuardianPackage(BasePackage):
     name = "django-guardian"
-    packages = ["django-guardian"]
+    packages = ["django-guardian<4"]
 
     def after_copy_templates(self) -> None:
         self._add_guardian_mixin()

@@ -3,7 +3,7 @@ from ._base import BasePackage
 
 class DrfSpectacularPackage(BasePackage):
     name = "drf-spectacular"
-    packages = ["drf-spectacular[sidecar]"]
+    packages = ["drf-spectacular[sidecar]<1"]
     required_dependencies = ["djangorestframework"]
 
 

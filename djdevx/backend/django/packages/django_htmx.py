@@ -5,7 +5,7 @@ from ._base import BasePackage
 
 class DjangoHtmxPackage(BasePackage):
     name = "django-htmx"
-    packages = ["django-htmx"]
+    packages = ["django-htmx<2"]
 
     def after_copy_templates(self) -> None:
         self._add_htmx_snippets()

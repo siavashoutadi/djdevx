@@ -3,7 +3,7 @@ from ._base import BasePackage
 
 class DjangoAllowCIDRPackage(BasePackage):
     name = "django-allow-cidr"
-    packages = ["django-allow-cidr"]
+    packages = ["django-allow-cidr<1"]
 
 
 _pkg = DjangoAllowCIDRPackage(__file__)

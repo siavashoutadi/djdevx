@@ -8,7 +8,7 @@ from .....utils.console.print import print_console
 
 class MfaPackage(BasePackage):
     name = "django-allauth MFA"
-    packages = ["django-allauth[mfa]"]
+    packages = ["django-allauth[mfa]<66"]
 
     def install(
         self,

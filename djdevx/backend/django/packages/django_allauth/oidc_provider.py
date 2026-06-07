@@ -9,7 +9,7 @@ from .._base import BasePackage
 
 class OidcProviderPackage(BasePackage):
     name = "django-allauth OIDC provider"
-    packages = ["django-allauth[idp-oidc]"]
+    packages = ["django-allauth[idp-oidc]<66"]
 
     # RSA private key is auto-generated; no manual input required.
     secret_generators = {

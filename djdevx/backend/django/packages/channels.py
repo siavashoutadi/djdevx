@@ -6,8 +6,8 @@ from ._base import BasePackage
 
 class ChannelsPackage(BasePackage):
     name = "channels"
-    packages = ["channels[daphne]", "channels_redis"]
-    dev_packages = ["twisted[http2,tls]"]
+    packages = ["channels[daphne]<5", "channels_redis<5"]
+    dev_packages = ["twisted[http2,tls]<27"]
 
     def after_uv_remove(self) -> None:
         """Remove ws_urls directory and restore original ASGI file."""

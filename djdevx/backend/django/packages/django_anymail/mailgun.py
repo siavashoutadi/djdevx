@@ -3,7 +3,7 @@ from .._base import BasePackage, InstallParam
 
 class MailgunPackage(BasePackage):
     name = "django-anymail Mailgun"
-    packages = ["django-anymail[mailgun]"]
+    packages = ["django-anymail[mailgun]<16"]
 
     install_params = [
         InstallParam(

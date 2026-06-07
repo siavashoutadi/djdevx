@@ -3,7 +3,7 @@ from ._base import BasePackage, InstallParam
 
 class DjangoMetaPackage(BasePackage):
     name = "django-meta"
-    packages = ["django-meta"]
+    packages = ["django-meta<3"]
 
     install_params = [
         InstallParam(

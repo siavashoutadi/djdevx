@@ -3,7 +3,7 @@ from ._base import BasePackage
 
 class DjangoRestFrameworkPackage(BasePackage):
     name = "Django REST Framework"
-    packages = ["djangorestframework"]
+    packages = ["djangorestframework<4"]
 
 
 _pkg = DjangoRestFrameworkPackage(__file__)

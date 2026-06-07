@@ -3,7 +3,7 @@ from ._base import BasePackage
 
 class DjangoSimpleHistoryPackage(BasePackage):
     name = "django-simple-history"
-    packages = ["django-simple-history"]
+    packages = ["django-simple-history<4"]
 
 
 _pkg = DjangoSimpleHistoryPackage(__file__)

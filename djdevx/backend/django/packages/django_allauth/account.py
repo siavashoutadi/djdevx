@@ -5,7 +5,7 @@ from .._base import BasePackage, InstallParam
 
 class AllauthAccountPackage(BasePackage):
     name = "django-allauth account"
-    packages = ["django-allauth"]
+    packages = ["django-allauth<66"]
 
     install_params = [
         InstallParam(

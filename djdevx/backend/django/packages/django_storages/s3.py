@@ -3,7 +3,7 @@ from .._base import BasePackage
 
 class S3Package(BasePackage):
     name = "django-storages S3"
-    packages = ["django-storages[s3]"]
+    packages = ["django-storages[s3]<2"]
 
 
 _pkg = S3Package(__file__)
