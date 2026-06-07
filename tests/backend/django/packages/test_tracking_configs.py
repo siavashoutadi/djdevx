@@ -30,7 +30,6 @@ def _assert_tracking_config(pkg: BasePackage, data_slug: str, tmp_path: Path) ->
         new_callable=lambda: property(lambda self: djdevx_root),
     ):
         pkg._write_package_tracking()
-        pkg._write_env_tracking()
 
     actual_path = (
         djdevx_root

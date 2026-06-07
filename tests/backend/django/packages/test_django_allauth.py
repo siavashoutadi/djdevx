@@ -722,19 +722,18 @@ def test_django_allauth_oidc_provider_install_remove(temp_dir):
         "OIDC provider URLs content mismatch"
     )
 
-    # Check that private key was added to .env file
-    env_file = backend_dir.parent / ".devcontainer" / ".env" / "devcontainer"
-    assert env_file.exists(), f".env devcontainer file not found at {env_file}"
+    # Check that private key was generated and stored in .secrets/
+    secrets_dir = backend_dir / ".secrets"
+    assert secrets_dir.exists(), ".secrets directory not created"
+    secret_file = secrets_dir / "idp_oidc_private_key"
+    assert secret_file.exists(), "idp_oidc_private_key secret file not found"
 
-    env_content = env_file.read_text()
-    assert "IDP_OIDC_PRIVATE_KEY=" in env_content, (
-        "IDP_OIDC_PRIVATE_KEY not added to .env file"
+    secret_content = secret_file.read_text()
+    assert "-----BEGIN PRIVATE KEY-----" in secret_content, (
+        "Private key content not found in .secrets file"
     )
-    assert "-----BEGIN PRIVATE KEY-----" in env_content, (
-        "Private key content not found in .env file"
-    )
-    assert "-----END PRIVATE KEY-----" in env_content, (
-        "Private key end marker not found in .env file"
+    assert "-----END PRIVATE KEY-----" in secret_content, (
+        "Private key end marker not found in .secrets file"
     )
 
     # Check OIDC provider templates are created
@@ -792,17 +791,8 @@ def test_django_allauth_oidc_provider_install_remove(temp_dir):
     urls_file = backend_dir / "urls" / "packages" / "django_allauth_oidc_provider.py"
     assert not urls_file.exists(), "OIDC provider URLs file not removed"
 
-    # Check that private key was removed from .env file
-    env_content = env_file.read_text()
-    assert "IDP_OIDC_PRIVATE_KEY=" not in env_content, (
-        "IDP_OIDC_PRIVATE_KEY not removed from .env file"
-    )
-    assert "-----BEGIN PRIVATE KEY-----" not in env_content, (
-        "Private key content still in .env file"
-    )
-    assert "-----END PRIVATE KEY-----" not in env_content, (
-        "Private key end marker still in .env file"
-    )
+    # Check that private key was removed from .secrets/
+    assert not secret_file.exists(), "idp_oidc_private_key secret file was not removed"
 
     # Verify OIDC provider templates are removed
     test_templates_dir = DATA_DIR / "oidc_provider" / "authentication" / "templates"

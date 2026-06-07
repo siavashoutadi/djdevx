@@ -63,36 +63,6 @@ class CacheTracker(ProjectConfig):
 
         self._save_doc(cache_key, doc)
 
-    def write_env_entries(
-        self, cache_key: str, env_entries: dict[str, dict[str, str]]
-    ) -> None:
-        """
-        Write or replace the [env] section of the config.toml.
-        Existing [cache] data is preserved.
-        Secret values should never be passed.
-
-        Args:
-            cache_key: Short identifier for the cache (e.g. "redis")
-            env_entries: Mapping of env var key -> dict with ``type`` and optional ``value``.
-                         Secret values should never be passed.
-        """
-        doc = self._load_or_create_doc(cache_key)
-
-        env_table = tomlkit.table(is_super_table=True)
-        for key, entry_data in env_entries.items():
-            entry = tomlkit.table()
-            entry.add("type", entry_data["type"])
-            if "value" in entry_data:
-                entry.add("value", entry_data["value"])
-            env_table.add(key, entry)
-
-        if "env" in doc:
-            doc["env"] = env_table
-        else:
-            doc.add("env", env_table)
-
-        self._save_doc(cache_key, doc)
-
     def read_cache_config(self, cache_key: str) -> tomlkit.TOMLDocument:
         """
         Read and parse the config.toml for the given cache.

@@ -1,26 +1,31 @@
-from settings.django.base import DEBUG
-from settings.django.storages import STORAGES
-from settings.utils.env import get_env
+from pydantic import SecretStr
 
-from google.oauth2 import service_account
+from settings.utils.base_settings import AppBaseSettings, IS_DEV
 
+if not IS_DEV:
+    from google.oauth2 import service_account
 
-env = get_env()
+    class GoogleSettings(AppBaseSettings):
+        storages_google_credentials: SecretStr
+        storages_google_bucket_name: str
 
+    _google = GoogleSettings()
 
-if not DEBUG:
     GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
-        env("STORAGES_GOOGLE_CREDENTIALS", default="")
+        _google.storages_google_credentials.get_secret_value()
     )
 
-    STORAGES.update(
+    STORAGES.update(  # noqa: F821
         {
             "default": {
                 "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
                 "OPTIONS": {
-                    "bucket_name": env("STORAGES_GOOGLE_BUCKET_NAME", ""),
+                    "bucket_name": _google.storages_google_bucket_name,
                     "credentials": GS_CREDENTIALS,
                 },
-            }
+            },
+            "staticfiles": {
+                "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+            },
         }
     )

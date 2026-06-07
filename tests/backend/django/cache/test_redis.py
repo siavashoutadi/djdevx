@@ -64,30 +64,6 @@ def test_redis_install_and_remove(temp_dir):
         "Sessions settings content mismatch"
     )
 
-    # Check if redis env file was created
-    redis_env_file = temp_dir / ".devcontainer" / ".env" / "redis"
-    assert redis_env_file.exists(), "Redis env file not created"
-
-    redis_env_content = redis_env_file.read_text()
-    expected_redis_env_file = DATA_DIR / ".devcontainer" / ".env" / "redis"
-    expected_redis_env_content = expected_redis_env_file.read_text()
-    assert redis_env_content.strip() == expected_redis_env_content.strip(), (
-        "Redis env content mismatch"
-    )
-
-    # Check if environment variables were added to devcontainer env
-    devcontainer_env_file = temp_dir / ".devcontainer" / ".env" / "devcontainer"
-    devcontainer_env_content = devcontainer_env_file.read_text()
-
-    redis_env_vars = [
-        "REDIS_PASSWORD",
-        "CACHE_LOCATION",
-    ]
-    for env_var in redis_env_vars:
-        assert env_var in devcontainer_env_content, (
-            f"Environment variable {env_var} not found in devcontainer env"
-        )
-
     # Check if docker-compose.yaml has redis service
     docker_compose_file = temp_dir / ".devcontainer" / "docker-compose.yaml"
     assert docker_compose_file.exists(), "docker-compose.yaml file not found"
@@ -115,32 +91,6 @@ def test_redis_install_and_remove(temp_dir):
 
     assert tracking_doc.get("cache", {}).get("name") == "redis", (
         "[cache].name is not 'redis' in tracking config"
-    )
-
-    env_section = tracking_doc.get("env", {})
-
-    expected_env_vars = ["REDIS_PASSWORD", "CACHE_LOCATION"]
-    for var in expected_env_vars:
-        assert var in env_section, (
-            f"{var} missing from [env] section in tracking config"
-        )
-
-    # REDIS_PASSWORD must be a secret with no stored value
-    password_entry = env_section["REDIS_PASSWORD"]
-    assert password_entry.get("type") == "secret", (
-        "REDIS_PASSWORD should have type 'secret'"
-    )
-    assert "value" not in password_entry, (
-        "REDIS_PASSWORD must not store a value in tracking config"
-    )
-
-    # CACHE_LOCATION must be user_input with its default value
-    location_entry = env_section["CACHE_LOCATION"]
-    assert location_entry.get("type") == "user_input", (
-        "CACHE_LOCATION should have type 'user_input'"
-    )
-    assert location_entry.get("value") == "redis://default@cache:6379/1", (
-        "CACHE_LOCATION value mismatch in tracking config"
     )
 
     # Test remove command
@@ -172,16 +122,6 @@ def test_redis_install_and_remove(temp_dir):
     assert "cached_db" not in sessions_content_after, (
         "sessions.py still references cached_db after removal"
     )
-
-    # Check if redis env file was removed
-    assert not redis_env_file.exists(), "Redis env file not removed"
-
-    # Check if environment variables were removed from devcontainer env
-    devcontainer_env_content = devcontainer_env_file.read_text()
-    for env_var in redis_env_vars:
-        assert env_var not in devcontainer_env_content, (
-            f"Environment variable {env_var} still found in devcontainer env after removal"
-        )
 
     # Check if redis service was removed from docker-compose
     docker_compose_content = docker_compose_file.read_text()

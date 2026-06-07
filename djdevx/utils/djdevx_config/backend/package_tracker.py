@@ -45,8 +45,7 @@ class PackageTracker(ProjectConfig):
 
     def write_package_config(self, template_path: str, name: str) -> None:
         """
-        Write or update only the [package] section of the config.toml.
-        Existing [env] entries are preserved.
+        Write or update the [package] section of the config.toml.
 
         Args:
             template_path: Relative path key (e.g. "whitenoise" or "django_anymail/brevo")
@@ -63,35 +62,6 @@ class PackageTracker(ProjectConfig):
 
         self._save_doc(template_path, doc)
 
-    def write_env_entries(
-        self, template_path: str, env_entries: dict[str, dict[str, str]]
-    ) -> None:
-        """
-        Write or replace the [env] section of the config.toml.
-        Existing [package] data is preserved.
-
-        Args:
-            template_path: Relative path key (e.g. "whitenoise" or "django_anymail/brevo")
-            env_entries: Mapping of env var key → dict with ``type`` and optional ``value``.
-                         Secret values should never be passed.
-        """
-        doc = self._load_or_create_doc(template_path)
-
-        env_table = tomlkit.table(is_super_table=True)
-        for key, entry_data in env_entries.items():
-            entry = tomlkit.table()
-            entry.add("type", entry_data["type"])
-            if "value" in entry_data:
-                entry.add("value", entry_data["value"])
-            env_table.add(key, entry)
-
-        if "env" in doc:
-            doc["env"] = env_table
-        else:
-            doc.add("env", env_table)
-
-        self._save_doc(template_path, doc)
-
     def read_package_config(self, template_path: str) -> tomlkit.TOMLDocument:
         """
         Read and parse the config.toml for the given package.
@@ -103,22 +73,6 @@ class PackageTracker(ProjectConfig):
             Parsed TOMLDocument for the package config.
         """
         return tomlkit.loads(self._config_path(template_path).read_text())
-
-    def remove_env_entries(self, template_path: str) -> None:
-        """
-        Remove the [env] section from the config.toml, leaving [package] intact.
-        No-op if the file or section does not exist.
-
-        Args:
-            template_path: Relative path key (e.g. "whitenoise")
-        """
-        config = self._config_path(template_path)
-        if not config.exists():
-            return
-        doc = tomlkit.loads(config.read_text())
-        if "env" in doc:
-            del doc["env"]
-            config.write_text(tomlkit.dumps(doc))
 
     def remove_package_config(self, template_path: str) -> None:
         """

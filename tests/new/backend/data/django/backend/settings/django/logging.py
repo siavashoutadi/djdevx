@@ -1,56 +1,38 @@
-from settings.django.base import DEBUG
-from settings.utils.env import get_env
+from typing import Any
+
+from settings.utils.base_settings import AppBaseSettings
 
 
-env = get_env()
+class LoggingSettings(AppBaseSettings):
+    use_rich_logging: bool = False
+    console_log_level: str = "INFO"
+    django_log_level: str = "WARNING"
+    root_log_level: str = "WARNING"
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "standard": {
-            "format": "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
-        },
-    },
-    "handlers": {
-        "console": {
-            "level": env("CONSOLE_LOG_LEVEL", default="INFO"),
-            "class": "logging.StreamHandler",
-            "formatter": "standard",
-            "filters": [],
-        },
-    },
-    "loggers": {
-        "django": {
-            "level": env("DJANGO_LOG_LEVEL", default="WARNING"),
-            "handlers": ["console"],
-            "propagate": False,
+    @classmethod
+    def get_dev_defaults(cls) -> dict[str, Any]:
+        return {
+            "use_rich_logging": True,
+            "console_log_level": "DEBUG",
+            "django_log_level": "INFO",
+            "root_log_level": "INFO",
         }
-    },
-    "root": {
-        "level": env("ROOT_LOG_LEVEL", default="WARNING"),
-        "handlers": ["console"],
-    },
-}
 
-if DEBUG:
+
+_log = LoggingSettings()
+
+if _log.use_rich_logging:
     LOGGING = {
         "version": 1,
         "disable_existing_loggers": False,
-        "filters": {
-            "require_debug_true": {
-                "()": "django.utils.log.RequireDebugTrue",
-            },
-        },
         "formatters": {
             "rich": {"datefmt": "[%X]"},
         },
         "handlers": {
             "console": {
                 "class": "rich.logging.RichHandler",
-                "filters": ["require_debug_true"],
                 "formatter": "rich",
-                "level": "DEBUG",
+                "level": _log.console_log_level,
                 "rich_tracebacks": True,
                 "tracebacks_show_locals": True,
             },
@@ -58,11 +40,39 @@ if DEBUG:
         "loggers": {
             "django": {
                 "handlers": [],
-                "level": "INFO",
+                "level": _log.django_log_level,
             },
         },
         "root": {
             "handlers": ["console"],
-            "level": "INFO",
+            "level": _log.root_log_level,
+        },
+    }
+else:
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "standard": {
+                "format": "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            },
+        },
+        "handlers": {
+            "console": {
+                "level": _log.console_log_level,
+                "class": "logging.StreamHandler",
+                "formatter": "standard",
+            },
+        },
+        "loggers": {
+            "django": {
+                "level": _log.django_log_level,
+                "handlers": ["console"],
+                "propagate": False,
+            },
+        },
+        "root": {
+            "level": _log.root_log_level,
+            "handlers": ["console"],
         },
     }

@@ -28,14 +28,6 @@ def test_django_storages_s3_install_and_remove(temp_dir):
             "django-storages",
             "s3",
             "install",
-            "--access-key",
-            "test-access-key",
-            "--secret-key",
-            "test-secret-key",
-            "--region-name",
-            "us-east-1",
-            "--bucket-name",
-            "test-bucket",
         ],
     )
 
@@ -55,14 +47,6 @@ def test_django_storages_s3_install_and_remove(temp_dir):
         DATA_DIR / "s3" / "settings" / "packages" / "django_storages_s3.py"
     ).read_text()
     assert settings_content.strip() == expected_settings.strip()
-
-    # Check if env file is updated
-    env_file = temp_dir / ".devcontainer" / ".env" / "devcontainer"
-    env_content = env_file.read_text()
-    assert "STORAGES_S3_ACCESS_KEY=test-access-key" in env_content
-    assert "STORAGES_S3_SECRET_KEY=test-secret-key" in env_content
-    assert "STORAGES_S3_REGION_NAME=us-east-1" in env_content
-    assert "STORAGES_S3_BUCKET_NAME=test-bucket" in env_content
 
     # Test remove
     result = runner.invoke(
@@ -98,12 +82,6 @@ def test_django_storages_azure_install_and_remove(temp_dir):
             "django-storages",
             "azure",
             "install",
-            "--account-key",
-            "test-account-key",
-            "--account-name",
-            "test-account-name",
-            "--container-name",
-            "test-container",
         ],
     )
 
@@ -123,13 +101,6 @@ def test_django_storages_azure_install_and_remove(temp_dir):
         DATA_DIR / "azure" / "settings" / "packages" / "django_storages_azure.py"
     ).read_text()
     assert settings_content.strip() == expected_settings.strip()
-
-    # Check if env file is updated
-    env_file = temp_dir / ".devcontainer" / ".env" / "devcontainer"
-    env_content = env_file.read_text()
-    assert "STORAGES_AZURE_ACCOUNT_KEY=test-account-key" in env_content
-    assert "STORAGES_AZURE_ACCOUNT_NAME=test-account-name" in env_content
-    assert "STORAGES_AZURE_CONTAINER_NAME=test-container" in env_content
 
     # Test remove
     result = runner.invoke(
@@ -165,10 +136,6 @@ def test_django_storages_google_install_and_remove(temp_dir):
             "django-storages",
             "google",
             "install",
-            "--credentials-file-path",
-            "/path/to/credentials.json",
-            "--bucket-name",
-            "test-google-bucket",
         ],
     )
 
@@ -190,12 +157,6 @@ def test_django_storages_google_install_and_remove(temp_dir):
         DATA_DIR / "google" / "settings" / "packages" / "django_storages_google.py"
     ).read_text()
     assert settings_content.strip() == expected_settings.strip()
-
-    # Check if env file is updated
-    env_file = temp_dir / ".devcontainer" / ".env" / "devcontainer"
-    env_content = env_file.read_text()
-    assert "STORAGES_GOOGLE_CREDENTIALS=/path/to/credentials.json" in env_content
-    assert "STORAGES_GOOGLE_BUCKET_NAME=test-google-bucket" in env_content
 
     # Test remove
     result = runner.invoke(

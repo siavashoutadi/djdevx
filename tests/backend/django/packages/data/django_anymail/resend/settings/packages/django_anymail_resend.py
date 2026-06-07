@@ -1,11 +1,17 @@
-from settings.django.base import INSTALLED_APPS, DEBUG
-from settings.utils.env import get_env
+from pydantic import SecretStr
 
-env = get_env()
+from settings.django.base import INSTALLED_APPS
+from settings.utils.base_settings import AppBaseSettings, IS_DEV
 
-if not DEBUG:
+if not IS_DEV:
+
+    class _ResendSettings(AppBaseSettings):
+        anymail_resend_api_key: SecretStr
+
+    _resend = _ResendSettings()
+
     ANYMAIL = {
-        "RESEND_API_KEY": env("ANYMAIL_RESEND_API_KEY", default=""),
+        "RESEND_API_KEY": _resend.anymail_resend_api_key.get_secret_value(),
     }
 
     EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
@@ -13,6 +19,3 @@ if not DEBUG:
     INSTALLED_APPS += [
         "anymail",
     ]
-
-    DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="")
-    SERVER_EMAIL = env("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)

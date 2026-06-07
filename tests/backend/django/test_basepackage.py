@@ -7,8 +7,6 @@ from unittest.mock import MagicMock, patch
 
 from djdevx.backend.django.packages._base import (
     BasePackage,
-    EnvType,
-    EnvVar,
     InstallParam,
     PathDeriver,
 )
@@ -335,7 +333,6 @@ class TestInstallParamsInjection:
         pkg._write_package_tracking = lambda: call_order.append(
             "_write_package_tracking"
         )
-        pkg._add_env_vars = lambda: call_order.append("_add_env_vars")
 
         pkg.install(color="red", size="small")
 
@@ -348,7 +345,6 @@ class TestInstallParamsInjection:
             "_copy_templates",
             "after_copy_templates",
             "_write_package_tracking",
-            "_add_env_vars",
         ]
 
     def test_install_context_set_before_before_uv_install_hook(self):
@@ -367,83 +363,10 @@ class TestInstallParamsInjection:
         pkg.before_copy_templates = lambda: None
         pkg._copy_templates = lambda context=None: None
         pkg.after_copy_templates = lambda: None
-        pkg._add_env_vars = lambda: None
 
         pkg.install(color="blue", size="small")
 
         assert context_at_hook_time == {"color": "blue", "size": "small"}
-
-
-class TestEnvParamsInjection:
-    """Tests for auto-generated env() and install() from prompted env_vars."""
-
-    def _make_env_param_pkg(self):
-        """Create a package with prompted env_vars."""
-        mock_path = PACKAGES_PATH / "whitenoise.py"
-
-        with patch.object(BasePackage, "_derive_djdevx_root") as mock_root:
-            mock_root.return_value = Path("/home/siavash/code/djdevx")
-
-            class PkgWithEnvParams(BasePackage):
-                name = "test"
-                packages = []
-                env_vars = [
-                    EnvVar(
-                        name="api_key",
-                        env_key="MY_API_KEY",
-                        help="API key",
-                        prompt="Enter API key",
-                        hide_input=True,
-                        env_type=EnvType.SECRET,
-                    ),
-                    EnvVar(
-                        name="email",
-                        env_key="DEFAULT_EMAIL",
-                        help="Email",
-                        prompt="Enter email",
-                    ),
-                ]
-
-            pkg = object.__new__(PkgWithEnvParams)
-            pkg._install_context = {}
-            pkg.__init__(str(mock_path))
-
-        return pkg
-
-    def test_env_method_is_generated(self):
-        """Subclass with prompted env_vars and no env() gets a generated env."""
-        pkg = self._make_env_param_pkg()
-        assert callable(pkg.env)
-
-    def test_generated_env_calls_add_env_variable(self):
-        """Generated env() calls pm.add_env_variable for each env_key."""
-        pkg = self._make_env_param_pkg()
-        mock_pm = MagicMock()
-        pkg._pm = mock_pm
-
-        pkg.env(api_key="secret123", email="test@example.com")
-
-        mock_pm.add_env_variable.assert_any_call(key="MY_API_KEY", value="secret123")
-        mock_pm.add_env_variable.assert_any_call(
-            key="DEFAULT_EMAIL", value="test@example.com"
-        )
-
-    def test_generated_install_also_calls_add_env_variable(self):
-        """Generated install() calls pm.add_env_variable for each prompted env_var."""
-        pkg = self._make_env_param_pkg()
-        mock_pm = MagicMock()
-        pkg._pm = mock_pm
-        pkg._check_required_dependencies = lambda: None
-        pkg._uv_add_all = lambda: None
-        pkg._copy_templates = lambda context=None: None
-        pkg._add_env_vars = lambda: None
-
-        pkg.install(api_key="mykey", email="user@example.com")
-
-        mock_pm.add_env_variable.assert_any_call(key="MY_API_KEY", value="mykey")
-        mock_pm.add_env_variable.assert_any_call(
-            key="DEFAULT_EMAIL", value="user@example.com"
-        )
 
 
 class TestHookOrdering:
@@ -474,7 +397,6 @@ class TestHookOrdering:
         pkg._write_package_tracking = lambda: call_order.append(
             "_write_package_tracking"
         )
-        pkg._add_env_vars = lambda: call_order.append("_add_env_vars")
 
         pkg.install()
 
@@ -487,7 +409,6 @@ class TestHookOrdering:
             "_copy_templates",
             "after_copy_templates",
             "_write_package_tracking",
-            "_add_env_vars",
         ]
 
     def test_remove_hook_order(self):
@@ -500,7 +421,6 @@ class TestHookOrdering:
         pkg.after_uv_remove = lambda: call_order.append("after_uv_remove")
         pkg._cleanup_files = lambda: call_order.append("_cleanup_files")
         pkg._cleanup_extra_files = lambda: call_order.append("_cleanup_extra_files")
-        pkg._remove_env_vars = lambda: call_order.append("_remove_env_vars")
         pkg._remove_tracking = lambda: call_order.append("_remove_tracking")
 
         pkg.remove()
@@ -511,7 +431,6 @@ class TestHookOrdering:
             "after_uv_remove",
             "_cleanup_files",
             "_cleanup_extra_files",
-            "_remove_env_vars",
             "_remove_tracking",
         ]
 
@@ -578,41 +497,6 @@ class TestCleanupExtraFiles:
         pkg._cleanup_extra_files()
 
 
-class TestRemoveEnvParams:
-    """Tests for _remove_env_vars() removing all env vars (static and prompted)."""
-
-    def test_remove_env_vars_removes_all_keys(self):
-        """_remove_env_vars() calls pm.remove_env_variable for every EnvVar, prompted or static."""
-        mock_path = PACKAGES_PATH / "whitenoise.py"
-        with patch.object(BasePackage, "_derive_djdevx_root") as mock_root:
-            mock_root.return_value = Path("/home/siavash/code/djdevx")
-
-            class PkgWithEnv(BasePackage):
-                name = "test"
-                packages = []
-                env_vars = [
-                    EnvVar(env_key="KEY_ONE", value="static-value"),
-                    EnvVar(name="k2", env_key="KEY_TWO", prompt="Enter K2"),
-                ]
-
-            pkg = object.__new__(PkgWithEnv)
-            pkg._install_context = {}
-            pkg.__init__(str(mock_path))
-
-        mock_pm = MagicMock()
-        pkg._pm = mock_pm
-
-        with patch(
-            "djdevx.backend.django.packages._base.PackageTracker"
-        ) as mock_tracker:
-            mock_tracker.return_value.remove_env_entries = MagicMock()
-            pkg._remove_env_vars()
-
-        assert mock_pm.remove_env_variable.call_count == 2
-        mock_pm.remove_env_variable.assert_any_call("KEY_ONE")
-        mock_pm.remove_env_variable.assert_any_call("KEY_TWO")
-
-
 class TestShowIfConditionalPrompt:
     """Tests for conditional prompting with show_if params."""
 
@@ -654,7 +538,6 @@ class TestShowIfConditionalPrompt:
         pkg._check_required_dependencies = lambda: None
         pkg._uv_add_all = lambda: None
         pkg._copy_templates = lambda context=None: None
-        pkg._add_env_vars = lambda: None
 
         with patch(
             "djdevx.backend.django.packages._base.typer.prompt",
@@ -673,7 +556,6 @@ class TestShowIfConditionalPrompt:
         pkg._check_required_dependencies = lambda: None
         pkg._uv_add_all = lambda: None
         pkg._copy_templates = lambda context=None: None
-        pkg._add_env_vars = lambda: None
 
         with patch("djdevx.backend.django.packages._base.typer.prompt") as mock_prompt:
             pkg.install(enable_feature=False, feature_key="")
@@ -686,7 +568,6 @@ class TestShowIfConditionalPrompt:
         pkg._check_required_dependencies = lambda: None
         pkg._uv_add_all = lambda: None
         pkg._copy_templates = lambda context=None: None
-        pkg._add_env_vars = lambda: None
 
         with patch("djdevx.backend.django.packages._base.typer.prompt") as mock_prompt:
             pkg.install(enable_feature=True, feature_key="already-set")
@@ -737,68 +618,6 @@ class TestPackageTracking:
         content = config_path.read_text()
         assert "[package]" in content
         assert 'name = "whitenoise"' in content
-
-    def test_write_env_tracking_includes_env_vars(self, tmp_path):
-        """_write_env_tracking() writes [env.KEY] sections for env_vars."""
-        pkg = self._make_tracking_pkg(
-            "whitenoise.py",
-            name="mypkg",
-            env_vars=[
-                EnvVar(env_key="MY_SECRET", value="val", env_type=EnvType.SECRET)
-            ],
-        )
-
-        with patch(
-            "djdevx.utils.djdevx_config.backend.package_tracker.ProjectConfig.djdevx_root",
-            new_callable=lambda: property(lambda self: tmp_path / ".djdevx"),
-        ):
-            pkg._write_package_tracking()
-            pkg._write_env_tracking()
-
-        config_path = (
-            tmp_path
-            / ".djdevx"
-            / "backend"
-            / "django"
-            / "packages"
-            / "whitenoise"
-            / "config.toml"
-        )
-        content = config_path.read_text()
-        assert "[env.MY_SECRET]" in content
-        assert 'type = "secret"' in content
-        # Secret values must never be stored in config.toml
-        assert "value" not in content
-
-    def test_write_env_tracking_defaults_to_user_input(self, tmp_path):
-        """EnvVar without explicit env_type defaults to 'user_input'."""
-        pkg = self._make_tracking_pkg(
-            "whitenoise.py",
-            name="mypkg",
-            env_vars=[EnvVar(env_key="SOME_URL", value="http://example.com")],
-        )
-
-        with patch(
-            "djdevx.utils.djdevx_config.backend.package_tracker.ProjectConfig.djdevx_root",
-            new_callable=lambda: property(lambda self: tmp_path / ".djdevx"),
-        ):
-            pkg._write_package_tracking()
-            pkg._write_env_tracking()
-
-        config_path = (
-            tmp_path
-            / ".djdevx"
-            / "backend"
-            / "django"
-            / "packages"
-            / "whitenoise"
-            / "config.toml"
-        )
-        content = config_path.read_text()
-        assert "[env.SOME_URL]" in content
-        assert 'type = "user_input"' in content
-        # Static USER_INPUT values are stored so deployments can use them automatically
-        assert 'value = "http://example.com"' in content
 
     def test_write_package_tracking_subpackage_creates_nested_dir(self, tmp_path):
         """Sub-packages (e.g. django_anymail/brevo) create nested folder structure."""
@@ -851,7 +670,7 @@ class TestPackageTracking:
             pkg._remove_tracking()  # should not raise
 
     def test_write_tracking_silent_when_no_djdevx_project(self, tmp_path):
-        """_write_package_tracking() and _write_env_tracking() do not raise when .djdevx is not a valid project."""
+        """_write_package_tracking() does not raise when .djdevx is not a valid project."""
         pkg = self._make_tracking_pkg("whitenoise.py", name="whitenoise")
         # ProjectConfig.project_root_dir raises typer.Exit when config.toml missing
         # Both methods wrap in try/except so they should be silently skipped
@@ -861,50 +680,5 @@ class TestPackageTracking:
         try:
             os.chdir(tmp_path)  # no .djdevx/config.toml here
             pkg._write_package_tracking()  # should not raise
-            pkg._write_env_tracking()  # should not raise
         finally:
             os.chdir(original_cwd)
-
-    def test_env_param_env_type_reflected_in_tracking(self, tmp_path):
-        """EnvVar.env_type is written to the tracking config by _write_env_tracking()."""
-        mock_path = PACKAGES_PATH / "whitenoise.py"
-
-        with patch.object(BasePackage, "_derive_djdevx_root") as mock_root:
-            mock_root.return_value = Path("/home/siavash/code/djdevx")
-
-            class PkgWithTypedEnvVar(BasePackage):
-                name = "celery"
-                packages = []
-                env_vars = [
-                    EnvVar(
-                        name="broker_url",
-                        env_key="CELERY_BROKER_URL",
-                        help="Broker URL",
-                        prompt="Enter broker URL",
-                        env_type=EnvType.SECRET,
-                    ),
-                ]
-
-            pkg = object.__new__(PkgWithTypedEnvVar)
-            pkg._install_context = {}
-            pkg.__init__(str(mock_path))
-
-        with patch(
-            "djdevx.utils.djdevx_config.backend.package_tracker.ProjectConfig.djdevx_root",
-            new_callable=lambda: property(lambda self: tmp_path / ".djdevx"),
-        ):
-            pkg._write_package_tracking()
-            pkg._write_env_tracking()
-
-        config_path = (
-            tmp_path
-            / ".djdevx"
-            / "backend"
-            / "django"
-            / "packages"
-            / "whitenoise"
-            / "config.toml"
-        )
-        content = config_path.read_text()
-        assert "[env.CELERY_BROKER_URL]" in content
-        assert 'type = "secret"' in content

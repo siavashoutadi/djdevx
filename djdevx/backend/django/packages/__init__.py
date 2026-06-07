@@ -36,7 +36,6 @@ from .django_htmx import app as htmx
 from .django_silk import app as silk
 from .django_sp_admin import app as sp_admin
 
-
 app = typer.Typer(no_args_is_help=True)
 
 app.add_typer(

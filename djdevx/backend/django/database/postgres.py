@@ -11,8 +11,6 @@ from ....utils.templates.manager import TemplateManager
 
 
 POSTGRES_ENV_VARIABLES = {
-    "POSTGRES_SERVER": "db",
-    "POSTGRES_PORT": "5432",
     "POSTGRES_USER": "postgres",
     "POSTGRES_PASSWORD": "password",
     "POSTGRES_DB": "postgres",
@@ -22,7 +20,7 @@ POSTGRES_DEPENDENCY = "psycopg2-binary"
 POSTGRES_DOCKER_SERVICE: ServiceConfig = {
     "name": "db",
     "image": "postgres:16",
-    "env_file": ["./.env/postgres"],
+    "environment": POSTGRES_ENV_VARIABLES,
     "volumes": ["app-db-data:/var/lib/postgresql/data/pgdata"],
     "networks": ["devcontainer"],
 }
@@ -37,7 +35,10 @@ POSTGRES_VOLUMES: list[VolumeConfig] = [
 PGADMIN_DOCKER_SERVICE: ServiceConfig = {
     "name": "pgadmin",
     "image": "dpage/pgadmin4:latest",
-    "env_file": ["./.env/pgadmin"],
+    "environment": {
+        "PGADMIN_DEFAULT_EMAIL": "admin@example.com",
+        "PGADMIN_DEFAULT_PASSWORD": "admin",
+    },
     "volumes": ["pgadmin-data:/var/lib/pgadmin"],
     "networks": ["devcontainer"],
     "ports": ["80"],
@@ -74,36 +75,18 @@ def install() -> None:
         / "postgres"
     )
 
-    context = {key.lower(): value for key, value in POSTGRES_ENV_VARIABLES.items()}
-    context.update({"backend_root": str(pm.project_path)})
-
     template_manager = TemplateManager()
     template_manager.copy_templates(
-        source_dir=source_dir, dest_dir=pm.project_path.parent, template_context=context
+        source_dir=source_dir,
+        dest_dir=pm.project_path.parent,
+        template_context={"backend_root": str(pm.project_path)},
     )
-
-    for key, value in POSTGRES_ENV_VARIABLES.items():
-        pm.add_env_variable(key, value, pm.devcontainer_env_devcontainer_path)
 
     pm.add_service_to_docker_compose(POSTGRES_DOCKER_SERVICE, POSTGRES_VOLUMES)
     pm.add_service_to_docker_compose(PGADMIN_DOCKER_SERVICE, PGADMIN_VOLUMES)
 
     tracker = DatabaseTracker()
     tracker.write_database_config("postgres", "postgres")
-    tracker.write_env_entries(
-        "postgres",
-        {
-            "POSTGRES_SERVER": {"type": "user_input", "value": "db"},
-            "POSTGRES_PORT": {"type": "user_input", "value": "5432"},
-            "POSTGRES_USER": {"type": "user_input", "value": "postgres"},
-            "POSTGRES_PASSWORD": {"type": "secret"},
-            "POSTGRES_DB": {"type": "user_input", "value": "postgres"},
-            "PGDATA": {
-                "type": "user_input",
-                "value": "/var/lib/postgresql/data/pgdata",
-            },
-        },
-    )
 
     print_console.success("PostgreSQL database installed successfully!")
 
@@ -128,12 +111,6 @@ def remove() -> None:
     )
 
     pm.copy_template(source_file=source_dir, dest_dir=pm.django_settings_path)
-
-    pm.remove_env_file("postgres")
-    pm.remove_env_file("pgadmin")
-
-    for env in POSTGRES_ENV_VARIABLES:
-        pm.remove_env_variable(env, pm.devcontainer_env_devcontainer_path)
 
     pm.remove_dependency(POSTGRES_DEPENDENCY)
 

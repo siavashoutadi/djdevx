@@ -1,12 +1,19 @@
-from settings.django.base import INSTALLED_APPS, DEBUG
-from settings.utils.env import get_env
+from pydantic import SecretStr
 
-env = get_env()
+from settings.django.base import INSTALLED_APPS
+from settings.utils.base_settings import AppBaseSettings, IS_DEV
 
-if not DEBUG:
+if not IS_DEV:
+
+    class MailjetSettings(AppBaseSettings):
+        anymail_mailjet_api_key: SecretStr
+        anymail_mailjet_secret_key: SecretStr
+
+    _mailjet = MailjetSettings()
+
     ANYMAIL = {
-        "MAILJET_API_KEY": env("ANYMAIL_MAILJET_API_KEY", default=""),
-        "MAILJET_SECRET_KEY": env("ANYMAIL_MAILJET_SECRET_KEY", default=""),
+        "MAILJET_API_KEY": _mailjet.anymail_mailjet_api_key.get_secret_value(),
+        "MAILJET_SECRET_KEY": _mailjet.anymail_mailjet_secret_key.get_secret_value(),
     }
 
     EMAIL_BACKEND = "anymail.backends.mailjet.EmailBackend"
@@ -14,6 +21,3 @@ if not DEBUG:
     INSTALLED_APPS += [
         "anymail",
     ]
-
-    DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="")
-    SERVER_EMAIL = env("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)

@@ -1,13 +1,20 @@
-from settings.django.base import INSTALLED_APPS, DEBUG
-from settings.utils.env import get_env
+from pydantic import SecretStr
 
-env = get_env()
+from settings.django.base import INSTALLED_APPS
+from settings.utils.base_settings import AppBaseSettings, IS_DEV
 
-if not DEBUG:
+if not IS_DEV:
+
+    class MailgunSettings(AppBaseSettings):
+        anymail_mailgun_api_key: SecretStr
+        anymail_mailgun_sender_domain: str
+
+    _mailgun = MailgunSettings()
+
     ANYMAIL = {
-        "MAILGUN_API_KEY": env("ANYMAIL_MAILGUN_API_KEY", default=""),
+        "MAILGUN_API_KEY": _mailgun.anymail_mailgun_api_key.get_secret_value(),
         "MAILGUN_API_URL": "https://api.mailgun.net/v3",
-        "MAILGUN_SENDER_DOMAIN": env("ANYMAIL_MAILGUN_SENDER_DOMAIN", default=""),
+        "MAILGUN_SENDER_DOMAIN": _mailgun.anymail_mailgun_sender_domain,
     }
 
     EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
@@ -15,6 +22,3 @@ if not DEBUG:
     INSTALLED_APPS += [
         "anymail",
     ]
-
-    DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="")
-    SERVER_EMAIL = env("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)

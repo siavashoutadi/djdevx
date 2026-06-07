@@ -143,6 +143,7 @@ $ djdevx backend django [OPTIONS] COMMAND [ARGS]...
 * `list`: List installed Django packages and features
 * `database`: Manage database infrastructure
 * `cache`: Manage cache infrastructure
+* `settings`: Manage project secrets and config vars
 
 #### `djdevx backend django packages`
 
@@ -214,7 +215,6 @@ $ djdevx backend django packages channels [OPTIONS] COMMAND [ARGS]...
 
 * `install`: Install and configure channels
 * `remove`: Remove channels package
-* `env`: Configure channels environment variables.
 
 ###### `djdevx backend django packages channels install`
 
@@ -238,20 +238,6 @@ Remove channels package
 
 ```console
 $ djdevx backend django packages channels remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-###### `djdevx backend django packages channels env`
-
-Configure channels environment variables.
-
-**Usage**:
-
-```console
-$ djdevx backend django packages channels env [OPTIONS]
 ```
 
 **Options**:
@@ -408,7 +394,6 @@ $ djdevx backend django packages django-allauth oidc-provider [OPTIONS] COMMAND 
 
 * `install`: Install and configure django-allauth OIDC...
 * `remove`: Remove django-allauth OIDC provider package
-* `env`: Configure django-allauth OIDC provider...
 
 ####### `djdevx backend django packages django-allauth oidc-provider install`
 
@@ -432,20 +417,6 @@ Remove django-allauth OIDC provider package
 
 ```console
 $ djdevx backend django packages django-allauth oidc-provider remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-####### `djdevx backend django packages django-allauth oidc-provider env`
-
-Configure django-allauth OIDC provider environment variables.
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-allauth oidc-provider env [OPTIONS]
 ```
 
 **Options**:
@@ -539,7 +510,6 @@ $ djdevx backend django packages django-anymail ses [OPTIONS] COMMAND [ARGS]...
 
 * `install`: Install and configure django-anymail SES
 * `remove`: Remove django-anymail SES package
-* `env`: Configure django-anymail SES environment...
 
 ####### `djdevx backend django packages django-anymail ses install`
 
@@ -553,10 +523,6 @@ $ djdevx backend django packages django-anymail ses install [OPTIONS]
 
 **Options**:
 
-* `--access-key TEXT`: The AWS access key for authentication
-* `--secret-key TEXT`: The AWS Secret key for authentication
-* `--region-name TEXT`: The AWS region
-* `--default-from-email TEXT`: The default from email address
 * `--help`: Show this message and exit.
 
 ####### `djdevx backend django packages django-anymail ses remove`
@@ -571,24 +537,6 @@ $ djdevx backend django packages django-anymail ses remove [OPTIONS]
 
 **Options**:
 
-* `--help`: Show this message and exit.
-
-####### `djdevx backend django packages django-anymail ses env`
-
-Configure django-anymail SES environment variables.
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-anymail ses env [OPTIONS]
-```
-
-**Options**:
-
-* `--access-key TEXT`: The AWS access key for authentication
-* `--secret-key TEXT`: The AWS Secret key for authentication
-* `--region-name TEXT`: The AWS region
-* `--default-from-email TEXT`: The default from email address
 * `--help`: Show this message and exit.
 
 ###### `djdevx backend django packages django-anymail brevo`
@@ -609,7 +557,6 @@ $ djdevx backend django packages django-anymail brevo [OPTIONS] COMMAND [ARGS]..
 
 * `install`: Install and configure django-anymail Brevo
 * `remove`: Remove django-anymail Brevo package
-* `env`: Configure django-anymail Brevo environment...
 
 ####### `djdevx backend django packages django-anymail brevo install`
 
@@ -623,8 +570,6 @@ $ djdevx backend django packages django-anymail brevo install [OPTIONS]
 
 **Options**:
 
-* `--api-key TEXT`: The Brevo API key for authentication
-* `--default-from-email TEXT`: The default from email address
 * `--help`: Show this message and exit.
 
 ####### `djdevx backend django packages django-anymail brevo remove`
@@ -639,22 +584,6 @@ $ djdevx backend django packages django-anymail brevo remove [OPTIONS]
 
 **Options**:
 
-* `--help`: Show this message and exit.
-
-####### `djdevx backend django packages django-anymail brevo env`
-
-Configure django-anymail Brevo environment variables.
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-anymail brevo env [OPTIONS]
-```
-
-**Options**:
-
-* `--api-key TEXT`: The Brevo API key for authentication
-* `--default-from-email TEXT`: The default from email address
 * `--help`: Show this message and exit.
 
 ###### `djdevx backend django packages django-anymail mailgun`
@@ -675,7 +604,6 @@ $ djdevx backend django packages django-anymail mailgun [OPTIONS] COMMAND [ARGS]
 
 * `install`: Install and configure django-anymail Mailgun
 * `remove`: Remove django-anymail Mailgun package
-* `env`: Configure django-anymail Mailgun...
 
 ####### `djdevx backend django packages django-anymail mailgun install`
 
@@ -690,9 +618,6 @@ $ djdevx backend django packages django-anymail mailgun install [OPTIONS]
 **Options**:
 
 * `--is-europe / --no-is-europe`: Flag to use Europe region for Mailgun  [default: no-is-europe]
-* `--api-key TEXT`: The Mailgun API key for authentication
-* `--domain TEXT`: The Mailgun domain
-* `--default-from-email TEXT`: The default from email address
 * `--help`: Show this message and exit.
 
 ####### `djdevx backend django packages django-anymail mailgun remove`
@@ -707,23 +632,6 @@ $ djdevx backend django packages django-anymail mailgun remove [OPTIONS]
 
 **Options**:
 
-* `--help`: Show this message and exit.
-
-####### `djdevx backend django packages django-anymail mailgun env`
-
-Configure django-anymail Mailgun environment variables.
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-anymail mailgun env [OPTIONS]
-```
-
-**Options**:
-
-* `--api-key TEXT`: The Mailgun API key for authentication
-* `--domain TEXT`: The Mailgun domain
-* `--default-from-email TEXT`: The default from email address
 * `--help`: Show this message and exit.
 
 ###### `djdevx backend django packages django-anymail mailjet`
@@ -744,7 +652,6 @@ $ djdevx backend django packages django-anymail mailjet [OPTIONS] COMMAND [ARGS]
 
 * `install`: Install and configure django-anymail Mailjet
 * `remove`: Remove django-anymail Mailjet package
-* `env`: Configure django-anymail Mailjet...
 
 ####### `djdevx backend django packages django-anymail mailjet install`
 
@@ -758,9 +665,6 @@ $ djdevx backend django packages django-anymail mailjet install [OPTIONS]
 
 **Options**:
 
-* `--api-key TEXT`: The Mailjet API key for authentication
-* `--secret-key TEXT`: The Mailjet Secret key for authentication
-* `--default-from-email TEXT`: The default from email address
 * `--help`: Show this message and exit.
 
 ####### `djdevx backend django packages django-anymail mailjet remove`
@@ -775,23 +679,6 @@ $ djdevx backend django packages django-anymail mailjet remove [OPTIONS]
 
 **Options**:
 
-* `--help`: Show this message and exit.
-
-####### `djdevx backend django packages django-anymail mailjet env`
-
-Configure django-anymail Mailjet environment variables.
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-anymail mailjet env [OPTIONS]
-```
-
-**Options**:
-
-* `--api-key TEXT`: The Mailjet API key for authentication
-* `--secret-key TEXT`: The Mailjet Secret key for authentication
-* `--default-from-email TEXT`: The default from email address
 * `--help`: Show this message and exit.
 
 ###### `djdevx backend django packages django-anymail resend`
@@ -812,7 +699,6 @@ $ djdevx backend django packages django-anymail resend [OPTIONS] COMMAND [ARGS].
 
 * `install`: Install and configure django-anymail Resend
 * `remove`: Remove django-anymail Resend package
-* `env`: Configure django-anymail Resend...
 
 ####### `djdevx backend django packages django-anymail resend install`
 
@@ -826,8 +712,6 @@ $ djdevx backend django packages django-anymail resend install [OPTIONS]
 
 **Options**:
 
-* `--api-key TEXT`: The Resend API key for authentication
-* `--default-from-email TEXT`: The default from email address
 * `--help`: Show this message and exit.
 
 ####### `djdevx backend django packages django-anymail resend remove`
@@ -842,22 +726,6 @@ $ djdevx backend django packages django-anymail resend remove [OPTIONS]
 
 **Options**:
 
-* `--help`: Show this message and exit.
-
-####### `djdevx backend django packages django-anymail resend env`
-
-Configure django-anymail Resend environment variables.
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-anymail resend env [OPTIONS]
-```
-
-**Options**:
-
-* `--api-key TEXT`: The Resend API key for authentication
-* `--default-from-email TEXT`: The default from email address
 * `--help`: Show this message and exit.
 
 ##### `djdevx backend django packages django-auditlog`
@@ -1113,7 +981,6 @@ $ djdevx backend django packages django-defender [OPTIONS] COMMAND [ARGS]...
 
 * `install`: Install and configure django-defender
 * `remove`: Remove django-defender package
-* `env`: Configure django-defender environment...
 
 ###### `djdevx backend django packages django-defender install`
 
@@ -1137,20 +1004,6 @@ Remove django-defender package
 
 ```console
 $ djdevx backend django packages django-defender remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-###### `djdevx backend django packages django-defender env`
-
-Configure django-defender environment variables.
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-defender env [OPTIONS]
 ```
 
 **Options**:
@@ -1927,7 +1780,6 @@ $ djdevx backend django packages django-storages s3 [OPTIONS] COMMAND [ARGS]...
 
 * `install`: Install and configure django-storages S3
 * `remove`: Remove django-storages S3 package
-* `env`: Configure django-storages S3 environment...
 
 ####### `djdevx backend django packages django-storages s3 install`
 
@@ -1941,10 +1793,6 @@ $ djdevx backend django packages django-storages s3 install [OPTIONS]
 
 **Options**:
 
-* `--access-key TEXT`: The AWS access key for authentication
-* `--secret-key TEXT`: The AWS Secret key for authentication
-* `--region-name TEXT`: The AWS region
-* `--bucket-name TEXT`: The AWS bucket name to store the files in
 * `--help`: Show this message and exit.
 
 ####### `djdevx backend django packages django-storages s3 remove`
@@ -1959,24 +1807,6 @@ $ djdevx backend django packages django-storages s3 remove [OPTIONS]
 
 **Options**:
 
-* `--help`: Show this message and exit.
-
-####### `djdevx backend django packages django-storages s3 env`
-
-Configure django-storages S3 environment variables.
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-storages s3 env [OPTIONS]
-```
-
-**Options**:
-
-* `--access-key TEXT`: The AWS access key for authentication
-* `--secret-key TEXT`: The AWS Secret key for authentication
-* `--region-name TEXT`: The AWS region
-* `--bucket-name TEXT`: The AWS bucket name to store the files in
 * `--help`: Show this message and exit.
 
 ###### `djdevx backend django packages django-storages azure`
@@ -1997,7 +1827,6 @@ $ djdevx backend django packages django-storages azure [OPTIONS] COMMAND [ARGS].
 
 * `install`: Install and configure django-storages Azure
 * `remove`: Remove django-storages Azure package
-* `env`: Configure django-storages Azure...
 
 ####### `djdevx backend django packages django-storages azure install`
 
@@ -2011,9 +1840,6 @@ $ djdevx backend django packages django-storages azure install [OPTIONS]
 
 **Options**:
 
-* `--account-key TEXT`: The Azure account key for authentication
-* `--account-name TEXT`: The Azure account name for authentication
-* `--container-name TEXT`: The Azure container name to store the files in
 * `--help`: Show this message and exit.
 
 ####### `djdevx backend django packages django-storages azure remove`
@@ -2028,23 +1854,6 @@ $ djdevx backend django packages django-storages azure remove [OPTIONS]
 
 **Options**:
 
-* `--help`: Show this message and exit.
-
-####### `djdevx backend django packages django-storages azure env`
-
-Configure django-storages Azure environment variables.
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-storages azure env [OPTIONS]
-```
-
-**Options**:
-
-* `--account-key TEXT`: The Azure account key for authentication
-* `--account-name TEXT`: The Azure account name for authentication
-* `--container-name TEXT`: The Azure container name to store the files in
 * `--help`: Show this message and exit.
 
 ###### `djdevx backend django packages django-storages google`
@@ -2065,7 +1874,6 @@ $ djdevx backend django packages django-storages google [OPTIONS] COMMAND [ARGS]
 
 * `install`: Install and configure django-storages...
 * `remove`: Remove django-storages Google Cloud...
-* `env`: Configure django-storages Google Cloud...
 
 ####### `djdevx backend django packages django-storages google install`
 
@@ -2079,8 +1887,6 @@ $ djdevx backend django packages django-storages google install [OPTIONS]
 
 **Options**:
 
-* `--credentials-file-path PATH`: The path to the google credential file
-* `--bucket-name TEXT`: The Google bucket name to store the files in
 * `--help`: Show this message and exit.
 
 ####### `djdevx backend django packages django-storages google remove`
@@ -2095,22 +1901,6 @@ $ djdevx backend django packages django-storages google remove [OPTIONS]
 
 **Options**:
 
-* `--help`: Show this message and exit.
-
-####### `djdevx backend django packages django-storages google env`
-
-Configure django-storages Google Cloud Storage environment variables.
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-storages google env [OPTIONS]
-```
-
-**Options**:
-
-* `--credentials-file-path PATH`: The path to the google credential file
-* `--bucket-name TEXT`: The Google bucket name to store the files in
 * `--help`: Show this message and exit.
 
 ##### `djdevx backend django packages django-taggit`
@@ -3150,6 +2940,348 @@ Remove Redis cache.
 
 ```console
 $ djdevx backend django cache redis remove [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+#### `djdevx backend django settings`
+
+Manage project secrets and config vars
+
+**Usage**:
+
+```console
+$ djdevx backend django settings [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `secrets`: Manage project secrets
+* `configs`: Manage project config variables
+
+##### `djdevx backend django settings secrets`
+
+Manage project secrets
+
+**Usage**:
+
+```console
+$ djdevx backend django settings secrets [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `init`: Initialise secrets for dev or prod
+* `list`: List secrets with source and value
+* `verify`: Verify secrets are present
+
+###### `djdevx backend django settings secrets init`
+
+Initialise secrets for dev or prod
+
+**Usage**:
+
+```console
+$ djdevx backend django settings secrets init [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `dev`: Initialise local development secrets.
+* `prod`: Initialise production secrets in...
+
+####### `djdevx backend django settings secrets init dev`
+
+Initialise local development secrets.
+
+Scans all settings files for SecretStr fields and ensures each has a
+value in .secrets/. Fields with registered generators are auto-populated;
+others prompt the user for input. Idempotent — skips already-present secrets.
+
+**Usage**:
+
+```console
+$ djdevx backend django settings secrets init dev [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+####### `djdevx backend django settings secrets init prod`
+
+Initialise production secrets in .secrets.prod/.
+
+For each SecretStr field, auto-generates or prompts for the value and
+writes it to .secrets.prod/&lt;name&gt;. Idempotent — skips already-present
+entries.
+
+**Usage**:
+
+```console
+$ djdevx backend django settings secrets init prod [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+###### `djdevx backend django settings secrets list`
+
+List secrets with source and value
+
+**Usage**:
+
+```console
+$ djdevx backend django settings secrets list [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `dev`: List secrets resolved via the dev chain:...
+* `prod`: List secrets resolved via the prod chain:...
+
+####### `djdevx backend django settings secrets list dev`
+
+List secrets resolved via the dev chain: .secrets/ &gt; /run/secrets/ &gt; dev default.
+
+**Usage**:
+
+```console
+$ djdevx backend django settings secrets list dev [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+####### `djdevx backend django settings secrets list prod`
+
+List secrets resolved via the prod chain: /run/secrets/ &gt; .secrets.prod/ &gt; prod default.
+
+**Usage**:
+
+```console
+$ djdevx backend django settings secrets list prod [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+###### `djdevx backend django settings secrets verify`
+
+Verify secrets are present
+
+**Usage**:
+
+```console
+$ djdevx backend django settings secrets verify [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `dev`: Verify secrets are present for dev...
+* `prod`: Verify secrets are present for prod...
+
+####### `djdevx backend django settings secrets verify dev`
+
+Verify secrets are present for dev (.secrets/ + /run/secrets/).
+Exits with code 1 if any secret without a dev default is missing.
+
+**Usage**:
+
+```console
+$ djdevx backend django settings secrets verify dev [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+####### `djdevx backend django settings secrets verify prod`
+
+Verify secrets are present for prod (.secrets.prod/).
+Exits with code 1 if any secret is missing with no prod default fallback.
+
+**Usage**:
+
+```console
+$ djdevx backend django settings secrets verify prod [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+##### `djdevx backend django settings configs`
+
+Manage project config variables
+
+**Usage**:
+
+```console
+$ djdevx backend django settings configs [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `init`: Initialise configs for prod
+* `list`: List config vars with source and value
+* `verify`: Verify config vars are present
+
+###### `djdevx backend django settings configs init`
+
+Initialise configs for prod
+
+**Usage**:
+
+```console
+$ djdevx backend django settings configs init [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `prod`: Initialise .env.prod with required config...
+
+####### `djdevx backend django settings configs init prod`
+
+Initialise .env.prod with required config variables.
+
+For each config var without a prod default, prompts the user for a value
+and writes it to .env.prod in KEY=VALUE format. Idempotent — skips
+keys that already exist in .env.prod.
+
+**Usage**:
+
+```console
+$ djdevx backend django settings configs init prod [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+###### `djdevx backend django settings configs list`
+
+List config vars with source and value
+
+**Usage**:
+
+```console
+$ djdevx backend django settings configs list [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `dev`: List config vars resolved via the dev...
+* `prod`: List config vars resolved via the prod...
+
+####### `djdevx backend django settings configs list dev`
+
+List config vars resolved via the dev chain: os.environ &gt; .env &gt; dev default.
+
+**Usage**:
+
+```console
+$ djdevx backend django settings configs list dev [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+####### `djdevx backend django settings configs list prod`
+
+List config vars resolved via the prod chain: /run/configs/app-config &gt; .env.prod &gt; prod default.
+
+**Usage**:
+
+```console
+$ djdevx backend django settings configs list prod [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+###### `djdevx backend django settings configs verify`
+
+Verify config vars are present
+
+**Usage**:
+
+```console
+$ djdevx backend django settings configs verify [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `dev`: Verify config vars are present for dev...
+* `prod`: Verify config vars are present for prod...
+
+####### `djdevx backend django settings configs verify dev`
+
+Verify config vars are present for dev (env vars / .env).
+Exits with code 1 if any config var without a dev default is missing.
+
+**Usage**:
+
+```console
+$ djdevx backend django settings configs verify dev [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+####### `djdevx backend django settings configs verify prod`
+
+Verify config vars are present for prod (.env.prod).
+Exits with code 1 if any config var is missing entirely.
+
+**Usage**:
+
+```console
+$ djdevx backend django settings configs verify prod [OPTIONS]
 ```
 
 **Options**:

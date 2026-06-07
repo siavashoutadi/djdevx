@@ -55,9 +55,6 @@ def test_channels_install_and_remove(temp_dir):
     actual_content = asgi_file.read_text()
     assert actual_content == expected_content, "ASGI content mismatch"
 
-    devcontainer_env_file = temp_dir / ".devcontainer" / ".env" / "devcontainer"
-    assert "CHANNEL_LAYERS_REDIS_HOST" in devcontainer_env_file.read_text()
-
     assert DjangoProjectManager().has_dependency("channels"), (
         "Channels dependency not found after installation"
     )
@@ -80,10 +77,6 @@ def test_channels_install_and_remove(temp_dir):
     assert not ws_urls_init_file.exists(), "WebSocket URLs file not removed"
     asgi_content = asgi_file.read_text()
     assert expected_content != asgi_content, "ASGI file content is not changed"
-    assert "CHANNEL_LAYERS_REDIS_HOST" not in devcontainer_env_file.read_text(), (
-        "Devcontainer env not cleaned up"
-    )
-
     assert not DjangoProjectManager().has_dependency("channels"), (
         "Channels dependency found after removal"
     )

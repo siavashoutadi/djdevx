@@ -1,14 +1,41 @@
-from settings.utils.env import get_env
+from typing import Any
 
-env = get_env()
+from pydantic import SecretStr
+
+from settings.utils.base_settings import AppBaseSettings
+
+
+class DatabaseSettings(AppBaseSettings):
+    postgres_server: str
+    postgres_port: int = 5432
+    postgres_db: str
+    postgres_user: str
+    postgres_password: SecretStr
+
+    @classmethod
+    def get_dev_defaults(cls) -> dict[str, Any]:
+        return {
+            "postgres_server": "localhost",
+            "postgres_port": 5432,
+            "postgres_db": "postgres",
+            "postgres_user": "postgres",
+            "postgres_password": "devpassword",
+        }
+
+    @classmethod
+    def get_devcontainer_overrides(cls) -> dict[str, Any]:
+        return {"postgres_server": "db"}
+
+
+_db = DatabaseSettings()
 
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "PORT": env("POSTGRES_PORT", default="5432"),
-        "HOST": env("POSTGRES_SERVER", default="localhost"),
-        "NAME": env("POSTGRES_DB", default=""),
-        "USER": env("POSTGRES_USER", default=""),
-        "PASSWORD": env("POSTGRES_PASSWORD", default=""),
+        "HOST": _db.postgres_server,
+        "PORT": str(_db.postgres_port),
+        "NAME": _db.postgres_db,
+        "USER": _db.postgres_user,
+        "PASSWORD": _db.postgres_password.get_secret_value(),
     }
 }

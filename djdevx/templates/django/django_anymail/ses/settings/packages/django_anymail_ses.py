@@ -1,14 +1,22 @@
-from settings.django.base import INSTALLED_APPS, DEBUG
-from settings.utils.env import get_env
+from pydantic import SecretStr
 
-env = get_env()
+from settings.django.base import INSTALLED_APPS
+from settings.utils.base_settings import AppBaseSettings, IS_DEV
 
-if not DEBUG:
+if not IS_DEV:
+
+    class _SesSettings(AppBaseSettings):
+        anymail_ses_access_key: SecretStr
+        anymail_ses_secret_key: SecretStr
+        anymail_ses_region_name: str
+
+    _ses = _SesSettings()
+
     ANYMAIL = {
         "AMAZON_SES_CLIENT_PARAMS": {
-            "aws_access_key_id": env("ANYMAIL_SES_ACCESS_KEY", default=""),
-            "aws_secret_access_key": env("ANYMAIL_SES_SECRET_KEY", default=""),
-            "region_name": env("ANYMAIL_SES_REGION_NAME", default=""),
+            "aws_access_key_id": _ses.anymail_ses_access_key.get_secret_value(),
+            "aws_secret_access_key": _ses.anymail_ses_secret_key.get_secret_value(),
+            "region_name": _ses.anymail_ses_region_name,
         }
     }
 
@@ -17,6 +25,3 @@ if not DEBUG:
     INSTALLED_APPS += [
         "anymail",
     ]
-
-    DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="")
-    SERVER_EMAIL = env("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)

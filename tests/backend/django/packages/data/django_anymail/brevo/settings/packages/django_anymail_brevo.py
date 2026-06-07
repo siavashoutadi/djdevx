@@ -1,12 +1,18 @@
-from settings.django.base import INSTALLED_APPS, DEBUG
-from settings.utils.env import get_env
+from pydantic import SecretStr
+
+from settings.django.base import INSTALLED_APPS
+from settings.utils.base_settings import AppBaseSettings, IS_DEV
 
 
-env = get_env()
+if not IS_DEV:
 
-if not DEBUG:
+    class BrevoSettings(AppBaseSettings):
+        anymail_brevo_api_key: SecretStr
+
+    _brevo = BrevoSettings()
+
     ANYMAIL = {
-        "BREVO_API_KEY": env("ANYMAIL_BREVO_API_KEY", default=""),
+        "BREVO_API_KEY": _brevo.anymail_brevo_api_key.get_secret_value(),
     }
 
     EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
@@ -14,6 +20,3 @@ if not DEBUG:
     INSTALLED_APPS += [
         "anymail",
     ]
-
-    DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="")
-    SERVER_EMAIL = env("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)

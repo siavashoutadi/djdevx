@@ -1,9 +1,9 @@
 .devcontainer
 .env
-.environments
 .venv
 .dockerignore
 .editorconfig
+.secrets
 .git
 .gitignore
 .pre-commit-config.yaml

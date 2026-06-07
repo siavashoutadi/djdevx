@@ -47,14 +47,6 @@ def test_django_defender_install_and_remove(temp_dir):
     actual_content = urls_file.read_text()
     assert actual_content == expected_content, "URLs content mismatch"
 
-    # Check environment variable was set
-    env_file = temp_dir / ".devcontainer" / ".env" / "devcontainer"
-    env_content = env_file.read_text()
-    assert "DEFENDER_REDIS_URL" in env_content, "Environment variable not set"
-    assert "redis://default:${REDIS_PASSWORD}@cache:6379/1" in env_content, (
-        "Environment variable value incorrect"
-    )
-
     assert DjangoProjectManager().has_dependency("django-defender"), (
         "Django-defender dependency not found after installation"
     )
@@ -75,10 +67,6 @@ def test_django_defender_install_and_remove(temp_dir):
 
     assert not settings_file.exists(), "Settings file not removed"
     assert not urls_file.exists(), "URLs file not removed"
-
-    # Check environment variable was removed
-    env_content = env_file.read_text()
-    assert "DEFENDER_REDIS_URL" not in env_content, "Environment variable not removed"
 
     assert not DjangoProjectManager().has_dependency("django-defender"), (
         "Django-defender dependency found after removal"

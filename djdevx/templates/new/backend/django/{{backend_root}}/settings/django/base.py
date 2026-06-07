@@ -1,12 +1,57 @@
+from typing import Any
+
+from pydantic import SecretStr
+
 from settings import BASE_DIR
-from settings.utils.env import get_env
+from settings.utils.base_settings import AppBaseSettings
 
-env = get_env()
 
-SECRET_KEY: str = env("SECRET_KEY", default="")
-DEBUG: bool = env.bool("DEBUG", default=False)
-ALLOWED_HOSTS: list[str] = env.list("ALLOWED_HOSTS", default=[])
-CSRF_TRUSTED_ORIGINS: list[str] = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+class DjangoBaseSettings(AppBaseSettings):
+    secret_key: SecretStr
+    debug: bool
+    allowed_hosts: list[str]
+    csrf_trusted_origins: list[str]
+
+    @classmethod
+    def get_dev_defaults(cls) -> dict[str, Any]:
+        return {
+            "debug": True,
+            "allowed_hosts": ["127.0.0.1", "localhost", "0.0.0.0"],
+            "csrf_trusted_origins": [
+                "http://localhost:8000",
+                "https://localhost:8000",
+                "http://127.0.0.1:8000",
+                "https://127.0.0.1:8000",
+                "http://0.0.0.0:8000",
+                "https://0.0.0.0:8000",
+                "http://localhost:3000",
+                "https://localhost:3000",
+                "http://127.0.0.1:3000",
+                "https://127.0.0.1:3000",
+                "http://0.0.0.0:3000",
+                "https://0.0.0.0:3000",
+                "http://localhost:4200",
+                "https://localhost:4200",
+                "http://127.0.0.1:4200",
+                "https://127.0.0.1:4200",
+                "http://0.0.0.0:4200",
+                "https://0.0.0.0:4200",
+                "http://localhost:5173",
+                "https://localhost:5173",
+                "http://127.0.0.1:5173",
+                "https://127.0.0.1:5173",
+                "http://0.0.0.0:5173",
+                "https://0.0.0.0:5173",
+            ],
+        }
+
+
+_base = DjangoBaseSettings()
+
+SECRET_KEY: str = _base.secret_key.get_secret_value()
+DEBUG: bool = _base.debug
+ALLOWED_HOSTS: list[str] = _base.allowed_hosts
+CSRF_TRUSTED_ORIGINS: list[str] = _base.csrf_trusted_origins
 
 DEFAULT_AUTO_FIELD: str = "django.db.models.BigAutoField"
 ROOT_URLCONF: str = "urls"
