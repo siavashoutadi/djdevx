@@ -1,20 +1,28 @@
-from settings.django.base import DEBUG
-from settings.django.storages import STORAGES
-from settings.utils.env import get_env
+from pydantic import SecretStr
 
+from settings.utils.base_settings import AppBaseSettings, IS_DEV
 
-env = get_env()
+if not IS_DEV:
 
-if not DEBUG:
-    STORAGES.update(
+    class AzureSettings(AppBaseSettings):
+        storages_azure_account_key: SecretStr
+        storages_azure_account_name: str
+        storages_azure_container_name: str
+
+    _azure = AzureSettings()
+
+    STORAGES.update(  # noqa: F821
         {
             "default": {
                 "BACKEND": "storages.backends.azure_storage.AzureStorage",
                 "OPTIONS": {
-                    "account_key": env("STORAGES_AZURE_ACCOUNT_KEY", default=""),
-                    "account_name": env("STORAGES_AZURE_ACCOUNT_NAME", default=""),
-                    "azure_container": env("STORAGES_AZURE_CONTAINER_NAME", default=""),
+                    "account_key": _azure.storages_azure_account_key.get_secret_value(),
+                    "account_name": _azure.storages_azure_account_name,
+                    "azure_container": _azure.storages_azure_container_name,
                 },
-            }
+            },
+            "staticfiles": {
+                "BACKEND": "storages.backends.azure_storage.AzureStorage",
+            },
         }
     )

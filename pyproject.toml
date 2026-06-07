@@ -16,6 +16,9 @@ dependencies = [
     "cryptography==48.0.0",
     "typing-extensions==4.15.0",
     "pyyaml>=6.0.3",
+    "rich>=13.0",
+    "pydantic[email]>=2.0",
+    "python-dotenv>=1.0",
 ]
 
 [project.scripts]

@@ -1,19 +1,13 @@
 import shutil
 
 from ....utils.templates.manager import TemplateManager
-from ._base import BasePackage, EnvVar
+from ._base import BasePackage
 
 
 class ChannelsPackage(BasePackage):
     name = "channels"
     packages = ["channels[daphne]", "channels_redis"]
     dev_packages = ["twisted[http2,tls]"]
-    env_vars = [
-        EnvVar(
-            env_key="CHANNEL_LAYERS_REDIS_HOST",
-            value="redis://default:${REDIS_PASSWORD}@cache:6379/1",
-        ),
-    ]
 
     def after_uv_remove(self) -> None:
         """Remove ws_urls directory and restore original ASGI file."""

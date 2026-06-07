@@ -10,15 +10,11 @@ from ....utils.django.project_manager import DjangoProjectManager
 from ....utils.devcontainer import ServiceConfig, VolumeConfig
 from ....utils.djdevx_config.backend import CacheTracker
 
-REDIS_ENV_VARIABLES = {
-    "REDIS_PASSWORD": "redis_password",
-    "CACHE_LOCATION": "redis://default@cache:6379/1",
-}
 REDIS_DEPENDENCY = "django-redis"
 REDIS_DOCKER_SERVICE: ServiceConfig = {
     "name": "cache",
     "image": "redis:7.4-alpine",
-    "env_file": ["./.env/redis"],
+    "environment": {"REDIS_PASSWORD": "redis_password"},
     "command": "/bin/sh -c 'redis-server --appendonly yes --requirepass $${REDIS_PASSWORD}'",
     "volumes": ["cache-data:/data"],
     "networks": ["devcontainer"],
@@ -41,37 +37,23 @@ def install() -> None:
 
     pm.add_dependency(REDIS_DEPENDENCY)
 
-    for key, value in REDIS_ENV_VARIABLES.items():
-        pm.add_env_variable(key, value, pm.devcontainer_env_devcontainer_path)
-
     current_dir = Path(__file__).resolve().parent
 
     source_dir = (
         current_dir.parent.parent.parent / "templates" / "django" / "cache" / "redis"
     )
 
-    context = {key.lower(): value for key, value in REDIS_ENV_VARIABLES.items()}
-    context.update({"backend_root": str(pm.project_path)})
-
     template_manager = TemplateManager()
     template_manager.copy_templates(
-        source_dir=source_dir, dest_dir=pm.project_path.parent, template_context=context
+        source_dir=source_dir,
+        dest_dir=pm.project_path.parent,
+        template_context={"backend_root": str(pm.project_path)},
     )
 
     pm.add_service_to_docker_compose(REDIS_DOCKER_SERVICE, REDIS_VOLUMES)
 
     tracker = CacheTracker()
     tracker.write_cache_config("redis", "redis")
-    tracker.write_env_entries(
-        "redis",
-        {
-            "REDIS_PASSWORD": {"type": "secret"},
-            "CACHE_LOCATION": {
-                "type": "user_input",
-                "value": "redis://default@cache:6379/1",
-            },
-        },
-    )
 
     print_console.success("Redis cache installed successfully!")
 
@@ -103,10 +85,6 @@ def remove() -> None:
 
     pm.copy_template(source_file=source_dir, dest_dir=pm.django_settings_path)
 
-    for key in REDIS_ENV_VARIABLES:
-        pm.remove_env_variable(key, pm.devcontainer_env_devcontainer_path)
-
-    pm.remove_env_file("redis")
     pm.remove_service_from_docker_compose(REDIS_DOCKER_SERVICE, REDIS_VOLUMES)
 
     CacheTracker().remove_cache_config("redis")

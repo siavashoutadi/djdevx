@@ -1,6 +1,5 @@
-from settings.django.base import DEBUG, INSTALLED_APPS, MIDDLEWARE
-from settings.utils.env import get_env
-
+from settings.django.base import INSTALLED_APPS, MIDDLEWARE
+from settings.utils.base_settings import AppBaseSettings, IS_DEV
 
 INSTALLED_APPS += [
     "corsheaders",
@@ -8,10 +7,14 @@ INSTALLED_APPS += [
 
 MIDDLEWARE.insert(0, "corsheaders.middleware.CorsMiddleware")
 
-env = get_env()
-
-if DEBUG:
+if IS_DEV:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
-    CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS", default=[])
-    CORS_ALLOWED_ORIGIN_REGEXES = env("CORS_ALLOWED_ORIGIN_REGEXES", default=[])
+
+    class CorsSettings(AppBaseSettings):
+        cors_allowed_origins: list[str]
+        cors_allowed_origin_regexes: list[str]
+
+    _cors = CorsSettings()
+    CORS_ALLOWED_ORIGINS = _cors.cors_allowed_origins
+    CORS_ALLOWED_ORIGIN_REGEXES = _cors.cors_allowed_origin_regexes

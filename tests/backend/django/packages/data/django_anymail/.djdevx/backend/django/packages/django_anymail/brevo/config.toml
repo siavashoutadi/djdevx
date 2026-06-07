@@ -1,8 +1,2 @@
 [package]
 name = "django-anymail Brevo"
-
-[env.ANYMAIL_BREVO_API_KEY]
-type = "secret"
-
-[env.DEFAULT_FROM_EMAIL]
-type = "user_input"

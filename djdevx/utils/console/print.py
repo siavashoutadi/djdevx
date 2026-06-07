@@ -1,6 +1,11 @@
 import difflib
 from rich.console import Console as RichConsole
+from rich.table import Table
 from rich.text import Text
+
+CHECK_MARK = "\u2713"
+CROSS_MARK = "\u2717"
+ELLIPSIS = "\u2026"
 
 
 class PrintConsole:
@@ -33,6 +38,10 @@ class PrintConsole:
         """Print a list of items with bullet points."""
         for item in items:
             self._console.print(f"🔹[bold]{item}[/bold]")
+
+    def table(self, table: Table) -> None:
+        """Render a Rich Table to the console."""
+        self._console.print(table)
 
     def diff(self, old: str, new: str, title_old="(current)", title_new="(new)"):
         """Print a diff comparison between old and new content."""

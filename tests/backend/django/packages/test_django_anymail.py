@@ -28,14 +28,6 @@ def test_django_anymail_ses_install_and_remove(temp_dir):
             "django-anymail",
             "ses",
             "install",
-            "--access-key",
-            "test-access-key",
-            "--secret-key",
-            "test-secret-key",
-            "--region-name",
-            "us-east-1",
-            "--default-from-email",
-            "noreply@example.com",
         ],
     )
 
@@ -55,14 +47,6 @@ def test_django_anymail_ses_install_and_remove(temp_dir):
         DATA_DIR / "ses" / "settings" / "packages" / "django_anymail_ses.py"
     ).read_text()
     assert settings_content.strip() == expected_settings.strip()
-
-    # Check if env file is updated
-    env_file = temp_dir / ".devcontainer" / ".env" / "devcontainer"
-    env_content = env_file.read_text()
-    assert "ANYMAIL_SES_ACCESS_KEY=test-access-key" in env_content
-    assert "ANYMAIL_SES_SECRET_KEY=test-secret-key" in env_content
-    assert "ANYMAIL_SES_REGION_NAME=us-east-1" in env_content
-    assert "DEFAULT_FROM_EMAIL=noreply@example.com" in env_content
 
     # Test remove
     result = runner.invoke(
@@ -98,10 +82,6 @@ def test_django_anymail_brevo_install_and_remove(temp_dir):
             "django-anymail",
             "brevo",
             "install",
-            "--api-key",
-            "test-brevo-api-key",
-            "--default-from-email",
-            "noreply@example.com",
         ],
     )
 
@@ -121,12 +101,6 @@ def test_django_anymail_brevo_install_and_remove(temp_dir):
         DATA_DIR / "brevo" / "settings" / "packages" / "django_anymail_brevo.py"
     ).read_text()
     assert settings_content.strip() == expected_settings.strip()
-
-    # Check if env file is updated
-    env_file = temp_dir / ".devcontainer" / ".env" / "devcontainer"
-    env_content = env_file.read_text()
-    assert "ANYMAIL_BREVO_API_KEY=test-brevo-api-key" in env_content
-    assert "DEFAULT_FROM_EMAIL=noreply@example.com" in env_content
 
     # Test remove
     result = runner.invoke(
@@ -162,12 +136,6 @@ def test_django_anymail_mailgun_install_and_remove(temp_dir):
             "django-anymail",
             "mailgun",
             "install",
-            "--api-key",
-            "test-mailgun-api-key",
-            "--domain",
-            "test-domain.com",
-            "--default-from-email",
-            "noreply@example.com",
         ],
     )
 
@@ -187,13 +155,6 @@ def test_django_anymail_mailgun_install_and_remove(temp_dir):
         DATA_DIR / "mailgun" / "settings" / "packages" / "django_anymail_mailgun.py"
     ).read_text()
     assert settings_content.strip() == expected_settings.strip()
-
-    # Check if env file is updated
-    env_file = temp_dir / ".devcontainer" / ".env" / "devcontainer"
-    env_content = env_file.read_text()
-    assert "ANYMAIL_MAILGUN_API_KEY=test-mailgun-api-key" in env_content
-    assert "ANYMAIL_MAILGUN_SENDER_DOMAIN=test-domain.com" in env_content
-    assert "DEFAULT_FROM_EMAIL=noreply@example.com" in env_content
 
     # Test remove
     result = runner.invoke(
@@ -229,12 +190,6 @@ def test_django_anymail_mailjet_install_and_remove(temp_dir):
             "django-anymail",
             "mailjet",
             "install",
-            "--api-key",
-            "test-mailjet-api-key",
-            "--secret-key",
-            "test-mailjet-secret-key",
-            "--default-from-email",
-            "noreply@example.com",
         ],
     )
 
@@ -254,13 +209,6 @@ def test_django_anymail_mailjet_install_and_remove(temp_dir):
         DATA_DIR / "mailjet" / "settings" / "packages" / "django_anymail_mailjet.py"
     ).read_text()
     assert settings_content.strip() == expected_settings.strip()
-
-    # Check if env file is updated
-    env_file = temp_dir / ".devcontainer" / ".env" / "devcontainer"
-    env_content = env_file.read_text()
-    assert "ANYMAIL_MAILJET_API_KEY=test-mailjet-api-key" in env_content
-    assert "ANYMAIL_MAILJET_SECRET_KEY=test-mailjet-secret-key" in env_content
-    assert "DEFAULT_FROM_EMAIL=noreply@example.com" in env_content
 
     # Test remove
     result = runner.invoke(
@@ -296,10 +244,6 @@ def test_django_anymail_resend_install_and_remove(temp_dir):
             "django-anymail",
             "resend",
             "install",
-            "--api-key",
-            "test-resend-api-key",
-            "--default-from-email",
-            "noreply@example.com",
         ],
     )
 
@@ -319,12 +263,6 @@ def test_django_anymail_resend_install_and_remove(temp_dir):
         DATA_DIR / "resend" / "settings" / "packages" / "django_anymail_resend.py"
     ).read_text()
     assert settings_content.strip() == expected_settings.strip()
-
-    # Check if env file is updated
-    env_file = temp_dir / ".devcontainer" / ".env" / "devcontainer"
-    env_content = env_file.read_text()
-    assert "ANYMAIL_RESEND_API_KEY=test-resend-api-key" in env_content
-    assert "DEFAULT_FROM_EMAIL=noreply@example.com" in env_content
 
     # Test remove
     result = runner.invoke(

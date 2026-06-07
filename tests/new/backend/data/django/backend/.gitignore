@@ -13,8 +13,8 @@ wheels/
 /staticfiles
 
 # Environment Variables
-.env/
-/.environments
+.env
+.env.prod
 
 # Devbox Environment Variables
 /devbox.d/.env
@@ -22,3 +22,7 @@ wheels/
 db.sqlite3
 
 .django_tailwind_cli
+
+# Secrets — never commit these
+.secrets/
+.secrets.prod/

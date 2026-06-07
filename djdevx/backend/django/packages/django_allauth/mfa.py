@@ -106,7 +106,6 @@ class MfaPackage(BasePackage):
         self.before_uv_remove()
         # Only remove configuration files, not django-allauth package (account depends on it)
         self._cleanup_files()
-        self._remove_env_vars()
         shutil.rmtree(
             self.pm.project_path / "authentication" / "templates" / "mfa",
             ignore_errors=True,

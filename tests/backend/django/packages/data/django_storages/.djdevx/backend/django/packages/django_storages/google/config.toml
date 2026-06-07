@@ -1,8 +1,2 @@
 [package]
 name = "django-storages Google Cloud Storage"
-
-[env.STORAGES_GOOGLE_CREDENTIALS]
-type = "user_input"
-
-[env.STORAGES_GOOGLE_BUCKET_NAME]
-type = "user_input"

@@ -40,8 +40,6 @@ def test_new_django_backend(temp_dir):
     exlude_files = [
         Path("backend/pyproject.toml"),
         Path(".pre-commit-config.yaml"),
-        Path("backend/.environments/dev"),
-        Path(".devcontainer/.env/devcontainer"),
     ]
 
     for relative_path in expected_files:
@@ -72,7 +70,7 @@ def test_new_django_backend(temp_dir):
 
     required_dependencies = [
         "django",
-        "django-environ",
+        "pydantic-settings",
         "django-typer",
         "ipdb",
         "ipython",

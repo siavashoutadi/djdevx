@@ -1,10 +1,11 @@
 """BasePackage class for standardized Django package installation management."""
 
+from __future__ import annotations
+
 import functools
 import inspect
 import shutil
 from dataclasses import dataclass
-from enum import Enum
 from pathlib import Path
 from typing import Annotated, Any, Callable, Optional
 
@@ -12,6 +13,7 @@ import typer
 
 from ....utils.console.print import print_console
 from ....utils.django.project_manager import DjangoProjectManager
+from ....utils.django.secret_manager import SecretManager
 from ....utils.django.uv_runner import UvRunner
 from ....utils.djdevx_config.backend.package_tracker import PackageTracker
 from ....utils.templates.manager import TemplateManager
@@ -93,7 +95,32 @@ class PathDeriver:
 
 @dataclass
 class InstallParam:
-    """Declares a parameter that contributes to template context during install."""
+    """
+    Declares a CLI parameter collected during install and passed to templates.
+
+    When a subclass declares ``install_params``, BasePackage auto-generates a
+    Typer ``install`` command whose options mirror these params. Values collected
+    at install time are merged into the Jinja2 template context so settings and
+    URL templates can be rendered with user-supplied configuration.
+
+    Fields:
+        name:                   Key in the template context dict and the CLI
+                                ``--<name>`` option name.
+        type_:                  Python type for the Typer option (default ``str``).
+        default:                Default value when the option is not supplied.
+        help:                   Help text shown next to the option in ``--help``.
+        prompt:                 If set, Typer prompts the user interactively for
+                                this value during install.
+        show_if:                Name of another param in this list. When set, this
+                                param is only prompted if the named param's value
+                                is ``True`` and the current value is still empty.
+                                Useful for optional sub-configuration (e.g. only
+                                ask for a bucket name when S3 storage is enabled).
+        message_before_prompt:  Text printed to stdout immediately before the
+                                conditional prompt fires (``show_if`` path only).
+        hide_input:             If ``True``, input is hidden in the terminal
+                                (use for passwords and tokens).
+    """
 
     name: str
     type_: type = str
@@ -105,85 +132,101 @@ class InstallParam:
     hide_input: bool = False
 
 
-class EnvType(str, Enum):
-    """Classification of an environment variable for tracking purposes."""
-
-    USER_INPUT = "user_input"  # plain value entered by the user
-    SECRET = "secret"  # sensitive value (e.g. API key, password)
-    RANDOM_SECRET = "random_secret"  # auto-generated random secret
-    PRIVATE_SSH_KEY = "private_ssh_key"  # SSH private key
-
-
-@dataclass
-class EnvVar:
-    """Declares an environment variable - either static or user-prompted.
-
-    For static values: set ``env_key`` and ``value``.
-    For prompted values: set ``env_key``, ``name``, and ``prompt``.
-
-    Args:
-        env_key: The environment variable key.
-        value: Static value (leave empty for prompted vars).
-        env_type: Classification of the variable (see ``EnvType``).
-        name: CLI parameter name (required when ``prompt`` is set).
-        type_: Python type for the CLI parameter.
-        default: Default value for CLI parameter.
-        help: Help text for CLI parameter.
-        prompt: Prompt text shown to the user (if set, user will be prompted).
-        hide_input: Whether to hide input (e.g. for secrets).
-    """
-
-    env_key: str
-    value: str = ""
-    env_type: EnvType = EnvType.USER_INPUT
-    name: str = ""
-    type_: type = str
-    default: Any = ""
-    help: str = ""
-    prompt: Optional[str] = None
-    hide_input: bool = False
-
-    def __post_init__(self) -> None:
-        """Auto-set hide_input for sensitive env types."""
-        if self.env_type in (
-            EnvType.SECRET,
-            EnvType.RANDOM_SECRET,
-            EnvType.PRIVATE_SSH_KEY,
-        ):
-            self.hide_input = True
-
-
 class BasePackage:
     """
-    Base class for Django packages with auto-registered install/remove/env commands.
+    Base class for Django packages with auto-registered install/remove commands.
 
-    Subclasses declare class-level config (name, packages, dev_packages, etc.)
-    and override methods only for custom logic. The `app` property automatically
-    wraps commands with step/success prints via functools.wraps.
+    Subclasses declare class-level attributes to describe what to install, which
+    templates to copy, and which secrets to generate. Override lifecycle hooks for
+    custom logic — the base ``install()`` and ``remove()`` methods handle the
+    standard flow automatically.
 
-    Auto-derivation from __file__:
-    - settings_file: stem of the file (whitenoise.py → whitenoise.py)
-    - url_file: stem of the file (django_debug_toolbar.py → django_debug_toolbar.py)
-    - template_path: relative path from packages/ directory
+    Install lifecycle (in order):
+        1. ``before_uv_install()``       — hook for pre-install checks/setup
+        2. ``_check_required_dependencies()`` — exits if declared deps are missing
+        3. ``_uv_add_all()``             — adds packages / dev_packages via uv
+        4. ``after_uv_install()``        — hook for post-install uv steps
+        5. ``before_copy_templates()``   — hook before template rendering
+        6. ``_copy_templates()``         — renders and copies Jinja2 templates
+        7. ``after_copy_templates()``    — hook after template rendering
+        8. ``_write_package_tracking()`` — records install in .djdevx/config.toml
+        9. ``_generate_secrets()``       — runs secret_generators, writes .secrets/
 
-    For sub-packages (e.g., packages/django_storages/s3.py):
-    - settings_file: parent_name + '_' + stem (django_storages_s3.py)
-    - url_file: parent_name + '_' + stem (django_storages_s3.py)
-    - template_path: relative path from packages/ (django_storages/s3)
+    Remove lifecycle (in order):
+        1. ``before_uv_remove()``        — hook for pre-remove steps
+        2. ``_uv_remove_all()``          — removes packages / dev_packages via uv
+        3. ``after_uv_remove()``         — hook for post-remove steps
+        4. ``_cleanup_files()``          — deletes auto-derived settings/URL files
+        5. ``_cleanup_extra_files()``    — deletes files_to_remove / folders_to_remove
+        6. ``_remove_tracking()``        — removes entry from .djdevx/config.toml
+
+    Path auto-derivation from ``__file__``:
+        Root packages  (packages/name.py)      → settings_file: name.py
+                                                  url_file:      name.py
+                                                  template_path: name
+        Sub-packages   (packages/dir/name.py)  → settings_file: dir_name.py
+                                                  url_file:      dir_name.py
+                                                  template_path: dir/name
+
+    Parameterised installs:
+        Declare ``install_params`` to have BasePackage auto-generate a Typer
+        ``install`` command with matching CLI options. Collected values are passed
+        as Jinja2 context when copying templates.
     """
 
-    # Class-level config attributes (all optional, subclasses override as needed)
+    # ------------------------------------------------------------------ #
+    # Class-level configuration — override in subclasses as needed        #
+    # ------------------------------------------------------------------ #
+
+    # Human-readable display name used in CLI step/success messages.
     name: str = ""
+
+    # PyPI package names added to the project via ``uv add`` during install.
     packages: list[str] = []
+
+    # PyPI package names added to the dev dependency group via ``uv add --group dev``.
     dev_packages: list[str] = []
+
+    # Other djdevx package names that must already be installed before this one.
+    # Install exits with an error and a hint if any are missing.
     required_dependencies: list[str] = []
-    env_vars: list["EnvVar"] = []
+
+    # Override the auto-derived settings filename (default: see path auto-derivation).
+    # Set only when the derived name would conflict with another package's file.
     settings_file: Optional[str] = None
+
+    # Override the auto-derived URL filename (default: see path auto-derivation).
     url_file: Optional[str] = None
+
+    # Override the auto-derived template directory path relative to
+    # djdevx/templates/django/ (default: see path auto-derivation).
     template_path: Optional[str] = None
+
+    # Declare CLI options collected at install time and passed to Jinja2 templates.
+    # When non-empty and install() is not overridden, BasePackage auto-generates
+    # a Typer install command whose --options mirror these params.
     install_params: list[InstallParam] = []
+
+    # Project-relative file paths deleted by remove() in addition to the
+    # auto-derived settings and URL files.
     files_to_remove: list[str] = []
+
+    # Project-relative directory paths recursively deleted by remove().
     folders_to_remove: list[str] = []
+
+    # Maps pydantic SecretStr field name → callable that returns the secret value.
+    # Generators are called automatically at the end of install() and write their
+    # output to .secrets/<field_name>. Skipped if the file already exists so
+    # repeated installs are idempotent.
+    # Field names must match the SecretStr fields declared in the package's
+    # settings template — SettingCollector discovers them via AST parsing at runtime
+    # so no parallel declaration is needed here.
+    secret_generators: dict[str, Callable[[], str]] = {}
+
+    # Auto-populated by __init_subclass__ — lists every subclass that has a
+    # non-empty secret_generators dict. Used by SettingCollector to build the
+    # generators index without manual registration.
+    _generator_packages: list[type[BasePackage]] = []
 
     def __init__(self, file: str) -> None:
         """
@@ -203,26 +246,25 @@ class BasePackage:
 
         self._pm: Optional[DjangoProjectManager] = None
         self._uv: Optional[UvRunner] = None
+        self._secret_manager: Optional[SecretManager] = None
         self._install_context: dict[str, Any] = {}
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
-        """Auto-generate install/env methods for subclasses that declare params."""
+        """Auto-generate install method for subclasses that declare install_params."""
         super().__init_subclass__(**kwargs)
 
-        install_params: list[InstallParam] = cls.install_params
-        # Prompted env vars drive CLI parameter generation
-        prompted_env_vars = [
-            env_var for env_var in cls.env_vars if env_var.prompt is not None
-        ]
+        # Register in the auto-discovered generator packages list.
+        if cls.secret_generators:
+            cls._generator_packages.append(cls)
 
-        has_params = bool(install_params) or bool(prompted_env_vars)
+        install_params: list[InstallParam] = cls.install_params
+
+        has_params = bool(install_params)
         install_overridden = "install" in cls.__dict__
-        env_overridden = "env" in cls.__dict__
 
         if has_params and not install_overridden:
             # Capture for closure
             captured_install_params = list(install_params)
-            captured_prompted_env_vars = list(prompted_env_vars)
 
             def generated_install(self, **kwargs: Any) -> None:  # type: ignore[override]
                 """Install and configure the package."""
@@ -254,13 +296,8 @@ class BasePackage:
                 self._copy_templates(context=self._install_context)
                 self.after_copy_templates()
 
-                for env_var in captured_prompted_env_vars:
-                    raw_value = kwargs[env_var.name]
-                    value = str(raw_value) if isinstance(raw_value, Path) else raw_value
-                    self.pm.add_env_variable(key=env_var.env_key, value=value)
-
                 self._write_package_tracking()
-                self._add_env_vars()
+                self._generate_secrets()
 
             cli_params = [
                 inspect.Parameter("self", inspect.Parameter.POSITIONAL_OR_KEYWORD)
@@ -293,66 +330,11 @@ class BasePackage:
                         annotation=annotation,
                     )
                 )
-            for env_var in captured_prompted_env_vars:
-                assert env_var.prompt is not None
-                annotation = Annotated[
-                    env_var.type_,
-                    typer.Option(
-                        help=env_var.help,
-                        prompt=env_var.prompt,
-                        hide_input=env_var.hide_input,
-                    ),
-                ]
-                cli_params.append(
-                    inspect.Parameter(
-                        env_var.name,
-                        inspect.Parameter.POSITIONAL_OR_KEYWORD,
-                        default=env_var.default,
-                        annotation=annotation,
-                    )
-                )
 
             generated_install.__signature__ = inspect.Signature(cli_params)  # type: ignore[attr-defined]
             generated_install.__name__ = "install"
             generated_install.__qualname__ = f"{cls.__name__}.install"
             cls.install = generated_install  # type: ignore[method-assign]
-
-        if bool(prompted_env_vars) and not env_overridden:
-            captured_prompted_env_vars_for_env = list(prompted_env_vars)
-
-            def generated_env(self, **kwargs: Any) -> None:  # type: ignore[override]
-                """Configure environment variables."""
-                for env_var in captured_prompted_env_vars_for_env:
-                    raw_value = kwargs[env_var.name]
-                    value = str(raw_value) if isinstance(raw_value, Path) else raw_value
-                    self.pm.add_env_variable(key=env_var.env_key, value=value)
-
-            env_cli_params = [
-                inspect.Parameter("self", inspect.Parameter.POSITIONAL_OR_KEYWORD)
-            ]
-            for env_var in captured_prompted_env_vars_for_env:
-                assert env_var.prompt is not None
-                annotation = Annotated[
-                    env_var.type_,
-                    typer.Option(
-                        help=env_var.help,
-                        prompt=env_var.prompt,
-                        hide_input=env_var.hide_input,
-                    ),
-                ]
-                env_cli_params.append(
-                    inspect.Parameter(
-                        env_var.name,
-                        inspect.Parameter.POSITIONAL_OR_KEYWORD,
-                        default=env_var.default,
-                        annotation=annotation,
-                    )
-                )
-
-            generated_env.__signature__ = inspect.Signature(env_cli_params)  # type: ignore[attr-defined]
-            generated_env.__name__ = "env"
-            generated_env.__qualname__ = f"{cls.__name__}.env"
-            cls.env = generated_env  # type: ignore[method-assign]
 
     @property
     def djdevx_root(self) -> Path:
@@ -393,6 +375,13 @@ class BasePackage:
             self._uv = UvRunner()
         return self._uv
 
+    @property
+    def secret_manager(self) -> SecretManager:
+        """Lazy-loaded SecretManager."""
+        if self._secret_manager is None:
+            self._secret_manager = SecretManager(self.pm.project_path)
+        return self._secret_manager
+
     def _uv_add_all(self) -> None:
         """Add all packages and dev_packages via uv."""
         for pkg in self.packages:
@@ -401,8 +390,11 @@ class BasePackage:
             self.uv.add_package(pkg, group="dev")
 
     def _strip_package_extras(self, pkg: str) -> str:
-        """Strip extras from package name (e.g., 'package[extra]' -> 'package')."""
-        return pkg.split("[")[0]
+        """Strip extras and version specifiers from package name."""
+        name = pkg.split("[")[0]
+        for sep in (">", "<", "=", "!", "~"):
+            name = name.split(sep)[0]
+        return name.strip()
 
     def _remove_package_if_exists(self, pkg: str, group: str = "") -> None:
         """Remove package if it exists."""
@@ -450,24 +442,6 @@ class BasePackage:
 
         url_path = self.pm.packages_urls_path / self._url_file
         url_path.unlink(missing_ok=True)
-
-    def _add_env_vars(self) -> None:
-        """Add static environment variables from env_vars and write env tracking."""
-        for env_var in self.env_vars:
-            if (
-                env_var.prompt is None
-            ):  # static vars only; prompted vars come from user input
-                self.pm.add_env_variable(env_var.env_key, env_var.value)
-        self._write_env_tracking()
-
-    def _remove_env_vars(self) -> None:
-        """Remove all environment variables from env_vars and remove env tracking."""
-        for env_var in self.env_vars:
-            self.pm.remove_env_variable(env_var.env_key)
-        try:
-            PackageTracker().remove_env_entries(self._template_path)
-        except (Exception, SystemExit):
-            pass
 
     def _cleanup_extra_files(self) -> None:
         """Remove files and folders declared in files_to_remove / folders_to_remove."""
@@ -526,28 +500,6 @@ class BasePackage:
         except (Exception, SystemExit):
             pass
 
-    def _write_env_tracking(self) -> None:
-        """Write only the [env] section of config.toml under .djdevx/. Silently skipped if not a djdevx project."""
-        try:
-            env_entries: dict[str, dict[str, str]] = {}
-            for env_var in self.env_vars:
-                entry: dict[str, str] = {"type": env_var.env_type.value}
-                # Persist static values for USER_INPUT vars (non-prompted, non-secret)
-                if (
-                    env_var.env_type == EnvType.USER_INPUT
-                    and env_var.prompt is None
-                    and env_var.value
-                ):
-                    entry["value"] = env_var.value
-                env_entries[env_var.env_key] = entry
-            if env_entries:
-                PackageTracker().write_env_entries(
-                    template_path=self._template_path,
-                    env_entries=env_entries,
-                )
-        except (Exception, SystemExit):
-            pass
-
     def _remove_tracking(self) -> None:
         """Delete the entire package tracking folder under .djdevx/. Silently skipped if not found."""
         try:
@@ -565,7 +517,7 @@ class BasePackage:
         self._copy_templates()
         self.after_copy_templates()
         self._write_package_tracking()
-        self._add_env_vars()
+        self._generate_secrets()
 
     def remove(self) -> None:
         """Remove the package."""
@@ -574,16 +526,24 @@ class BasePackage:
         self.after_uv_remove()
         self._cleanup_files()
         self._cleanup_extra_files()
-        self._remove_env_vars()
         self._remove_tracking()
 
-    def env(self) -> None:
-        """Configure environment variables."""
-        self._add_env_vars()
+    def _generate_secrets(self) -> None:
+        """
+        Run secret_generators for this package and write results to .secrets/.
+
+        Called automatically at the end of install(). Skips fields that already
+        have a value in .secrets/ so repeated installs are idempotent.
+        """
+        for field_name, generator in self.secret_generators.items():
+            if not self.secret_manager.has_secret(field_name):
+                value = generator()
+                self.secret_manager.write_secret(field_name, value)
+                print_console.info(f"  Generated secret: {field_name}")
 
     @property
     def app(self) -> typer.Typer:
-        """Build and return a Typer app with wrapped install/remove/env commands."""
+        """Build and return a Typer app with wrapped install and remove commands."""
         typer_app = typer.Typer(no_args_is_help=True)
 
         wrapped_install = self._wrap_command(
@@ -601,17 +561,6 @@ class BasePackage:
             f"{self.name or 'Package'} removed successfully.",
         )
         typer_app.command(help=f"Remove {self.name or ''} package")(wrapped_remove)
-
-        has_custom_env = bool(self.env_vars) or type(self).env is not BasePackage.env
-        if has_custom_env:
-            wrapped_env = self._wrap_command(
-                self.env,
-                f"Configuring {self.name or 'package'} environment...",
-                f"{self.name or 'Package'} environment configured successfully.",
-            )
-            typer_app.command(
-                help=f"Configure {self.name or 'package'} environment variables."
-            )(wrapped_env)
 
         return typer_app
 

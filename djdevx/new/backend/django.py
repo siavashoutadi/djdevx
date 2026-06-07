@@ -1,4 +1,3 @@
-import secrets
 import subprocess
 import typer
 
@@ -6,8 +5,10 @@ from typing_extensions import Annotated
 from pathlib import Path
 
 from ...utils.console.print import print_console
-from ...utils.templates.manager import TemplateManager
+from ...utils.django.secret_manager import SecretManager
 from ...utils.django.uv_runner import UvRunner
+from ...utils.generators import generate_random_password
+from ...utils.templates.manager import TemplateManager
 from ...requirement import requirement
 
 app = typer.Typer(no_args_is_help=True)
@@ -74,7 +75,6 @@ def django(
     data = {
         "project_name": project_name,
         "project_description": project_description,
-        "django_secret_key": generate_secret(),
         "python_version": python_version,
         "django_version": DJANGO_VERSION,
         "backend_root": backend_root,
@@ -84,6 +84,9 @@ def django(
     template_manager.copy_templates(
         source_dir=source_dir, dest_dir=dest_dir, template_context=data
     )
+
+    secret_manager = SecretManager(backend_root_path)
+    secret_manager.write_secret("secret_key", generate_random_password(length=64))
 
     install_dependencies(backend_root_path)
 
@@ -98,10 +101,6 @@ def django(
     print_console.success("Project is initialized successfully.")
 
 
-def generate_secret():
-    return secrets.token_hex(32)
-
-
 def install_dependencies(backend_root: Path):
     """Install Python dependencies in the specified directory."""
     uv = UvRunner(backend_root=backend_root)
@@ -109,11 +108,11 @@ def install_dependencies(backend_root: Path):
     dependencies: list[str] = [
         f"django~={DJANGO_VERSION}.0",
         "django-typer",
-        "django-environ",
         "ipython",
         "ipdb",
         "uvicorn",
-        "python-dotenv",
+        "pydantic-settings",
+        "email-validator",
     ]
     for pkg in dependencies:
         print_console.step(f"Installing {pkg} ...")

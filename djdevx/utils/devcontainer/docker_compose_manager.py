@@ -11,6 +11,7 @@ from ..console.print import print_console
 class ServiceConfig(TypedDict):
     name: str
     image: str
+    environment: NotRequired[dict[str, str]]
     env_file: NotRequired[list[str]]
     volumes: NotRequired[list[str]]
     networks: NotRequired[list[str]]

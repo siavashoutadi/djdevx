@@ -7,7 +7,6 @@ from typing import List, Optional
 from ..djdevx_config.backend.django import DjangoConfig
 from ..templates.manager import TemplateManager
 from ..devcontainer import (
-    EnvFileManager,
     ServiceConfig,
     VolumeConfig,
     DockerComposeManager,
@@ -26,7 +25,6 @@ class DjangoProjectManager:
         """Initialize and validate Django project."""
         self._config = DjangoConfig()
         self._template_manager = TemplateManager()
-        self._devcontainer_env = EnvFileManager(self._config.project_root_dir)
         self._devcontainer_compose = DockerComposeManager(self._config.project_root_dir)
         self._uv_runner = UvRunner(backend_root=self._config.django_backend_root)
         self.validate_django_project()
@@ -110,11 +108,6 @@ class DjangoProjectManager:
         """Get JavaScript directory path."""
         return Path.joinpath(self.static_path, "js")
 
-    @property
-    def devcontainer_env_devcontainer_path(self) -> Path:
-        """Path to the devcontainer env file."""
-        return self._devcontainer_env.env_devcontainer_path
-
     # Template Operations (delegated to TemplateManager)
     def copy_templates(
         self,
@@ -139,21 +132,6 @@ class DjangoProjectManager:
             dest_dir=dest_dir,
             template_context=template_context or {},
         )
-
-    # Django Environment Management
-    def add_env_variable(
-        self, key: str, value: str, file_path: Optional[Path] = None
-    ) -> None:
-        """Add Django environment variable."""
-        self._devcontainer_env.add_env_variable(key, value, file_path)
-
-    def remove_env_variable(self, key: str, file_path: Optional[Path] = None) -> None:
-        """Remove Django environment variable."""
-        self._devcontainer_env.remove_env_variable(key, file_path)
-
-    def remove_env_file(self, file_name: str) -> None:
-        """Remove an environment file."""
-        self._devcontainer_env.remove_env_file(file_name)
 
     # Dependency Management
     def get_dependencies(self, group: str = "") -> list[str]:
