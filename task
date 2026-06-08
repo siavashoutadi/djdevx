@@ -11,7 +11,9 @@ function help {
 }
 
 function generate_manual {
-    uv run typer djdevx.main utils docs --output manual.md --name djdevx
+    uv run typer djdevx.main utils docs --output docs/cli/manual.md --name djdevx
+    sed -i '/^#/ s/`//g' docs/cli/manual.md
+    sed -i '/^###/ s/^#\{3,\} /## /' docs/cli/manual.md
 }
 
 TIMEFORMAT="Task completed in %3lR"

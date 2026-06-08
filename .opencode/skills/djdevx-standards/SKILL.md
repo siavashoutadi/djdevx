@@ -36,7 +36,7 @@ metadata:
 
 ### Package Architecture
 - Every installable Django package inherits from `BasePackage` (in `djdevx/backend/django/packages/_base.py`)
-- Declare class attributes: `name`, `packages`, `dev_packages`, `env_vars`, `install_params`, `files_to_remove`, `folders_to_remove`
+- Declare class attributes: `name`, `packages`, `dev_packages`, `required_dependencies`, `install_params`, `secret_generators`, `files_to_remove`, `folders_to_remove`
 - Paths are auto-derived from `__file__` via `PathDeriver`
 - Hook lifecycle: `before_uv_install` / `after_uv_install` / `before_copy_templates` / `after_copy_templates` / etc.
 - Module-level singleton pattern: `_pkg = PackageClass(__file__)` + `app = _pkg.app`
@@ -46,8 +46,8 @@ metadata:
 - Use Typer with `No_args_is_help=True` on all apps
 - Nested sub-commands via `app.add_typer(sub_app)`
 - Use `Annotated[type, typer.Option(...)]` for CLI parameters
-- `EnvVar` dataclass for env variables with types: `USER_INPUT`, `SECRET`, `RANDOM_SECRET`, `PRIVATE_SSH_KEY`
 - `InstallParam` dataclass for install parameters with optional `show_if` for conditional prompts
+- Config vars and secrets declared as pydantic `AppBaseSettings` subclasses in settings templates (not inline in the package class)
 
 ### Template Conventions
 - Templates use `.j2` extension (stripped on render)

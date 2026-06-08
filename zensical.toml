@@ -1,0 +1,29 @@
+site_name = "djdevx"
+site_description = "A CLI to improve the development experience for Django projects"
+site_url = "https://siavashoutadi.github.io/djdevx/"
+repo_url = "https://github.com/siavashoutadi/djdevx"
+edit_uri = "edit/main/docs/"
+
+nav = [
+  { "Home" = "index.md" },
+  { "User Guide" = [
+    { "Getting Started" = "user-guide/getting-started.md" },
+    { "Managing Packages" = "user-guide/managing-packages.md" },
+    { "Managing Features" = "user-guide/managing-features.md" },
+    { "Database" = "user-guide/databases.md" },
+    { "Cache" = "user-guide/caching.md" },
+    { "Managing Settings" = "user-guide/managing-settings.md" },
+    { "CLI Full Manual" = "cli/manual.md" },
+  ]},
+  { "Developer Guide" = [
+    { "Architecture" = "developer-guide/architecture.md" },
+    { "CLI Architecture" = "developer-guide/cli-architecture.md" },
+    { "Package Architecture" = "developer-guide/package-architecture.md" },
+    { "Template System" = "developer-guide/template-system.md" },
+    { "Pydantic Settings" = "developer-guide/pydantic-settings.md" },
+    { "URL Architecture" = "developer-guide/url-architecture.md" },
+    { "Creating a Package" = "developer-guide/creating-a-package.md" },
+    { "Testing" = "developer-guide/testing.md" },
+    { "Code Standards" = "developer-guide/code-standards.md" }
+  ]}
+]

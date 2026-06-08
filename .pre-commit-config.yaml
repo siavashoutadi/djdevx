@@ -21,4 +21,4 @@ repos:
         entry: ./task generate_manual
         language: script
         files: ^.*$
-        exclude: ^manual\.md$
+        exclude: ^docs/cli/manual\.md$
