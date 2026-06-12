@@ -18,6 +18,7 @@ $ djdevx [OPTIONS] COMMAND [ARGS]...
 * `requirement`: Check the requirement for project creation.
 * `new`: Create a new project
 * `backend`: Backend development tools
+* `deployment`: Generate deployment manifests
 
 ## djdevx version
 
@@ -3286,4 +3287,70 @@ $ djdevx backend django settings configs verify prod [OPTIONS]
 
 **Options**:
 
+* `--help`: Show this message and exit.
+
+## djdevx deployment
+
+Generate deployment manifests
+
+**Usage**:
+
+```console
+$ djdevx deployment [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `docker-compose`: Docker Compose: generate manifests + verify
+
+## djdevx deployment docker-compose
+
+Docker Compose: generate manifests + verify
+
+**Usage**:
+
+```console
+$ djdevx deployment docker-compose [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `generate`
+* `verify`
+
+## djdevx deployment docker-compose generate
+
+**Usage**:
+
+```console
+$ djdevx deployment docker-compose generate [OPTIONS]
+```
+
+**Options**:
+
+* `-o, --output PATH`: Output directory for manifests
+* `--domain TEXT`: Domain name for the deployment
+* `--traefik-email TEXT`: Email for Let&#x27;s Encrypt certificates
+* `--cloudflare-token TEXT`: CF_DNS_API_TOKEN for Cloudflare DNS challenge (optional)
+* `--help`: Show this message and exit.
+
+## djdevx deployment docker-compose verify
+
+**Usage**:
+
+```console
+$ djdevx deployment docker-compose verify [OPTIONS]
+```
+
+**Options**:
+
+* `-o, --output PATH`: Output directory for manifests
 * `--help`: Show this message and exit.

@@ -43,6 +43,7 @@ ddx --help
 | [Database](user-guide/databases.md) | Create and manage PostgreSQL databases |
 | [Cache](user-guide/caching.md) | Create and manage Redis caches |
 | [Managing Settings](user-guide/managing-settings.md) | Configure secrets, config vars, and environment |
+| [Deployment](user-guide/deployment.md) | Generate Docker Compose / Kubernetes manifests |
 | [CLI Architecture](developer-guide/cli-architecture.md) | Command tree, Typer conventions, adding sub-commands |
 | [CLI Full Manual](cli/manual.md) | Auto-generated command reference |
 

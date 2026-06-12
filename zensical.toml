@@ -13,6 +13,10 @@ nav = [
     { "Database" = "user-guide/databases.md" },
     { "Cache" = "user-guide/caching.md" },
     { "Managing Settings" = "user-guide/managing-settings.md" },
+    { "Deployment" = [
+      { "Overview" = "user-guide/deployment.md" },
+      { "Docker Compose" = "user-guide/deployment/docker-compose.md" },
+    ]},
     { "CLI Full Manual" = "cli/manual.md" },
   ]},
   { "Developer Guide" = [
@@ -22,6 +26,7 @@ nav = [
     { "Template System" = "developer-guide/template-system.md" },
     { "Pydantic Settings" = "developer-guide/pydantic-settings.md" },
     { "URL Architecture" = "developer-guide/url-architecture.md" },
+    { "Deployment Architecture" = "developer-guide/deployment-architecture.md" },
     { "Creating a Package" = "developer-guide/creating-a-package.md" },
     { "Testing" = "developer-guide/testing.md" },
     { "Code Standards" = "developer-guide/code-standards.md" }

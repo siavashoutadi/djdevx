@@ -27,6 +27,7 @@ read and write project state through `.djdevx/`.
 - [Template System](template-system.md) -- Jinja2 setup, rendering, template discovery
 - [Pydantic Settings](pydantic-settings.md) -- Source priority, SettingCollector, design rules
 - [URL Architecture](url-architecture.md) -- URL pattern auto-registration
+- [Deployment Architecture](deployment-architecture.md) -- BaseDeployPlugin, auto-generated CLI, adding targets
 - [Feature Architecture](../user-guide/managing-features.md) -- High-level feature installation
 - [Database Management](../user-guide/databases.md) -- PostgreSQL database management
 - [Cache Management](../user-guide/caching.md) -- Redis cache management
