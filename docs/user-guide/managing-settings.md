@@ -56,7 +56,8 @@ can be set via `.env`, environment variables, or default values in settings.
 
 ```bash
 # Initialize production config vars — prompts for each missing var,
-# validates input against pydantic type annotations, writes to .env.prod
+# validates input against pydantic type annotations, writes to .env.prod.
+# Supports readline history (up/down arrows) and line editing.
 ddx backend django settings configs init prod
 
 # Show all config vars with their resolve source and value
@@ -214,6 +215,10 @@ When you add a `SecretStr` field to your settings class, the behavior during
   skips the field silently (no prompt)
 - **No dev default** -- you will be prompted interactively (hidden input,
   must confirm by typing twice)
+
+`configs init prod` enables readline before prompting, so you get command
+history (up/down arrows recall previous values) and full line editing
+(left/right, home/end, delete). History is saved to `~/.djdevx/readline_history`.
 
 In production (`ddx backend django settings secrets init prod`), dev defaults
 are not used. Every secret must be provided or you will be prompted. Run

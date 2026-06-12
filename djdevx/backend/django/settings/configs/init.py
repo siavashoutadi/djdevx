@@ -14,7 +14,7 @@ from dotenv import set_key
 
 from .....utils.djdevx_config.backend.django import DjangoConfig
 from .....utils.django.setting_collector import SettingCollector
-from .._source import ConfigSource, resolve_config_source_prod
+from .._source import ConfigSource, resolve_config_source_prod, setup_readline
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -196,6 +196,7 @@ def init_prod() -> None:
     and writes it to .env.prod in KEY=VALUE format. Idempotent — skips
     keys that already exist in .env.prod.
     """
+    setup_readline()
     config = DjangoConfig()
     backend_root = config.django_backend_root
     collector = SettingCollector(backend_root)

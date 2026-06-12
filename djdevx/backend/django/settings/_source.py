@@ -2,7 +2,9 @@
 Shared source-resolution logic for configs and secrets.
 """
 
+import atexit
 import os
+import readline
 from enum import StrEnum
 from pathlib import Path
 
@@ -121,3 +123,15 @@ def resolve_secret_source_prod(secret, backend_root: Path) -> str:
     if secret.prod_default is not None:
         return SecretSource.PROD_DEFAULT
     return SecretSource.MISSING
+
+
+def setup_readline() -> None:
+    """Enable readline history for interactive prompts."""
+    ddx_dir = Path.home() / ".djdevx"
+    ddx_dir.mkdir(exist_ok=True)
+    histfile = ddx_dir / "readline_history"
+    try:
+        readline.read_history_file(str(histfile))
+    except FileNotFoundError:
+        pass
+    atexit.register(readline.write_history_file, str(histfile))

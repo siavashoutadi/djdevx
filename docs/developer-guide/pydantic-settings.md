@@ -671,6 +671,10 @@ For each non-SecretStr field discovered by the `SettingCollector`:
 2. **Prompt the user** with the field's type annotation for validation
 3. **Write to `backend/.env.prod`** in `KEY=VALUE` format via `dotenv.set_key()`
 
+`setup_readline()` is called before any prompts, giving readline history
+(up/down arrow navigation) and full line editing. History is persisted to
+`~/.djdevx/readline_history` across sessions.
+
 Input is validated against the pydantic type using `pydantic.TypeAdapter`:
 
 ```python
@@ -968,10 +972,14 @@ Templates                                     my_package_endpoint: str
                                         └───────┬───────┴────────┬────────┘
                                                 │                │
                                                 ▼                ▼
-                                        ddx settings      ddx settings
-                                        secrets init      configs init prod
-                                        → .secrets/       → .env.prod
+                                         ddx settings      ddx settings
+                                         secrets init      configs init prod
+                                         → .secrets/       → .env.prod
 ```
+
+`configs init prod` calls `setup_readline()` from `_source.py`, enabling
+readline history (up/down arrow navigation), line editing, and proper escape
+sequence handling. History is persisted to `~/.djdevx/readline_history`.
 
 No parallel declarations in djdevx source. No manifest files in `.djdevx/`.
 Updating a settings file is immediately reflected in all commands.
