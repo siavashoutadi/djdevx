@@ -19,7 +19,7 @@ class DatabaseSettings(AppBaseSettings):
             "postgres_port": 5432,
             "postgres_db": "postgres",
             "postgres_user": "postgres",
-            "postgres_password": "devpassword",
+            "postgres_password": "password",
         }
 
     @classmethod
