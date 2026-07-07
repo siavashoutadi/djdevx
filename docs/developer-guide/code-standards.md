@@ -82,6 +82,8 @@
   `BasePackage._derive_djdevx_root`)
 - Package integration tests live in
   `tests/backend/django/packages/test_<name>.py`
+- Tracking output verified in
+  `tests/backend/django/test_tracking_configs.py`
 
 > Read the [Testing Guide](testing.md) for detailed testing instructions and patterns.
 
