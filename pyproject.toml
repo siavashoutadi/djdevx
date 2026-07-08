@@ -8,13 +8,13 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "typer==0.25.1",
+    "typer==0.26.8",
     "jinja2==3.1.6",
-    "pillow==12.2.0",
-    "requests==2.34.0",
+    "pillow==12.3.0",
+    "requests==2.34.2",
     "tomlkit==0.15.0",
-    "cryptography==48.0.0",
-    "typing-extensions==4.15.0",
+    "cryptography==49.0.0",
+    "typing-extensions==4.16.0",
     "pyyaml>=6.0.3",
     "rich>=13.0",
     "pydantic[email]>=2.0",
@@ -35,7 +35,7 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "pre-commit==4.6.0",
-    "pytest==9.0.3",
+    "pytest==9.1.1",
     "pytest-xdist==3.8.0",
     "pyyaml==6.0.3",
 ]
