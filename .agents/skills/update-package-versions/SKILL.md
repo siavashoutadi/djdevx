@@ -32,7 +32,7 @@ Update Python package dependencies in `pyproject.toml` to their latest versions.
 2. For each dependency, fetch the latest stable version using the helper script:
 
    ```bash
-   uv run .opencode/skills/update-package-versions/scripts/get_latest_package_version.py <PACKAGE_NAME>
+   uv run .agents/skills/update-package-versions/scripts/get_latest_package_version.py <PACKAGE_NAME>
    ```
 
 3. Install the latest version:
