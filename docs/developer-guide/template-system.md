@@ -217,7 +217,7 @@ templates/new/backend/django/
 │   └── config.toml.j2
 ├── .editorconfig
 ├── .gitignore.j2
-├── .pre-commit-config.yaml.j2
+├── prek.toml.j2
 ├── {{backend_root}}/
 │   ├── .gitignore.j2
 │   ├── .python-version.j2

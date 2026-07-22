@@ -163,7 +163,7 @@ cython_debug/
 
 
 # Djdevx test files
-/tests/new/backend/data/django/backend/.pre-commit-config.yaml
+/tests/new/backend/data/django/backend/prek.toml
 /tests/new/backend/data/django/backend/pyproject.toml
 /tests/new/backend/data/django/backend/uv.lock
 

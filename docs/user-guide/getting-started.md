@@ -24,7 +24,7 @@ This scaffolds a complete Django project with:
 - `.devcontainer/` -- VS Code devcontainer with Docker Compose
 - `Dockerfile` -- Production-ready container image
 - `docker-compose.yaml` -- Local development services
-- `.pre-commit-config.yaml` -- Linting and formatting hooks
+- `prek.toml` -- Linting and formatting hooks
 - `pyproject.toml` -- Project metadata and dependencies
 - `.env` template -- Environment variable management
 - Pydantic-settings based configuration classes

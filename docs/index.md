@@ -9,7 +9,7 @@ streamline your workflow and make development enjoyable.
 ## Key Features
 
 - **Simplified Project Setup** -- Quickly scaffold Django applications with best
-  practices, including devcontainer, Docker, pre-commit, and environment
+  practices, including devcontainer, Docker, prek, and environment
   management out of the box.
 - **Package Management** -- Install and configure 30+ popular Django packages
   (`django-allauth`, `djangorestframework`, `django-debug-toolbar`, `channels`,

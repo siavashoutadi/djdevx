@@ -683,8 +683,8 @@ def test_new_django_backend(temp_dir):
     pyproject = tomllib.loads((temp_dir / "backend" / "pyproject.toml").read_text())
     assert pyproject["project"]["name"] == "my_project"
 
-    precommit = yaml.safe_load((temp_dir / ".pre-commit-config.yaml").read_text())
-    assert len(precommit["repos"]) > 0
+    prek_config = tomllib.loads((temp_dir / "prek.toml").read_text())
+    assert len(prek_config["repos"]) > 0
 ```
 
 ## Writing New Tests
@@ -733,12 +733,12 @@ All test subdirectories must contain an `__init__.py`.
 - Define file-specific fixtures locally rather than in conftest.py
 - Use `tmp_path` directly for simple Path-based tests
 
-### Linting and Pre-commit
+### Linting and Prek
 
-Before pushing, run the pre-commit hooks:
+Before pushing, run the prek hooks:
 
 ```bash
-uv run pre-commit run --all-files
+uv run prek run --all-files
 ```
 
 The repository uses ruff for linting and formatting. Test files should follow

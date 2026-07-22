@@ -10,7 +10,7 @@
 - **uv** -- Python package manager and runner
 - **tomlkit** -- TOML read/write for config tracking
 - **requests** -- HTTP client
-- **Ruff** -- Linter and formatter (via pre-commit)
+- **Ruff** -- Linter and formatter (via prek)
 - **Hatchling** -- Build system
 
 > Read the [Architecture](architecture.md) for a high-level overview of how these components fit together.
@@ -109,7 +109,7 @@
 
 ### Code Quality
 
-- All code formatted and linted with Ruff (via pre-commit)
+- All code formatted and linted with Ruff (via prek)
 - Extensive type hints required (including `Annotated` for Typer)
 - Descriptive naming over comments -- only comment complex logic
 - Docstrings for all classes and functions

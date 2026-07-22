@@ -16,7 +16,7 @@
 - **Comprehensive Command Suite**: From initializing projects to managing packages and adding features, `djdevx` provides a wide range of commands to simplify Django development.
 - **Devcontainer Support**: Pre-configured `.devcontainer` setup for Visual Studio Code, including Docker Compose integration and essential extensions for Django development.
 - **Devbox Integration**: Ready-to-use `devbox.json` and `.env` templates for creating consistent and portable development environments.
-- **Pre-commit Hooks**: Includes a robust `.pre-commit-config.yaml` with hooks for linting, formatting, and code quality checks.
+- **Prek Hooks**: Includes a robust `prek.toml` with hooks for linting, formatting, and code quality checks.
 - **Docker Support**: Provides `Dockerfile` for containerized development and deployment.
 - **Environment Variable Management**: Templates for `.env` files to simplify environment-specific configurations.
 - **Package Management**: Easily install and configure popular Django packages like `django-allauth`, `django-debug-toolbar`, `djangorestframework`, and more.

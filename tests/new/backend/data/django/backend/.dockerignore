@@ -6,7 +6,7 @@
 .secrets
 .git
 .gitignore
-.pre-commit-config.yaml
+prek.toml
 README.md
 biome.jsonc
 devbox.json

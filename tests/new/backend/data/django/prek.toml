@@ -1,0 +1,54 @@
+[[repos]]
+repo = "https://github.com/pre-commit/pre-commit-hooks"
+rev = "v6.0.0"
+hooks = [
+  { id = "trailing-whitespace" },
+  { id = "end-of-file-fixer" },
+  { id = "check-yaml" },
+  { id = "check-added-large-files" },
+  { id = "check-merge-conflict" },
+  { id = "check-case-conflict" },
+]
+
+[[repos]]
+repo = "https://github.com/astral-sh/ruff-pre-commit"
+rev = "v0.15.22"
+hooks = [
+  { id = "ruff", name = "ruff (linter)", args = ["--fix"] },
+  { id = "ruff-format", name = "ruff (formatter)" },
+]
+
+[[repos]]
+repo = "https://github.com/asottile/pyupgrade"
+rev = "v3.21.2"
+hooks = [
+  { id = "pyupgrade", args = ["--py313-plus"] },
+]
+
+[[repos]]
+repo = "https://github.com/adamchainz/django-upgrade"
+rev = "1.31.1"
+hooks = [
+  { id = "django-upgrade", args = ["--target-version", "5.2"] },
+]
+
+[[repos]]
+repo = "https://github.com/adamchainz/djade-pre-commit"
+rev = "1.9.0"
+hooks = [
+  { id = "djade", args = ["--target-version", "5.2"] },
+]
+
+[[repos]]
+repo = "https://github.com/sirwart/ripsecrets"
+rev = "v0.1.11"
+hooks = [
+  { id = "ripsecrets" },
+]
+
+[[repos]]
+repo = "https://github.com/shellcheck-py/shellcheck-py"
+rev = "v0.11.0.1"
+hooks = [
+  { id = "shellcheck" },
+]

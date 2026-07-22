@@ -94,7 +94,7 @@ def django(
         print_console.step("Initializing the git repository ...")
         init_git(dest_dir)
 
-    update_precommit_hooks(
+    update_prek_hooks(
         backend_root=backend_root_path, project_dir=dest_dir, git_init=git_init
     )
 
@@ -122,7 +122,7 @@ def install_dependencies(backend_root: Path):
     dev_dependencies: list[str] = [
         "factory_boy",
         "rich",
-        "pre-commit",
+        "prek",
         "django-upgrade",
         "ruff",
     ]
@@ -133,10 +133,10 @@ def install_dependencies(backend_root: Path):
         print_console.success(f"{pkg} is installed successfully.")
 
 
-def update_precommit_hooks(backend_root: Path, project_dir: Path, git_init: bool):
-    print_console.step("Updating pre-commit hooks ...")
+def update_prek_hooks(backend_root: Path, project_dir: Path, git_init: bool):
+    print_console.step("Updating prek hooks ...")
     uv = UvRunner(backend_root=backend_root)
-    uv.run_uv_command("run", "pre-commit", "autoupdate")
+    uv.run_uv_command("run", "prek", "update")
     if git_init and is_git_repository(project_dir):
         subprocess.check_call(["git", "add", "."], cwd=project_dir)
         subprocess.check_call(

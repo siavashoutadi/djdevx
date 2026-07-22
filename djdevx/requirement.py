@@ -41,14 +41,6 @@ def requirement():
             f"❌ Docker is not installed - [link={docker_link}]Install Docker[/link]"
         )
 
-    precommit_installed = system_tools.is_tool_installed("pre-commit")
-    if precommit_installed:
-        print_console.info("✅ pre-commit is installed")
-    else:
-        print_console.info(
-            "❌ pre-commit is not installed - Install it by 'uv tool install pre-commit'"
-        )
-
     if docker_installed and uv_installed and git_installed:
         print_console.success("All requirements are met!")
     else:

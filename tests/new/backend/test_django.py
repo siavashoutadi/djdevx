@@ -1,6 +1,5 @@
 from pathlib import Path
 import tomllib
-import yaml
 from typer.testing import CliRunner
 from djdevx.main import app
 
@@ -34,12 +33,15 @@ def test_new_django_backend(temp_dir):
     assert result.exit_code == 0
 
     expected_files = [
-        f.relative_to(DATA_DIR) for f in DATA_DIR.rglob("*") if f.is_file()
+        f.relative_to(DATA_DIR)
+        for f in DATA_DIR.rglob("*")
+        if f.is_file() and ".ruff_cache" not in f.parts
     ]
 
     exlude_files = [
         Path("backend/pyproject.toml"),
-        Path(".pre-commit-config.yaml"),
+        Path("prek.toml"),
+        Path("backend/templates/_base.html"),
     ]
 
     for relative_path in expected_files:
@@ -80,7 +82,7 @@ def test_new_django_backend(temp_dir):
     required_dev_dependencies = [
         "django-upgrade",
         "factory-boy",
-        "pre-commit",
+        "prek",
         "rich",
         "ruff",
     ]
@@ -115,14 +117,14 @@ def test_new_django_backend(temp_dir):
             f"Required dev dependency '{dep}' not found"
         )
 
-    precommit_config_path = temp_dir / ".pre-commit-config.yaml"
-    assert precommit_config_path.exists(), ".pre-commit-config.yaml file not created"
+    prek_config_path = temp_dir / "prek.toml"
+    assert prek_config_path.exists(), "prek.toml file not created"
 
-    with open(precommit_config_path, "r") as f:
-        precommit_config = yaml.safe_load(f)
+    with open(prek_config_path, "rb") as f:
+        prek_config = tomllib.load(f)
 
-    assert "repos" in precommit_config
-    repos = precommit_config["repos"]
+    assert "repos" in prek_config
+    repos = prek_config["repos"]
 
     expected_repos = [
         "https://github.com/pre-commit/pre-commit-hooks",
@@ -138,10 +140,10 @@ def test_new_django_backend(temp_dir):
 
     for expected_repo in expected_repos:
         assert expected_repo in repo_urls, (
-            f"Expected repo '{expected_repo}' not found in pre-commit config"
+            f"Expected repo '{expected_repo}' not found in prek config"
         )
 
-    precommit_hooks_repo = next(
+    prek_hooks_repo = next(
         (
             repo
             for repo in repos
@@ -149,7 +151,7 @@ def test_new_django_backend(temp_dir):
         ),
         None,
     )
-    assert precommit_hooks_repo is not None
+    assert prek_hooks_repo is not None
 
     expected_hook_ids = [
         "trailing-whitespace",
@@ -160,7 +162,7 @@ def test_new_django_backend(temp_dir):
         "check-case-conflict",
     ]
 
-    actual_hook_ids = [hook["id"] for hook in precommit_hooks_repo["hooks"]]
+    actual_hook_ids = [hook["id"] for hook in prek_hooks_repo["hooks"]]
 
     for hook_id in expected_hook_ids:
         assert hook_id in actual_hook_ids, (

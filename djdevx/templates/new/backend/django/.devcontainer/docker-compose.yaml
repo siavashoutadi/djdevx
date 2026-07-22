@@ -8,12 +8,12 @@ services:
       PYTHONBREAKPOINT: "ipdb.set_trace"
     volumes:
     - ../:/home/devuser/workspace:cached
-    - precommit-cache:/home/devuser/.cache/pre-commit
+    - prek-cache:/home/devuser/.cache/prek
     networks:
     - devcontainer
     command: sleep infinity
 volumes:
-  precommit-cache:
+  prek-cache:
     driver: local
 networks:
   devcontainer:
