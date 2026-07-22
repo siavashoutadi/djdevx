@@ -1,7 +1,7 @@
 ---
-name: update-precommit-versions
+name: update-prek-versions
 description: >
-  Updates pre-commit hook versions in .pre-commit-config.yaml to their latest
+  Updates prek hook versions in .pre-commit-config.yaml to their latest
   available versions.
 license: MIT
 compatibility: opencode
@@ -12,14 +12,14 @@ metadata:
 
 ## Task
 
-Update pre-commit hook versions in `.pre-commit-config.yaml` to their latest versions.
+Update prek hook versions in `.pre-commit-config.yaml` to their latest versions.
 
 ## Steps
 
 1. Update hook versions in `.pre-commit-config.yaml`:
 
    ```bash
-   uv run pre-commit autoupdate
+   uv run prek update
    ```
 
 2. Review the changes:
@@ -31,17 +31,17 @@ Update pre-commit hook versions in `.pre-commit-config.yaml` to their latest ver
 3. Install the updated hooks:
 
    ```bash
-   uv run pre-commit install --install-hooks
+   uv run prek install --prepare-hooks
    ```
 
 4. Run all hooks against all files to verify the new versions don't introduce failures:
 
    ```bash
-   uv run pre-commit run --all-files
+   uv run prek run --all-files
    ```
 
 5. Clean up old cached hook environments:
 
    ```bash
-   uv run pre-commit gc
+   uv run prek cache gc
    ```

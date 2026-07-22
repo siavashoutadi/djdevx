@@ -12,7 +12,7 @@ repos:
       - id: check-merge-conflict
       - id: check-case-conflict
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.9
+    rev: v0.15.22
     hooks:
       - id: ruff
         name: ruff (linter)
@@ -25,12 +25,12 @@ repos:
     -   id: pyupgrade
         args: [--py313-plus]
   - repo: https://github.com/adamchainz/django-upgrade
-    rev: 1.29.1
+    rev: 1.31.1
     hooks:
     -   id: django-upgrade
         args: [--target-version, "5.2"]
   - repo: https://github.com/adamchainz/djade-pre-commit
-    rev: 1.7.0
+    rev: 1.9.0
     hooks:
     -   id: djade
         args: [--target-version, "5.2"]
