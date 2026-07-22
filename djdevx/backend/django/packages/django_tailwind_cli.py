@@ -14,14 +14,14 @@ class DjangoTailwindCliPackage(BasePackage):
         "templates/_tw_dark_mode.html",
     ]
 
-    def after_uv_install(self) -> None:
+    def after_pixi_install(self) -> None:
         self._add_input_css_to_git_ignore()
         self._add_tailwind_build_to_docker_file()
 
     def after_copy_templates(self) -> None:
         self._add_tailwind_snippets()
 
-    def before_uv_remove(self) -> None:
+    def before_pixi_remove(self) -> None:
         self._remove_tailwind_snippets()
         self._remove_input_css_to_git_ignore()
         self._remove_tailwind_build_to_docker_file()
@@ -77,8 +77,8 @@ class DjangoTailwindCliPackage(BasePackage):
 
     def _add_tailwind_build_to_docker_file(self) -> None:
         """Add tailwind build command to Dockerfile."""
-        build_static_line = "uv run manage.py collectstatic --noinput && \\"
-        tailwind_build_line = "uv run manage.py tailwind build --force && \\"
+        build_static_line = "pixi run manage.py collectstatic --noinput && \\"
+        tailwind_build_line = "pixi run manage.py tailwind build --force && \\"
 
         docker_file = self.pm.dockerfile_path
         content = docker_file.read_text()
@@ -95,7 +95,7 @@ class DjangoTailwindCliPackage(BasePackage):
         docker_file = self.pm.dockerfile_path
         with fileinput.input(files=[docker_file], inplace=True) as f:
             for line in f:
-                if "uv run manage.py tailwind build" not in line:
+                if "pixi run manage.py tailwind build" not in line:
                     print(line, end="")
 
 

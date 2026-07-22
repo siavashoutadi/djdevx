@@ -7,7 +7,7 @@ generation and pydantic-settings for configuration management.
 ## High-Level Design
 
 ```
-CLI (Typer) ──► Commands ──► Module ──┬── Install dependencies (uv pip)
+CLI (Typer) ──► Commands ──► Module ──┬── Install dependencies (pixi)
                   ▲              ├── Copy Jinja2 templates
                   │              ├── Append settings / URLs
                   │              └── Generate secrets

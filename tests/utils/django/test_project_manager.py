@@ -38,7 +38,7 @@ class TestHasDependency:
     # --- Normalization: underscore vs hyphen ---
 
     def test_query_underscore_dep_hyphen(self) -> None:
-        """Query with underscore matches dep recorded with hyphen (uv normalises on install)."""
+        """Query with underscore matches dep recorded with hyphen (pixi normalises on install)."""
         pm = self._make_pm(["channels-redis>=4.0"])
         assert pm.has_dependency("channels_redis") is True
 

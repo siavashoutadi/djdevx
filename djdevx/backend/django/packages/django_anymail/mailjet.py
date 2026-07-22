@@ -3,7 +3,7 @@ from .._base import BasePackage
 
 class MailjetPackage(BasePackage):
     name = "django-anymail Mailjet"
-    packages = ["django-anymail[mailjet]<16"]
+    packages = ["django-anymail<16"]
 
 
 _pkg = MailjetPackage(__file__)

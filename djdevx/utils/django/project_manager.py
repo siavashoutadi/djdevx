@@ -1,5 +1,4 @@
 import re
-import tomllib
 import typer
 from pathlib import Path
 from typing import List, Optional
@@ -12,7 +11,7 @@ from ..devcontainer import (
     DockerComposeManager,
 )
 from ..console.print import print_console
-from .uv_runner import UvRunner
+from .pixi_runner import PixiRunner
 
 
 class DjangoProjectManager:
@@ -26,14 +25,14 @@ class DjangoProjectManager:
         self._config = DjangoConfig()
         self._template_manager = TemplateManager()
         self._devcontainer_compose = DockerComposeManager(self._config.project_root_dir)
-        self._uv_runner = UvRunner(backend_root=self._config.django_backend_root)
+        self._pixi_runner = PixiRunner(backend_root=self._config.django_backend_root)
         self.validate_django_project()
 
     def validate_django_project(self) -> None:
         """Validate that this is a Django project managed by djdevx."""
         if not self.project_path.exists():
             print_console.error(
-                "Could not find pyproject.toml. Are you running from the project directory?"
+                "Could not find project directory. Are you running from the project directory?"
             )
             raise typer.Exit(code=1)
 
@@ -135,21 +134,15 @@ class DjangoProjectManager:
 
     # Dependency Management
     def get_dependencies(self, group: str = "") -> list[str]:
-        """Get list of dependencies from pyproject.toml."""
-        with open(self.pyproject_path, "rb") as f:
-            pyproject_data = tomllib.load(f)
-
-        if group:
-            return pyproject_data.get("dependency-groups", {}).get(group, [])
-
-        return pyproject_data.get("project", {}).get("dependencies", [])
+        """Get list of dependencies via pixi list."""
+        return self._pixi_runner.list_dependencies(environment=group)
 
     def remove_dependency(self, dependency_name: str) -> None:
         """Remove a dependency"""
         if not self.has_dependency(dependency_name):
             return
 
-        self._uv_runner.remove_package(dependency_name)
+        self._pixi_runner.remove_package(dependency_name)
 
     def has_dependency(self, dependency_name: str, group: str = "") -> bool:
         """Check if a specific dependency is installed."""
@@ -177,7 +170,7 @@ class DjangoProjectManager:
             print_console.warning(f"Dependency {dependency} already exists.")
             return
 
-        self._uv_runner.add_package(dependency)
+        self._pixi_runner.add_package(dependency)
 
     @staticmethod
     def _normalize_pkg_name(name: str) -> str:

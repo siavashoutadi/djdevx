@@ -3,7 +3,7 @@ import typer
 from typing import Annotated
 from pathlib import Path
 
-from ....utils.django.uv_runner import UvRunner
+from ....utils.django.pixi_runner import PixiRunner
 from ....utils.django.project_manager import DjangoProjectManager
 
 
@@ -24,8 +24,8 @@ def startapp(
     """
     pm = DjangoProjectManager()
 
-    uv_runner = UvRunner()
-    uv_runner.run_manage_command("startapp", application_name)
+    pixi_runner = PixiRunner()
+    pixi_runner.run_manage_command("startapp", application_name)
 
     current_dir = Path(__file__).resolve().parent
     source_dir = current_dir.parent.parent.parent / "templates" / "django" / "startapp"

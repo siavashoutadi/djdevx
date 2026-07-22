@@ -55,6 +55,8 @@ RUN --mount=type=cache,target=/var/cache/apt \
     tar -xvzf uv-x86_64-unknown-linux-gnu.tar.gz && \
     chmod +x uv-x86_64-unknown-linux-gnu/* && \
     mv uv-x86_64-unknown-linux-gnu/* /usr/local/bin && \
+    curl -fsSL https://pixi.sh/install.sh | sh && \
+    mv /root/.pixi/bin/pixi /usr/local/bin/pixi && \
     cd /tmp && wget https://github.com/sirwart/ripsecrets/releases/download/v0.1.8/ripsecrets-0.1.8-x86_64-unknown-linux-gnu.tar.gz && \
     tar -xvzf ripsecrets-*.tar.gz && \
     chmod +x ripsecrets-0.1.8-x86_64-unknown-linux-gnu/* && \

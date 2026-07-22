@@ -14,7 +14,7 @@ import typer
 from ....utils.console.print import print_console
 from ....utils.django.project_manager import DjangoProjectManager
 from ....utils.django.secret_manager import SecretManager
-from ....utils.django.uv_runner import UvRunner
+from ....utils.django.pixi_runner import PixiRunner
 from ....utils.djdevx_config.backend.package_tracker import PackageTracker
 from ....utils.templates.manager import TemplateManager
 
@@ -142,23 +142,23 @@ class BasePackage:
     standard flow automatically.
 
     Install lifecycle (in order):
-        1. ``before_uv_install()``       — hook for pre-install checks/setup
+        1. ``before_pixi_install()``       — hook for pre-install checks/setup
         2. ``_check_required_dependencies()`` — exits if declared deps are missing
-        3. ``_uv_add_all()``             — adds packages / dev_packages via uv
-        4. ``after_uv_install()``        — hook for post-install uv steps
-        5. ``before_copy_templates()``   — hook before template rendering
-        6. ``_copy_templates()``         — renders and copies Jinja2 templates
-        7. ``after_copy_templates()``    — hook after template rendering
-        8. ``_write_package_tracking()`` — records install in .djdevx/config.toml
-        9. ``_generate_secrets()``       — runs secret_generators, writes .secrets/
+        3. ``_pixi_add_all()``             — adds packages / dev_packages via pixi
+        4. ``after_pixi_install()``        — hook for post-install pixi steps
+        5. ``before_copy_templates()``     — hook before template rendering
+        6. ``_copy_templates()``           — renders and copies Jinja2 templates
+        7. ``after_copy_templates()``      — hook after template rendering
+        8. ``_write_package_tracking()``   — records install in .djdevx/config.toml
+        9. ``_generate_secrets()``         — runs secret_generators, writes .secrets/
 
     Remove lifecycle (in order):
-        1. ``before_uv_remove()``        — hook for pre-remove steps
-        2. ``_uv_remove_all()``          — removes packages / dev_packages via uv
-        3. ``after_uv_remove()``         — hook for post-remove steps
-        4. ``_cleanup_files()``          — deletes auto-derived settings/URL files
-        5. ``_cleanup_extra_files()``    — deletes files_to_remove / folders_to_remove
-        6. ``_remove_tracking()``        — removes entry from .djdevx/config.toml
+        1. ``before_pixi_remove()``        — hook for pre-remove steps
+        2. ``_pixi_remove_all()``          — removes packages / dev_packages via pixi
+        3. ``after_pixi_remove()``         — hook for post-remove steps
+        4. ``_cleanup_files()``            — deletes auto-derived settings/URL files
+        5. ``_cleanup_extra_files()``      — deletes files_to_remove / folders_to_remove
+        6. ``_remove_tracking()``          — removes entry from .djdevx/config.toml
 
     Path auto-derivation from ``__file__``:
         Root packages  (packages/name.py)      → settings_file: name.py
@@ -181,10 +181,10 @@ class BasePackage:
     # Human-readable display name used in CLI step/success messages.
     name: str = ""
 
-    # PyPI package names added to the project via ``uv add`` during install.
+    # Package names added to the project via ``pixi add`` during install.
     packages: list[str] = []
 
-    # PyPI package names added to the dev dependency group via ``uv add --group dev``.
+    # Package names added to the dev feature via ``pixi add --feature dev``.
     dev_packages: list[str] = []
 
     # Other djdevx package names that must already be installed before this one.
@@ -245,7 +245,7 @@ class BasePackage:
         self._template_path = deriver.derive_template_path(self.template_path)
 
         self._pm: Optional[DjangoProjectManager] = None
-        self._uv: Optional[UvRunner] = None
+        self._pixi: Optional[PixiRunner] = None
         self._secret_manager: Optional[SecretManager] = None
         self._install_context: dict[str, Any] = {}
 
@@ -273,10 +273,10 @@ class BasePackage:
                     for install_param in captured_install_params
                 }
 
-                self.before_uv_install()
+                self.before_pixi_install()
                 self._check_required_dependencies()
-                self._uv_add_all()
-                self.after_uv_install()
+                self._pixi_add_all()
+                self.after_pixi_install()
                 self.before_copy_templates()
 
                 for install_param in captured_install_params:
@@ -369,11 +369,11 @@ class BasePackage:
         return self._pm
 
     @property
-    def uv(self) -> UvRunner:
-        """Lazy-loaded UvRunner."""
-        if self._uv is None:
-            self._uv = UvRunner()
-        return self._uv
+    def pixi(self) -> PixiRunner:
+        """Lazy-loaded PixiRunner."""
+        if self._pixi is None:
+            self._pixi = PixiRunner()
+        return self._pixi
 
     @property
     def secret_manager(self) -> SecretManager:
@@ -382,12 +382,12 @@ class BasePackage:
             self._secret_manager = SecretManager(self.pm.project_path)
         return self._secret_manager
 
-    def _uv_add_all(self) -> None:
-        """Add all packages and dev_packages via uv."""
+    def _pixi_add_all(self) -> None:
+        """Add all packages and dev_packages via pixi."""
         for pkg in self.packages:
-            self.uv.add_package(pkg)
+            self.pixi.add_package(pkg)
         for pkg in self.dev_packages:
-            self.uv.add_package(pkg, group="dev")
+            self.pixi.add_package(pkg, feature="dev")
 
     def _strip_package_extras(self, pkg: str) -> str:
         """Strip extras and version specifiers from package name."""
@@ -400,9 +400,9 @@ class BasePackage:
         """Remove package if it exists."""
         pkg_base = self._strip_package_extras(pkg)
         if self.pm.has_dependency(pkg_base, group):
-            self.uv.remove_package(pkg_base, group=group)
+            self.pixi.remove_package(pkg_base, feature=group)
 
-    def _uv_remove_all(self) -> None:
+    def _pixi_remove_all(self) -> None:
         """Remove all packages and dev_packages."""
         for pkg in self.packages:
             self._remove_package_if_exists(pkg)
@@ -466,12 +466,12 @@ class BasePackage:
                 print_console.info(f"\n> ddx backend django packages {dep} install")
                 raise typer.Exit(code=1)
 
-    def before_uv_install(self) -> None:
-        """Hook called before uv install. Override in subclasses for pre-install logic."""
+    def before_pixi_install(self) -> None:
+        """Hook called before pixi install. Override in subclasses for pre-install logic."""
         ...
 
-    def after_uv_install(self) -> None:
-        """Hook called after uv install. Override in subclasses for post-install logic."""
+    def after_pixi_install(self) -> None:
+        """Hook called after pixi install. Override in subclasses for post-install logic."""
         ...
 
     def before_copy_templates(self) -> None:
@@ -482,12 +482,12 @@ class BasePackage:
         """Hook called after templates are copied. Override in subclasses."""
         ...
 
-    def before_uv_remove(self) -> None:
-        """Hook called before uv remove. Override in subclasses for pre-remove logic."""
+    def before_pixi_remove(self) -> None:
+        """Hook called before pixi remove. Override in subclasses for pre-remove logic."""
         ...
 
-    def after_uv_remove(self) -> None:
-        """Hook called after uv remove. Override in subclasses for post-remove logic."""
+    def after_pixi_remove(self) -> None:
+        """Hook called after pixi remove. Override in subclasses for post-remove logic."""
         ...
 
     def _write_package_tracking(self) -> None:
@@ -509,10 +509,10 @@ class BasePackage:
 
     def install(self) -> None:
         """Install the package."""
-        self.before_uv_install()
+        self.before_pixi_install()
         self._check_required_dependencies()
-        self._uv_add_all()
-        self.after_uv_install()
+        self._pixi_add_all()
+        self.after_pixi_install()
         self.before_copy_templates()
         self._copy_templates()
         self.after_copy_templates()
@@ -521,9 +521,9 @@ class BasePackage:
 
     def remove(self) -> None:
         """Remove the package."""
-        self.before_uv_remove()
-        self._uv_remove_all()
-        self.after_uv_remove()
+        self.before_pixi_remove()
+        self._pixi_remove_all()
+        self.after_pixi_remove()
         self._cleanup_files()
         self._cleanup_extra_files()
         self._remove_tracking()
@@ -579,12 +579,12 @@ class BasePackage:
 
         @functools.wraps(method)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
-            # Reset lazy-loaded project manager and uv runner so each command
+            # Reset lazy-loaded project manager and pixi runner so each command
             # invocation re-discovers the project path from the current working
             # directory. This is essential when the module-level _pkg instance is
             # shared across multiple test calls in the same process.
             self._pm = None
-            self._uv = None
+            self._pixi = None
             print_console.step(step_msg)
             result = method(*args, **kwargs)
             print_console.success(success_msg)
@@ -593,7 +593,8 @@ class BasePackage:
         # If the underlying function has an injected __signature__ (from __init_subclass__),
         # functools.wraps copies it via __func__.__signature__, which includes `self`.
         # Fix by re-computing the signature from the bound method (which strips `self`).
-        if hasattr(method, "__func__") and hasattr(method.__func__, "__signature__"):
+        func = getattr(method, "__func__", None)
+        if func is not None and hasattr(func, "__signature__"):
             bound_sig = inspect.signature(method)
             wrapper.__signature__ = bound_sig  # type: ignore[attr-defined]
 

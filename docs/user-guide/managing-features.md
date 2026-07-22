@@ -24,7 +24,7 @@ ddx backend django feature --help
 
 When you install a feature, djdevx:
 
-1. **Adds dependencies** -- Runs `uv add` for required Python packages
+1. **Adds dependencies** -- Runs `pixi add` for required Python packages
 2. **Copies templates** -- Renders Jinja2 templates into the project
 3. **Appends settings** -- Modifies `INSTALLED_APPS`, `MIDDLEWARE`, templates, etc.
 4. **Tracks installation** -- Records the installation under `.djdevx/`

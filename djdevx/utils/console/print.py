@@ -1,5 +1,6 @@
 import difflib
 from rich.console import Console as RichConsole
+from rich.markup import escape
 from rich.table import Table
 from rich.text import Text
 
@@ -16,28 +17,28 @@ class PrintConsole:
 
     def step(self, line: str):
         """Print a step message in cyan."""
-        self._console.print(f"[bold cyan]{line}[/bold cyan]")
+        self._console.print(f"[bold cyan]{escape(line)}[/bold cyan]")
 
     def success(self, line: str):
         """Print a success message in green."""
-        self._console.print(f"[bold green]{line}[/bold green]")
+        self._console.print(f"[bold green]{escape(line)}[/bold green]")
 
     def error(self, line: str):
         """Print an error message in red."""
-        self._console.print(f"[bold red]{line}[/bold red]")
+        self._console.print(f"[bold red]{escape(line)}[/bold red]")
 
     def info(self, line: str):
         """Print an info message without styling."""
-        self._console.print(f"{line}")
+        self._console.print(escape(line))
 
     def warning(self, line: str):
         """Print a warning message in yellow."""
-        self._console.print(f"[bold yellow]{line}[/bold yellow]")
+        self._console.print(f"[bold yellow]{escape(line)}[/bold yellow]")
 
     def list(self, items: list):
         """Print a list of items with bullet points."""
         for item in items:
-            self._console.print(f"🔹[bold]{item}[/bold]")
+            self._console.print(f"🔹[bold]{escape(item)}[/bold]")
 
     def table(self, table: Table) -> None:
         """Render a Rich Table to the console."""

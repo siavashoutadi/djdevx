@@ -8,49 +8,49 @@ execution.
 
 ```bash
 # Run all tests (parallel, auto-detected CPU count)
-uv run pytest
+pixi run pytest
 
 # Run with verbose output
-uv run pytest -v
+pixi run pytest -v
 
 # Stop on first failure
-uv run pytest -x
+pixi run pytest -x
 
 # Run a specific test file
-uv run pytest tests/backend/django/packages/test_whitenoise.py
+pixi run pytest tests/backend/django/packages/test_whitenoise.py
 
 # Run a specific test class
-uv run pytest tests/backend/django/packages/test_tracking_configs.py::TestFlatPackageTracking
+pixi run pytest tests/backend/django/packages/test_tracking_configs.py::TestFlatPackageTracking
 
 # Run a specific test function
-uv run pytest tests/backend/django/packages/test_whitenoise.py::test_whitenoise_install_and_remove
+pixi run pytest tests/backend/django/packages/test_whitenoise.py::test_whitenoise_install_and_remove
 
 # Run tests matching a keyword expression
-uv run pytest -k "database"
+pixi run pytest -k "database"
 
 # Run tests matching a keyword class/function name
-uv run pytest -k "TestIsSecretStr"
-uv run pytest -k "test_creates_config"
+pixi run pytest -k "TestIsSecretStr"
+pixi run pytest -k "test_creates_config"
 
 # List all collected tests without running
-uv run pytest --collect-only
-uv run pytest tests/backend/django/ --collect-only
+pixi run pytest --collect-only
+pixi run pytest tests/backend/django/ --collect-only
 
 # Enter debugger on first failure
-uv run pytest --pdb -x
+pixi run pytest --pdb -x
 
 # Run only unit tests (marker-based filtering)
-uv run pytest -m unit
+pixi run pytest -m unit
 
 # Run only integration tests (slower)
-uv run pytest -m integration
+pixi run pytest -m integration
 
 # Skip slow tests
-uv run pytest -m "not slow"
+pixi run pytest -m "not slow"
 
 # Control parallelism (e.g., disable parallel execution)
-uv run pytest -n 0
-uv run pytest -p no:xdist
+pixi run pytest -n 0
+pixi run pytest -p no:xdist
 ```
 
 ## Test Configuration
@@ -88,7 +88,7 @@ Use marker expressions to filter:
 
 ```bash
 # Skip slow tests
-uv run pytest -m "not slow"
+pixi run pytest -m "not slow"
 ```
 
 To add a marker to a test:
@@ -106,7 +106,7 @@ def test_something_fast():
 Before running tests, install dev dependencies:
 
 ```bash
-uv sync --group dev
+pixi install --feature dev
 ```
 
 ## Test Structure
@@ -738,7 +738,7 @@ All test subdirectories must contain an `__init__.py`.
 Before pushing, run the prek hooks:
 
 ```bash
-uv run prek run --all-files
+pixi run prek run --all-files
 ```
 
 The repository uses ruff for linting and formatting. Test files should follow

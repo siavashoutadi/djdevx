@@ -24,7 +24,7 @@ ddx backend django packages --help
 
 When you run `install`, djdevx:
 
-1. **Adds dependencies** -- Runs `uv add` for the package's PyPI dependencies
+1. **Adds dependencies** -- Runs `pixi add` for the package's PyPI dependencies
 2. **Copies templates** -- Renders Jinja2 templates into the project
 3. **Appends settings** -- Adds the package to `INSTALLED_APPS`, `MIDDLEWARE`, etc.
 4. **Appends URL patterns** -- Registers the package's URLs in the project
@@ -32,7 +32,7 @@ When you run `install`, djdevx:
 6. **Tracks installation** -- Records the installation under `.djdevx/`
 
 When you run `remove`, the reverse happens: dependencies are removed via
-`uv remove`, template files are deleted, and tracking is cleaned up.
+`pixi remove`, template files are deleted, and tracking is cleaned up.
 
 ## Example Packages
 

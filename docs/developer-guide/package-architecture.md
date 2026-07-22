@@ -19,8 +19,8 @@ class MyPackage(BasePackage):
 | Attribute | Type | Description |
 |-----------|------|-------------|
 | `name` | `str` | Unique package identifier (used in CLI commands and messages) |
-| `packages` | `list[str]` | PyPI package names to install via `uv add` |
-| `dev_packages` | `list[str]` | Dev-only PyPI dependencies added via `uv add --group dev` |
+| `packages` | `list[str]` | PyPI package names to install via `pixi add` |
+| `dev_packages` | `list[str]` | Dev-only PyPI dependencies added via `pixi add --feature dev` |
 | `required_dependencies` | `list[str]` | Other djdevx package names that must be installed first; install exits with an error and hint if missing |
 | `install_params` | `list[InstallParam]` | Parameters to collect at install time — auto-generates Typer CLI options and Jinja2 template context |
 | `secret_generators` | `dict[str, Callable]` | Maps pydantic `SecretStr` field names to generator callables; called at end of install, idempotent |
@@ -80,15 +80,15 @@ Packages can override these methods to customize behavior:
 
 | Hook | Timing |
 |------|--------|
-| `before_uv_install()` | Before running `uv add` |
-| `after_uv_install()` | After running `uv add` |
+| `before_pixi_install()` | Before running `pixi add` |
+| `after_pixi_install()` | After running `pixi add` |
 | `before_copy_templates()` | Before copying template files |
 | `after_copy_templates()` | After copying template files |
-| `before_uv_remove()` | Before running `uv remove` |
-| `after_uv_remove()` | After running `uv remove` |
+| `before_pixi_remove()` | Before running `pixi remove` |
+| `after_pixi_remove()` | After running `pixi remove` |
 
 Hooks can access install-time parameter values via `self._install_context`.
-This is useful for conditional logic in `before_uv_install()`:
+This is useful for conditional logic in `before_pixi_install()`:
 
 ```python
 class AllauthAccountPackage(BasePackage):
@@ -96,7 +96,7 @@ class AllauthAccountPackage(BasePackage):
         InstallParam(name="is_profanity_for_username_enabled", type_=bool, default=True, prompt="Enable profanity filter for username"),
     ]
 
-    def before_uv_install(self) -> None:
+    def before_pixi_install(self) -> None:
         if self._install_context.get("is_profanity_for_username_enabled", True):
             self.packages = list(self.packages) + ["better-profanity"]
 ```
@@ -127,25 +127,25 @@ class MfaPackage(BasePackage):
         totp_period: Annotated[int, typer.Option(min=15, max=300)] = 30,
         totp_digits: Annotated[int, typer.Option(min=6, max=8)] = 6,
     ) -> None:
-        self.before_uv_install()
-        self._uv_add_all()
-        self.after_uv_install()
+        self.before_pixi_install()
+        self._pixi_add_all()
+        self.after_pixi_install()
         self.before_copy_templates()
         self._copy_templates(context={...})
         self.after_copy_templates()
 ```
 
 When `install()` is fully overridden, you must call the lifecycle hooks
-(`before_uv_install`, `_uv_add_all`, `_copy_templates`, etc.) yourself.
+(`before_pixi_install`, `_pixi_add_all`, `_copy_templates`, etc.) yourself.
 
 The `remove()` method can also be overridden — for example, to skip removing
 shared dependencies:
 
 ```python
 def remove(self) -> None:
-    self.before_uv_remove()
+    self.before_pixi_remove()
     self._cleanup_files()     # remove config files
-    # Don't call _uv_remove_all() — parent package still needs django-allauth
+    # Don't call _pixi_remove_all() — parent package still needs django-allauth
     shutil.rmtree(self.pm.project_path / "authentication", ignore_errors=True)
 ```
 
@@ -209,7 +209,7 @@ templates/django/<template_path>/
 ```
 
 If the template directory does not exist, template copying is silently
-skipped (templates are optional — some packages only need `uv add`).
+skipped (templates are optional — some packages only need `pixi add`).
 
 ### Package Tracking
 

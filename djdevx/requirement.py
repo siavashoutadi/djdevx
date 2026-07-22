@@ -14,13 +14,13 @@ def requirement():
     """
     print_console.step("Checking the requirement ...")
 
-    uv_installed = system_tools.is_tool_installed("uv")
-    if uv_installed:
-        print_console.info("✅ uv is installed")
+    pixi_installed = system_tools.is_tool_installed("pixi")
+    if pixi_installed:
+        print_console.info("✅ pixi is installed")
     else:
-        uv_link = "https://docs.astral.sh/uv/getting-started/installation/"
+        pixi_link = "https://pixi.sh"
         print_console.info(
-            f"❌ uv is not installed - [link={uv_link}]Install uv[/link]"
+            f"❌ pixi is not installed - [link={pixi_link}]Install pixi[/link]"
         )
 
     git_installed = system_tools.is_tool_installed("git")
@@ -41,7 +41,15 @@ def requirement():
             f"❌ Docker is not installed - [link={docker_link}]Install Docker[/link]"
         )
 
-    if docker_installed and uv_installed and git_installed:
+    prek_installed = system_tools.is_tool_installed("prek")
+    if prek_installed:
+        print_console.info("✅ prek is installed")
+    else:
+        print_console.info(
+            "❌ prek is not installed - Install it by 'pipx install prek' or 'uv tool install prek'"
+        )
+
+    if docker_installed and pixi_installed and git_installed:
         print_console.success("All requirements are met!")
     else:
         print_console.error(

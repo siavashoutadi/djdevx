@@ -26,3 +26,7 @@ db.sqlite3
 # Secrets — never commit these
 .secrets/
 .secrets.prod/
+
+# pixi environments
+.pixi/*
+!.pixi/config.toml

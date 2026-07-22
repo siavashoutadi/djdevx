@@ -35,19 +35,19 @@ class AllauthAccountPackage(BasePackage):
         ),
     ]
 
-    def before_uv_install(self) -> None:
-        """Conditionally add better-profanity before uv install."""
+    def before_pixi_install(self) -> None:
+        """Conditionally add better-profanity before pixi install."""
         if self._install_context.get("is_profanity_for_username_enabled", True):
             if "better-profanity" not in self.packages:
                 self.packages = list(self.packages) + ["better-profanity"]
 
-    def after_uv_remove(self) -> None:
+    def after_pixi_remove(self) -> None:
         shutil.rmtree(self.pm.project_path / "authentication", ignore_errors=True)
         (self.pm.project_path / "static" / "css" / "vendor" / "auth.css").unlink(
             missing_ok=True
         )
         if self.pm.has_dependency("better-profanity"):
-            self.uv.remove_package("better-profanity")
+            self.pixi.remove_pypi_package("better-profanity")
 
 
 _pkg = AllauthAccountPackage(__file__)

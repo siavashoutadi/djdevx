@@ -90,7 +90,7 @@ def test_django_tailwind_cli_install_and_remove(temp_dir):
     dockerfile_path = backend_dir / "Dockerfile"
     if dockerfile_path.exists():
         dockerfile_content = dockerfile_path.read_text()
-        assert "uv run manage.py tailwind build" in dockerfile_content, (
+        assert "pixi run manage.py tailwind build" in dockerfile_content, (
             "Tailwind build command not added to Dockerfile"
         )
 
@@ -140,7 +140,7 @@ def test_django_tailwind_cli_install_and_remove(temp_dir):
     # Check that Dockerfile modifications were removed
     if dockerfile_path.exists():
         dockerfile_content = dockerfile_path.read_text()
-        assert "uv run manage.py tailwind build" not in dockerfile_content, (
+        assert "pixi run manage.py tailwind build" not in dockerfile_content, (
             "Tailwind build command not removed from Dockerfile"
         )
 

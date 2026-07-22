@@ -64,7 +64,7 @@ class DjangoSnakeoilPackage(BasePackage):
     def after_copy_templates(self) -> None:
         self._add_snakeoil_snippets()
 
-    def before_uv_remove(self) -> None:
+    def before_pixi_remove(self) -> None:
         self._remove_snakeoil_snippets()
 
     def _add_snakeoil_snippets(self) -> None:

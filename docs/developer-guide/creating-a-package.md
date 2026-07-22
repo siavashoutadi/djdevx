@@ -178,10 +178,10 @@ configs` and `ddx backend django settings secrets` CLI commands.
 The full install lifecycle is:
 
 ```
-1. before_uv_install()
+1. before_pixi_install()
 2. _check_required_dependencies()
-3. _uv_add_all()
-4. after_uv_install()
+3. _pixi_add_all()
+4. after_pixi_install()
 5. before_copy_templates()
 6. _copy_templates()
 7. after_copy_templates()
@@ -197,7 +197,7 @@ Override hooks to customize behavior:
 class DjangoExamplePackage(BasePackage):
     ...
 
-    def after_uv_install(self) -> None:
+    def after_pixi_install(self) -> None:
         """Run additional setup after pip install."""
         ...
 
@@ -210,12 +210,12 @@ class DjangoExamplePackage(BasePackage):
 
 | Hook | Timing |
 |------|--------|
-| `before_uv_install()` | Before running `uv add` |
-| `after_uv_install()` | After running `uv add` |
+| `before_pixi_install()` | Before running `pixi add` |
+| `after_pixi_install()` | After running `pixi add` |
 | `before_copy_templates()` | Before copying template files |
 | `after_copy_templates()` | After copying template files |
-| `before_uv_remove()` | Before running `uv remove` |
-| `after_uv_remove()` | After running `uv remove` |
+| `before_pixi_remove()` | Before running `pixi remove` |
+| `after_pixi_remove()` | After running `pixi remove` |
 
 ## Step 5: Registration
 

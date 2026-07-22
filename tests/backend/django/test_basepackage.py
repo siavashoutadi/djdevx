@@ -163,14 +163,14 @@ class TestBasePackageInitialization:
             pkg = BasePackage("/path/to/packages/whitenoise.py")
             assert pkg._settings_file == "whitenoise.py"
 
-    def test_lazy_loading_of_pm_and_uv(self):
-        """PM and UV utilities should be lazily loaded."""
+    def test_lazy_loading_of_pm_and_pixi(self):
+        """PM and pixi utilities should be lazily loaded."""
         with patch.object(BasePackage, "_derive_djdevx_root") as mock_root:
             mock_root.return_value = Path("/home/siavash/code/djdevx")
             pkg = BasePackage("/path/to/packages/whitenoise.py")
             # Before access, should be None
             assert pkg._pm is None
-            assert pkg._uv is None
+            assert pkg._pixi is None
 
 
 class TestPathEdgeCases:
@@ -321,12 +321,12 @@ class TestInstallParamsInjection:
         pkg = self._make_install_param_pkg()
 
         call_order = []
-        pkg.before_uv_install = lambda: call_order.append("before_uv_install")
+        pkg.before_pixi_install = lambda: call_order.append("before_pixi_install")
         pkg._check_required_dependencies = lambda: call_order.append(
             "_check_required_deps"
         )
-        pkg._uv_add_all = lambda: call_order.append("_uv_add_all")
-        pkg.after_uv_install = lambda: call_order.append("after_uv_install")
+        pkg._pixi_add_all = lambda: call_order.append("_pixi_add_all")
+        pkg.after_pixi_install = lambda: call_order.append("after_pixi_install")
         pkg.before_copy_templates = lambda: call_order.append("before_copy_templates")
         pkg._copy_templates = lambda context=None: call_order.append("_copy_templates")
         pkg.after_copy_templates = lambda: call_order.append("after_copy_templates")
@@ -337,10 +337,10 @@ class TestInstallParamsInjection:
         pkg.install(color="red", size="small")
 
         assert call_order == [
-            "before_uv_install",
+            "before_pixi_install",
             "_check_required_deps",
-            "_uv_add_all",
-            "after_uv_install",
+            "_pixi_add_all",
+            "after_pixi_install",
             "before_copy_templates",
             "_copy_templates",
             "after_copy_templates",
@@ -348,7 +348,7 @@ class TestInstallParamsInjection:
         ]
 
     def test_install_context_set_before_before_uv_install_hook(self):
-        """_install_context is populated before before_uv_install() is called."""
+        """_install_context is populated before before_pixi_install() is called."""
         pkg = self._make_install_param_pkg()
 
         context_at_hook_time = {}
@@ -356,10 +356,10 @@ class TestInstallParamsInjection:
         def capture_context():
             context_at_hook_time.update(pkg._install_context)
 
-        pkg.before_uv_install = capture_context
+        pkg.before_pixi_install = capture_context
         pkg._check_required_dependencies = lambda: None
-        pkg._uv_add_all = lambda: None
-        pkg.after_uv_install = lambda: None
+        pkg._pixi_add_all = lambda: None
+        pkg.after_pixi_install = lambda: None
         pkg.before_copy_templates = lambda: None
         pkg._copy_templates = lambda context=None: None
         pkg.after_copy_templates = lambda: None
@@ -385,12 +385,12 @@ class TestHookOrdering:
         pkg = self._make_base_pkg()
         call_order = []
 
-        pkg.before_uv_install = lambda: call_order.append("before_uv_install")
+        pkg.before_pixi_install = lambda: call_order.append("before_pixi_install")
         pkg._check_required_dependencies = lambda: call_order.append(
             "_check_required_dependencies"
         )
-        pkg._uv_add_all = lambda: call_order.append("_uv_add_all")
-        pkg.after_uv_install = lambda: call_order.append("after_uv_install")
+        pkg._pixi_add_all = lambda: call_order.append("_pixi_add_all")
+        pkg.after_pixi_install = lambda: call_order.append("after_pixi_install")
         pkg.before_copy_templates = lambda: call_order.append("before_copy_templates")
         pkg._copy_templates = lambda context=None: call_order.append("_copy_templates")
         pkg.after_copy_templates = lambda: call_order.append("after_copy_templates")
@@ -401,10 +401,10 @@ class TestHookOrdering:
         pkg.install()
 
         assert call_order == [
-            "before_uv_install",
+            "before_pixi_install",
             "_check_required_dependencies",
-            "_uv_add_all",
-            "after_uv_install",
+            "_pixi_add_all",
+            "after_pixi_install",
             "before_copy_templates",
             "_copy_templates",
             "after_copy_templates",
@@ -416,9 +416,9 @@ class TestHookOrdering:
         pkg = self._make_base_pkg()
         call_order = []
 
-        pkg.before_uv_remove = lambda: call_order.append("before_uv_remove")
-        pkg._uv_remove_all = lambda: call_order.append("_uv_remove_all")
-        pkg.after_uv_remove = lambda: call_order.append("after_uv_remove")
+        pkg.before_pixi_remove = lambda: call_order.append("before_pixi_remove")
+        pkg._pixi_remove_all = lambda: call_order.append("_pixi_remove_all")
+        pkg.after_pixi_remove = lambda: call_order.append("after_pixi_remove")
         pkg._cleanup_files = lambda: call_order.append("_cleanup_files")
         pkg._cleanup_extra_files = lambda: call_order.append("_cleanup_extra_files")
         pkg._remove_tracking = lambda: call_order.append("_remove_tracking")
@@ -426,9 +426,9 @@ class TestHookOrdering:
         pkg.remove()
 
         assert call_order == [
-            "before_uv_remove",
-            "_uv_remove_all",
-            "after_uv_remove",
+            "before_pixi_remove",
+            "_pixi_remove_all",
+            "after_pixi_remove",
             "_cleanup_files",
             "_cleanup_extra_files",
             "_remove_tracking",
@@ -536,7 +536,7 @@ class TestShowIfConditionalPrompt:
         """When gating param is True and dependent param is empty, typer.prompt is called."""
         pkg = self._make_show_if_pkg()
         pkg._check_required_dependencies = lambda: None
-        pkg._uv_add_all = lambda: None
+        pkg._pixi_add_all = lambda: None
         pkg._copy_templates = lambda context=None: None
 
         with patch(
@@ -554,7 +554,7 @@ class TestShowIfConditionalPrompt:
         """When gating param is False, conditional prompt is not invoked."""
         pkg = self._make_show_if_pkg()
         pkg._check_required_dependencies = lambda: None
-        pkg._uv_add_all = lambda: None
+        pkg._pixi_add_all = lambda: None
         pkg._copy_templates = lambda context=None: None
 
         with patch("djdevx.backend.django.packages._base.typer.prompt") as mock_prompt:
@@ -566,7 +566,7 @@ class TestShowIfConditionalPrompt:
         """When the dependent param already has a value, no prompt is issued."""
         pkg = self._make_show_if_pkg()
         pkg._check_required_dependencies = lambda: None
-        pkg._uv_add_all = lambda: None
+        pkg._pixi_add_all = lambda: None
         pkg._copy_templates = lambda context=None: None
 
         with patch("djdevx.backend.django.packages._base.typer.prompt") as mock_prompt:

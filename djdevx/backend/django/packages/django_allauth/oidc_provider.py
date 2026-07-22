@@ -16,7 +16,7 @@ class OidcProviderPackage(BasePackage):
         "idp_oidc_private_key": generate_rsa_private_key,
     }
 
-    def before_uv_install(self) -> None:
+    def before_pixi_install(self) -> None:
         """Ensure django-allauth account is installed before proceeding."""
         account_settings_path = (
             self.pm.packages_settings_path / "django_allauth_account.py"

@@ -4,4 +4,23 @@ version = "0.1.0"
 description = "{{ project_description }}"
 requires-python = ">={{ python_version }}"
 readme = "README.md"
-dependencies = []
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "linux-64", "linux-aarch64", "osx-64"]
+
+[tool.pixi.dependencies]
+python = ">={{ python_version }}"
+
+[tool.pixi.feature.dev.tasks]
+runserver = "python manage.py runserver 0.0.0.0:8000"
+migrate = "python manage.py migrate"
+shell = "python manage.py shell"
+
+[tool.pixi.feature.dev.activation.env]
+DEBUG = "True"
+
+[tool.pixi.environments]
+default = { features = ["dev"], solve-group = "default" }
+dev = { features = ["dev"], solve-group = "default" }
+prod = { features = [], solve-group = "default" }

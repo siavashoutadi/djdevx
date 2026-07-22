@@ -10,7 +10,7 @@ class DjangoHtmxPackage(BasePackage):
     def after_copy_templates(self) -> None:
         self._add_htmx_snippets()
 
-    def after_uv_remove(self) -> None:
+    def after_pixi_remove(self) -> None:
         self._remove_htmx_snippets()
 
     def _add_htmx_snippets(self) -> None:

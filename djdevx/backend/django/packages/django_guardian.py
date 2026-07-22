@@ -8,7 +8,7 @@ class DjangoGuardianPackage(BasePackage):
     def after_copy_templates(self) -> None:
         self._add_guardian_mixin()
 
-    def before_uv_remove(self) -> None:
+    def before_pixi_remove(self) -> None:
         self._remove_guardian_mixin()
 
     def _add_guardian_mixin(self) -> None:

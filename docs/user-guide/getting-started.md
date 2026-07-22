@@ -49,12 +49,12 @@ confirms everything is present before you start development.
 
 ## Navigate the Project
 
-The scaffolded project uses `uv` as its package manager. Navigate to the
+The scaffolded project uses `pixi` as its package manager. Navigate to the
 backend directory and start the development server:
 
 ```bash
 cd backend
-uv run python manage.py runserver
+pixi run python manage.py runserver
 ```
 
 ## Install a Package

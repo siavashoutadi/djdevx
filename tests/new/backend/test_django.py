@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 import tomllib
 from typer.testing import CliRunner
@@ -87,33 +88,46 @@ def test_new_django_backend(temp_dir):
         "ruff",
     ]
 
-    project_dependencies = [
-        dep.split(">")[0]
-        .split("<")[0]
-        .split("=")[0]
-        .split("!")[0]
-        .split("~")[0]
-        .strip()
-        for dep in project["dependencies"]
-    ]
+    pyproject_path = temp_dir / "backend" / "pyproject.toml"
+    with open(pyproject_path, "rb") as f:
+        pyproject_data = tomllib.load(f)
 
-    print(project_dependencies)
+    pixi_data = pyproject_data.get("tool", {}).get("pixi", {})
 
-    project_dev_dependencies = [
-        dep.split(">")[0]
-        .split("<")[0]
-        .split("=")[0]
-        .split("!")[0]
-        .split("~")[0]
-        .strip()
-        for dep in pyproject_data["dependency-groups"]["dev"]
-    ]
+    def _to_name(dep: str) -> str:
+        return (
+            dep.split(">")[0]
+            .split("<")[0]
+            .split("=")[0]
+            .split("!")[0]
+            .split("~")[0]
+            .split("@")[0]
+            .strip()
+        )
 
+    project_dependencies = []
+    for section in ("dependencies", "pypi-dependencies"):
+        for dep in pixi_data.get(section, {}):
+            project_dependencies.append(_to_name(dep))
+
+    dev_feature = pixi_data.get("feature", {}).get("dev", {})
+    project_dev_dependencies = []
+    for section in ("dependencies", "pypi-dependencies"):
+        for dep in dev_feature.get(section, {}):
+            project_dev_dependencies.append(_to_name(dep))
+
+    def _normalize(name: str) -> str:
+        return re.sub(r"[-_.]+", "-", name).lower()
+
+    project_dep_names = {_normalize(d) for d in project_dependencies}
     for dep in required_dependencies:
-        assert dep in project_dependencies, f"Required dependency '{dep}' not found"
+        assert _normalize(dep) in project_dep_names, (
+            f"Required dependency '{dep}' not found"
+        )
 
+    project_dev_dep_names = {_normalize(d) for d in project_dev_dependencies}
     for dep in required_dev_dependencies:
-        assert dep in project_dev_dependencies, (
+        assert _normalize(dep) in project_dev_dep_names, (
             f"Required dev dependency '{dep}' not found"
         )
 

@@ -6,7 +6,7 @@ from pathlib import Path
 
 from ...utils.console.print import print_console
 from ...utils.django.secret_manager import SecretManager
-from ...utils.django.uv_runner import UvRunner
+from ...utils.django.pixi_runner import PixiRunner
 from ...utils.generators import generate_random_password
 from ...utils.templates.manager import TemplateManager
 from ...requirement import requirement
@@ -103,7 +103,7 @@ def django(
 
 def install_dependencies(backend_root: Path):
     """Install Python dependencies in the specified directory."""
-    uv = UvRunner(backend_root=backend_root)
+    pixi = PixiRunner(backend_root=backend_root)
 
     dependencies: list[str] = [
         f"django~={DJANGO_VERSION}.0",
@@ -116,7 +116,7 @@ def install_dependencies(backend_root: Path):
     ]
     for pkg in dependencies:
         print_console.step(f"Installing {pkg} ...")
-        uv.add_package(pkg)
+        pixi.add_package(pkg)
         print_console.success(f"{pkg} is installed successfully.")
 
     dev_dependencies: list[str] = [
@@ -129,14 +129,14 @@ def install_dependencies(backend_root: Path):
 
     for pkg in dev_dependencies:
         print_console.step(f"Installing {pkg} ...")
-        uv.add_package(pkg, group="dev")
+        pixi.add_package(pkg, feature="dev")
         print_console.success(f"{pkg} is installed successfully.")
 
 
 def update_prek_hooks(backend_root: Path, project_dir: Path, git_init: bool):
     print_console.step("Updating prek hooks ...")
-    uv = UvRunner(backend_root=backend_root)
-    uv.run_uv_command("run", "prek", "update")
+    pixi = PixiRunner(backend_root=backend_root)
+    pixi.run_pixi_command("run", "prek", "update")
     if git_init and is_git_repository(project_dir):
         subprocess.check_call(["git", "add", "."], cwd=project_dir)
         subprocess.check_call(

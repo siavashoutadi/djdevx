@@ -7,7 +7,7 @@
 - **Jinja2** -- Template engine for code generation
 - **pytest** (with pytest-xdist) -- Testing framework
 - **Rich** -- Console output with styling (`PrintConsole` wrapper)
-- **uv** -- Python package manager and runner
+- **pixi** -- Python package manager and runner
 - **tomlkit** -- TOML read/write for config tracking
 - **requests** -- HTTP client
 - **Ruff** -- Linter and formatter (via prek)
@@ -38,7 +38,7 @@
   `required_dependencies`, `install_params`, `secret_generators`,
   `files_to_remove`, `folders_to_remove`
 - Paths are auto-derived from `__file__` via `PathDeriver`
-- Hook lifecycle: `before_uv_install` / `after_uv_install` /
+- Hook lifecycle: `before_pixi_install` / `after_pixi_install` /
   `before_copy_templates` / `after_copy_templates` / etc.
 - Module-level singleton pattern: `_pkg = PackageClass(__file__)` +
   `app = _pkg.app`
@@ -75,7 +75,7 @@
 
 - Use `pytest` (markers available: `@pytest.mark.unit`,
   `@pytest.mark.integration`, `@pytest.mark.slow`)
-- Default run: `uv run pytest` (auto-parallel via `-n auto`, short tracebacks)
+- Default run: `pixi run pytest` (auto-parallel via `-n auto`, short tracebacks)
 - Use `temp_dir` fixture (wraps `tmp_path`) for isolated filesystem tests
 - Use `Typer CliRunner` for CLI integration tests
 - Use `unittest.mock.patch` to isolate unit tests (e.g., mock
@@ -93,7 +93,7 @@
   `.djdevx/backend/django/packages/<template_path>/config.toml`
 - Trackers: `PackageTracker`, `FeatureTracker`, `DatabaseTracker`,
   `CacheTracker`
-- `UvRunner` wraps `uv add`, `uv remove`, `uv run`, and Django manage.py
+- `PixiRunner` wraps `pixi add`, `pixi remove`, `pixi run`, and Django manage.py
   commands
 - `DjangoProjectManager` centralizes path, template, env var, and dependency
   operations
