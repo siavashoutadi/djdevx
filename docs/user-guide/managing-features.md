@@ -8,39 +8,32 @@ configuration changes.
 
 ```bash
 # Install a feature
-ddx backend django feature pwa --app-name myapp --port 8000
+ddx features add tailwind-ui
 
 # Remove a feature
-ddx backend django feature css bootstrap remove
+ddx features remove pwa
 
-# List installed features
-ddx backend django list features
+# List all features with install status
+ddx features list
 
-# Show available features
-ddx backend django feature --help
+# Interactive selection (omit [NAME])
+ddx features add
+ddx features remove
 ```
-
-## Behind the Scenes
-
-When you install a feature, djdevx:
-
-1. **Adds dependencies** -- Runs `pixi add` for required Python packages
-2. **Copies templates** -- Renders Jinja2 templates into the project
-3. **Appends settings** -- Modifies `INSTALLED_APPS`, `MIDDLEWARE`, templates, etc.
-4. **Tracks installation** -- Records the installation under `.djdevx/`
 
 ## Example Features
 
-| Feature | Command | Notes |
-|---------|---------|-------|
-| PWA | `ddx backend django feature pwa` | Progressive Web App with manifest and service worker |
-| Bootstrap | `ddx backend django feature css bootstrap` | Bootstrap 5 CSS framework |
+| Feature        | Command                           | Notes                                                |
+| -------------- | --------------------------------- | ---------------------------------------------------- |
+| PWA            | `ddx features add pwa`            | Progressive Web App with manifest and service worker |
+| Tailwind UI    | `ddx features add tailwind-ui`    | Tailwind CSS UI components                           |
+| Tailwind Theme | `ddx features add tailwind-theme` | Custom tailwind theme configuration                  |
 
-## Finding Features
+## Shell Autocompletion
 
-Run `ddx backend django feature --help` to see all available features.
-Run `ddx backend django list features` to see which are installed in the
-current project.
+The `[NAME]` argument supports tab completion:
+- `ddx features add <TAB>` — lists features not yet installed
+- `ddx features remove <TAB>` — lists installed features
 
 For complete reference including every option and parameter, see the
 [Full Manual](../cli/manual.md).

@@ -17,13 +17,13 @@ pixi run pytest -v
 pixi run pytest -x
 
 # Run a specific test file
-pixi run pytest tests/backend/django/packages/test_whitenoise.py
+pixi run pytest tests/packages/test_whitenoise.py
 
 # Run a specific test class
-pixi run pytest tests/backend/django/packages/test_tracking_configs.py::TestFlatPackageTracking
+pixi run pytest tests/packages/test_tracking_configs.py::TestFlatPackageTracking
 
 # Run a specific test function
-pixi run pytest tests/backend/django/packages/test_whitenoise.py::test_whitenoise_install_and_remove
+pixi run pytest tests/packages/test_whitenoise.py::test_whitenoise_install_and_remove
 
 # Run tests matching a keyword expression
 pixi run pytest -k "database"
@@ -34,7 +34,6 @@ pixi run pytest -k "test_creates_config"
 
 # List all collected tests without running
 pixi run pytest --collect-only
-pixi run pytest tests/backend/django/ --collect-only
 
 # Enter debugger on first failure
 pixi run pytest --pdb -x
@@ -118,42 +117,38 @@ Python package (contains `__init__.py`).
 tests/
 ├── conftest.py                      # Shared fixtures (temp_dir)
 ├── test_helpers.py                  # Shared test utility functions
+├── test_new.py                      # Full project scaffolding test
 │
-├── backend/
-│   └── django/
-│       ├── test_basepackage.py      # BasePackage unit tests (path derivation, hooks, etc.)
-│       ├── cache/
-│       │   └── test_redis.py        # Redis cache install/remove
-│       ├── create/
-│       │   └── test_app.py          # App creation command test
-│       ├── database/
-│       │   └── test_postgres.py     # PostgreSQL install/remove
-│       ├── feature/
-│       │   ├── test_bootstrap.py
-│       │   ├── test_frankenui.py
-│       │   ├── test_pwa.py
-│       │   ├── test_semantic.py
-│       │   ├── test_starting_point_ui.py
-│       │   ├── test_tailwind_theme.py
-│       │   └── test_tailwind_ui.py
-│       ├── list/
-│       │   ├── test_caches.py
-│       │   ├── test_databases.py
-│       │   ├── test_features.py
-│       │   └── test_packages.py
-│       ├── packages/
-│       │   ├── test_channels.py             # ~35 package-specific tests
-│       │   ├── test_whitenoise.py           # Prototypical package test
-│       │   ├── test_django_allauth.py
-│       │   ├── test_tracking_configs.py     # Tracking config golden-file verification
-│       │   ├── test_storages_combined.py    # Multi-package combined install
-│       │   └── ...
-│       └── settings/
-│           └── test_source.py
-│
-├── new/
-│   └── backend/
-│       └── test_django.py           # Full project scaffolding test
+├── packages/
+│   ├── test_basepackage.py          # BasePackage unit tests (path derivation, hooks, etc.)
+│   ├── test_channels.py             # ~35 package-specific tests
+│   ├── test_whitenoise.py           # Prototypical package test
+│   ├── test_django_allauth.py
+│   ├── test_tracking_configs.py     # Tracking config golden-file verification
+│   ├── test_storages_combined.py    # Multi-package combined install
+│   └── ...
+├── cache/
+│   └── test_redis.py                # Redis cache install/remove
+├── create/
+│   └── test_app.py                  # App creation command test
+├── database/
+│   └── test_postgres.py             # PostgreSQL install/remove
+├── features/
+│   ├── test_pwa.py
+│   ├── test_tailwind_theme.py
+│   └── test_tailwind_ui.py
+├── frameworks/
+│   ├── test_bootstrap.py
+│   ├── test_frankenui.py
+│   ├── test_semantic.py
+│   └── test_starting_point_ui.py
+├── settings/
+│   └── test_source.py
+├── list/
+│   ├── test_caches.py
+│   ├── test_databases.py
+│   ├── test_features.py
+│   └── test_packages.py
 │
 └── utils/
     ├── test_cache_tracker.py
@@ -172,11 +167,11 @@ directories alongside the test file. These are the "golden files" that test
 output is compared against.
 
 ```
-tests/backend/django/packages/
+tests/packages/
 ├── test_whitenoise.py
 └── data/
     └── whitenoise/
-        ├── .djdevx/backend/django/packages/whitenoise/config.toml
+        ├── .djdevx/packages/whitenoise/config.toml
         └── settings/packages/whitenoise.py
 ```
 
@@ -238,19 +233,11 @@ This keeps shared scope minimal:
 ```python
 # tests/utils/test_feature_tracker.py
 import pytest
-from djdevx.utils.djdevx_config.backend.feature_tracker import FeatureTracker
+from djdevx.utils.tracking.feature_tracking import FeatureTracking
 
 @pytest.fixture
-def tracker(tmp_path: Path) -> FeatureTracker:
-    djdevx_root = tmp_path / ".djdevx"
-    djdevx_root.mkdir(parents=True)
-
-    class IsolatedTracker(FeatureTracker):
-        @property
-        def djdevx_root(self) -> Path:
-            return djdevx_root
-
-    return IsolatedTracker()
+def tracker(tmp_path: Path) -> FeatureTracking:
+    return FeatureTracking(project_root=tmp_path)
 ```
 
 ### `create_test_django_backend` (shared helper)
@@ -263,7 +250,7 @@ from tests.test_helpers import create_test_django_backend
 
 def test_package_install(temp_dir):
     runner = CliRunner()
-    backend_dir = create_test_django_backend(temp_dir, runner)
+    project_dir = create_test_django_backend(temp_dir, runner)
     os.chdir(temp_dir)
     # ... now run install/remove commands
 ```
@@ -290,17 +277,17 @@ DATA_DIR = Path(__file__).parent / "data" / "whitenoise"
 
 
 def test_whitenoise_install_and_remove(temp_dir):
-    backend_dir = create_test_django_backend(temp_dir, runner)
+    project_dir = create_test_django_backend(temp_dir, runner)
     os.chdir(temp_dir)
 
     # --- Install ---
     result = runner.invoke(
-        app, ["backend", "django", "packages", "whitenoise", "install"]
+        app, ["packages", "add", "whitenoise"]
     )
     assert result.exit_code == 0, f"Install failed: {result.output}"
 
     # Verify settings file was created
-    settings_file = backend_dir / "settings" / "packages" / "whitenoise.py"
+    settings_file = project_dir / "settings" / "packages" / "whitenoise.py"
     assert settings_file.exists()
     assert settings_file.read_text() == (
         DATA_DIR / "settings" / "packages" / "whitenoise.py"
@@ -309,21 +296,13 @@ def test_whitenoise_install_and_remove(temp_dir):
     # Verify dependency was added
     assert DjangoProjectManager().has_dependency("whitenoise")
 
-    # Verify tracking config was created
-    tracking_config = (
-        temp_dir / ".djdevx" / "backend" / "django" / "packages" / "whitenoise" / "config.toml"
-    )
-    assert tracking_config.exists()
-    assert '[package]' in tracking_config.read_text()
-
     # --- Remove ---
     result = runner.invoke(
-        app, ["backend", "django", "packages", "whitenoise", "remove"]
+        app, ["packages", "remove", "whitenoise"]
     )
     assert result.exit_code == 0, f"Remove failed: {result.output}"
     assert not settings_file.exists()
     assert not DjangoProjectManager().has_dependency("whitenoise")
-    assert not tracking_config.exists()
 ```
 
 ### Pattern B: Dependency and Idempotency Tests
@@ -338,29 +317,29 @@ def test_feature_missing_dependency(temp_dir):
 
     # Try to install without required dependency
     result = runner.invoke(
-        app, ["backend", "django", "feature", "tailwind-ui", "install"]
+        app, ["features", "add", "tailwind-ui"]
     )
     assert result.exit_code != 0
     assert "Heroicons is not installed" in result.output
 
 
 def test_feature_install_idempotent(temp_dir):
-    backend_dir = create_test_django_backend(temp_dir, runner)
+    project_dir = create_test_django_backend(temp_dir, runner)
     os.chdir(temp_dir)
 
     # Install dependencies first, then feature
-    runner.invoke(app, ["backend", "django", "packages", "heroicons", "install"])
-    runner.invoke(app, ["backend", "django", "feature", "tailwind-theme", "install", ...])
+    runner.invoke(app, ["packages", "add", "heroicons"])
+    runner.invoke(app, ["features", "add", "tailwind-theme", ...])
 
     # Install feature twice
     for _ in range(2):
         result = runner.invoke(
-            app, ["backend", "django", "feature", "tailwind-ui", "install"]
+            app, ["features", "add", "tailwind-ui"]
         )
         assert result.exit_code == 0
 
     # Verify no duplicate content
-    input_css = (backend_dir / "tailwind" / "src" / "css" / "input.css").read_text()
+    input_css = (project_dir / "tailwind" / "src" / "css" / "input.css").read_text()
     assert input_css.count('@import "./tailwind-ui/all.css"') == 1
 
 
@@ -370,7 +349,7 @@ def test_remove_when_not_installed(temp_dir):
     os.chdir(temp_dir)
 
     result = runner.invoke(
-        app, ["backend", "django", "feature", "tailwind-ui", "remove"]
+        app, ["features", "remove", "tailwind-ui"]
     )
     assert result.exit_code == 0
 ```
@@ -381,17 +360,17 @@ Test that multiple packages can coexist correctly (e.g., whitenoise + S3).
 
 ```python
 def test_whitenoise_plus_s3(temp_dir):
-    backend_dir = create_test_django_backend(temp_dir, runner)
+    project_dir = create_test_django_backend(temp_dir, runner)
     os.chdir(temp_dir)
 
     # Install first package
-    runner.invoke(app, ["backend", "django", "packages", "whitenoise", "install"])
-    whitenoise_file = backend_dir / "settings" / "packages" / "whitenoise.py"
+    runner.invoke(app, ["packages", "add", "whitenoise"])
+    whitenoise_file = project_dir / "settings" / "packages" / "whitenoise.py"
     assert whitenoise_file.exists()
 
     # Install second package
-    runner.invoke(app, ["backend", "django", "packages", "django-storages", "s3", "install"])
-    s3_file = backend_dir / "settings" / "packages" / "django_storages_s3.py"
+    runner.invoke(app, ["packages", "add", "django-storages", "s3"])
+    s3_file = project_dir / "settings" / "packages" / "django_storages_s3.py"
     assert s3_file.exists()
 
     # Both files and dependencies present
@@ -423,59 +402,36 @@ touching the real filesystem, create a local subclass that overrides
 from pathlib import Path
 import pytest
 import tomlkit
-from djdevx.utils.djdevx_config.backend.feature_tracker import FeatureTracker
+from djdevx.utils.tracking.feature_tracking import FeatureTracking
 
 
 @pytest.fixture
-def tracker(tmp_path: Path) -> FeatureTracker:
-    djdevx_root = tmp_path / ".djdevx"
-    djdevx_root.mkdir(parents=True)
-
-    class IsolatedTracker(FeatureTracker):
-        @property
-        def djdevx_root(self) -> Path:
-            return djdevx_root
-
-    return IsolatedTracker()
+def tracker(tmp_path: Path) -> FeatureTracking:
+    return FeatureTracking(project_root=tmp_path)
 
 
 class TestWriteFeatureConfig:
-    def test_creates_config_toml(self, tracker: FeatureTracker) -> None:
-        tracker.write_feature_config("tailwind_theme", "Tailwind Theme")
-        assert tracker._config_path("tailwind_theme").exists()
+    def test_creates_config_toml(self, tracker: FeatureTracking) -> None:
+        tracker.add("tailwind_theme", "Tailwind Theme")
+        assert tracker.is_installed("tailwind_theme")
 
-    def test_config_contains_correct_section(self, tracker: FeatureTracker) -> None:
-        tracker.write_feature_config("tailwind_theme", "Tailwind Theme")
-        doc = tomlkit.loads(
-            tracker._config_path("tailwind_theme").read_text()
-        ).unwrap()
-        assert doc["feature"]["name"] == "Tailwind Theme"
-
-    def test_overwrite_updates_in_place(self, tracker: FeatureTracker) -> None:
-        tracker.write_feature_config("tailwind_theme", "Old")
-        tracker.write_feature_config("tailwind_theme", "New")
-        doc = tomlkit.loads(
-            tracker._config_path("tailwind_theme").read_text()
-        ).unwrap()
-        assert doc["feature"]["name"] == "New"
-
-    def test_round_trip_nested_key(self, tracker: FeatureTracker) -> None:
-        tracker.write_feature_config("css/bootstrap", "Bootstrap")
-        doc = tracker.read_feature_config("css/bootstrap").unwrap()
-        assert doc["feature"]["name"] == "Bootstrap"
+    def test_overwrite_updates_in_place(self, tracker: FeatureTracking) -> None:
+        tracker.add("tailwind_theme", "Old")
+        tracker.add("tailwind_theme", "New")
+        assert tracker.is_installed("tailwind_theme")
 
 
 class TestIsInstalled:
-    def test_false_before_install(self, tracker: FeatureTracker) -> None:
+    def test_false_before_install(self, tracker: FeatureTracking) -> None:
         assert tracker.is_installed("tailwind_theme") is False
 
-    def test_true_after_write(self, tracker: FeatureTracker) -> None:
-        tracker.write_feature_config("tailwind_theme", "Tailwind Theme")
+    def test_true_after_write(self, tracker: FeatureTracking) -> None:
+        tracker.add("tailwind_theme", "Tailwind Theme")
         assert tracker.is_installed("tailwind_theme") is True
 
-    def test_false_after_remove(self, tracker: FeatureTracker) -> None:
-        tracker.write_feature_config("tailwind_theme", "Tailwind Theme")
-        tracker.remove_feature_config("tailwind_theme")
+    def test_false_after_remove(self, tracker: FeatureTracking) -> None:
+        tracker.add("tailwind_theme", "Tailwind Theme")
+        tracker.remove("tailwind_theme")
         assert tracker.is_installed("tailwind_theme") is False
 ```
 
@@ -487,7 +443,7 @@ For testing logic in isolation, mock dependencies with `unittest.mock.patch`.
 
 ```python
 from unittest.mock import patch, MagicMock
-from djdevx.backend.django.packages._base import BasePackage
+from djdevx.packages._base import BasePackage
 
 
 def test_package_path_derivation():
@@ -560,7 +516,7 @@ class TestShowIfConditionalPrompt:
         pkg._copy_templates = lambda context=None: None
 
         with patch(
-            "djdevx.backend.django.packages._base.typer.prompt",
+            "djdevx.packages._base.typer.prompt",
             return_value="prompted-value",
         ) as mock_prompt:
             pkg.install(enable_feature=True, feature_key="")
@@ -574,7 +530,7 @@ class TestShowIfConditionalPrompt:
         pkg._uv_add_all = lambda: None
         pkg._copy_templates = lambda context=None: None
 
-        with patch("djdevx.backend.django.packages._base.typer.prompt") as mock_prompt:
+        with patch("djdevx.packages._base.typer.prompt") as mock_prompt:
             pkg.install(enable_feature=False, feature_key="")
 
         mock_prompt.assert_not_called()
@@ -612,7 +568,7 @@ Verifies that every package produces exactly the expected tracking
 import importlib
 from pathlib import Path
 from unittest.mock import patch
-from djdevx.backend.django.packages._base import BasePackage
+from djdevx.packages._base import BasePackage
 
 DATA_DIR = Path(__file__).parent / "data"
 
@@ -625,13 +581,13 @@ def _assert_tracking_config(pkg: BasePackage, data_slug: str, tmp_path: Path) ->
     djdevx_root = tmp_path / ".djdevx"
 
     with patch(
-        "djdevx.utils.djdevx_config.backend.package_tracker.ProjectConfig.djdevx_root",
+        "djdevx.utils.tracking.package_tracking.PackageTracking.djdevx_root",
         new_callable=lambda: property(lambda self: djdevx_root),
     ):
         pkg._write_package_tracking()
 
-    actual = djdevx_root / "backend" / "django" / "packages" / pkg._template_path / "config.toml"
-    expected = DATA_DIR / data_slug / ".djdevx" / "backend" / "django" / "packages" / pkg._template_path / "config.toml"
+    actual = djdevx_root / "packages" / pkg._template_path / "config.toml"
+    expected = DATA_DIR / data_slug / ".djdevx" / "packages" / pkg._template_path / "config.toml"
 
     assert actual.exists()
     assert expected.exists()
@@ -640,11 +596,11 @@ def _assert_tracking_config(pkg: BasePackage, data_slug: str, tmp_path: Path) ->
 
 class TestFlatPackageTracking:
     def test_whitenoise(self, tmp_path):
-        pkg = _get_pkg("djdevx.backend.django.packages.whitenoise")
+        pkg = _get_pkg("djdevx.packages.whitenoise")
         _assert_tracking_config(pkg, "whitenoise", tmp_path)
 
     def test_channels(self, tmp_path):
-        pkg = _get_pkg("djdevx.backend.django.packages.channels")
+        pkg = _get_pkg("djdevx.packages.channels")
         _assert_tracking_config(pkg, "channels", tmp_path)
 ```
 
@@ -661,9 +617,9 @@ import yaml
 DATA_DIR = Path(__file__).parent / "data" / "django"
 
 
-def test_new_django_backend(temp_dir):
+def test_new_project(temp_dir):
     result = runner.invoke(app, [
-        "new", "backend", "django",
+        "new",
         "--project-name", "my_project",
         "--project-directory", str(temp_dir),
     ])
@@ -680,7 +636,7 @@ def test_new_django_backend(temp_dir):
             )
 
     # Structured assertions for specific files
-    pyproject = tomllib.loads((temp_dir / "backend" / "pyproject.toml").read_text())
+    pyproject = tomllib.loads((temp_dir / "pyproject.toml").read_text())
     assert pyproject["project"]["name"] == "my_project"
 
     prek_config = tomllib.loads((temp_dir / "prek.toml").read_text())
@@ -695,7 +651,7 @@ Place test files in `tests/` mirroring the source module path:
 
 | Source module | Test file |
 |---|---|
-| `djdevx/backend/django/packages/whitenoise.py` | `tests/backend/django/packages/test_whitenoise.py` |
+| `djdevx/packages/whitenoise.py` | `tests/packages/test_whitenoise.py` |
 | `djdevx/utils/django/setting_collector.py` | `tests/utils/django/test_setting_collector.py` |
 
 All test subdirectories must contain an `__init__.py`.
@@ -715,7 +671,7 @@ All test subdirectories must contain an `__init__.py`.
 ### Adding Data Fixtures for a New Package
 
 1. Run the install command manually once to see the generated files
-2. Create the corresponding files under `tests/backend/django/packages/data/<slug>/`
+2. Create the corresponding files under `tests/packages/data/<slug>/`
    echoing the output structure
 3. Write a test that compares `runner.invoke(...)` output against these fixtures
 

@@ -117,7 +117,7 @@ class _EnvDefaultsSource(InitSettingsSource):
 
 class AppBaseSettings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=(Path("/run/configs/app-config"), Path("backend/.env")),
+        env_file=(Path("/run/configs/app-config"), Path(".env")),
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
@@ -174,7 +174,7 @@ tuple. The order determines priority — first source wins:
 1. `env_settings` — `os.environ` (highest priority)
 2. `dotenv_settings` — Files listed in `model_config.env_file`
 3. `file_secret_settings` — Docker secrets (`/run/secrets/`) and
-   local secrets (`backend/.secrets/`)
+   local secrets (`.secrets/`)
 4. `_EnvDefaultsSource` — Dev/prod/devcontainer defaults (lowest)
 
 pydantic-settings iterates through these sources for each field and uses
@@ -188,21 +188,21 @@ checks each source in order. The first source that provides a value wins.
 
 ```
 1. os.environ                         ← Runtime env vars (highest)
-2. backend/.env                       ← Gitignored personal/CI override
-3. /run/configs/app-config            ← Docker Swarm Config / K8s ConfigMap
-4. /run/secrets/<fieldname>           ← Docker Swarm Secret / K8s Secret volume
-5. backend/.secrets/<fieldname>       ← Local secrets directory
-6. _EnvDefaultsSource                 ← Dev / devcontainer / prod defaults
-7. Field-level Python default         ← e.g., port: int = 5432 (lowest)
+2. .env                                ← Gitignored personal/CI override
+3. /run/configs/app-config             ← Docker Swarm Config / K8s ConfigMap
+4. /run/secrets/<fieldname>            ← Docker Swarm Secret / K8s Secret volume
+5. .secrets/<fieldname>                ← Local secrets directory
+6. _EnvDefaultsSource                  ← Dev / devcontainer / prod defaults
+7. Field-level Python default          ← e.g., port: int = 5432 (lowest)
 ```
 
 | Level | Source | Mechanism | Dev | Prod |
 |---|---|---|---|---|
 | 1 | `os.environ` | Runtime env vars | Used if set | Used if set |
-| 2 | `backend/.env` | dotenv file | Common override | Not typically used |
+| 2 | `.env` | dotenv file | Common override | Not typically used |
 | 3 | `/run/configs/app-config` | Config file mounted by orchestrator | Not present | Used in Docker/K8s |
 | 4 | `/run/secrets/<name>` | Secret file mounted by orchestrator | Not present | Used in Docker/K8s |
-| 5 | `backend/.secrets/<name>` | Per-file secrets (`0o600`) | Main dev source | Not typically used |
+| 5 | `.secrets/<name>` | Per-file secrets (`0o600`) | Main dev source | Not typically used |
 | 6 | `_EnvDefaultsSource` | Classmethod defaults | `get_dev_defaults()` | `get_prod_defaults()` |
 | 7 | Field default | `field: type = value` | Fallback | Fallback |
 
@@ -300,7 +300,7 @@ pydantic-settings treats all fields uniformly during resolution, but
 | Classification | Type | Dev source | Container source | Redacted in logs |
 |---|---|---|---|---|
 | Non-sensitive | `str`, `bool`, `int`, `list`, etc. | `get_dev_defaults()` or `.env` | `/run/configs/app-config` | No |
-| Sensitive | `SecretStr`, `Optional[SecretStr]` | `backend/.secrets/<name>` | `/run/secrets/<name>` | Yes |
+| Sensitive | `SecretStr`, `Optional[SecretStr]` | `.secrets/<name>` | `/run/secrets/<name>` | Yes |
 
 ### SecretStr behavior
 
@@ -357,29 +357,28 @@ The generated Django project's settings are split across multiple files in a
 structured directory:
 
 ```
-backend/
-  settings/
-    __init__.py            ← Dynamic loader — imports everything
-    utils/
-      base_settings.py     ← AppBaseSettings, IS_DEV, _EnvDefaultsSource
-    django/
-      __init__.py
-      base.py              ← DjangoBaseSettings (SECRET_KEY, DEBUG, ALLOWED_HOSTS, …)
-      auth.py              ← AUTH_USER_MODEL, password validators
-      database.py          ← Database config (SQLite by default, replaced by postgres)
-      email.py.j2          ← Email backend config (Jinja2 template)
-      i18n.py              ← Internationalization
-      logging.py           ← Logging levels and formatters
-      sessions.py          ← Session engine
-      staticfiles.py       ← Static/media URL config
-      storages.py          ← Storage backends
-    packages/
-      __init__.py          ← Empty — populated by package install
-      django_debug_toolbar.py
-      djangorestframework.py
-      …                    ← One file per installed package
-    apps/
-      __init__.py          ← Empty — for developer-defined settings
+settings/
+  __init__.py            ← Dynamic loader — imports everything
+  utils/
+    base_settings.py     ← AppBaseSettings, IS_DEV, _EnvDefaultsSource
+  django/
+    __init__.py
+    base.py              ← DjangoBaseSettings (SECRET_KEY, DEBUG, ALLOWED_HOSTS, ...)
+    auth.py              ← AUTH_USER_MODEL, password validators
+    database.py          ← Database config (SQLite by default, replaced by postgres)
+    email.py.j2          ← Email backend config (Jinja2 template)
+    i18n.py              ← Internationalization
+    logging.py           ← Logging levels and formatters
+    sessions.py          ← Session engine
+    staticfiles.py       ← Static/media URL config
+    storages.py          ← Storage backends
+  packages/
+    __init__.py          ← Empty — populated by package install
+    django_debug_toolbar.py
+    djangorestframework.py
+    ...                  ← One file per installed package
+  apps/
+    __init__.py          ← Empty — for developer-defined settings
 ```
 
 ### Dynamic loader
@@ -474,8 +473,8 @@ information.
 ### When it runs
 
 The `SettingCollector` is used exclusively by CLI commands — never at Django
-runtime. It powers `ddx backend django settings secrets list/init/verify`
-and `ddx backend django settings configs list/init/verify`.
+runtime. It powers `ddx settings secrets list/init/verify`
+and `ddx settings configs list/init/verify`.
 
 ### How AST parsing works
 
@@ -515,7 +514,7 @@ Parsing via AST (rather than `import`) is a deliberate design choice:
 | Accuracy | Can't resolve dynamic defaults | Full runtime accuracy |
 
 The project may not even have its dependencies installed when CLI commands
-run (e.g., right after `ddx new backend django`). AST parsing works in all
+run (e.g., right after `ddx new`). AST parsing works in all
 environments.
 
 ### SecretStr detection
@@ -597,7 +596,7 @@ mechanism protects against accidental conflicts).
 
 ## CLI Tooling
 
-The CLI commands under `ddx backend django settings` give developers full
+The CLI commands under `ddx settings` give developers full
 visibility and control over their project's settings. All commands use the
 `SettingCollector` to discover fields, then apply environment-specific
 resolution chains to determine source and value.
@@ -605,7 +604,7 @@ resolution chains to determine source and value.
 ### Commands overview
 
 ```
-ddx backend django settings
+ddx settings
   secrets
     list [dev|prod]       → Display all SecretStr fields with source and status
     init [dev|prod]       → Generate missing secrets (auto-generate or prompt)
@@ -624,8 +623,8 @@ The resolution chain for listing and verifying differs between dev and prod:
 
 | Step | Dev | Prod |
 |---|---|---|
-| 1 | `backend/.secrets/<name>` | `/run/secrets/<name>` |
-| 2 | `/run/secrets/<name>` | `backend/.secrets.prod/<name>` |
+| 1 | `.secrets/<name>` | `/run/secrets/<name>` |
+| 2 | `/run/secrets/<name>` | `.secrets.prod/<name>` |
 | 3 | `get_dev_defaults()` | `get_prod_defaults()` |
 | 4 | **MISSING** | **MISSING** |
 
@@ -634,8 +633,8 @@ The resolution chain for listing and verifying differs between dev and prod:
 | Step | Dev | Prod |
 |---|---|---|
 | 1 | `os.environ` | `os.environ` |
-| 2 | `backend/.env` | `/run/configs/app-config` |
-| 3 | `get_dev_defaults()` | `backend/.env.prod` |
+| 2 | `.env` | `/run/configs/app-config` |
+| 3 | `get_dev_defaults()` | `.env.prod` |
 | 4 | **MISSING** | `get_prod_defaults()` |
 | 5 | — | **MISSING** |
 
@@ -644,22 +643,22 @@ The resolution chain for listing and verifying differs between dev and prod:
 The most commonly used command. For each `SecretStr` field discovered by the
 `SettingCollector`:
 
-1. **If already present** in `backend/.secrets/` or `/run/secrets/` → skip
+1. **If already present** in `.secrets/` or `/run/secrets/` → skip
 2. **If `get_dev_defaults()` provides a value** → skip (dev defaults are safe)
-3. **If `secret.generator` is not None** → auto-generate and write to `backend/.secrets/<name>`
-4. **Otherwise** → prompt the user for a value and write to `backend/.secrets/<name>`
+3. **If `secret.generator` is not None** → auto-generate and write to `.secrets/<name>`
+4. **Otherwise** → prompt the user for a value and write to `.secrets/<name>`
 
 Secrets are written as individual files using `SecretManager`:
 
 ```python
-# backend/.secrets/postgres_password  (0o600, inside 0o700 directory)
+# .secrets/postgres_password  (0o600, inside 0o700 directory)
 ```
 
 ### secrets init prod
 
 Same flow as dev, but:
 
-- Writes to `backend/.secrets.prod/<name>` (separate directory for production)
+- Writes to `.secrets.prod/<name>` (separate directory for production)
 - Does NOT skip fields with dev defaults — production requires explicit values
 - Prompts for ALL secrets unless already present
 
@@ -667,9 +666,9 @@ Same flow as dev, but:
 
 For each non-SecretStr field discovered by the `SettingCollector`:
 
-1. **If already present** in `os.environ`, `backend/.env`, or `backend/.env.prod` → skip
+1. **If already present** in `os.environ`, `.env`, or `.env.prod` → skip
 2. **Prompt the user** with the field's type annotation for validation
-3. **Write to `backend/.env.prod`** in `KEY=VALUE` format via `dotenv.set_key()`
+3. **Write to `.env.prod`** in `KEY=VALUE` format via `dotenv.set_key()`
 
 `setup_readline()` is called before any prompts, giving readline history
 (up/down arrow navigation) and full line editing. History is persisted to
@@ -711,18 +710,17 @@ djdevx/templates/django/<package_name>/
   static/...                        (optional static files)
 ```
 
-The file is copied to `backend/settings/packages/<filename>.py` in the
+The file is copied to `settings/packages/<filename>.py` in the
 generated project.
 
 #### Convention B: Core Django settings (database, cache)
 
 ```
-djdevx/templates/django/<package_type>/<variant>/
-  {{backend_root}}/settings/django/<filename>.py
+<package_dir>/templates/
+  settings/django/<filename>.py
 ```
 
-The `{{backend_root}}` Jinja2 variable (typically `backend`) is rendered
-during template copy. The file ends up at `backend/settings/django/<filename>.py`.
+The file ends up at `settings/django/<filename>.py`.
 
 #### Convention C: Sub-packages (grouped under a directory)
 
@@ -857,7 +855,7 @@ class MyPackage(BasePackage):
 
 The key must match the field name in the settings template exactly. When
 `secrets init dev` runs and the secret doesn't exist yet, it calls the
-generator and writes the result to `backend/.secrets/api_key`.
+generator and writes the result to `.secrets/api_key`.
 
 ### Install params as template context
 
@@ -872,14 +870,14 @@ class MyPackage(BasePackage):
     ]
 ```
 
-During `ddx backend django packages my-package install`, the CLI prompts for
+During `ddx packages add my-package`, the CLI prompts for
 each parameter and passes the values as Jinja2 context when rendering templates.
 
 ### Full example: Adding a new package with settings
 
 **Step 1: Create the package file**
 
-`djdevx/backend/django/packages/my_package.py`:
+`djdevx/packages/my_package/__init__.py`:
 
 ```python
 from ._base import BasePackage
@@ -923,7 +921,7 @@ INSTALLED_APPS += ["my_package"]
 
 **Step 3: Register in the package registry**
 
-`djdevx/backend/django/packages/__init__.py`:
+`djdevx/packages/__init__.py`:
 
 ```python
 from .my_package import app as my_package
@@ -937,7 +935,7 @@ When `secrets init dev` runs, the `SettingCollector` discovers
 displays:
 
 ```
-✓  my_package_api_key   backend/.secrets/my_package_api_key
+✓  my_package_api_key   .secrets/my_package_api_key
 ✓  my_package_endpoint  Dev default
 ```
 

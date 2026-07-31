@@ -3,7 +3,7 @@ import shutil
 from pathlib import Path
 from typing import List, Optional
 
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import ChainableUndefined, Environment, FileSystemLoader
 
 
 class TemplateManager:
@@ -25,7 +25,9 @@ class TemplateManager:
             Rendered string
         """
         if "{{" in template_str or "{%" in template_str:
-            template = Environment().from_string(template_str)
+            template = Environment(
+                undefined=ChainableUndefined,
+            ).from_string(template_str)
             return template.render(**template_context)
         return template_str
 
@@ -51,7 +53,10 @@ class TemplateManager:
             exclude_files = []
 
         dest_dir.mkdir(parents=True, exist_ok=True)
-        jinja_env = Environment(loader=FileSystemLoader(source_dir))
+        jinja_env = Environment(
+            loader=FileSystemLoader(source_dir),
+            undefined=ChainableUndefined,
+        )
 
         for source_path in source_dir.rglob("*"):
             if any(source_path.match(str(exclude)) for exclude in exclude_files):
@@ -105,7 +110,10 @@ class TemplateManager:
 
         dest_dir.mkdir(parents=True, exist_ok=True)
 
-        jinja_env = Environment(loader=FileSystemLoader(source_file.parent))
+        jinja_env = Environment(
+            loader=FileSystemLoader(source_file.parent),
+            undefined=ChainableUndefined,
+        )
 
         filename = self.render_template_string(source_file.name, template_context)
         dest_path = dest_dir / filename
@@ -123,6 +131,54 @@ class TemplateManager:
             shutil.copy2(source_file, dest_path)
 
         return dest_path
+
+    def scan_templates(
+        self,
+        source_dir: Path,
+        template_context: Optional[dict] = None,
+        exclude_files: Optional[List[Path]] = None,
+    ) -> list[Path]:
+        """
+        Return list of relative paths that copy_templates would create.
+
+        Does no I/O — only walks the source tree and renders path components.
+
+        Args:
+            source_dir: Source directory containing templates
+            template_context: Context variables for Jinja2 rendering
+            exclude_files: List of file patterns to exclude
+        """
+        if template_context is None:
+            template_context = {}
+        if exclude_files is None:
+            exclude_files = []
+
+        result: list[Path] = []
+
+        for source_path in source_dir.rglob("*"):
+            if source_path.is_dir():
+                continue
+            if any(source_path.match(str(exclude)) for exclude in exclude_files):
+                continue
+
+            rel_path = source_path.relative_to(source_dir)
+
+            rendered_parts = [
+                self.render_template_string(part, template_context)
+                for part in rel_path.parts
+            ]
+            dest_path = Path(*rendered_parts)
+
+            if source_path.suffix == ".j2":
+                filename = self.render_template_string(dest_path.stem, template_context)
+                dest_path = dest_path.parent / filename
+            else:
+                filename = self.render_template_string(dest_path.name, template_context)
+                dest_path = dest_path.parent / filename
+
+            result.append(dest_path)
+
+        return result
 
     @staticmethod
     def remove_lines_from_file(file_path: Path, patterns_to_remove: List[str]) -> None:

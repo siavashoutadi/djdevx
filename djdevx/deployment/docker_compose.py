@@ -1,19 +1,18 @@
 """Docker Compose deployment plugin with Traefik ingress."""
 
-from __future__ import annotations
-
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 
-import typer
 import yaml
 from dotenv import dotenv_values
 
-from ..backend.django.settings._source import setup_readline
-from ..utils.console.print import CROSS_MARK, print_console
-from ..utils.django.setting_collector import CollectedSettings
+from ..settings._source import setup_readline
+from ..utils.console import prompts
+from ..utils.console.print import print_console
+from ..utils.project.setting_collector import CollectedSettings, SettingCollector
+from ..utils.project.project_structure import ProjectStructure
 
 from ._base import BaseDeployPlugin, DeployParam
 
@@ -29,7 +28,7 @@ class DeployInputs:
     cloudflare_api_token: str | None = None
 
     @classmethod
-    def load_from_env(cls, path: Path) -> DeployInputs | None:
+    def load_from_env(cls, path: Path) -> Self | None:
         if not path.exists():
             return None
         values = dotenv_values(path)
@@ -63,19 +62,18 @@ class DeployInputs:
         cls,
         traefik_email: str | None = None,
         cloudflare_api_token: str | None = None,
-    ) -> DeployInputs:
+    ) -> Self:
         setup_readline()
         if traefik_email is None:
             while True:
                 traefik_email = input("Let's Encrypt email: ").strip()
                 if cls._validate_email(traefik_email):
                     break
-                print_console.error("Invalid email address. Please try again.")
+                print_console.fail("Invalid email address. Please try again.")
         if cloudflare_api_token is None:
-            result = typer.prompt(
+            result = prompts.password(
                 "CF_DNS_API_TOKEN (optional, press Enter to skip)",
                 default="",
-                hide_input=True,
             )
             cloudflare_api_token = result or None
         return cls(
@@ -105,7 +103,7 @@ class DockerComposePlugin(BaseDeployPlugin):
             \u2514\u2500\u2500 docker-compose.prod.yml # created once, never overwritten
     """
 
-    name = "Docker Compose"
+    name: str = "Docker Compose"
 
     generate_params: list[DeployParam] = [
         DeployParam(
@@ -171,11 +169,9 @@ class DockerComposePlugin(BaseDeployPlugin):
         for f in ("docker-compose.base.yml", "docker-compose.prod.yml"):
             path = output_dir / "app" / f
             if path.exists():
-                print_console.success(f"  \u2713  app/{f}")
+                print_console.ok(f"  app/{f}")
             else:
-                print_console.error(
-                    f"  \u2717  app/{f}  (missing \u2014 run generate first)"
-                )
+                print_console.fail(f"  app/{f}  (missing \u2014 run generate first)")
                 all_ok = False
 
         # -- secrets
@@ -183,8 +179,8 @@ class DockerComposePlugin(BaseDeployPlugin):
         for secret in settings.secrets:
             secret_path = secrets_dir / secret.name
             if secret_path.exists():
-                print_console.success(
-                    f"  \u2713  {secret.name}  ({secret_path.relative_to(output_dir)})"
+                print_console.ok(
+                    f"  {secret.name}  ({secret_path.relative_to(output_dir)})"
                 )
             elif self._resolve_secret_value(secret) is not None:
                 print_console.warning(
@@ -193,19 +189,19 @@ class DockerComposePlugin(BaseDeployPlugin):
                 all_ok = False
             else:
                 hint = self._hint_secrets_command()
-                print_console.error(f"  \u2717  {secret.name}  (no value)")
+                print_console.fail(f"  {secret.name}  (no value)")
                 print_console.info(f"     Run: {hint}")
                 all_ok = False
 
         # -- config vars
         for cv in settings.config_vars:
             if cv.name.upper() == "DEBUG":
-                print_console.success(f"  \u2713  {cv.name}  (hardcoded to false)")
+                print_console.ok(f"  {cv.name}  (hardcoded to false)")
             elif self._resolve_config_value(cv) is not None:
-                print_console.success(f"  \u2713  {cv.name}  (resolved)")
+                print_console.ok(f"  {cv.name}  (resolved)")
             else:
                 hint = self._hint_configs_command()
-                print_console.error(f"  \u2717  {cv.name}  (no value)")
+                print_console.fail(f"  {cv.name}  (no value)")
                 print_console.info(f"     Run: {hint}")
                 all_ok = False
 
@@ -216,12 +212,12 @@ class DockerComposePlugin(BaseDeployPlugin):
             inputs = DeployInputs.load_from_env(traefik_env)
             if inputs is not None:
                 traefik_env_ok = True
-                print_console.success("  \u2713  traefik/.env  (current)")
+                print_console.ok("  traefik/.env  (current)")
             else:
-                print_console.error("  \u2717  traefik/.env  (missing TRAEFIK_EMAIL)")
+                print_console.fail("  traefik/.env  (missing TRAEFIK_EMAIL)")
                 all_ok = False
         else:
-            print_console.error("  \u2717  traefik/.env  (missing)")
+            print_console.fail("  traefik/.env  (missing)")
             print_console.info("     Run: ddx deployment docker-compose generate")
             all_ok = False
 
@@ -240,12 +236,10 @@ class DockerComposePlugin(BaseDeployPlugin):
                     )
                     all_ok = False
                 else:
-                    print_console.success(
-                        "  \u2713  traefik/docker-compose.yml  (current)"
-                    )
+                    print_console.ok("  traefik/docker-compose.yml  (current)")
             else:
-                print_console.error(
-                    "  \u2717  traefik/docker-compose.yml  (missing \u2014 run generate)"
+                print_console.fail(
+                    "  traefik/docker-compose.yml  (missing \u2014 run generate)"
                 )
                 all_ok = False
 
@@ -264,16 +258,16 @@ class DockerComposePlugin(BaseDeployPlugin):
                     )
                     all_ok = False
                 else:
-                    print_console.success("  \u2713  app/.env  (current)")
+                    print_console.ok("  app/.env  (current)")
         else:
-            print_console.error("  \u2717  app/.env  (missing)")
+            print_console.fail("  app/.env  (missing)")
             print_console.info("     Run: ddx deployment docker-compose generate")
             all_ok = False
 
         # -- DOMAIN in app/.env
         app_env_vars = dotenv_values(app_env_path) if app_env_path.exists() else {}
         if not app_env_vars.get("DOMAIN"):
-            print_console.error("  \u2717  app/.env  (missing DOMAIN)")
+            print_console.fail("  app/.env  (missing DOMAIN)")
             print_console.info("     Run: ddx deployment docker-compose generate")
             all_ok = False
 
@@ -291,19 +285,17 @@ class DockerComposePlugin(BaseDeployPlugin):
                 )
                 all_ok = False
             else:
-                print_console.success(
-                    "  \u2713  app/docker-compose.base.yml  (current)"
-                )
+                print_console.ok("  app/docker-compose.base.yml  (current)")
         elif not base_yml.exists():
-            print_console.error(
-                "  \u2717  app/docker-compose.base.yml  (missing \u2014 run generate)"
+            print_console.fail(
+                "  app/docker-compose.base.yml  (missing \u2014 run generate)"
             )
             all_ok = False
 
         if all_ok:
-            print_console.success("All checks passed.")
+            print_console.step_done("All checks passed.")
         else:
-            print_console.error(
+            print_console.fail(
                 "Some checks failed. Fix the issues above before deploying."
             )
 
@@ -315,17 +307,12 @@ class DockerComposePlugin(BaseDeployPlugin):
 
     @staticmethod
     def _collect_settings() -> CollectedSettings:
-        from ..utils.djdevx_config.backend.django import DjangoConfig
-        from ..utils.django.setting_collector import SettingCollector
-
-        config = DjangoConfig()
-        collector = SettingCollector(config.django_backend_root)
+        root = ProjectStructure().root
+        collector = SettingCollector(root)
         return collector.collect()
 
     def _resolve_secret_value(self, secret: Any) -> str | None:
-        from ..utils.djdevx_config.backend.django import DjangoConfig
-
-        backend_root = DjangoConfig().django_backend_root
+        backend_root = ProjectStructure().root
         prod_file = backend_root / ".secrets.prod" / secret.name
         if prod_file.exists():
             return prod_file.read_text().strip()
@@ -333,11 +320,7 @@ class DockerComposePlugin(BaseDeployPlugin):
 
     @staticmethod
     def _hint_secrets_command() -> str:
-        from ..utils.djdevx_config.project import ProjectConfig
-
-        config = ProjectConfig().config_data
-        framework = config.get("backend", {}).get("framework", "django")
-        return f"djdevx backend {framework} settings secrets init prod"
+        return "ddx settings secrets init prod"
 
     def _resolve_config_value(self, config_var: Any) -> str | None:
         env_prod = self._read_env_prod()
@@ -352,17 +335,11 @@ class DockerComposePlugin(BaseDeployPlugin):
 
     @staticmethod
     def _hint_configs_command() -> str:
-        from ..utils.djdevx_config.project import ProjectConfig
-
-        config = ProjectConfig().config_data
-        framework = config.get("backend", {}).get("framework", "django")
-        return f"djdevx backend {framework} settings configs init prod"
+        return "ddx settings configs init prod"
 
     @staticmethod
     def _read_env_prod() -> dict[str, str | None]:
-        from ..utils.djdevx_config.backend.django import DjangoConfig
-
-        backend_root = DjangoConfig().django_backend_root
+        backend_root = ProjectStructure().root
         env_path = backend_root / ".env.prod"
         if not env_path.exists():
             return {}
@@ -435,7 +412,7 @@ class DockerComposePlugin(BaseDeployPlugin):
             value = self._resolve_secret_value(secret)
             if value is None:
                 hint = self._hint_secrets_command()
-                print_console.error(f"  {CROSS_MARK} {secret.name}  (no value)")
+                print_console.fail(f"  {secret.name}  (no value)")
                 print_console.info(f"     Run: {hint}")
                 print_console.info(f"     Or create {secret_path} manually")
                 continue
@@ -457,7 +434,7 @@ class DockerComposePlugin(BaseDeployPlugin):
             return
         hint = self._hint_configs_command()
         for name in missing:
-            print_console.error(f"  {CROSS_MARK} {name}  (no value)")
+            print_console.fail(f"  {name}  (no value)")
             print_console.info(f"     Run: {hint}")
 
     # ------------------------------------------------------------------
@@ -466,15 +443,13 @@ class DockerComposePlugin(BaseDeployPlugin):
 
     @staticmethod
     def _build_app_env(output_dir: Path, domain: str | None = None) -> str | None:
-        from ..utils.djdevx_config.backend.django import DjangoConfig
+        from ..utils.tracking import ProjectTracking
 
-        config = DjangoConfig()
-        env_prod = config.django_backend_root / ".env.prod"
+        config = ProjectTracking()
+        env_prod = config.project_root / ".env.prod"
         if not env_prod.exists():
-            print_console.error(f"  {env_prod} not found")
-            print_console.info(
-                "     Run: ddx backend django settings configs init prod"
-            )
+            print_console.fail(f"  {env_prod} not found")
+            print_console.info("     Run: ddx settings configs init prod")
             return None
 
         app_env = output_dir / "app" / ".env"
@@ -487,7 +462,7 @@ class DockerComposePlugin(BaseDeployPlugin):
             while not domain:
                 domain = input("Domain name: ").strip()
                 if not DeployInputs._validate_domain(domain):
-                    print_console.error(
+                    print_console.fail(
                         "Invalid domain. Please try again (e.g. example.com)."
                     )
                     domain = None

@@ -20,7 +20,7 @@ When you add your own file to `settings/apps/`, everything shows up in the
 
 ## Managing Settings with the CLI
 
-The `ddx backend django settings` command tree provides tools to inspect,
+The `ddx settings` command tree provides tools to inspect,
 verify, and initialize configuration and secrets.
 
 ### Secrets
@@ -31,23 +31,23 @@ are stored in `.secrets/<field_name>` and should never be committed.
 ```bash
 # Initialize secrets for local development — auto-generates where possible,
 # prompts for the rest, writes to .secrets/<name>
-ddx backend django settings secrets init dev
+ddx settings secrets init dev
 
 # Initialize secrets for production — same but writes to .secrets.prod/<name>
-ddx backend django settings secrets init prod
+ddx settings secrets init prod
 
 # Show all secrets with their resolve source and value
-ddx backend django settings secrets list dev
-ddx backend django settings secrets list prod
+ddx settings secrets list dev
+ddx settings secrets list prod
 
 # Verify all secrets are present — exits with code 1 if anything is missing
-ddx backend django settings secrets verify dev
-ddx backend django settings secrets verify prod
+ddx settings secrets verify dev
+ddx settings secrets verify prod
 ```
 
 Example output after installing PostgreSQL and Redis:
 
-![ddx backend django settings secrets list dev](../images/manage_settings/secrets-list.png)
+![ddx settings secrets list dev](../images/manage_settings/secrets-list.png)
 
 ### Config Vars
 
@@ -58,20 +58,20 @@ can be set via `.env`, environment variables, or default values in settings.
 # Initialize production config vars — prompts for each missing var,
 # validates input against pydantic type annotations, writes to .env.prod.
 # Supports readline history (up/down arrows) and line editing.
-ddx backend django settings configs init prod
+ddx settings configs init prod
 
 # Show all config vars with their resolve source and value
-ddx backend django settings configs list dev
-ddx backend django settings configs list prod
+ddx settings configs list dev
+ddx settings configs list prod
 
 # Verify all config vars are present — exits with code 1 if anything is missing
-ddx backend django settings configs verify dev
-ddx backend django settings configs verify prod
+ddx settings configs verify dev
+ddx settings configs verify prod
 ```
 
 Example output after installing PostgreSQL, Redis:
 
-![ddx backend django settings configs list dev](../images/manage_settings/configs-list.png)
+![ddx settings configs list dev](../images/manage_settings/configs-list.png)
 
 These commands scan all three settings directories (`django/`, `packages/`,
 `apps/`) and show everything in one view.
@@ -83,9 +83,9 @@ config vars ready for local development:
 
 ```bash
 cd myproject
-ddx backend django settings secrets init dev
-ddx backend django settings secrets verify dev
-ddx backend django settings configs verify dev
+ddx settings secrets init dev
+ddx settings secrets verify dev
+ddx settings configs verify dev
 ```
 
 ## Adding Settings for Your Own Apps
@@ -102,7 +102,7 @@ executed by `settings/__init__.py`. No manual registration needed.
 
 ### 1. Create Your App
 
-Run `ddx backend django create app`. This creates your app under `backend/`
+Run `ddx create`. This creates your app in the project root
 and generates a settings file at `settings/apps/<app_name>.py` that registers
 it in `INSTALLED_APPS`. You can then add your `AppBaseSettings` subclass to
 that file.
@@ -211,7 +211,7 @@ API_ENDPOINT: str = _settings.api_endpoint
 When you add a `SecretStr` field to your settings class, the behavior during
 `secrets init` depends on whether a dev default exists:
 
-- **Dev default defined** -- `ddx backend django settings secrets init dev`
+- **Dev default defined** -- `ddx settings secrets init dev`
   skips the field silently (no prompt)
 - **No dev default** -- you will be prompted interactively (hidden input,
   must confirm by typing twice)
@@ -220,13 +220,13 @@ When you add a `SecretStr` field to your settings class, the behavior during
 history (up/down arrows recall previous values) and full line editing
 (left/right, home/end, delete). History is saved to `~/.djdevx/readline_history`.
 
-In production (`ddx backend django settings secrets init prod`), dev defaults
+In production (`ddx settings secrets init prod`), dev defaults
 are not used. Every secret must be provided or you will be prompted. Run
-`ddx backend django settings secrets verify` to check -- it exits with code 1
+`ddx settings secrets verify` to check -- it exits with code 1
 if anything is missing.
 
-`ddx backend django settings secrets init prod` creates `.secrets.prod/` and
-`ddx backend django settings configs init prod` creates `.env.prod`, so you
+`ddx settings secrets init prod` creates `.secrets.prod/` and
+`ddx settings configs init prod` creates `.env.prod`, so you
 can see exactly what variables a production deployment needs. In a real
 Kubernetes deployment, create one Secret per file in `.secrets.prod/` and a
 ConfigMap from `.env.prod`:

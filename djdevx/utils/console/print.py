@@ -8,6 +8,9 @@ CHECK_MARK = "\u2713"
 CROSS_MARK = "\u2717"
 ELLIPSIS = "\u2026"
 
+GREEN_CHECK_MARK = f"[bold green]{CHECK_MARK}[/bold green]"
+RED_CROSS_MARK = f"[bold red]{CROSS_MARK}[/bold red]"
+
 
 class PrintConsole:
     """Styled output printer for djdevx messages."""
@@ -16,24 +19,36 @@ class PrintConsole:
         self._console = RichConsole()
 
     def step(self, line: str):
-        """Print a step message in cyan."""
-        self._console.print(f"[bold cyan]{escape(line)}[/bold cyan]")
+        """Print a pending step with a blue checkbox."""
+        self._console.print(f"[bold blue]\u2610[/bold blue] {escape(line)}")
 
-    def success(self, line: str):
+    def step_done(self, line: str):
+        """Print a completed step with a blue checked box."""
+        self._console.print(f"[bold blue]\u2611[/bold blue] {escape(line)}")
+
+    def success(self, line: str, end: str = "\n"):
         """Print a success message in green."""
-        self._console.print(f"[bold green]{escape(line)}[/bold green]")
+        self._console.print(f"[bold green]{escape(line)}[/bold green]", end=end)
 
-    def error(self, line: str):
+    def error(self, line: str, end: str = "\n"):
         """Print an error message in red."""
-        self._console.print(f"[bold red]{escape(line)}[/bold red]")
+        self._console.print(f"[bold red]{escape(line)}[/bold red]", end=end)
 
-    def info(self, line: str):
+    def info(self, line: str, end: str = "\n"):
         """Print an info message without styling."""
-        self._console.print(escape(line))
+        self._console.print(escape(line), end=end)
 
     def warning(self, line: str):
         """Print a warning message in yellow."""
         self._console.print(f"[bold yellow]{escape(line)}[/bold yellow]")
+
+    def ok(self, message: str):
+        """Print a green checkmark followed by an unstyled message on the same line."""
+        self._console.print(f"[bold green]{CHECK_MARK}[/bold green] {escape(message)}")
+
+    def fail(self, message: str):
+        """Print a red cross followed by an unstyled message on the same line."""
+        self._console.print(f"[bold red]{CROSS_MARK}[/bold red] {escape(message)}")
 
     def list(self, items: list):
         """Print a list of items with bullet points."""

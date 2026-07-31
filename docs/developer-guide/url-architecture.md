@@ -21,36 +21,34 @@ The generated project's URL directory is organised into three subdirectories,
 each with a distinct purpose:
 
 ```
-backend/
-└── <backend_root>/
-    ├── urls/
-    │   ├── __init__.py          ← Auto-discovery hub
-    │   ├── django/
-    │   │   ├── __init__.py
-    │   │   ├── admin.py         → path("admin/", admin.site.urls)
-    │   │   └── media.py         → static() serving in DEBUG only
-    │   ├── apps/
-    │   │   ├── __init__.py
-    │   │   ├── pwa.py           → path("", include("pwa.urls"))
-    │   │   ├── tailwind_ui.py   → path("twui/", include(...))
-    │   │   └── <app_name>.py    → path("<app_name>/", include("<app_name>.urls"))
-    │   └── packages/
-    │       ├── __init__.py
-    │       ├── django_health_check.py    → health check endpoint
-    │       ├── django_silk.py            → path("silk/", include("silk.urls"))
-    │       ├── drf_spectacular.py        → api/schema/, swagger-ui/, redoc/
-    │       └── ...                       (one file per installed third-party package)
-    ├── ws_urls/                         ← WebSocket URL auto-discovery
-    │   ├── __init__.py                  ← Same rglob + importlib pattern
-    │   └── ...                          (package websocket_urlpatterns files)
-    └── asgi.py                          → URLRouter(websocket_urlpatterns)
+urls/
+  ├── __init__.py          ← Auto-discovery hub
+  ├── django/
+  │   ├── __init__.py
+  │   ├── admin.py         → path("admin/", admin.site.urls)
+  │   └── media.py         → static() serving in DEBUG only
+  ├── apps/
+  │   ├── __init__.py
+  │   ├── pwa.py           → path("", include("pwa.urls"))
+  │   ├── tailwind_ui.py   → path("twui/", include(...))
+  │   └── <app_name>.py    → path("<app_name>/", include("<app_name>.urls"))
+  └── packages/
+      ├── __init__.py
+      ├── django_health_check.py    → health check endpoint
+      ├── django_silk.py            → path("silk/", include("silk.urls"))
+      ├── drf_spectacular.py        → api/schema/, swagger-ui/, redoc/
+      └── ...                       (one file per installed third-party package)
+ws_urls/                         ← WebSocket URL auto-discovery
+  ├── __init__.py                  ← Same rglob + importlib pattern
+  └── ...                          (package websocket_urlpatterns files)
+asgi.py                          → URLRouter(websocket_urlpatterns)
 ```
 
 | Directory | Purpose | Managed by |
 |-----------|---------|------------|
 | `urls/django/` | Django core URLs (admin, media, static files) | Scaffolded once at project creation |
-| `urls/apps/` | Custom Django app URLs | `ddx backend django create` or manual |
-| `urls/packages/` | Third-party package URLs | `ddx backend django packages <name> install` / `remove` |
+| `urls/apps/` | Custom Django app URLs | `ddx create` or manual |
+| `urls/packages/` | Third-party package URLs | `ddx packages add <name>` / `ddx packages remove <name>` |
 | `ws_urls/` | WebSocket URL patterns (Channels) | Package templates (e.g. channels) |
 
 ---
@@ -156,12 +154,12 @@ These are scaffolded once when the project is created and rarely change.
 Holds URL configuration for custom Django applications. There are two ways
 an app gets its URL file here:
 
-#### Via `ddx backend django create`
+#### Via `ddx create`
 
 When you run:
 
 ```
-ddx backend django create --application-name myapp
+ddx create --application-name myapp
 ```
 
 The startapp feature copies a Jinja2 template to produce two files:
@@ -260,10 +258,10 @@ auto-derived URL file:
 
 ```python
 def _cleanup_files(self) -> None:
-    settings_path = self.pm.packages_settings_path / self._settings_file
+    settings_path = self.structure.packages_settings_dir / self._settings_file
     settings_path.unlink(missing_ok=True)
 
-    url_path = self.pm.packages_urls_path / self._url_file
+    url_path = self.structure.packages_urls_dir / self._url_file
     url_path.unlink(missing_ok=True)
 ```
 
@@ -371,7 +369,7 @@ urlpatterns = [
 At install time, the user is prompted for `account_url_prefix`:
 
 ```
-ddx backend django packages django-allauth account install --account-url-prefix auth
+ddx packages add django-allauth account --account-url-prefix auth
 ```
 
 The rendered output becomes `urls/packages/django_allauth_account.py`:
@@ -427,12 +425,12 @@ application = ProtocolTypeRouter({
 
 ## How to Add URLs for Your Own App
 
-### Option 1: Use `ddx backend django create`
+### Option 1: Use `ddx create`
 
 The simplest approach. Running:
 
 ```
-ddx backend django create --application-name myapp
+ddx create --application-name myapp
 ```
 
 Automatically:
@@ -552,7 +550,7 @@ of namespace declarations.
 
 - [Package Architecture](package-architecture.md) — How packages declare
   URLs via `BasePackage`, `url_file`, and `PathDeriver`
-- [Creating a Package](creating-a-package.md) — Step-by-step guide for
+- [Add a Package](adding-a-package.md) — Step-by-step guide for
   adding a new Django package to djdevx
 - [Template System](template-system.md) — Jinja2 rendering, `.j2`
   conventions, and template context

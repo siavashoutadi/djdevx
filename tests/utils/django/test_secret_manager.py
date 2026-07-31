@@ -3,7 +3,7 @@
 import stat
 from pathlib import Path
 
-from djdevx.utils.django.secret_manager import SecretManager
+from djdevx.utils.project.secret_manager import SecretManager
 
 
 class TestSecretManager:

@@ -3,7 +3,7 @@
 import ast
 from pathlib import Path
 
-from djdevx.utils.django.setting_collector import (
+from djdevx.utils.project.setting_collector import (
     _extract_class_default,
     _extract_defaults,
     _is_secret_str,
@@ -75,7 +75,6 @@ class TestIsSecretStr:
 
     def test_none_annotation(self) -> None:
         """No annotation (ellipsis / missing) should not crash."""
-        # This tests the function with a non-annotation node
         assert _is_secret_str(ast.Constant(value=None)) is False
 
 
@@ -132,7 +131,6 @@ class TestExtractClassDefault:
         """Defaults that are complex expressions should not crash."""
         node = self._parse_assign("x: int = some_func()")
         result = _extract_class_default(node)
-        # Should gracefully return None for non-literal expressions
         assert result is None
 
 
@@ -385,7 +383,6 @@ class Cfg2(AppBaseSettings):
         result = collector.collect()
         assert len(result.config_vars) == 1
         assert result.config_vars[0].name == "shared_field"
-        # prod_default falls back to class default from first file
         assert result.config_vars[0].prod_default == "from_base"
 
     def test_extracts_dev_defaults(self, tmp_path: Path) -> None:

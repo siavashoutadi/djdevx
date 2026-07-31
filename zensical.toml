@@ -16,19 +16,32 @@ nav = [
     { "Deployment" = [
       { "Overview" = "user-guide/deployment.md" },
       { "Docker Compose" = "user-guide/deployment/docker-compose.md" },
-    ]},
+    ] },
     { "CLI Full Manual" = "cli/manual.md" },
-  ]},
+  ] },
   { "Developer Guide" = [
     { "Architecture" = "developer-guide/architecture.md" },
     { "CLI Architecture" = "developer-guide/cli-architecture.md" },
-    { "Package Architecture" = "developer-guide/package-architecture.md" },
+    { "Installable System" = [
+      { "Overview" = "developer-guide/installable-system.md" },
+      { "Common Concepts" = "developer-guide/creating-an-installable.md" },
+      { "Package Architecture" = "developer-guide/package-architecture.md" },
+      { "Add a Package" = "developer-guide/adding-a-package.md" },
+      { "Feature Architecture" = "developer-guide/feature-architecture.md" },
+      { "Add a Feature" = "developer-guide/adding-a-feature.md" },
+      { "Framework Architecture" = "developer-guide/framework-architecture.md" },
+      { "Add a Framework" = "developer-guide/adding-a-framework.md" },
+      { "Database Architecture" = "developer-guide/database-architecture.md" },
+      { "Add a Database" = "developer-guide/adding-a-database.md" },
+      { "Cache Architecture" = "developer-guide/cache-architecture.md" },
+      { "Add a Cache" = "developer-guide/adding-a-cache.md" },
+    ] },
     { "Template System" = "developer-guide/template-system.md" },
     { "Pydantic Settings" = "developer-guide/pydantic-settings.md" },
     { "URL Architecture" = "developer-guide/url-architecture.md" },
     { "Deployment Architecture" = "developer-guide/deployment-architecture.md" },
-    { "Creating a Package" = "developer-guide/creating-a-package.md" },
+    { "Console Utilities" = "developer-guide/console.md" },
     { "Testing" = "developer-guide/testing.md" },
-    { "Code Standards" = "developer-guide/code-standards.md" }
-  ]}
+    { "Code Standards" = "developer-guide/code-standards.md" },
+  ] },
 ]

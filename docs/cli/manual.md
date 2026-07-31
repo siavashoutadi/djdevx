@@ -14,20 +14,26 @@ $ djdevx [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `version`: Show the application version.
-* `requirement`: Check the requirement for project creation.
+* `version`: Show the application version
+* `requirement`: Check system requirements
 * `new`: Create a new project
-* `backend`: Backend development tools
+* `packages`: Manage Django packages
+* `frameworks`: Manage CSS/JS frameworks
+* `features`: Manage features
+* `create`: Create new Django applications
+* `database`: Manage database infrastructure
+* `cache`: Manage cache infrastructure
+* `settings`: Manage project secrets and configs
 * `deployment`: Generate deployment manifests
 
 ## djdevx version
 
-Show the application version.
+Show the application version
 
 **Usage**:
 
 ```console
-$ djdevx version [OPTIONS]
+$ djdevx version [OPTIONS] COMMAND [ARGS]...
 ```
 
 **Options**:
@@ -36,12 +42,30 @@ $ djdevx version [OPTIONS]
 
 ## djdevx requirement
 
-Check the requirement for project creation.
+Check system requirements
 
 **Usage**:
 
 ```console
-$ djdevx requirement [OPTIONS]
+$ djdevx requirement [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `verify`: Check the requirements for project creation.
+
+## djdevx requirement verify
+
+Check the requirements for project creation.
+
+**Usage**:
+
+```console
+$ djdevx requirement verify [OPTIONS]
 ```
 
 **Options**:
@@ -60,58 +84,22 @@ $ djdevx new [OPTIONS] COMMAND [ARGS]...
 
 **Options**:
 
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `backend`: Create a backend only project
-
-## djdevx new backend
-
-Create a backend only project
-
-**Usage**:
-
-```console
-$ djdevx new backend [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `django`: Create a new django project
-
-## djdevx new backend django
-
-Create a new django project
-
-**Usage**:
-
-```console
-$ djdevx new backend django [OPTIONS]
-```
-
-**Options**:
-
 * `--project-name TEXT`: The name of the project  [default: my-project]
 * `--project-description TEXT`: The description of the project  [default: My project is awesome]
 * `--project-directory PATH`: The directory to initialize the project in  [default: .]
 * `--python-version TEXT`: The minimum python version for the project  [default: 3.14]
-* `--backend-root TEXT`: Backend root directory name  [default: backend]
 * `--git-init / --no-git-init`: whether to initialize a git repository in the project directory  [default: git-init]
+* `-v, --verbose`: Show full output of all commands
 * `--help`: Show this message and exit.
 
-## djdevx backend
+## djdevx packages
 
-Backend development tools
+Manage Django packages
 
 **Usage**:
 
 ```console
-$ djdevx backend [OPTIONS] COMMAND [ARGS]...
+$ djdevx packages [OPTIONS] COMMAND [ARGS]...
 ```
 
 **Options**:
@@ -120,16 +108,72 @@ $ djdevx backend [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `django`: Django backend development tools
+* `add`: Install a package.
+* `remove`: Remove a package or variant.
+* `list`: List all available packages with install...
 
-## djdevx backend django
+## djdevx packages add
 
-Django backend development tools
+Install a package.
 
 **Usage**:
 
 ```console
-$ djdevx backend django [OPTIONS] COMMAND [ARGS]...
+$ djdevx packages add [OPTIONS] [NAME]
+```
+
+**Arguments**:
+
+* `[NAME]`: Package name to install
+
+**Options**:
+
+* `-p, --provider TEXT`: Variant/provider name
+* `-v, --verbose`: Show full pixi output
+* `--help`: Show this message and exit.
+
+## djdevx packages remove
+
+Remove a package or variant.
+
+**Usage**:
+
+```console
+$ djdevx packages remove [OPTIONS] [NAME]
+```
+
+**Arguments**:
+
+* `[NAME]`: Package name to remove
+
+**Options**:
+
+* `-p, --provider TEXT`: Variant/provider to remove
+* `-v, --verbose`: Show full pixi output
+* `--help`: Show this message and exit.
+
+## djdevx packages list
+
+List all available packages with install status in a table.
+
+**Usage**:
+
+```console
+$ djdevx packages list [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx frameworks
+
+Manage CSS/JS frameworks
+
+**Usage**:
+
+```console
+$ djdevx frameworks [OPTIONS] COMMAND [ARGS]...
 ```
 
 **Options**:
@@ -138,22 +182,70 @@ $ djdevx backend django [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `packages`: Install and configure django packages
-* `feature`: Add features to your Django project
-* `create`: Create new Django applications or components
-* `list`: List installed Django packages and features
-* `database`: Manage database infrastructure
-* `cache`: Manage cache infrastructure
-* `settings`: Manage project secrets and config vars
+* `add`: Add a CSS/JS framework.
+* `remove`: Remove a CSS/JS framework.
+* `list`: List all available frameworks with install...
 
-## djdevx backend django packages
+## djdevx frameworks add
 
-Install and configure django packages
+Add a CSS/JS framework.
 
 **Usage**:
 
 ```console
-$ djdevx backend django packages [OPTIONS] COMMAND [ARGS]...
+$ djdevx frameworks add [OPTIONS] [NAME]
+```
+
+**Arguments**:
+
+* `[NAME]`: Framework name to add
+
+**Options**:
+
+* `-v, --verbose`: Show full pixi output
+* `--help`: Show this message and exit.
+
+## djdevx frameworks remove
+
+Remove a CSS/JS framework.
+
+**Usage**:
+
+```console
+$ djdevx frameworks remove [OPTIONS] [NAME]
+```
+
+**Arguments**:
+
+* `[NAME]`: Framework name to remove
+
+**Options**:
+
+* `-v, --verbose`: Show full pixi output
+* `--help`: Show this message and exit.
+
+## djdevx frameworks list
+
+List all available frameworks with install status in a table.
+
+**Usage**:
+
+```console
+$ djdevx frameworks list [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx features
+
+Manage features
+
+**Usage**:
+
+```console
+$ djdevx features [OPTIONS] COMMAND [ARGS]...
 ```
 
 **Options**:
@@ -162,50 +254,72 @@ $ djdevx backend django packages [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `channels`: Manage channels package
-* `django-allauth`: Manage django-allauth package
-* `django-allow-cidr`: Manage django-allow-cidr package
-* `django-anymail`: Manage django-anymail package
-* `django-auditlog`: Manage django-auditlog package
-* `django-browser-reload`: Manage django-browser-reload package
-* `django-cors-headers`: Manage django-cors-headers package
-* `django-csp`: Manage django-csp package
-* `django-debug-toolbar`: Manage django-debug-toolbar package
-* `django-defender`: Manage django-defender package
-* `django-extensions`: Manage django-extensions package
-* `django-filter`: Manage django-filter package
-* `django-guardian`: Manage django-guardian package
-* `django-health-check`: Manage django-health-check package
-* `django-htmx`: Manage django-htmx package
-* `django-silk`: Manage django-silk package
-* `django-import-export`: Manage django-import-export package
-* `django-meta`: Manage django-meta package
-* `django-oauth-toolkit`: Manage django-oauth-toolkit package
-* `django-permissions-policy`: Manage django-permissions-policy package
-* `django-role-permissions`: Manage django-role-permissions package
-* `django-simple-history`: Manage django-simple-history package
-* `django-simple-nav`: Manage django-simple-nav package
-* `django-snakeoil`: Manage django-snakeoil package
-* `django-sp-admin`: Manage django-sp-admin package
-* `django-storages`: Manage django-storages package
-* `django-taggit`: Manage django-taggit package
-* `django-tailwind-cli`: Manage django-tailwind-cli package
-* `djangochannelsrestframework`: Manage djangochannelsrestframework package
-* `djangorestframework`: Manage djangorestframework package
-* `drf-nested-routers`: Manage drf-nested-routers package
-* `drf-flex-fields`: Manage drf-flex-fields package
-* `drf-spectacular`: Manage drf-spectacular package
-* `heroicons`: Manage heroicons package
-* `whitenoise`: Manage whitenoise package
+* `add`: Install a feature.
+* `remove`: Remove a feature or variant.
+* `list`: List all available features with install...
 
-## djdevx backend django packages channels
+## djdevx features add
 
-Manage channels package
+Install a feature.
 
 **Usage**:
 
 ```console
-$ djdevx backend django packages channels [OPTIONS] COMMAND [ARGS]...
+$ djdevx features add [OPTIONS] [NAME]
+```
+
+**Arguments**:
+
+* `[NAME]`: Feature name to install
+
+**Options**:
+
+* `-p, --provider TEXT`: Variant/provider name
+* `-v, --verbose`: Show full pixi output
+* `--help`: Show this message and exit.
+
+## djdevx features remove
+
+Remove a feature or variant.
+
+**Usage**:
+
+```console
+$ djdevx features remove [OPTIONS] [NAME]
+```
+
+**Arguments**:
+
+* `[NAME]`: Feature name to remove
+
+**Options**:
+
+* `-p, --provider TEXT`: Variant/provider to remove
+* `-v, --verbose`: Show full pixi output
+* `--help`: Show this message and exit.
+
+## djdevx features list
+
+List all available features with install status in a table.
+
+**Usage**:
+
+```console
+$ djdevx features list [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx create
+
+Create new Django applications
+
+**Usage**:
+
+```console
+$ djdevx create [OPTIONS] COMMAND [ARGS]...
 ```
 
 **Options**:
@@ -214,2617 +328,31 @@ $ djdevx backend django packages channels [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `install`: Install and configure channels
-* `remove`: Remove channels package
+* `app`: Create a new Django application.
 
-## djdevx backend django packages channels install
+## djdevx create app
 
-Install and configure channels
+Create a new Django application.
 
 **Usage**:
 
 ```console
-$ djdevx backend django packages channels install [OPTIONS]
+$ djdevx create app [OPTIONS]
 ```
 
 **Options**:
 
+* `--name TEXT`: Application name
 * `--help`: Show this message and exit.
 
-## djdevx backend django packages channels remove
-
-Remove channels package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages channels remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-allauth
-
-Manage django-allauth package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-allauth [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `account`: Manage django-allauth with account...
-* `mfa`: Manage django-allauth with MFA functionality
-* `oidc-provider`: Manage django-allauth with OIDC provider...
-
-## djdevx backend django packages django-allauth account
-
-Manage django-allauth with account functionality
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-allauth account [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-allauth account
-* `remove`: Remove django-allauth account package
-
-## djdevx backend django packages django-allauth account install
-
-Install and configure django-allauth account
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-allauth account install [OPTIONS]
-```
-
-**Options**:
-
-* `--email-subject-prefix TEXT`: Subject-line prefix for emails (e.g., &#x27; - &#x27;)
-* `--enable-login-by-code / --no-enable-login-by-code`: Enable login by code  [default: enable-login-by-code]
-* `--is-profanity-for-username-enabled / --no-is-profanity-for-username-enabled`: Enable profanity filter for usernames  [default: is-profanity-for-username-enabled]
-* `--account-url-prefix TEXT`: URL prefix for account URLs  [default: auth]
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-allauth account remove
-
-Remove django-allauth account package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-allauth account remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-allauth mfa
-
-Manage django-allauth with MFA functionality
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-allauth mfa [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-allauth MFA
-* `remove`: Remove django-allauth MFA package
-
-## djdevx backend django packages django-allauth mfa install
-
-Install and configure django-allauth MFA
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-allauth mfa install [OPTIONS]
-```
-
-**Options**:
-
-* `--enable-totp / --no-enable-totp`: Enable TOTP (Time-based One-Time Password)  [default: enable-totp]
-* `--enable-recovery-codes / --no-enable-recovery-codes`: Enable recovery codes  [default: enable-recovery-codes]
-* `--enable-webauthn / --no-enable-webauthn`: Enable WebAuthn/passkeys  [default: no-enable-webauthn]
-* `--enable-trust / --no-enable-trust`: Enable &#x27;trust this browser&#x27; functionality  [default: no-enable-trust]
-* `--totp-issuer TEXT`: Issuer name for TOTP QR codes
-* `--totp-period INTEGER RANGE`: [default: 30; 15&lt;=x&lt;=300]
-* `--totp-digits INTEGER RANGE`: [default: 6; 6&lt;=x&lt;=8]
-* `--totp-tolerance INTEGER RANGE`: [default: 0; 0&lt;=x&lt;=5]
-* `--recovery-code-count INTEGER RANGE`: [default: 10; 5&lt;=x&lt;=20]
-* `--recovery-code-digits INTEGER RANGE`: [default: 8; 6&lt;=x&lt;=16]
-* `--passkey-login / --no-passkey-login`: [default: no-passkey-login]
-* `--passkey-signup / --no-passkey-signup`: [default: no-passkey-signup]
-* `--webauthn-allow-insecure / --no-webauthn-allow-insecure`: [default: no-webauthn-allow-insecure]
-* `--trust-cookie-age-days INTEGER RANGE`: [default: 14; 1&lt;=x&lt;=365]
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-allauth mfa remove
-
-Remove django-allauth MFA package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-allauth mfa remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-allauth oidc-provider
-
-Manage django-allauth with OIDC provider functionality
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-allauth oidc-provider [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-allauth OIDC...
-* `remove`: Remove django-allauth OIDC provider package
-
-## djdevx backend django packages django-allauth oidc-provider install
-
-Install and configure django-allauth OIDC provider
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-allauth oidc-provider install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-allauth oidc-provider remove
-
-Remove django-allauth OIDC provider package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-allauth oidc-provider remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-allow-cidr
-
-Manage django-allow-cidr package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-allow-cidr [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-allow-cidr
-* `remove`: Remove django-allow-cidr package
-
-## djdevx backend django packages django-allow-cidr install
-
-Install and configure django-allow-cidr
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-allow-cidr install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-allow-cidr remove
-
-Remove django-allow-cidr package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-allow-cidr remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-anymail
-
-Manage django-anymail package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-anymail [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `ses`: Manage django-anymail with SES backend
-* `brevo`: Manage django-anymail with Brevo backend
-* `mailgun`: Manage django-anymail with Mailgun backend
-* `mailjet`: Manage django-anymail with Mailjet backend
-* `resend`: Manage django-anymail with Resend backend
-
-## djdevx backend django packages django-anymail ses
-
-Manage django-anymail with SES backend
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-anymail ses [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-anymail SES
-* `remove`: Remove django-anymail SES package
-
-## djdevx backend django packages django-anymail ses install
-
-Install and configure django-anymail SES
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-anymail ses install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-anymail ses remove
-
-Remove django-anymail SES package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-anymail ses remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-anymail brevo
-
-Manage django-anymail with Brevo backend
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-anymail brevo [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-anymail Brevo
-* `remove`: Remove django-anymail Brevo package
-
-## djdevx backend django packages django-anymail brevo install
-
-Install and configure django-anymail Brevo
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-anymail brevo install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-anymail brevo remove
-
-Remove django-anymail Brevo package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-anymail brevo remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-anymail mailgun
-
-Manage django-anymail with Mailgun backend
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-anymail mailgun [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-anymail Mailgun
-* `remove`: Remove django-anymail Mailgun package
-
-## djdevx backend django packages django-anymail mailgun install
-
-Install and configure django-anymail Mailgun
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-anymail mailgun install [OPTIONS]
-```
-
-**Options**:
-
-* `--is-europe / --no-is-europe`: Flag to use Europe region for Mailgun  [default: no-is-europe]
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-anymail mailgun remove
-
-Remove django-anymail Mailgun package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-anymail mailgun remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-anymail mailjet
-
-Manage django-anymail with Mailjet backend
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-anymail mailjet [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-anymail Mailjet
-* `remove`: Remove django-anymail Mailjet package
-
-## djdevx backend django packages django-anymail mailjet install
-
-Install and configure django-anymail Mailjet
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-anymail mailjet install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-anymail mailjet remove
-
-Remove django-anymail Mailjet package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-anymail mailjet remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-anymail resend
-
-Manage django-anymail with Resend backend
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-anymail resend [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-anymail Resend
-* `remove`: Remove django-anymail Resend package
-
-## djdevx backend django packages django-anymail resend install
-
-Install and configure django-anymail Resend
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-anymail resend install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-anymail resend remove
-
-Remove django-anymail Resend package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-anymail resend remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-auditlog
-
-Manage django-auditlog package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-auditlog [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-auditlog
-* `remove`: Remove django-auditlog package
-
-## djdevx backend django packages django-auditlog install
-
-Install and configure django-auditlog
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-auditlog install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-auditlog remove
-
-Remove django-auditlog package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-auditlog remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-browser-reload
-
-Manage django-browser-reload package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-browser-reload [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-browser-reload
-* `remove`: Remove django-browser-reload package
-
-## djdevx backend django packages django-browser-reload install
-
-Install and configure django-browser-reload
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-browser-reload install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-browser-reload remove
-
-Remove django-browser-reload package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-browser-reload remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-cors-headers
-
-Manage django-cors-headers package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-cors-headers [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-cors-headers
-* `remove`: Remove django-cors-headers package
-
-## djdevx backend django packages django-cors-headers install
-
-Install and configure django-cors-headers
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-cors-headers install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-cors-headers remove
-
-Remove django-cors-headers package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-cors-headers remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-csp
-
-Manage django-csp package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-csp [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-csp
-* `remove`: Remove django-csp package
-
-## djdevx backend django packages django-csp install
-
-Install and configure django-csp
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-csp install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-csp remove
-
-Remove django-csp package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-csp remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-debug-toolbar
-
-Manage django-debug-toolbar package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-debug-toolbar [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-debug-toolbar
-* `remove`: Remove django-debug-toolbar package
-
-## djdevx backend django packages django-debug-toolbar install
-
-Install and configure django-debug-toolbar
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-debug-toolbar install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-debug-toolbar remove
-
-Remove django-debug-toolbar package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-debug-toolbar remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-defender
-
-Manage django-defender package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-defender [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-defender
-* `remove`: Remove django-defender package
-
-## djdevx backend django packages django-defender install
-
-Install and configure django-defender
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-defender install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-defender remove
-
-Remove django-defender package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-defender remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-extensions
-
-Manage django-extensions package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-extensions [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-extensions
-* `remove`: Remove django-extensions package
-
-## djdevx backend django packages django-extensions install
-
-Install and configure django-extensions
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-extensions install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-extensions remove
-
-Remove django-extensions package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-extensions remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-filter
-
-Manage django-filter package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-filter [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-filter
-* `remove`: Remove django-filter package
-
-## djdevx backend django packages django-filter install
-
-Install and configure django-filter
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-filter install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-filter remove
-
-Remove django-filter package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-filter remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-guardian
-
-Manage django-guardian package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-guardian [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-guardian
-* `remove`: Remove django-guardian package
-
-## djdevx backend django packages django-guardian install
-
-Install and configure django-guardian
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-guardian install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-guardian remove
-
-Remove django-guardian package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-guardian remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-health-check
-
-Manage django-health-check package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-health-check [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-health-check
-* `remove`: Remove django-health-check package
-
-## djdevx backend django packages django-health-check install
-
-Install and configure django-health-check
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-health-check install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-health-check remove
-
-Remove django-health-check package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-health-check remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-htmx
-
-Manage django-htmx package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-htmx [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-htmx
-* `remove`: Remove django-htmx package
-
-## djdevx backend django packages django-htmx install
-
-Install and configure django-htmx
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-htmx install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-htmx remove
-
-Remove django-htmx package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-htmx remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-silk
-
-Manage django-silk package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-silk [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-silk
-* `remove`: Remove django-silk package
-
-## djdevx backend django packages django-silk install
-
-Install and configure django-silk
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-silk install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-silk remove
-
-Remove django-silk package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-silk remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-import-export
-
-Manage django-import-export package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-import-export [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-import-export
-* `remove`: Remove django-import-export package
-
-## djdevx backend django packages django-import-export install
-
-Install and configure django-import-export
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-import-export install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-import-export remove
-
-Remove django-import-export package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-import-export remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-meta
-
-Manage django-meta package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-meta [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-meta
-* `remove`: Remove django-meta package
-
-## djdevx backend django packages django-meta install
-
-Install and configure django-meta
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-meta install [OPTIONS]
-```
-
-**Options**:
-
-* `--site-protocol TEXT`: Protocol for your site URL: &#x27;http&#x27; or &#x27;https&#x27; (use https for production)  [default: https]
-* `--site-domain TEXT`: Your website domain without protocol (e.g., &#x27;example.com&#x27; or &#x27;blog.example.com&#x27;)
-* `--site-name TEXT`: Display name of your website (e.g., &#x27;My Awesome Blog&#x27;)
-* `--site-type TEXT`: OpenGraph type (website, article, blog, product). See: https://ogp.me/#types  [default: website]
-* `--use-og-properties / --no-use-og-properties`: Enable OpenGraph meta tags for rich previews on Facebook, LinkedIn, WhatsApp, etc.  [default: use-og-properties]
-* `--use-twitter-properties / --no-use-twitter-properties`: Enable Twitter Card meta tags for rich previews when links are shared on Twitter/X  [default: use-twitter-properties]
-* `--use-schemaorg-properties / --no-use-schemaorg-properties`: Enable Schema.org structured data for better SEO and search engine understanding  [default: use-schemaorg-properties]
-* `--use-title-tag / --no-use-title-tag`: Auto-render &lt;title&gt; tags in templates (disable if you manage titles manually)  [default: use-title-tag]
-* `--configure-facebook / --no-configure-facebook`: Configure Facebook-specific settings (App ID, Pages, Publisher).  [default: no-configure-facebook]
-* `--fb-app-id TEXT`: Facebook App ID from https://developers.facebook.com/apps/ (numeric ID)
-* `--fb-pages TEXT`: Facebook Page ID for your business page (numeric ID)
-* `--fb-publisher TEXT`: Full Facebook Page URL (e.g., &#x27;https://www.facebook.com/YourPageName&#x27;)
-* `--configure-twitter / --no-configure-twitter`: Configure Twitter Card settings for rich previews.  [default: no-configure-twitter]
-* `--twitter-site TEXT`: Your website&#x27;s Twitter/X handle including @ (e.g., &#x27;@YourSite&#x27;)
-* `--twitter-author TEXT`: Default author Twitter/X handle with @ (e.g., &#x27;@AuthorName&#x27;)
-* `--twitter-type TEXT`: Twitter Card type: &#x27;summary&#x27; or &#x27;summary_large_image&#x27;  [default: summary_large_image]
-* `--default-image-url TEXT`: Full URL to default share image (1200x630px recommended)
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-meta remove
-
-Remove django-meta package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-meta remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-oauth-toolkit
-
-Manage django-oauth-toolkit package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-oauth-toolkit [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-oauth-toolkit
-* `remove`: Remove django-oauth-toolkit package
-
-## djdevx backend django packages django-oauth-toolkit install
-
-Install and configure django-oauth-toolkit
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-oauth-toolkit install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-oauth-toolkit remove
-
-Remove django-oauth-toolkit package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-oauth-toolkit remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-permissions-policy
-
-Manage django-permissions-policy package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-permissions-policy [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure...
-* `remove`: Remove django-permissions-policy package
-
-## djdevx backend django packages django-permissions-policy install
-
-Install and configure django-permissions-policy
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-permissions-policy install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-permissions-policy remove
-
-Remove django-permissions-policy package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-permissions-policy remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-role-permissions
-
-Manage django-role-permissions package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-role-permissions [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-role-permissions
-* `remove`: Remove django-role-permissions package
-
-## djdevx backend django packages django-role-permissions install
-
-Install and configure django-role-permissions
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-role-permissions install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-role-permissions remove
-
-Remove django-role-permissions package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-role-permissions remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-simple-history
-
-Manage django-simple-history package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-simple-history [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-simple-history
-* `remove`: Remove django-simple-history package
-
-## djdevx backend django packages django-simple-history install
-
-Install and configure django-simple-history
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-simple-history install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-simple-history remove
-
-Remove django-simple-history package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-simple-history remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-simple-nav
-
-Manage django-simple-nav package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-simple-nav [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-simple-nav
-* `remove`: Remove django-simple-nav package
-
-## djdevx backend django packages django-simple-nav install
-
-Install and configure django-simple-nav
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-simple-nav install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-simple-nav remove
-
-Remove django-simple-nav package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-simple-nav remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-snakeoil
-
-Manage django-snakeoil package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-snakeoil [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-snakeoil
-* `remove`: Remove django-snakeoil package
-
-## djdevx backend django packages django-snakeoil install
-
-Install and configure django-snakeoil
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-snakeoil install [OPTIONS]
-```
-
-**Options**:
-
-* `--site-name TEXT`: Display name of your website for og:site_name meta tag (e.g., &#x27;My Blog&#x27;)
-* `--site-description TEXT`: Default description for your website (shown in search results and social shares)
-* `--author TEXT`: Default author name for meta author tag
-* `--og-type TEXT`: OpenGraph type for og:type meta tag (website, article, blog). See: https://ogp.me/#types  [default: website]
-* `--default-image-url TEXT`: Full URL to default share image for social media (1200x630px recommended)  [default: images/logo.svg]
-* `--site-url TEXT`: Your website&#x27;s full URL including protocol (e.g., &#x27;https://example.com&#x27;)
-* `--locale TEXT`: Default locale/language for og:locale (e.g., &#x27;en_US&#x27;, &#x27;en_GB&#x27;, &#x27;es_ES&#x27;)
-* `--twitter-site TEXT`: Twitter/X handle for your website (e.g., &#x27;@yoursite&#x27;)
-* `--twitter-card-type TEXT`: Twitter card type: &#x27;summary&#x27; or &#x27;summary_large_image&#x27; (recommended for rich previews)  [default: summary_large_image]
-* `--keywords TEXT`: Default keywords for SEO (comma-separated, e.g., &#x27;django, web development, python&#x27;)
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-snakeoil remove
-
-Remove django-snakeoil package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-snakeoil remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-sp-admin
-
-Manage django-sp-admin package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-sp-admin [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-sp-admin
-* `remove`: Remove django-sp-admin package
-
-## djdevx backend django packages django-sp-admin install
-
-Install and configure django-sp-admin
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-sp-admin install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-sp-admin remove
-
-Remove django-sp-admin package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-sp-admin remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-storages
-
-Manage django-storages package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-storages [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `s3`: Manage django-storages with S3 backend
-* `azure`: Manage django-storages with Azure backend
-* `google`: Manage django-storages with Google backend
-
-## djdevx backend django packages django-storages s3
-
-Manage django-storages with S3 backend
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-storages s3 [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-storages S3
-* `remove`: Remove django-storages S3 package
-
-## djdevx backend django packages django-storages s3 install
-
-Install and configure django-storages S3
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-storages s3 install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-storages s3 remove
-
-Remove django-storages S3 package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-storages s3 remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-storages azure
-
-Manage django-storages with Azure backend
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-storages azure [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-storages Azure
-* `remove`: Remove django-storages Azure package
-
-## djdevx backend django packages django-storages azure install
-
-Install and configure django-storages Azure
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-storages azure install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-storages azure remove
-
-Remove django-storages Azure package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-storages azure remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-storages google
-
-Manage django-storages with Google backend
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-storages google [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-storages...
-* `remove`: Remove django-storages Google Cloud...
-
-## djdevx backend django packages django-storages google install
-
-Install and configure django-storages Google Cloud Storage
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-storages google install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-storages google remove
-
-Remove django-storages Google Cloud Storage package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-storages google remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-taggit
-
-Manage django-taggit package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-taggit [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-taggit
-* `remove`: Remove django-taggit package
-
-## djdevx backend django packages django-taggit install
-
-Install and configure django-taggit
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-taggit install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-taggit remove
-
-Remove django-taggit package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-taggit remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-tailwind-cli
-
-Manage django-tailwind-cli package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-tailwind-cli [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure django-tailwind-cli
-* `remove`: Remove django-tailwind-cli package
-
-## djdevx backend django packages django-tailwind-cli install
-
-Install and configure django-tailwind-cli
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-tailwind-cli install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages django-tailwind-cli remove
-
-Remove django-tailwind-cli package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages django-tailwind-cli remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages djangochannelsrestframework
-
-Manage djangochannelsrestframework package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages djangochannelsrestframework [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure...
-* `remove`: Remove djangochannelsrestframework package
-
-## djdevx backend django packages djangochannelsrestframework install
-
-Install and configure djangochannelsrestframework
-
-**Usage**:
-
-```console
-$ djdevx backend django packages djangochannelsrestframework install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages djangochannelsrestframework remove
-
-Remove djangochannelsrestframework package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages djangochannelsrestframework remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages djangorestframework
-
-Manage djangorestframework package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages djangorestframework [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure Django REST Framework
-* `remove`: Remove Django REST Framework package
-
-## djdevx backend django packages djangorestframework install
-
-Install and configure Django REST Framework
-
-**Usage**:
-
-```console
-$ djdevx backend django packages djangorestframework install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages djangorestframework remove
-
-Remove Django REST Framework package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages djangorestframework remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages drf-nested-routers
-
-Manage drf-nested-routers package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages drf-nested-routers [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure drf-nested-routers
-* `remove`: Remove drf-nested-routers package
-
-## djdevx backend django packages drf-nested-routers install
-
-Install and configure drf-nested-routers
-
-**Usage**:
-
-```console
-$ djdevx backend django packages drf-nested-routers install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages drf-nested-routers remove
-
-Remove drf-nested-routers package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages drf-nested-routers remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages drf-flex-fields
-
-Manage drf-flex-fields package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages drf-flex-fields [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure drf-flex-fields
-* `remove`: Remove drf-flex-fields package
-
-## djdevx backend django packages drf-flex-fields install
-
-Install and configure drf-flex-fields
-
-**Usage**:
-
-```console
-$ djdevx backend django packages drf-flex-fields install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages drf-flex-fields remove
-
-Remove drf-flex-fields package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages drf-flex-fields remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages drf-spectacular
-
-Manage drf-spectacular package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages drf-spectacular [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure drf-spectacular
-* `remove`: Remove drf-spectacular package
-
-## djdevx backend django packages drf-spectacular install
-
-Install and configure drf-spectacular
-
-**Usage**:
-
-```console
-$ djdevx backend django packages drf-spectacular install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages drf-spectacular remove
-
-Remove drf-spectacular package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages drf-spectacular remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages heroicons
-
-Manage heroicons package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages heroicons [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure heroicons
-* `remove`: Remove heroicons package
-
-## djdevx backend django packages heroicons install
-
-Install and configure heroicons
-
-**Usage**:
-
-```console
-$ djdevx backend django packages heroicons install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages heroicons remove
-
-Remove heroicons package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages heroicons remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages whitenoise
-
-Manage whitenoise package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages whitenoise [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install and configure whitenoise
-* `remove`: Remove whitenoise package
-
-## djdevx backend django packages whitenoise install
-
-Install and configure whitenoise
-
-**Usage**:
-
-```console
-$ djdevx backend django packages whitenoise install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django packages whitenoise remove
-
-Remove whitenoise package
-
-**Usage**:
-
-```console
-$ djdevx backend django packages whitenoise remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django feature
-
-Add features to your Django project
-
-**Usage**:
-
-```console
-$ djdevx backend django feature [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `pwa`: Add PWA support to the project
-* `css`: Manage css frameworks
-* `tailwind-theme`: Manage tailwind theme
-* `tailwind-ui`: Manage tailwind ui
-
-## djdevx backend django feature pwa
-
-Add PWA support to the project
-
-**Usage**:
-
-```console
-$ djdevx backend django feature pwa [OPTIONS]
-```
-
-**Options**:
-
-* `--name TEXT`: The display name for the application  [required]
-* `--short-name TEXT`: The short name for the application when there is not enough space to display the name  [required]
-* `--description TEXT`: The description of the application  [required]
-* `--icon-path PATH`: Path to the input icon file to be used for generating the PWA icons with different sizes  [default: /tmp/icon.png]
-* `--background-color TEXT`: The page color of the window that the application will be opened in  [default: #ffffff]
-* `--theme-color TEXT`: The theme color of the application  [default: #000000]
-* `--start-url TEXT`: The start URL of the application  [default: /]
-* `--dir TEXT`: The base direction of the application  [default: ltr]
-* `--scope TEXT`: Defines which URL are within the navigation scope of your application. Scope can often just be set to the base URL of your PWA.
-* `--orientation TEXT`: The default orientation of the application. Options are   [default: portrait]
-* `--display TEXT`: The display mode that the website should default to. Options are   [default: standalone]
-* `--language TEXT`: The primary language of the application  [default: en]
-* `--help`: Show this message and exit.
-
-## djdevx backend django feature css
-
-Manage css frameworks
-
-**Usage**:
-
-```console
-$ djdevx backend django feature css [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `bootstrap`: Manage bootstrap css framework
-* `frankenui`: Manage Franken UI css framework
-* `semantic`: Manage Semantic css framework
-* `starting-point-ui`: Manage Starting Point UI css framework
-
-## djdevx backend django feature css bootstrap
-
-Manage bootstrap css framework
-
-**Usage**:
-
-```console
-$ djdevx backend django feature css bootstrap [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Add Bootstrap CSS framework to the project.
-* `remove`: Remove Bootstrap CSS framework from the...
-
-## djdevx backend django feature css bootstrap install
-
-Add Bootstrap CSS framework to the project.
-
-Downloads the specified version (or latest) of Bootstrap&#x27;s minified CSS, theme CSS,
-JavaScript files, and jQuery, then saves them to the static directory.
-
-**Usage**:
-
-```console
-$ djdevx backend django feature css bootstrap install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django feature css bootstrap remove
-
-Remove Bootstrap CSS framework from the project.
-
-**Usage**:
-
-```console
-$ djdevx backend django feature css bootstrap remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django feature css frankenui
-
-Manage Franken UI css framework
-
-**Usage**:
-
-```console
-$ djdevx backend django feature css frankenui [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Add FrankenUI CSS framework to the project.
-* `remove`: Remove FrankenUI CSS framework from the...
-
-## djdevx backend django feature css frankenui install
-
-Add FrankenUI CSS framework to the project.
-
-Downloads the specified version (or latest) of FrankenUI&#x27;s minified CSS
-and JavaScript files, then saves them to the static directory.
-
-**Usage**:
-
-```console
-$ djdevx backend django feature css frankenui install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django feature css frankenui remove
-
-Remove FrankenUI CSS framework from the project.
-
-**Usage**:
-
-```console
-$ djdevx backend django feature css frankenui remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django feature css semantic
-
-Manage Semantic css framework
-
-**Usage**:
-
-```console
-$ djdevx backend django feature css semantic [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Add Semantic UI CSS framework to the project.
-* `remove`: Remove Semantic css framework from the...
-
-## djdevx backend django feature css semantic install
-
-Add Semantic UI CSS framework to the project.
-
-Downloads the latest Semantic UI (from jsdelivr tags) and jQuery, saves them to the
-static directory, and updates the base template to include links.
-
-**Usage**:
-
-```console
-$ djdevx backend django feature css semantic install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django feature css semantic remove
-
-Remove Semantic css framework from the project.
-
-**Usage**:
-
-```console
-$ djdevx backend django feature css semantic remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django feature css starting-point-ui
-
-Manage Starting Point UI css framework
-
-**Usage**:
-
-```console
-$ djdevx backend django feature css starting-point-ui [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Add Starting Point UI CSS framework to the...
-* `remove`: Remove Starting Point UI CSS framework...
-
-## djdevx backend django feature css starting-point-ui install
-
-Add Starting Point UI CSS framework to the project.
-
-Downloads the specified version (or latest) of Starting Point UI&#x27;s minified CSS
-and JavaScript files, then saves them to the static directory.
-
-Starting Point UI is a Tailwind CSS v4+ component library.
-
-**Usage**:
-
-```console
-$ djdevx backend django feature css starting-point-ui install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django feature css starting-point-ui remove
-
-Remove Starting Point UI CSS framework from the project.
-
-**Usage**:
-
-```console
-$ djdevx backend django feature css starting-point-ui remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django feature tailwind-theme
-
-Manage tailwind theme
-
-**Usage**:
-
-```console
-$ djdevx backend django feature tailwind-theme [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install Tailwind theme with customizable...
-* `remove`: Remove Tailwind theme.
-
-## djdevx backend django feature tailwind-theme install
-
-Install Tailwind theme with customizable colors.
-
-**Usage**:
-
-```console
-$ djdevx backend django feature tailwind-theme install [OPTIONS]
-```
-
-**Options**:
-
-* `--primary-color TEXT`: Primary color (hex code or CSS variable). Example: #0047AB or --color-blue-500  [default: #0047AB]
-* `--secondary-color TEXT`: Secondary color (hex code or CSS variable). Example: #2F739F or --color-slate-600  [default: #2F739F]
-* `--accent-color TEXT`: Accent color (hex code or CSS variable). Example: #F38B49 or --color-orange-500  [default: #F38B49]
-* `--neutral-color TEXT`: Neutral color (hex code or CSS variable). Example: #728389 or --color-zinc-500  [default: #728389]
-* `--bg-light TEXT`: Background color for light theme (hex code or CSS variable). Example: #FFFFFF or --color-white  [default: #FFFFFF]
-* `--bg-secondary-light TEXT`: Secondary background color for light theme (hex code or CSS variable). Example: #84A8E0 or --color-primary-200  [default: #FBFBFB]
-* `--bg-tertiary-light TEXT`: Tertiary background color for light theme (hex code or CSS variable). Example: #C8DFE9 or --color-secondary-200  [default: #F8FFFF]
-* `--text-light TEXT`: Text color for light theme (hex code or CSS variable). Example: #0f172a or --color-slate-900  [default: --color-slate-900]
-* `--text-secondary-light TEXT`: Secondary text color for light theme (hex code or CSS variable). Example: #334155 or --color-slate-700  [default: --color-slate-700]
-* `--text-muted-light TEXT`: Muted text color for light theme (hex code or CSS variable). Example: #64748b or --color-slate-500  [default: --color-slate-500]
-* `--bg-dark TEXT`: Background color for dark theme (hex code or CSS variable). Example: #0A0F1A  [default: #0A0F1A]
-* `--bg-secondary-dark TEXT`: Secondary background color for dark theme (hex code or CSS variable). Example: #132035  [default: #132035]
-* `--bg-tertiary-dark TEXT`: Tertiary background color for dark theme (hex code or CSS variable). Example: #182945  [default: #182945]
-* `--text-dark TEXT`: Text color for dark theme (hex code or CSS variable). Example: #f1f5f9 or --color-slate-100  [default: --color-slate-100]
-* `--text-secondary-dark TEXT`: Secondary text color for dark theme (hex code or CSS variable). Example: #cbd5e1 or --color-slate-300  [default: --color-slate-300]
-* `--text-muted-dark TEXT`: Muted text color for dark theme (hex code or CSS variable). Example: #64748b or --color-slate-500  [default: --color-slate-500]
-* `--help`: Show this message and exit.
-
-## djdevx backend django feature tailwind-theme remove
-
-Remove Tailwind theme.
-
-**Usage**:
-
-```console
-$ djdevx backend django feature tailwind-theme remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django feature tailwind-ui
-
-Manage tailwind ui
-
-**Usage**:
-
-```console
-$ djdevx backend django feature tailwind-ui [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `install`: Install Tailwind UI
-* `remove`: Remove Tailwind UI.
-
-## djdevx backend django feature tailwind-ui install
-
-Install Tailwind UI
-
-**Usage**:
-
-```console
-$ djdevx backend django feature tailwind-ui install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django feature tailwind-ui remove
-
-Remove Tailwind UI.
-
-**Usage**:
-
-```console
-$ djdevx backend django feature tailwind-ui remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django create
-
-Create new Django applications or components
-
-**Usage**:
-
-```console
-$ djdevx backend django create [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `app`: Create a new Django application
-
-## djdevx backend django create app
-
-Create a new Django application
-
-**Usage**:
-
-```console
-$ djdevx backend django create app [OPTIONS]
-```
-
-**Options**:
-
-* `--application-name TEXT`: Application name
-* `--help`: Show this message and exit.
-
-## djdevx backend django list
-
-List installed Django packages and features
-
-**Usage**:
-
-```console
-$ djdevx backend django list [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `packages`: List all installed Django packages
-* `features`: List all installed Django features
-* `databases`: List all installed Django databases
-* `caches`: List all installed Django caches
-
-## djdevx backend django list packages
-
-List all installed Django packages
-
-**Usage**:
-
-```console
-$ djdevx backend django list packages [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django list features
-
-List all installed Django features
-
-**Usage**:
-
-```console
-$ djdevx backend django list features [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django list databases
-
-List all installed Django databases
-
-**Usage**:
-
-```console
-$ djdevx backend django list databases [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django list caches
-
-List all installed Django caches
-
-**Usage**:
-
-```console
-$ djdevx backend django list caches [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django database
+## djdevx database
 
 Manage database infrastructure
 
 **Usage**:
 
 ```console
-$ djdevx backend django database [OPTIONS] COMMAND [ARGS]...
+$ djdevx database [OPTIONS] COMMAND [ARGS]...
 ```
 
 **Options**:
@@ -2833,63 +361,70 @@ $ djdevx backend django database [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `postgres`: PostgreSQL database management
+* `add`: Add a database.
+* `remove`: Remove a database.
+* `list`: List all available databases with install...
 
-## djdevx backend django database postgres
+## djdevx database add
 
-PostgreSQL database management
+Add a database.
 
 **Usage**:
 
 ```console
-$ djdevx backend django database postgres [OPTIONS] COMMAND [ARGS]...
+$ djdevx database add [OPTIONS] [NAME]
+```
+
+**Arguments**:
+
+* `[NAME]`: Database provider name to install
+
+**Options**:
+
+* `-v, --verbose`: Show full pixi output
+* `--help`: Show this message and exit.
+
+## djdevx database remove
+
+Remove a database.
+
+**Usage**:
+
+```console
+$ djdevx database remove [OPTIONS] [NAME]
+```
+
+**Arguments**:
+
+* `[NAME]`: Database provider name to remove
+
+**Options**:
+
+* `-v, --verbose`: Show full pixi output
+* `--help`: Show this message and exit.
+
+## djdevx database list
+
+List all available databases with install status in a table.
+
+**Usage**:
+
+```console
+$ djdevx database list [OPTIONS]
 ```
 
 **Options**:
 
 * `--help`: Show this message and exit.
 
-**Commands**:
-
-* `install`: Install PostgreSQL database.
-* `remove`: Remove PostgreSQL database.
-
-## djdevx backend django database postgres install
-
-Install PostgreSQL database.
-
-**Usage**:
-
-```console
-$ djdevx backend django database postgres install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django database postgres remove
-
-Remove PostgreSQL database.
-
-**Usage**:
-
-```console
-$ djdevx backend django database postgres remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django cache
+## djdevx cache
 
 Manage cache infrastructure
 
 **Usage**:
 
 ```console
-$ djdevx backend django cache [OPTIONS] COMMAND [ARGS]...
+$ djdevx cache [OPTIONS] COMMAND [ARGS]...
 ```
 
 **Options**:
@@ -2898,63 +433,70 @@ $ djdevx backend django cache [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `redis`: Redis cache management
+* `add`: Add a cache.
+* `remove`: Remove a cache.
+* `list`: List all available caches with install...
 
-## djdevx backend django cache redis
+## djdevx cache add
 
-Redis cache management
+Add a cache.
 
 **Usage**:
 
 ```console
-$ djdevx backend django cache redis [OPTIONS] COMMAND [ARGS]...
+$ djdevx cache add [OPTIONS] [NAME]
+```
+
+**Arguments**:
+
+* `[NAME]`: Cache provider name to install
+
+**Options**:
+
+* `-v, --verbose`: Show full pixi output
+* `--help`: Show this message and exit.
+
+## djdevx cache remove
+
+Remove a cache.
+
+**Usage**:
+
+```console
+$ djdevx cache remove [OPTIONS] [NAME]
+```
+
+**Arguments**:
+
+* `[NAME]`: Cache provider name to remove
+
+**Options**:
+
+* `-v, --verbose`: Show full pixi output
+* `--help`: Show this message and exit.
+
+## djdevx cache list
+
+List all available caches with install status in a table.
+
+**Usage**:
+
+```console
+$ djdevx cache list [OPTIONS]
 ```
 
 **Options**:
 
 * `--help`: Show this message and exit.
 
-**Commands**:
+## djdevx settings
 
-* `install`: Install Redis cache.
-* `remove`: Remove Redis cache.
-
-## djdevx backend django cache redis install
-
-Install Redis cache.
+Manage project secrets and configs
 
 **Usage**:
 
 ```console
-$ djdevx backend django cache redis install [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django cache redis remove
-
-Remove Redis cache.
-
-**Usage**:
-
-```console
-$ djdevx backend django cache redis remove [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django settings
-
-Manage project secrets and config vars
-
-**Usage**:
-
-```console
-$ djdevx backend django settings [OPTIONS] COMMAND [ARGS]...
+$ djdevx settings [OPTIONS] COMMAND [ARGS]...
 ```
 
 **Options**:
@@ -2966,14 +508,14 @@ $ djdevx backend django settings [OPTIONS] COMMAND [ARGS]...
 * `secrets`: Manage project secrets
 * `configs`: Manage project config variables
 
-## djdevx backend django settings secrets
+## djdevx settings secrets
 
 Manage project secrets
 
 **Usage**:
 
 ```console
-$ djdevx backend django settings secrets [OPTIONS] COMMAND [ARGS]...
+$ djdevx settings secrets [OPTIONS] COMMAND [ARGS]...
 ```
 
 **Options**:
@@ -2982,169 +524,72 @@ $ djdevx backend django settings secrets [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `init`: Initialise secrets for dev or prod
-* `list`: List secrets with source and value
-* `verify`: Verify secrets are present
+* `list`: List secrets for the given environment.
+* `init`: Initialize secrets for the given environment.
+* `verify`: Verify secrets completeness.
 
-## djdevx backend django settings secrets init
+## djdevx settings secrets list
 
-Initialise secrets for dev or prod
+List secrets for the given environment.
 
 **Usage**:
 
 ```console
-$ djdevx backend django settings secrets init [OPTIONS] COMMAND [ARGS]...
+$ djdevx settings secrets list [OPTIONS] ENV:{dev|prod}
 ```
+
+**Arguments**:
+
+* `ENV:{dev|prod}`: Environment: dev or prod  [required]
 
 **Options**:
 
 * `--help`: Show this message and exit.
 
-**Commands**:
+## djdevx settings secrets init
 
-* `dev`: Initialise local development secrets.
-* `prod`: Initialise production secrets in...
-
-## djdevx backend django settings secrets init dev
-
-Initialise local development secrets.
-
-Scans all settings files for SecretStr fields and ensures each has a
-value in .secrets/. Fields with registered generators are auto-populated;
-others prompt the user for input. Idempotent — skips already-present secrets.
+Initialize secrets for the given environment.
 
 **Usage**:
 
 ```console
-$ djdevx backend django settings secrets init dev [OPTIONS]
+$ djdevx settings secrets init [OPTIONS] ENV:{dev|prod}
 ```
+
+**Arguments**:
+
+* `ENV:{dev|prod}`: Environment: dev or prod  [required]
 
 **Options**:
 
 * `--help`: Show this message and exit.
 
-## djdevx backend django settings secrets init prod
+## djdevx settings secrets verify
 
-Initialise production secrets in .secrets.prod/.
-
-For each SecretStr field, auto-generates or prompts for the value and
-writes it to .secrets.prod/&lt;name&gt;. Idempotent — skips already-present
-entries.
+Verify secrets completeness.
 
 **Usage**:
 
 ```console
-$ djdevx backend django settings secrets init prod [OPTIONS]
+$ djdevx settings secrets verify [OPTIONS] ENV:{dev|prod}
 ```
+
+**Arguments**:
+
+* `ENV:{dev|prod}`: Environment: dev or prod  [required]
 
 **Options**:
 
 * `--help`: Show this message and exit.
 
-## djdevx backend django settings secrets list
-
-List secrets with source and value
-
-**Usage**:
-
-```console
-$ djdevx backend django settings secrets list [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `dev`: List secrets resolved via the dev chain:...
-* `prod`: List secrets resolved via the prod chain:...
-
-## djdevx backend django settings secrets list dev
-
-List secrets resolved via the dev chain: .secrets/ &gt; /run/secrets/ &gt; dev default.
-
-**Usage**:
-
-```console
-$ djdevx backend django settings secrets list dev [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django settings secrets list prod
-
-List secrets resolved via the prod chain: /run/secrets/ &gt; .secrets.prod/ &gt; prod default.
-
-**Usage**:
-
-```console
-$ djdevx backend django settings secrets list prod [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django settings secrets verify
-
-Verify secrets are present
-
-**Usage**:
-
-```console
-$ djdevx backend django settings secrets verify [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `dev`: Verify secrets are present for dev...
-* `prod`: Verify secrets are present for prod...
-
-## djdevx backend django settings secrets verify dev
-
-Verify secrets are present for dev (.secrets/ + /run/secrets/).
-Exits with code 1 if any secret without a dev default is missing.
-
-**Usage**:
-
-```console
-$ djdevx backend django settings secrets verify dev [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django settings secrets verify prod
-
-Verify secrets are present for prod (.secrets.prod/).
-Exits with code 1 if any secret is missing with no prod default fallback.
-
-**Usage**:
-
-```console
-$ djdevx backend django settings secrets verify prod [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django settings configs
+## djdevx settings configs
 
 Manage project config variables
 
 **Usage**:
 
 ```console
-$ djdevx backend django settings configs [OPTIONS] COMMAND [ARGS]...
+$ djdevx settings configs [OPTIONS] COMMAND [ARGS]...
 ```
 
 **Options**:
@@ -3153,137 +598,59 @@ $ djdevx backend django settings configs [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `init`: Initialise configs for prod
-* `list`: List config vars with source and value
-* `verify`: Verify config vars are present
+* `list`: List config vars for the given environment.
+* `init`: Initialize config vars for the given...
+* `verify`: Verify config vars completeness.
 
-## djdevx backend django settings configs init
+## djdevx settings configs list
 
-Initialise configs for prod
+List config vars for the given environment.
 
 **Usage**:
 
 ```console
-$ djdevx backend django settings configs init [OPTIONS] COMMAND [ARGS]...
+$ djdevx settings configs list [OPTIONS] ENV:{dev|prod}
 ```
+
+**Arguments**:
+
+* `ENV:{dev|prod}`: Environment: dev or prod  [required]
 
 **Options**:
 
 * `--help`: Show this message and exit.
 
-**Commands**:
+## djdevx settings configs init
 
-* `prod`: Initialise .env.prod with required config...
-
-## djdevx backend django settings configs init prod
-
-Initialise .env.prod with required config variables.
-
-For each config var without a prod default, prompts the user for a value
-and writes it to .env.prod in KEY=VALUE format. Idempotent — skips
-keys that already exist in .env.prod.
+Initialize config vars for the given environment.
 
 **Usage**:
 
 ```console
-$ djdevx backend django settings configs init prod [OPTIONS]
+$ djdevx settings configs init [OPTIONS] ENV:{dev|prod}
 ```
+
+**Arguments**:
+
+* `ENV:{dev|prod}`: Environment: dev or prod  [required]
 
 **Options**:
 
 * `--help`: Show this message and exit.
 
-## djdevx backend django settings configs list
+## djdevx settings configs verify
 
-List config vars with source and value
-
-**Usage**:
-
-```console
-$ djdevx backend django settings configs list [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `dev`: List config vars resolved via the dev...
-* `prod`: List config vars resolved via the prod...
-
-## djdevx backend django settings configs list dev
-
-List config vars resolved via the dev chain: os.environ &gt; .env &gt; dev default.
+Verify config vars completeness.
 
 **Usage**:
 
 ```console
-$ djdevx backend django settings configs list dev [OPTIONS]
+$ djdevx settings configs verify [OPTIONS] ENV:{dev|prod}
 ```
 
-**Options**:
+**Arguments**:
 
-* `--help`: Show this message and exit.
-
-## djdevx backend django settings configs list prod
-
-List config vars resolved via the prod chain: /run/configs/app-config &gt; .env.prod &gt; prod default.
-
-**Usage**:
-
-```console
-$ djdevx backend django settings configs list prod [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django settings configs verify
-
-Verify config vars are present
-
-**Usage**:
-
-```console
-$ djdevx backend django settings configs verify [OPTIONS] COMMAND [ARGS]...
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-**Commands**:
-
-* `dev`: Verify config vars are present for dev...
-* `prod`: Verify config vars are present for prod...
-
-## djdevx backend django settings configs verify dev
-
-Verify config vars are present for dev (env vars / .env).
-Exits with code 1 if any config var without a dev default is missing.
-
-**Usage**:
-
-```console
-$ djdevx backend django settings configs verify dev [OPTIONS]
-```
-
-**Options**:
-
-* `--help`: Show this message and exit.
-
-## djdevx backend django settings configs verify prod
-
-Verify config vars are present for prod (.env.prod).
-Exits with code 1 if any config var is missing entirely.
-
-**Usage**:
-
-```console
-$ djdevx backend django settings configs verify prod [OPTIONS]
-```
+* `ENV:{dev|prod}`: Environment: dev or prod  [required]
 
 **Options**:
 

@@ -1,9 +1,6 @@
 """BaseDeployPlugin — base class for all deployment target plugins."""
 
-from __future__ import annotations
-
 import inspect
-import textwrap
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional
@@ -12,6 +9,7 @@ import typer
 from typing_extensions import Annotated
 
 from ..utils.console.print import print_console
+from ..utils.project.project_structure import ProjectStructure
 
 
 @dataclass
@@ -115,7 +113,7 @@ class BaseDeployPlugin:
                 f"Generating {self.name} deployment manifests in {output_dir} \u2026"
             )
             self.generate(output_dir=output_dir, **cli_kwargs)
-            print_console.success(f"{self.name} manifests generated.")
+            print_console.step_done(f"{self.name} manifests generated.")
 
         generate_cmd.__signature__ = inspect.Signature(params)  # type: ignore[attr-defined]
         generate_cmd.__name__ = "generate"
@@ -140,26 +138,13 @@ class BaseDeployPlugin:
     # ------------------------------------------------------------------
 
     def _default_output_dir(self) -> Path:
-        return self._project_root() / "deployment" / self.name.lower().replace(" ", "-")
-
-    @staticmethod
-    def _project_root() -> Path:
-        from ..utils.djdevx_config.project import ProjectConfig
-
-        return ProjectConfig().project_root_dir
+        return (
+            ProjectStructure().root / "deployment" / self.name.lower().replace(" ", "-")
+        )
 
     # ------------------------------------------------------------------
     # Shared helpers
     # ------------------------------------------------------------------
-
-    @staticmethod
-    def _check_files_exist(*paths: Path) -> bool:
-        missing = [p for p in paths if not p.exists()]
-        if missing:
-            for p in missing:
-                print_console.error(f"  missing  {p}")
-            return False
-        return True
 
     @staticmethod
     def _write(path: Path, content: str) -> None:
@@ -178,10 +163,6 @@ class BaseDeployPlugin:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content)
         print_console.info(f"  wrote  {path}  (new)")
-
-    @staticmethod
-    def _indent(text: str, spaces: int = 2) -> str:
-        return textwrap.indent(text, " " * spaces)
 
     @staticmethod
     def _to_env_str(value: Any) -> str:

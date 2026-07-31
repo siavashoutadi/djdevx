@@ -8,8 +8,8 @@ Before generating manifests, your project must have secrets and config vars
 initialized:
 
 ```bash
-ddx backend django settings secrets init prod
-ddx backend django settings configs init prod
+ddx settings secrets init prod
+ddx settings configs init prod
 ```
 
 ## Targets

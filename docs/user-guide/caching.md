@@ -1,39 +1,53 @@
 # Cache Management
 
-`djdevx` can manage and configure different cache backends for development
-with devcontainer support. Currently only Redis is supported, but more cache
-backends will be added in the future.
+`djdevx` can manage and configure cache backends for development with
+devcontainer support. **Only one cache can be installed at a time.**
+
+Currently only Redis is supported, but more cache backends will be added in
+the future.
 
 ## Usage
 
 ```bash
-# Install Redis cache
-ddx backend django cache redis install
+# Install a cache
+ddx cache add redis
 
-# Remove Redis cache
-ddx backend django cache redis remove
+# Remove a cache
+ddx cache remove redis
 
-# List installed caches
-ddx backend django list caches
+# List all caches with install status
+ddx cache list
+
+# Interactive selection (omit [NAME])
+ddx cache add
+ddx cache remove
 ```
 
-## Behind the Scenes
+## Shell Autocompletion
 
-When you install a cache, djdevx:
+The `[NAME]` argument supports tab completion:
+- `ddx cache add <TAB>` — lists available (not installed) caches
+- `ddx cache remove <TAB>` — lists installed caches
 
-1. **Configures settings** -- Adds `CACHES` backend configuration
-2. **Configures devcontainer** -- Adds the Redis service to
-   `docker-compose.yaml`
-3. **Installs dependencies** -- Adds `django-redis` to the project
-4. **Tracks** -- Records the cache under `.djdevx/`
+## Single-Instance Constraint
+
+Only one cache can be installed at a time. If a cache is already installed,
+attempting to add another will show an error:
+
+```
+$ ddx cache add memcached
+A cache (redis) is already installed.
+Only one cache can be installed at a time.
+```
+
+Remove the existing cache first, then install the new one.
 
 ## Example
 
 ```bash
-ddx backend django cache redis install
+ddx cache add redis
 ```
 
 ## Finding More
 
-Run `ddx backend django cache redis --help` for all options.
 See the [Full Manual](../cli/manual.md) for complete reference.

@@ -1,39 +1,53 @@
 # Database Management
 
-`djdevx` can manage and configure different databases for development with
-devcontainer support. Currently only PostgreSQL is supported, but more
-databases will be added in the future.
+`djdevx` can manage and configure databases for development with devcontainer
+support. **Only one database can be installed at a time.**
+
+Currently only PostgreSQL is supported, but more databases will be added in
+the future.
 
 ## Usage
 
 ```bash
-# Install PostgreSQL
-ddx backend django database postgres install
+# Install a database
+ddx database add postgres
 
-# Remove PostgreSQL
-ddx backend django database postgres remove
+# Remove a database
+ddx database remove postgres
 
-# List installed databases
-ddx backend django list databases
+# List all databases with install status
+ddx database list
+
+# Interactive selection (omit [NAME])
+ddx database add
+ddx database remove
 ```
 
-## Behind the Scenes
+## Shell Autocompletion
 
-When you install a database, djdevx:
+The `[NAME]` argument supports tab completion:
+- `ddx database add <TAB>` — lists available (not installed) databases
+- `ddx database remove <TAB>` — lists installed databases
 
-1. **Updates settings** -- Configures `DATABASES` in Django settings
-2. **Configures devcontainer** -- Adds the PostgreSQL service to
-   `docker-compose.yaml`
-3. **Installs dependencies** -- Adds `psycopg2-binary` to the project
-4. **Tracks** -- Records the database under `.djdevx/`
+## Single-Instance Constraint
+
+Only one database can be installed at a time. If a database is already
+installed, attempting to add another will show an error:
+
+```
+$ ddx database add mysql
+A database (postgres) is already installed.
+Only one database can be installed at a time.
+```
+
+Remove the existing database first, then install the new one.
 
 ## Example
 
 ```bash
-ddx backend django database postgres install
+ddx database add postgres
 ```
 
 ## Finding More
 
-Run `ddx backend django database postgres --help` for all options.
 See the [Full Manual](../cli/manual.md) for complete reference.

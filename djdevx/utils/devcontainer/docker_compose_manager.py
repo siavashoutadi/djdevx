@@ -40,9 +40,10 @@ class DockerComposeManager:
     def _load_compose(self) -> dict:
         """Load docker-compose.yaml file."""
         if not self.compose_path.exists():
-            raise FileNotFoundError(
-                f"docker-compose.yaml not found at {self.compose_path}"
-            )
+            self.compose_path.parent.mkdir(parents=True, exist_ok=True)
+            self.compose_data = {}
+            self._save_compose()
+            return {}
 
         with open(self.compose_path, "r") as f:
             data = yaml.safe_load(f)
@@ -89,7 +90,9 @@ class DockerComposeManager:
                 }
 
         self._save_compose()
-        print_console.step(f"Added service '{service_name}' to docker-compose.yaml")
+        print_console.ok(
+            f"Added service '{service_name}' to docker-compose.yaml for devcontainer"
+        )
 
     def remove_service(
         self, service: ServiceConfig, volumes: list[VolumeConfig]
@@ -113,6 +116,9 @@ class DockerComposeManager:
                         del self.compose_data["volumes"][volume_key]
 
         self._save_compose()
+        print_console.ok(
+            f"Removed service '{service_name}' from docker-compose.yaml for devcontainer"
+        )
 
     def service_exists(self, service_name: str) -> bool:
         """Check if a service exists in docker-compose.yaml.

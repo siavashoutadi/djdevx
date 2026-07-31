@@ -10,8 +10,6 @@ Future targets:
   * k8s/flux         Kubernetes via Flux (GitOps)
 """
 
-from __future__ import annotations
-
 import typer
 
 from .docker_compose import app as docker_compose_app
