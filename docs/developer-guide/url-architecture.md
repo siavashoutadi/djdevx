@@ -30,7 +30,6 @@ urls/
   ├── apps/
   │   ├── __init__.py
   │   ├── pwa.py           → path("", include("pwa.urls"))
-  │   ├── tailwind_ui.py   → path("twui/", include(...))
   │   └── <app_name>.py    → path("<app_name>/", include("<app_name>.urls"))
   └── packages/
       ├── __init__.py
@@ -284,8 +283,7 @@ if DEBUG:
     ]
 ```
 
-Used by: `django_browser_reload`, `djangorestframework` (api-auth),
-`tailwind_ui`
+Used by: `django_browser_reload`, `djangorestframework` (api-auth)
 
 ### DEBUG + not TESTING
 

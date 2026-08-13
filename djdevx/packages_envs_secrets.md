@@ -1,6 +1,6 @@
 # Packages — Environment Variables & Secrets Analysis
 
-Analysis of all 39 Django template packages under `djdevx/templates/django/` plus the 3 core settings files under `templates/new/backend/django/`.
+Analysis of all 37 Django template packages under `djdevx/templates/django/` plus the 3 core settings files under `templates/new/backend/django/`.
 
 ---
 
@@ -110,7 +110,7 @@ The `DEBUG` env var controls `IS_DEV`:
 
 ## Packages WITHOUT AppBaseSettings (no env vars)
 
-These 29 packages add apps, middleware, URLs, template tags, or hardcoded Django settings — they read no env vars and declare no secrets.
+These 27 packages add apps, middleware, URLs, template tags, or hardcoded Django settings — they read no env vars and declare no secrets.
 
 | Package | Files | What It Configures |
 |---|---|---|
@@ -140,8 +140,6 @@ These 29 packages add apps, middleware, URLs, template tags, or hardcoded Django
 | **heroicons** | `settings/packages/heroicons.py` | Adds `heroicons` app + template tag library |
 | **pwa** | `pwa/` (views, urls, apps) | Custom app with `manifest.json` / `sw.js` views |
 | **startapp** | `startapp/` (j2 templates) | Jinja2 templates for scaffolding new Django apps |
-| **tailwind_theme** | (empty directory) | No files |
-| **tailwind_ui** | `tailwind_ui/` (tags, views, urls) | Custom app with UI template tags and views |
 | **whitenoise** | `settings/packages/whitenoise.py` | Adds middleware + `STORAGES["staticfiles"]` backend |
 
 ---
@@ -186,7 +184,7 @@ Applied on top of `get_dev_defaults()` when `DEVCONTAINER` env var is set:
 | Fields with registered auto-generator | **2** (`secret_key`, `idp_oidc_private_key`) |
 | Fields with generator but **no** runtime `get_dev_defaults()` | **2** (intentional — generated via CLI) |
 | Fields with NO fallback in dev AND no generator | **0** |
-| Packages with zero env vars | **29** out of 39 |
+| Packages with zero env vars | **27** out of 37 |
 
 ---
 

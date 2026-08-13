@@ -15,7 +15,7 @@ streamline your workflow and make development enjoyable.
   (`django-allauth`, `djangorestframework`, `django-debug-toolbar`, `channels`,
   and more) with a single command.
 - **Feature Addition** — Add PWA support, CSS frameworks (Bootstrap, FrankenUI,
-  Semantic, Starting Point UI), Tailwind themes, and deployment configurations.
+  Semantic, Starting Point UI), and deployment configurations.
 - **Database Management** — Create and manage databases with support for
   multiple providers, devcontainer integration, and single-instance enforcement.
 - **Cache Management** — Create and manage cache backends with support for

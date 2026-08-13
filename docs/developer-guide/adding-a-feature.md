@@ -2,7 +2,7 @@
 
 Step-by-step guide to adding a new feature to djdevx. Features are
 higher-level components that may span multiple packages and templates (e.g.,
-PWA support, a Tailwind theme, Tailwind UI components).
+PWA support).
 
 This page focuses on feature-specific concerns. Shared concepts (variants,
 install params, secrets, hooks, templates, testing) live in
@@ -25,8 +25,8 @@ install params, secrets, hooks, templates, testing) live in
 ## How features differ from packages
 
 - Features are **not** tied to a single third-party package — they often
-  declare **no `pixi_packages` at all** (`pwa`, `tailwind_ui`,
-  `tailwind_theme`) and exist purely for template/config wiring.
+  declare **no `pixi_packages` at all** (`pwa`) and exist purely for
+  template/config wiring.
 - When a feature does need a package, it declares a **dependency on another
   djdevx installable** via `needs` — the orchestrator auto-installs it first.
 - Features use hooks (rather than `InstallParam`-driven class config) for
@@ -54,7 +54,7 @@ Features commonly need another installable present. `needs` accepts
 dependencies are auto-installed recursively before the feature:
 
 ```python
-# djdevx/features/tailwind_ui/__init__.py
+# djdevx/features/sso/__init__.py
 from ...utils.installable.types import InstallableRef, PACKAGE
 
 from .._base import BaseFeature
@@ -62,11 +62,11 @@ from .._registry import register
 
 
 @register
-class TailwindUIFeature(BaseFeature):
-    name: str = "tailwind_ui"
-    display_name: str = "Tailwind UI"
-    description: str = "Tailwind UI components (alerts, badges, buttons, toasts, cards)"
-    needs: list[InstallableRef] = [InstallableRef("django-tailwind-cli", PACKAGE)]
+class SSOFeature(BaseFeature):
+    name: str = "sso"
+    display_name: str = "Single Sign-On"
+    description: str = "Authentication via third-party identity providers"
+    needs: list[InstallableRef] = [InstallableRef("django-allauth", PACKAGE)]
 ```
 
 Cross-category dependencies work in both directions — a feature can depend on
@@ -92,52 +92,31 @@ install_params: list[InstallParam] = [
 ]
 ```
 
-`tailwind_theme` shows a long list of 16 params with color defaults (light and
-dark theme palettes).
-
 ## Enriching the install context
 
 Use `before_copy_templates()` to derive new context keys before templates are
-rendered. `tailwind_theme` generates a full color palette for each collected
-color and rewrites `--color-*` values to `var(--color-*)`:
+rendered. For example, resolving a user-supplied relative path into values
+templates can use directly:
 
 ```python
-# djdevx/features/tailwind_theme/__init__.py
+# djdevx/features/sso/__init__.py
 @register
-class TailwindThemeFeature(BaseFeature):
-    name: str = "tailwind_theme"
-    display_name: str = "Tailwind Theme"
+class SSOFeature(BaseFeature):
+    name: str = "sso"
+    display_name: str = "Single Sign-On"
 
     def _enrich_context(self) -> None:
         ctx = self._install_context
-        for color_key, palette_key in {
-            "primary_color": "primary_palette",
-            "secondary_color": "secondary_palette",
-        }.items():
-            hex_val = ctx.get(color_key, "")
-            ctx[palette_key] = color_converter.generate_palette(hex_val)
+        callback_url = ctx.get("callback_url", "")
+        if callback_url and not callback_url.startswith("/"):
+            ctx["callback_url"] = "/" + callback_url
 
     def before_copy_templates(self) -> None:
         self._enrich_context()
-
-    def after_copy_templates(self) -> None:
-        input_css = self.structure.tailwind_input_css
-        if input_css.exists():
-            content = input_css.read_text()
-            if '@import "./theme.css";' not in content:
-                content = '@import "./theme.css";\n' + content
-                input_css.write_text(content)
-
-    def before_pixi_remove(self) -> None:
-        input_css = self.structure.tailwind_input_css
-        if input_css.exists():
-            content = input_css.read_text()
-            content = content.replace('@import "./theme.css";\n', "")
-            input_css.write_text(content)
 ```
 
-The derived palette keys are then available as Jinja2 variables in templates
-and in later hooks via `self._install_context`.
+The derived keys are then available as Jinja2 variables in templates and in
+later hooks via `self._install_context`.
 
 ## Generating files in hooks
 

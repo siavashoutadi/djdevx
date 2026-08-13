@@ -134,9 +134,7 @@ tests/
 ├── database/
 │   └── test_postgres.py             # PostgreSQL install/remove
 ├── features/
-│   ├── test_pwa.py
-│   ├── test_tailwind_theme.py
-│   └── test_tailwind_ui.py
+│   └── test_pwa.py
 ├── frameworks/
 │   ├── test_bootstrap.py
 │   ├── test_frankenui.py
@@ -305,42 +303,26 @@ def test_whitenoise_install_and_remove(temp_dir):
     assert not DjangoProjectManager().has_dependency("whitenoise")
 ```
 
-### Pattern B: Dependency and Idempotency Tests
+### Pattern B: Idempotency and Removal Tests
 
-Test that features fail gracefully when dependencies are missing, and that
-running install multiple times is safe (idempotent).
+Test that running install multiple times is safe (idempotent), and that
+removing an installable that was never installed does not error.
 
 ```python
-def test_feature_missing_dependency(temp_dir):
-    create_test_django_backend(temp_dir, runner)
-    os.chdir(temp_dir)
-
-    # Try to install without required dependency
-    result = runner.invoke(
-        app, ["features", "add", "tailwind-ui"]
-    )
-    assert result.exit_code != 0
-    assert "Heroicons is not installed" in result.output
-
-
 def test_feature_install_idempotent(temp_dir):
     project_dir = create_test_django_backend(temp_dir, runner)
     os.chdir(temp_dir)
 
-    # Install dependencies first, then feature
-    runner.invoke(app, ["packages", "add", "heroicons"])
-    runner.invoke(app, ["features", "add", "tailwind-theme", ...])
-
     # Install feature twice
     for _ in range(2):
         result = runner.invoke(
-            app, ["features", "add", "tailwind-ui"]
+            app, ["features", "add", "pwa"]
         )
         assert result.exit_code == 0
 
     # Verify no duplicate content
-    input_css = (project_dir / "tailwind" / "src" / "css" / "input.css").read_text()
-    assert input_css.count('@import "./tailwind-ui/all.css"') == 1
+    base = (project_dir / "templates" / "_base.html").read_text()
+    assert base.count('rel="manifest"') == 1
 
 
 def test_remove_when_not_installed(temp_dir):
@@ -349,7 +331,7 @@ def test_remove_when_not_installed(temp_dir):
     os.chdir(temp_dir)
 
     result = runner.invoke(
-        app, ["features", "remove", "tailwind-ui"]
+        app, ["features", "remove", "pwa"]
     )
     assert result.exit_code == 0
 ```
@@ -412,27 +394,27 @@ def tracker(tmp_path: Path) -> FeatureTracking:
 
 class TestWriteFeatureConfig:
     def test_creates_config_toml(self, tracker: FeatureTracking) -> None:
-        tracker.add("tailwind_theme", "Tailwind Theme")
-        assert tracker.is_installed("tailwind_theme")
+        tracker.add("pwa", "PWA")
+        assert tracker.is_installed("pwa")
 
     def test_overwrite_updates_in_place(self, tracker: FeatureTracking) -> None:
-        tracker.add("tailwind_theme", "Old")
-        tracker.add("tailwind_theme", "New")
-        assert tracker.is_installed("tailwind_theme")
+        tracker.add("pwa", "Old")
+        tracker.add("pwa", "New")
+        assert tracker.is_installed("pwa")
 
 
 class TestIsInstalled:
     def test_false_before_install(self, tracker: FeatureTracking) -> None:
-        assert tracker.is_installed("tailwind_theme") is False
+        assert tracker.is_installed("pwa") is False
 
     def test_true_after_write(self, tracker: FeatureTracking) -> None:
-        tracker.add("tailwind_theme", "Tailwind Theme")
-        assert tracker.is_installed("tailwind_theme") is True
+        tracker.add("pwa", "PWA")
+        assert tracker.is_installed("pwa") is True
 
     def test_false_after_remove(self, tracker: FeatureTracking) -> None:
-        tracker.add("tailwind_theme", "Tailwind Theme")
-        tracker.remove("tailwind_theme")
-        assert tracker.is_installed("tailwind_theme") is False
+        tracker.add("pwa", "PWA")
+        tracker.remove("pwa")
+        assert tracker.is_installed("pwa") is False
 ```
 
 ### Pattern E: Mock-Heavy Unit Tests

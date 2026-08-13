@@ -8,7 +8,7 @@ configuration changes.
 
 ```bash
 # Install a feature
-ddx features add tailwind-ui
+ddx features add pwa
 
 # Remove a feature
 ddx features remove pwa
@@ -23,11 +23,9 @@ ddx features remove
 
 ## Example Features
 
-| Feature        | Command                           | Notes                                                |
-| -------------- | --------------------------------- | ---------------------------------------------------- |
-| PWA            | `ddx features add pwa`            | Progressive Web App with manifest and service worker |
-| Tailwind UI    | `ddx features add tailwind-ui`    | Tailwind CSS UI components                           |
-| Tailwind Theme | `ddx features add tailwind-theme` | Custom tailwind theme configuration                  |
+| Feature | Command                        | Notes                                                |
+| ------- | ------------------------------ | ---------------------------------------------------- |
+| PWA     | `ddx features add pwa`         | Progressive Web App with manifest and service worker |
 
 ## Shell Autocompletion
 

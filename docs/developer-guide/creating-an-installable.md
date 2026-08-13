@@ -332,12 +332,12 @@ automatically installed before the target.
 from djdevx.utils.installable.types import InstallableRef
 from djdevx.utils.installable.types import PACKAGE, FEATURE
 
-class TailwindUIFeature(BaseFeature):
-    name: str = "tailwind_ui"
-    display_name: str = "Tailwind UI"
+class SSOFeature(BaseFeature):
+    name: str = "sso"
+    display_name: str = "Single Sign-On"
     needs: list[InstallableRef] = [
-        InstallableRef("heroicons", PACKAGE),
-        InstallableRef("tailwind-cli", PACKAGE),
+        InstallableRef("django-allauth", PACKAGE),
+        InstallableRef("pwa", FEATURE),
     ]
 ```
 
@@ -353,7 +353,7 @@ class TailwindUIFeature(BaseFeature):
 
 Cross-category dependencies work — a feature can depend on a package, a
 database can depend on a package, etc. See [Add a Feature](adding-a-feature.md)
-for a real cross-category example (`tailwind_ui` → `django-tailwind-cli`).
+for a real cross-category example (`sso` → `django-allauth`).
 
 ---
 
@@ -416,8 +416,8 @@ def after_copy_templates(self) -> None:
 ```
 
 `before_copy_templates()` can also **enrich** the context — derive new keys
-that templates and later hooks can read (see the `tailwind_theme` feature,
-which generates color palettes from the collected colors).
+that templates and later hooks can read (see
+[Enriching the install context](adding-a-feature.md#enriching-the-install-context)).
 
 ### Tracking generated files
 

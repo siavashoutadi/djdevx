@@ -1,7 +1,7 @@
 # Feature Architecture
 
 Features are higher-level components that may span multiple packages and
-templates (e.g., PWA support, Tailwind UI theme). They use the same
+templates (e.g., PWA support). They use the same
 `Installable` base as packages but without `InstallParam` on variants
 (though variants are still supported).
 
@@ -53,7 +53,7 @@ add_installable(cls, name, provider=None):
 
 Features are identical to packages in architecture — they use the same
 `Installable` base class. The only difference is semantic: features are
-higher-level constructs (PWA, Tailwind theme) vs. third-party Django packages.
+higher-level constructs (e.g., PWA) vs. third-party Django packages.
 
 ### Concrete Examples
 
@@ -92,21 +92,18 @@ Feature with hook overrides:
 
 ```python
 @register
-class TailwindUIFeature(BaseFeature):
-    name: str = "tailwind_ui"
-    display_name: str = "Tailwind UI"
-    needs: list[InstallableRef] = [InstallableRef("heroicons", PACKAGE)]
+class SSOFeature(BaseFeature):
+    name: str = "sso"
+    display_name: str = "Single Sign-On"
+    needs: list[InstallableRef] = [InstallableRef("django-allauth", PACKAGE)]
 
     def after_copy_templates(self) -> None:
-        input_css = self.structure.tailwind_input_css
-        if input_css.exists():
-            content = input_css.read_text()
-            if '@import "./tailwind-ui/all.css";' not in content:
-                content = content.replace(
-                    '@import "tailwindcss";',
-                    '@import "./tailwind-ui/all.css";\n@import "tailwindcss";',
-                )
-                input_css.write_text(content)
+        urls_file = self.structure.packages_urls_dir / "sso.py"
+        if not urls_file.exists():
+            urls_file.write_text("from django.urls import path, include\n\nurlpatterns = []\n")
+
+    def before_pixi_remove(self) -> None:
+        (self.structure.packages_urls_dir / "sso.py").unlink(missing_ok=True)
 ```
 
 ## CLI Commands

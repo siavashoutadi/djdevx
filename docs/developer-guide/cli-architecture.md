@@ -107,8 +107,6 @@ ddx
   ├── list.py            # list table
   ├── pwa/
   │   └── __init__.py    # @register PWAFeature(BaseFeature)
-  └── tailwind_theme/
-      └── __init__.py    # @register TailwindThemeFeature(BaseFeature)
   ```
 
 - **Validation via callbacks** — Input validation uses `callback=func` on

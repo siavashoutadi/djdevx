@@ -15,7 +15,7 @@
 
 - **Complete Project Scaffolding**: `ddx new` generates a best-practice Django project — devcontainer, `Dockerfile`, `docker-compose.yaml`, `prek.toml`, `pyproject.toml`, and pydantic-settings based configuration — ready from the first command.
 - **One-Command Package Setup**: Install and configure 39+ Django packages (`django-allauth`, `django-debug-toolbar`, `djangorestframework`, and more) that wire up dependencies, `INSTALLED_APPS`, middleware, settings, URL patterns, and templates for you.
-- **Features Beyond Packages**: Add high-level features like PWA support, CSS frameworks (Bootstrap, FrankenUI, Semantic, Starting Point UI), and Tailwind themes that span multiple packages and configuration changes.
+- **Features Beyond Packages**: Add high-level features like PWA support, CSS frameworks (Bootstrap, FrankenUI, Semantic, Starting Point UI), and deployment configurations that span multiple packages and configuration changes.
 - **Databases & Caches**: Set up PostgreSQL and Redis with devcontainer and Docker Compose integration via `ddx database add postgres` and `ddx cache add redis`.
 - **Typed Configuration**: pydantic-settings based config with automatic discovery across app, package, and core settings. `ddx settings` lists, initializes, and verifies secrets and config vars for dev and prod.
 - **Secrets Done Right**: Secrets live in `.secrets/` (never committed), config vars in `.env`. Dev mode auto-generates safe defaults; prod mode prompts for every value and fails verification if anything is missing.
