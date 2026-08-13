@@ -78,3 +78,9 @@ class AllauthPackage(BasePackage):
         (self.structure.root / "static" / "css" / "vendor" / "auth.css").unlink(
             missing_ok=True
         )
+        for js_file in (
+            "allauth-toasts.js",
+            "allauth-theme.js",
+            "email-remove.js",
+        ):
+            (self.structure.root / "static" / "js" / js_file).unlink(missing_ok=True)

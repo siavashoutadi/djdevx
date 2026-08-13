@@ -46,6 +46,7 @@ ddx packages add whitenoise
 | [Database](user-guide/databases.md) | Create and manage databases |
 | [Cache](user-guide/caching.md) | Create and manage caches |
 | [Managing Settings](user-guide/managing-settings.md) | Configure secrets, config vars, and environment |
+| [Content Security Policy](user-guide/content-security-policy.md) | Configure strict CSP defaults, directives, and nonces |
 | [Deployment](user-guide/deployment.md) | Generate Docker Compose / Kubernetes manifests |
 | [CLI Full Manual](cli/manual.md) | Auto-generated command reference |
 

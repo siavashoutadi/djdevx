@@ -11,6 +11,7 @@
        <link rel="icon" href="{% static 'images/favicon.svg' %}"
         type="image/x-icon" />
     <title>{% block title %}Home{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/toasts.css' %}">
     {% block extra_head %}{% endblock %}
   </head>
   <body>
@@ -18,5 +19,6 @@
     {% block content %}
     {% endblock content %}
     {% block extra_body %}{% endblock %}
+    <script src="{% static 'js/toasts.js' %}" defer></script>
   </body>
 </html>

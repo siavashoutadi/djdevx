@@ -285,6 +285,12 @@ spec:
 work with any deployment method (Docker Compose, Nomad, manual provisioning,
 etc.).*
 
+## Content Security Policy
+
+Generated projects ship with Django's built-in CSP enabled — strict dev and
+production defaults, a directive reference, and nonce usage are covered in
+[Content Security Policy](content-security-policy.md).
+
 ## Deep Dive
 
 For the architecture behind settings — source priority, dev vs prod mode,

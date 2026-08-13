@@ -23,7 +23,7 @@
     </div>
 
     {% if dismissible %}
-        <button class="twui-toast-close" onclick="this.parentElement.classList.add('hiding'); setTimeout(() => this.parentElement.remove(), 300);">
+        <button class="twui-toast-close">
             {% heroicon_outline "x-mark" class="w-4 h-4" %}
         </button>
     {% endif %}

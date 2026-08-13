@@ -1,4 +1,5 @@
 {% extends "_base.html" %}
+{% load static %}
 
 {% block title %}Tailwind UI{% endblock %}
 
@@ -6,10 +7,10 @@
 
 <div class="min-h-screen relative">
     <div class="fixed top-1/2 right-0 bg-gray-100 dark:bg-gray-800 flex flex-col space-y-4z-50">
-        <button class="twui-btn hover:bg-gray-200 dark:hover:bg-gray-700" onclick="setTheme('light')">
+        <button class="twui-btn hover:bg-gray-200 dark:hover:bg-gray-700" data-set-theme="light">
             {% heroicon_outline "sun" %}
         </button>
-        <button class="twui-btn hover:bg-gray-200 dark:hover:bg-gray-700" onclick="setTheme('dark')">
+        <button class="twui-btn hover:bg-gray-200 dark:hover:bg-gray-700" data-set-theme="dark">
             {% heroicon_outline "moon" %}
         </button>
     </div>
@@ -56,3 +57,7 @@
 </div>
 
 {% endblock content %}
+
+{% block extra_body %}
+  <script src="{% static 'js/tailwind-ui.js' %}" defer></script>
+{% endblock extra_body %}
