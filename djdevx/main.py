@@ -17,7 +17,9 @@ from .settings import app as settings_app
 app = typer.Typer(no_args_is_help=True)
 
 app.add_typer(version_app, name="version", help="Show the application version")
-app.add_typer(requirement_app, name="requirement", help="Check system requirements")
+app.add_typer(
+    requirement_app, name="requirement", help="Check and install system requirements"
+)
 app.add_typer(new_app, name="new", help="Create a new project")
 app.add_typer(packages_app, name="packages", help="Manage Django packages")
 app.add_typer(frameworks_app, name="frameworks", help="Manage CSS/JS frameworks")

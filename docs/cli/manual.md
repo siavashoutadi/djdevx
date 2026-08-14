@@ -15,7 +15,7 @@ $ djdevx [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `version`: Show the application version
-* `requirement`: Check system requirements
+* `requirement`: Check and install system requirements
 * `new`: Create a new project
 * `packages`: Manage Django packages
 * `frameworks`: Manage CSS/JS frameworks
@@ -42,7 +42,7 @@ $ djdevx version [OPTIONS] COMMAND [ARGS]...
 
 ## djdevx requirement
 
-Check system requirements
+Check and install system requirements
 
 **Usage**:
 
@@ -57,6 +57,7 @@ $ djdevx requirement [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `verify`: Check the requirements for project creation.
+* `install`: Install the required tools for project...
 
 ## djdevx requirement verify
 
@@ -70,6 +71,23 @@ $ djdevx requirement verify [OPTIONS]
 
 **Options**:
 
+* `--help`: Show this message and exit.
+
+## djdevx requirement install
+
+Install the required tools for project creation.
+
+**Usage**:
+
+```console
+$ djdevx requirement install [OPTIONS]
+```
+
+**Options**:
+
+* `-t, --tool TEXT`: Tool to install (pixi, git, docker). If omitted, prompts.
+* `--dry-run`: Print commands without running them.
+* `-v, --verbose`: Print each command before running it.
 * `--help`: Show this message and exit.
 
 ## djdevx new

@@ -15,7 +15,9 @@ Both point to `djdevx.main:app`.
 ```
 ddx
 ├── version                                      # Show version
-├── requirement verify                           # Check system requirements
+├── requirement
+│   ├── verify                                      # Check system requirements
+│   └── install [-t TOOL] [--dry-run] [-v]          # Install required tools
 ├── new                                          # Create new Django project
 │     [--project-name] [--project-description]
 │     [--project-directory] [--python-version]
