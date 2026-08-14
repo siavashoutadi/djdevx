@@ -15,7 +15,7 @@ def test_starting_point_ui_install_and_remove(temp_dir):
     assert result.exit_code == 0, f"Install failed: {result.output}"
 
     sp_css_file = temp_dir / "tailwind" / "src" / "css" / "starting-point.css"
-    sp_js_file = temp_dir / "static" / "js" / "starting-point.js"
+    sp_js_file = temp_dir / "static" / "js" / "vendor" / "starting-point.js"
 
     assert sp_css_file.exists(), "Starting Point CSS file not created"
     assert sp_js_file.exists(), "Starting Point JS file not created"

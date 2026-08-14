@@ -14,8 +14,8 @@ def test_frankenui_install_and_remove(temp_dir):
     result = runner.invoke(app, ["frameworks", "add", "frankenui"])
     assert result.exit_code == 0, f"Install failed: {result.output}"
 
-    franken_css_file = temp_dir / "static" / "css" / "franken.css"
-    franken_js_file = temp_dir / "static" / "js" / "franken.js"
+    franken_css_file = temp_dir / "static" / "css" / "vendor" / "franken.css"
+    franken_js_file = temp_dir / "static" / "js" / "vendor" / "franken.js"
 
     assert franken_css_file.exists(), "Franken CSS file not downloaded"
     assert franken_js_file.exists(), "Franken JS file not downloaded"

@@ -14,8 +14,10 @@ def test_bootstrap_install_and_remove(temp_dir):
     result = runner.invoke(app, ["frameworks", "add", "bootstrap"])
     assert result.exit_code == 0, f"Install failed: {result.output}"
 
-    bootstrap_css_file = temp_dir / "static" / "css" / "bootstrap.min.css"
-    bootstrap_js_file = temp_dir / "static" / "js" / "bootstrap.bundle.min.js"
+    bootstrap_css_file = temp_dir / "static" / "css" / "vendor" / "bootstrap.min.css"
+    bootstrap_js_file = (
+        temp_dir / "static" / "js" / "vendor" / "bootstrap.bundle.min.js"
+    )
 
     assert bootstrap_css_file.exists(), "Bootstrap CSS file not downloaded"
     assert bootstrap_js_file.exists(), "Bootstrap JS file not downloaded"

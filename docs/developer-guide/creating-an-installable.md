@@ -390,7 +390,7 @@ def after_pixi_install(self) -> None:
 # after_copy_templates — download files, modify rendered templates
 def after_copy_templates(self) -> None:
     # Download CSS
-    dest = self.structure.static_css_dir / self.css_filename
+    dest = self.structure.static_css_dir / "vendor" / self.css_filename
     urllib.request.urlretrieve(self.css_url, dest)
 
     # Modify rendered template

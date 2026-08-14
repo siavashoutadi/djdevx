@@ -14,8 +14,8 @@ def test_semantic_install_and_remove(temp_dir):
     result = runner.invoke(app, ["frameworks", "add", "semantic"])
     assert result.exit_code == 0, f"Install failed: {result.output}"
 
-    semantic_css_file = temp_dir / "static" / "css" / "semantic.min.css"
-    semantic_js_file = temp_dir / "static" / "js" / "semantic.min.js"
+    semantic_css_file = temp_dir / "static" / "css" / "vendor" / "semantic.min.css"
+    semantic_js_file = temp_dir / "static" / "js" / "vendor" / "semantic.min.js"
 
     assert semantic_css_file.exists(), "Semantic CSS file not downloaded"
     assert semantic_js_file.exists(), "Semantic JS file not downloaded"

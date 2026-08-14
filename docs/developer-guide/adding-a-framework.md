@@ -41,8 +41,8 @@ class BootstrapFramework(BaseFramework):
 ```
 
 That's it. Declaring the URLs and filenames is enough — `BaseFramework`
-downloads the files into `static/css` / `static/js` and injects the
-`<link>`/`<script>` tags into `_base.html`.
+downloads the files into `static/css/vendor` / `static/js/vendor` and injects
+the `<link>`/`<script>` tags into `_base.html`.
 
 If the framework only needs CSS (no JS), leave `js_url`/`js_filename` empty.
 
@@ -118,7 +118,7 @@ class StartingPointUIFramework(BaseFramework):
 
     @property
     def _js_path(self) -> Path:
-        return self.structure.static_js_dir / "starting-point.js"
+        return self.structure.static_js_dir / "vendor" / "starting-point.js"
 
     @property
     def _input_css_path(self) -> Path:
@@ -142,7 +142,7 @@ class StartingPointUIFramework(BaseFramework):
         if path.exists():
             template = path.read_text()
             if "starting-point.js" not in template:
-                tag = "<script src=\"{% static 'js/starting-point.js' %}\"></script>"
+                tag = "<script src=\"{% static 'js/vendor/starting-point.js' %}\"></script>"
                 template = template.replace("</body>", f"    {tag}\n  </body>")
                 path.write_text(template)
 
@@ -158,7 +158,7 @@ class StartingPointUIFramework(BaseFramework):
         path = self._base_template_path
         if path.exists():
             template = path.read_text()
-            tag = "<script src=\"{% static 'js/starting-point.js' %}\"></script>"
+            tag = "<script src=\"{% static 'js/vendor/starting-point.js' %}\"></script>"
             template = re.sub(r"\s*" + re.escape(tag) + r"\s*\n?", "", template)
             path.write_text(template)
 ```

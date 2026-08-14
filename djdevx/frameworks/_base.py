@@ -30,12 +30,12 @@ class BaseFramework(Installable):
 
     @property
     def _style_tag(self) -> str:
-        return f'<link rel="stylesheet" href="{{\% static \'css/{self.css_filename}\' %}}">'
+        return f'<link rel="stylesheet" href="{{% static \'css/vendor/{self.css_filename}\' %}}">'
 
     @property
     def _script_tag(self) -> str:
         tm = ' type="module"' if self.js_module else ""
-        return f"<script{tm} src=\"{{% static 'js/{self.js_filename}' %}}\"></script>"
+        return f"<script{tm} src=\"{{% static 'js/vendor/{self.js_filename}' %}}\"></script>"
 
     def _download(self, url: str, dest: Path) -> None:
         dest.parent.mkdir(parents=True, exist_ok=True)
@@ -53,12 +53,12 @@ class BaseFramework(Installable):
 
     def _install_framework(self) -> None:
         if self.css_url and self.css_filename:
-            dest = self.structure.static_css_dir / self.css_filename
+            dest = self.structure.static_css_dir / "vendor" / self.css_filename
             if not dest.exists():
                 self._download(self.css_url, dest)
 
         if self.js_url and self.js_filename:
-            dest = self.structure.static_js_dir / self.js_filename
+            dest = self.structure.static_js_dir / "vendor" / self.js_filename
             if not dest.exists():
                 self._download(self.js_url, dest)
 
@@ -68,9 +68,13 @@ class BaseFramework(Installable):
         self._modify_base_template(install=False)
 
         if self.css_filename:
-            (self.structure.static_css_dir / self.css_filename).unlink(missing_ok=True)
+            (self.structure.static_css_dir / "vendor" / self.css_filename).unlink(
+                missing_ok=True
+            )
         if self.js_filename:
-            (self.structure.static_js_dir / self.js_filename).unlink(missing_ok=True)
+            (self.structure.static_js_dir / "vendor" / self.js_filename).unlink(
+                missing_ok=True
+            )
 
     def _modify_base_template(self, install: bool = True) -> None:
         path = self._base_template_path

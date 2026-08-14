@@ -49,8 +49,8 @@ remove:
 
 When `after_copy_templates()` runs:
 
-1. If `css_url` is set, downloads the CSS file to `static/css/<css_filename>`
-2. If `js_url` is set, downloads the JS file to `static/js/<js_filename>`
+1. If `css_url` is set, downloads the CSS file to `static/css/vendor/<css_filename>`
+2. If `js_url` is set, downloads the JS file to `static/js/vendor/<js_filename>`
 3. Inserts `<link>` tag before `</head>` in `templates/_base.html`
 4. Inserts `<script>` tag before `</body>` in `templates/_base.html`
 
@@ -61,12 +61,12 @@ and deleting the downloaded files.
 
 ```html
 <!-- CSS -->
-<link rel="stylesheet" href="{% static 'css/<css_filename>' %}">
+<link rel="stylesheet" href="{% static 'css/vendor/<css_filename>' %}">
 
 <!-- JS -->
-<script src="{% static 'js/<js_filename>' %}"></script>
+<script src="{% static 'js/vendor/<js_filename>' %}"></script>
 <!-- or with js_module=True -->
-<script type="module" src="{% static 'js/<js_filename>' %}"></script>
+<script type="module" src="{% static 'js/vendor/<js_filename>' %}"></script>
 ```
 
 ### Concrete Implementations
