@@ -443,10 +443,8 @@ class DockerComposePlugin(BaseDeployPlugin):
 
     @staticmethod
     def _build_app_env(output_dir: Path, domain: str | None = None) -> str | None:
-        from ..utils.tracking import ProjectTracking
-
-        config = ProjectTracking()
-        env_prod = config.project_root / ".env.prod"
+        backend_root = ProjectStructure().root
+        env_prod = backend_root / ".env.prod"
         if not env_prod.exists():
             print_console.fail(f"  {env_prod} not found")
             print_console.info("     Run: ddx settings configs init prod")
