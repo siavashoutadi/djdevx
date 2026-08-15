@@ -6,7 +6,7 @@ from typer.testing import CliRunner
 
 from djdevx.main import app as main_app
 from tests.test_helpers import create_test_django_project
-from djdevx.utils.tracking._section import SectionTracking
+from djdevx.utils.tracking import ProjectTracking, Section
 
 runner = CliRunner()
 
@@ -42,14 +42,14 @@ def test_pwa_comprehensive(temp_dir):
     urls_file = temp_dir / "urls" / "apps" / "pwa.py"
     assert urls_file.exists()
 
-    assert SectionTracking("features").is_installed("pwa"), (
+    assert ProjectTracking().is_installed(Section.FEATURES, "pwa"), (
         "PWA should be tracked after install"
     )
 
     result = runner.invoke(main_app, ["features", "remove", "pwa"])
     assert result.exit_code == 0, f"PWA remove failed: {result.output}"
 
-    assert not SectionTracking("features").is_installed("pwa"), (
+    assert not ProjectTracking().is_installed(Section.FEATURES, "pwa"), (
         "PWA tracking should be removed"
     )
 

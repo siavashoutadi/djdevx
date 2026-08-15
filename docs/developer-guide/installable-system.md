@@ -326,21 +326,32 @@ writes it to `.secrets/<field_name>` (or removes it).
 
 ## Tracking System
 
-### TrackingOps
+### ProjectTracking
 
-`TrackingOps(section)` wraps `SectionTracking` for the installable lifecycle:
+`ProjectTracking` is the single tracking entry point. It owns the `djdevx.toml`
+document (load/save) and reads/writes `[<section>.<name>]` entries via
+`add()`, `remove()`, `is_installed()`, `get_variants()`, and `list()`.
+Sections are `Section` enum members (`Section.PACKAGES`, `Section.FEATURES`,
+`Section.FRAMEWORKS`, `Section.DATABASE`, `Section.CACHE`):
 
 ```python
-TrackingOps("packages").track_install(installable, variant)
-TrackingOps("packages").remove("my-package")
-TrackingOps("packages").get_variants("django-allauth")
+project = ProjectTracking()
+project.is_installed(Section.PACKAGES, "whitenoise")
+project.add(Section.PACKAGES, "whitenoise", "Whitenoise")
+project.remove(Section.PACKAGES, "whitenoise")
+project.get_variants(Section.PACKAGES, "django-allauth")
+project.list(Section.FEATURES)
 ```
 
-### SectionTracking
+### TrackingOps
 
-`SectionTracking` reads and writes `[<section>.<name>]` entries in
-`djdevx.toml`. It provides `add()`, `remove()`, `is_installed()`,
-`get_variants()`, and `list()`.
+`TrackingOps(section)` wraps `ProjectTracking` for the installable lifecycle:
+
+```python
+TrackingOps(Section.PACKAGES).track_install(installable, variant)
+TrackingOps(Section.PACKAGES).remove("my-package")
+TrackingOps(Section.PACKAGES).get_variants("django-allauth")
+```
 
 Tracking data in `djdevx.toml`:
 

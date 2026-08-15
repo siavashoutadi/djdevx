@@ -2,7 +2,7 @@ import os
 from typer.testing import CliRunner
 from djdevx.main import app
 from tests.test_helpers import create_test_django_project
-from djdevx.utils.tracking._section import SectionTracking
+from djdevx.utils.tracking import ProjectTracking, Section
 
 runner = CliRunner()
 
@@ -29,7 +29,7 @@ def test_semantic_install_and_remove(temp_dir):
     assert "semantic.min.css" in base_content, "Semantic CSS link not added"
     assert "semantic.min.js" in base_content, "Semantic JS script not added"
 
-    assert SectionTracking("frameworks").is_installed("semantic"), (
+    assert ProjectTracking().is_installed(Section.FRAMEWORKS, "semantic"), (
         "semantic should be tracked"
     )
 
@@ -43,7 +43,7 @@ def test_semantic_install_and_remove(temp_dir):
     assert "semantic.min.css" not in base_content_after, "Semantic CSS link not removed"
     assert "semantic.min.js" not in base_content_after, "Semantic JS script not removed"
 
-    assert not SectionTracking("frameworks").is_installed("semantic"), (
+    assert not ProjectTracking().is_installed(Section.FRAMEWORKS, "semantic"), (
         "tracking should be removed"
     )
 

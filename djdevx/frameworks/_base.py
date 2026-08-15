@@ -5,12 +5,13 @@ import urllib.request
 from pathlib import Path
 
 from ..utils.installable.installable import Installable
+from ..utils.tracking import Section
 
 
 class BaseFramework(Installable):
     """Base class for CSS/JS frameworks."""
 
-    section: str = "frameworks"
+    section: Section = Section.FRAMEWORKS
 
     css_url: str = ""
     css_filename: str = ""

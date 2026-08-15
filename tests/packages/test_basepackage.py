@@ -11,6 +11,7 @@ from djdevx.utils.installable.types import (
     InstallParam,
     Variant,
 )
+from djdevx.utils.tracking import Section
 from djdevx.utils.types.pixi_types import PixiPackageSpec
 
 
@@ -104,7 +105,7 @@ class TestHookOrdering:
             patch.object(PixiOps, "add_packages") as mock_add,
             patch("djdevx.utils.installable.installable.copy_templates") as mock_copy,
             patch.object(SecretsOps, "generate") as mock_gen,
-            patch("djdevx.utils.installable.tracking.SectionTracking"),
+            patch("djdevx.utils.installable.tracking.ProjectTracking"),
         ):
             mock_add.side_effect = lambda *a, **kw: call_order.append("pixi_add_all")
             mock_copy.side_effect = lambda self, variant: call_order.append(
@@ -144,7 +145,7 @@ class TestHookOrdering:
                 "djdevx.utils.installable.installable.restore_original_templates"
             ) as mock_restore,
             patch.object(SecretsOps, "remove") as mock_rem,
-            patch("djdevx.utils.installable.tracking.SectionTracking"),
+            patch("djdevx.utils.installable.tracking.ProjectTracking"),
         ):
             mock_rem_pixi.side_effect = lambda *a, **kw: call_order.append(
                 "pixi_remove_all"
@@ -200,26 +201,31 @@ class TestCleanupExtraFiles:
 class TestPackageTracking:
     def test_write_tracking_adds_to_djdevx_toml(self):
         pkg = SimplePackage()
-        mock_tracking = MagicMock()
+        mock_project = MagicMock()
         with patch(
-            "djdevx.utils.installable.tracking.SectionTracking",
-            return_value=mock_tracking,
+            "djdevx.utils.installable.tracking.ProjectTracking",
+            return_value=mock_project,
         ):
             track_install(pkg)
-        mock_tracking.add.assert_called_once_with("simple", "Simple Package")
+        mock_project.add.assert_called_once_with(
+            Section.PACKAGES, "simple", "Simple Package"
+        )
 
     def test_write_tracking_variant_appends(self):
         pkg = AdditiveVariantPackage()
-        mock_tracking = MagicMock()
-        mock_tracking.get_variants.return_value = ["account"]
+        mock_project = MagicMock()
+        mock_project.get_variants.return_value = ["account"]
         variant = pkg.variants["mfa"]
         with patch(
-            "djdevx.utils.installable.tracking.SectionTracking",
-            return_value=mock_tracking,
+            "djdevx.utils.installable.tracking.ProjectTracking",
+            return_value=mock_project,
         ):
             track_install(pkg, variant)
-        mock_tracking.add.assert_called_once_with(
-            "additive-pkg", "Additive Package", variants=["account", "mfa"]
+        mock_project.add.assert_called_once_with(
+            Section.PACKAGES,
+            "additive-pkg",
+            "Additive Package",
+            variants=["account", "mfa"],
         )
 
 

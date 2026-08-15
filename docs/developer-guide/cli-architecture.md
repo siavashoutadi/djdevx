@@ -158,16 +158,26 @@ To add a new installable category (e.g., "monitoring"):
    └── list.py            # list table
    ```
 
-2. Create a tracking class in `utils/tracking/`:
+2. Add a `Section` enum member and set it in the category base:
    ```python
-   class MonitoringTracking(SectionTracking):
-       def __init__(self, project_root=None):
-           super().__init__("monitoring", project_root)
+   # djdevx/utils/tracking/sections.py
+   MONITORING = "monitoring"
+
+   # monitoring/_base.py
+   class BaseMonitoring(Installable):
+       section: Section = Section.MONITORING
    ```
 
-3. Implement `get_registry()` and `get_tracking_cls()` in `_base.py`.
+3. Track installs via `ProjectTracking` in `djdevx.toml`:
+   ```python
+   project = ProjectTracking()
+   project.is_installed(Section.MONITORING, "prometheus")
+   project.add(Section.MONITORING, "prometheus", "Prometheus")
+   ```
 
-4. Register in `djdevx/main.py`:
+4. Implement `get_registry()` in `_base.py`.
+
+5. Register in `djdevx/main.py`:
    ```python
    from .monitoring import app as monitoring_app
    app.add_typer(monitoring_app, name="monitoring", help="Manage monitoring tools")

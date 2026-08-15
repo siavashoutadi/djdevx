@@ -10,6 +10,7 @@ import tomlkit
 from djdevx.packages._base import BasePackage
 from djdevx.utils.installable.tracking import TrackingOps
 from djdevx.utils.installable.types import Variant
+from djdevx.utils.tracking import ProjectTracking, Section
 from djdevx.utils.types.pixi_types import PixiPackageSpec
 
 
@@ -45,7 +46,7 @@ class TestFlatPackageTracking:
     def test_write_creates_section(self, tmp_path):
         setup_djdevx_toml(tmp_path)
         pkg = SimplePackage()
-        TrackingOps("packages", tmp_path).track_install(pkg)
+        TrackingOps(Section.PACKAGES, tmp_path).track_install(pkg)
         doc = tomlkit.loads((tmp_path / "djdevx.toml").read_text())
         packages = doc.get("packages", {})
         assert "whitenoise" in packages
@@ -53,46 +54,40 @@ class TestFlatPackageTracking:
 
     def test_write_creates_variant_section(self, tmp_path):
         setup_djdevx_toml(tmp_path)
-        mock_section = MagicMock()
-        mock_section.get_variants.return_value = []
-        ops = TrackingOps("packages", tmp_path)
-        ops._tracking = mock_section
+        mock_project = MagicMock()
+        mock_project.get_variants.return_value = []
+        ops = TrackingOps(Section.PACKAGES, tmp_path)
+        ops._project = mock_project
         pkg = VariantPackage()
         variant = pkg.variants["base"]
         ops.track_install(pkg, variant)
-        mock_section.add.assert_called_once_with("sanctr", "Sanctr", variants=["base"])
+        mock_project.add.assert_called_once_with(
+            Section.PACKAGES, "sanctr", "Sanctr", variants=["base"]
+        )
 
     def test_read_after_write(self, tmp_path):
         setup_djdevx_toml(tmp_path)
-        from djdevx.utils.tracking._section import SectionTracking
-
-        tracking = SectionTracking("packages", tmp_path)
-        tracking.add("whitenoise", "Whitenoise")
-        installed = tracking.list()
+        tracking = ProjectTracking(tmp_path)
+        tracking.add(Section.PACKAGES, "whitenoise", "Whitenoise")
+        installed = tracking.list(Section.PACKAGES)
         assert "whitenoise" in installed
         assert installed["whitenoise"]["display_name"] == "Whitenoise"
 
     def test_remove_tracking(self, tmp_path):
         setup_djdevx_toml(tmp_path)
-        from djdevx.utils.tracking._section import SectionTracking
-
-        tracking = SectionTracking("packages", tmp_path)
-        tracking.add("whitenoise", "Whitenoise")
-        assert tracking.is_installed("whitenoise")
-        tracking.remove("whitenoise")
-        assert not tracking.is_installed("whitenoise")
+        tracking = ProjectTracking(tmp_path)
+        tracking.add(Section.PACKAGES, "whitenoise", "Whitenoise")
+        assert tracking.is_installed(Section.PACKAGES, "whitenoise")
+        tracking.remove(Section.PACKAGES, "whitenoise")
+        assert not tracking.is_installed(Section.PACKAGES, "whitenoise")
 
     def test_is_installed_false_for_missing(self, tmp_path):
         setup_djdevx_toml(tmp_path)
-        from djdevx.utils.tracking._section import SectionTracking
-
-        tracking = SectionTracking("packages", tmp_path)
-        assert not tracking.is_installed("nonexistent")
+        tracking = ProjectTracking(tmp_path)
+        assert not tracking.is_installed(Section.PACKAGES, "nonexistent")
 
     def test_missing_djdevx_toml_creates_it(self, tmp_path):
-        from djdevx.utils.tracking._section import SectionTracking
-
-        tracking = SectionTracking("packages", tmp_path)
-        tracking.add("heroicons", "Heroicons")
+        tracking = ProjectTracking(tmp_path)
+        tracking.add(Section.PACKAGES, "heroicons", "Heroicons")
         doc = tomlkit.loads((tmp_path / "djdevx.toml").read_text())
         assert "heroicons" in doc["packages"]

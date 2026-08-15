@@ -1,12 +1,13 @@
 """BaseDatabase — thin wrapper over InstallableBase for the database domain."""
 
 from ..utils.installable.installable import Installable
+from ..utils.tracking import Section
 
 
 class BaseDatabase(Installable):
     """Base class for database providers."""
 
-    section: str = "database"
+    section: Section = Section.DATABASE
 
     @classmethod
     def get_registry(cls):

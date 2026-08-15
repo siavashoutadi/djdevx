@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Optional
 
-from ..tracking._section import SectionTracking
+from ..tracking import ProjectTracking, Section
 
 
 def _normalize(name: str) -> str:
@@ -13,42 +13,47 @@ def _normalize(name: str) -> str:
 class TrackingOps:
     """Section-scoped tracking operations for installable lifecycle."""
 
-    def __init__(self, section: str, project_root: Optional[Path] = None):
-        self._tracking = SectionTracking(section, project_root)
+    def __init__(self, section: Section, project_root: Optional[Path] = None):
+        self._section = section
+        self._project = ProjectTracking(project_root)
 
     def track_install(self, instance, variant=None) -> None:
         name = _normalize(instance.name)
         if variant:
-            existing = self._tracking.get_variants(name)
+            existing = self._project.get_variants(self._section, name)
             variant_name = variant.name
             if variant_name and variant_name not in existing:
                 existing = existing + [variant_name]
-            self._tracking.add(name, instance.display_name, variants=existing)
+            self._project.add(
+                self._section, name, instance.display_name, variants=existing
+            )
         else:
-            self._tracking.add(name, instance.display_name)
+            self._project.add(self._section, name, instance.display_name)
 
     def get_variants(self, name: str) -> list[str]:
-        return self._tracking.get_variants(_normalize(name))
+        return self._project.get_variants(self._section, _normalize(name))
 
     def remove(self, name: str) -> None:
-        self._tracking.remove(_normalize(name))
+        self._project.remove(self._section, _normalize(name))
 
     def add(self, name: str, display_name: str, variants=None) -> None:
-        self._tracking.add(_normalize(name), display_name, variants=variants)
+        self._project.add(
+            self._section, _normalize(name), display_name, variants=variants
+        )
 
 
-def get_section(cls) -> str:
+def get_section(cls) -> Section:
     field = cls.model_fields.get("section")
     if field is None:
-        return ""
+        raise ValueError(f"{cls.__name__} does not declare a 'section' field")
     value = field.default
     if value is None:
-        value = field.default_factory() if field.default_factory else ""
+        value = field.default_factory() if field.default_factory else Section.PACKAGES
     return value
 
 
 def get_installed_names(cls) -> dict:
-    return SectionTracking(get_section(cls)).list()
+    return ProjectTracking().list(get_section(cls))
 
 
 def get_available_names(cls) -> list[str]:
@@ -56,7 +61,7 @@ def get_available_names(cls) -> list[str]:
 
 
 def get_installed_variants(cls, name: str) -> list[str]:
-    return SectionTracking(get_section(cls)).get_variants(name)
+    return ProjectTracking().get_variants(get_section(cls), name)
 
 
 def get_installable_names(cls) -> list[str]:

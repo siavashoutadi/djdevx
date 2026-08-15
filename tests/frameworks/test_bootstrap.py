@@ -2,7 +2,7 @@ import os
 from typer.testing import CliRunner
 from djdevx.main import app
 from tests.test_helpers import create_test_django_project
-from djdevx.utils.tracking._section import SectionTracking
+from djdevx.utils.tracking import ProjectTracking, Section
 
 runner = CliRunner()
 
@@ -31,7 +31,7 @@ def test_bootstrap_install_and_remove(temp_dir):
     assert "bootstrap.min.css" in base_content, "Bootstrap CSS link not added"
     assert "bootstrap.bundle.min.js" in base_content, "Bootstrap JS script not added"
 
-    assert SectionTracking("frameworks").is_installed("bootstrap"), (
+    assert ProjectTracking().is_installed(Section.FRAMEWORKS, "bootstrap"), (
         "bootstrap should be tracked after install"
     )
 
@@ -58,7 +58,7 @@ def test_bootstrap_install_and_remove(temp_dir):
         "Bootstrap JS script not removed"
     )
 
-    assert not SectionTracking("frameworks").is_installed("bootstrap"), (
+    assert not ProjectTracking().is_installed(Section.FRAMEWORKS, "bootstrap"), (
         "bootstrap tracking should be removed"
     )
 

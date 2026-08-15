@@ -1,7 +1,7 @@
-from ._section import SectionTracking
 from .project import ProjectTracking
+from .sections import Section
 
 __all__ = [
     "ProjectTracking",
-    "SectionTracking",
+    "Section",
 ]

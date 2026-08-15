@@ -9,6 +9,7 @@ from pydantic import Field
 
 from ..console.print import print_console
 from ..project.project_structure import ProjectStructure
+from ..tracking import Section
 from .pixi_ops import PixiOps
 from .scaffold import (
     cleanup_files,
@@ -48,7 +49,7 @@ class Installable(InstallableConfig):
     """
 
     description: str = ""
-    section: str = ""
+    section: Section = Section.PACKAGES
     exclusive_variants: bool = False
     variants: dict[str, Variant] = Field(default_factory=dict)
     verbose: bool = Field(default=False, exclude=True, repr=False)

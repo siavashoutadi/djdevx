@@ -1,12 +1,13 @@
 """BaseCache — thin wrapper over InstallableBase for the cache domain."""
 
 from ..utils.installable.installable import Installable
+from ..utils.tracking import Section
 
 
 class BaseCache(Installable):
     """Base class for cache backends."""
 
-    section: str = "cache"
+    section: Section = Section.CACHE
 
     @classmethod
     def get_registry(cls):

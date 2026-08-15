@@ -5,6 +5,7 @@ from typing import Any, Callable, Optional, cast
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from ..tracking.sections import Section
 from ..types.pixi_types import PixiPackageSpec
 
 
@@ -25,14 +26,14 @@ class InstallParam:
 @dataclass(frozen=True)
 class InstallableKind:
     name: str
-    section: str
+    section: Section
 
 
-PACKAGE = InstallableKind("package", "packages")
-FEATURE = InstallableKind("feature", "features")
-FRAMEWORK = InstallableKind("framework", "frameworks")
-DATABASE = InstallableKind("database", "database")
-CACHE = InstallableKind("cache", "cache")
+PACKAGE = InstallableKind("package", Section.PACKAGES)
+FEATURE = InstallableKind("feature", Section.FEATURES)
+FRAMEWORK = InstallableKind("framework", Section.FRAMEWORKS)
+DATABASE = InstallableKind("database", Section.DATABASE)
+CACHE = InstallableKind("cache", Section.CACHE)
 
 
 @dataclass

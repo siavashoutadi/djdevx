@@ -2,7 +2,7 @@ import os
 from typer.testing import CliRunner
 from djdevx.main import app
 from tests.test_helpers import create_test_django_project
-from djdevx.utils.tracking._section import SectionTracking
+from djdevx.utils.tracking import ProjectTracking, Section
 
 runner = CliRunner()
 
@@ -30,7 +30,7 @@ def test_frankenui_install_and_remove(temp_dir):
     assert "franken.js" in base_content, "Franken JS script not added"
     assert 'type="module"' in base_content, "type=module not set on script"
 
-    assert SectionTracking("frameworks").is_installed("frankenui"), (
+    assert ProjectTracking().is_installed(Section.FRAMEWORKS, "frankenui"), (
         "frankenui should be tracked"
     )
 
@@ -44,7 +44,7 @@ def test_frankenui_install_and_remove(temp_dir):
     assert "franken.css" not in base_content_after, "Franken CSS link not removed"
     assert "franken.js" not in base_content_after, "Franken JS script not removed"
 
-    assert not SectionTracking("frameworks").is_installed("frankenui"), (
+    assert not ProjectTracking().is_installed(Section.FRAMEWORKS, "frankenui"), (
         "tracking should be removed"
     )
 

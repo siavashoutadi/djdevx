@@ -112,8 +112,11 @@
 
 - Installed items tracked in `djdevx.toml` under category-specific sections:
   `[packages]`, `[features]`, `[frameworks]`, `[database]`, `[cache]`
-- Trackers: `PackageTracking`, `FeatureTracking`, `FrameworkTracking`,
-  `DatabaseTracking`, `CacheTracking` (all extend `SectionTracking`)
+- `ProjectTracking` is the single tracking entry point — it owns the
+  `djdevx.toml` document and provides section-scoped operations
+- Sections are `Section` enum members (`Section.PACKAGES`, `Section.FEATURES`,
+  `Section.FRAMEWORKS`, `Section.DATABASE`, `Section.CACHE`)
+- `TrackingOps(section)` wraps `ProjectTracking` for the installable lifecycle
 - `PixiOps` wraps `pixi add`, `pixi remove`, `pixi run`, and Django manage.py
   commands — replaces the deprecated `PixiRunner`
 - `Scaffold` centralizes path, template, and file operations — replaces the

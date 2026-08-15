@@ -5,7 +5,7 @@ from typing import Any
 
 from ..console import prompts
 from ..console.print import print_console
-from ..tracking._section import SectionTracking
+from ..tracking import ProjectTracking
 
 from .tracking import (
     get_installed_names,
@@ -20,10 +20,11 @@ def _auto_install_needs(needs: list[InstallableRef], verbose: bool) -> None:
     """Resolve and install unmet dependencies recursively."""
     from .resolver import resolve  # local import to avoid circular imports
 
+    project = ProjectTracking()
     for ref in needs:
         cls = resolve(ref)
         section = get_section(cls)
-        if SectionTracking(section).is_installed(ref.name):
+        if project.is_installed(section, ref.name):
             continue
         print_console.step(f"Installing required dependency: {ref.name}")
         add_installable(cls, ref.name, verbose=verbose)

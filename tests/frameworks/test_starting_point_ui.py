@@ -2,7 +2,7 @@ import os
 from typer.testing import CliRunner
 from djdevx.main import app
 from tests.test_helpers import create_test_django_project
-from djdevx.utils.tracking._section import SectionTracking
+from djdevx.utils.tracking import ProjectTracking, Section
 
 runner = CliRunner()
 
@@ -34,7 +34,7 @@ def test_starting_point_ui_install_and_remove(temp_dir):
     base_content = base_template_path.read_text()
     assert "starting-point.js" in base_content, "Starting Point JS script not added"
 
-    assert SectionTracking("frameworks").is_installed("starting-point-ui"), (
+    assert ProjectTracking().is_installed(Section.FRAMEWORKS, "starting-point-ui"), (
         "starting_point_ui should be tracked"
     )
 
@@ -54,9 +54,9 @@ def test_starting_point_ui_install_and_remove(temp_dir):
         "Starting Point JS script not removed"
     )
 
-    assert not SectionTracking("frameworks").is_installed("starting-point-ui"), (
-        "tracking should be removed"
-    )
+    assert not ProjectTracking().is_installed(
+        Section.FRAMEWORKS, "starting-point-ui"
+    ), "tracking should be removed"
 
 
 def test_starting_point_ui_install_idempotent(temp_dir):
