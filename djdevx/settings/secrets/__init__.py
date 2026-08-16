@@ -3,7 +3,6 @@
 from typing import Any, Literal
 
 import typer
-from rich.table import Table
 
 from ...utils.console.print import (
     GREEN_CHECK_MARK,
@@ -51,16 +50,15 @@ def list_secrets(
         return
 
     cfg = ENV_CONFIG_LIST[env]
-    table = Table(
-        title=f"Secrets ({env})",
-        title_style="bold cyan",
-        header_style="bold",
-        border_style="bright_black",
+    table = print_console.build_table(
+        f"Secrets ({env})",
+        [
+            ("Status", {"width": 8, "justify": "center", "no_wrap": True}),
+            ("Name", {"style": "bold", "min_width": 16, "no_wrap": True}),
+            ("Source", {"style": "dim", "overflow": "ellipsis"}),
+        ],
         show_lines=False,
     )
-    table.add_column("Status", width=8, justify="center", no_wrap=True)
-    table.add_column("Name", style="bold", min_width=16, no_wrap=True)
-    table.add_column("Source", style="dim", overflow="ellipsis")
 
     for secret in result.secrets:
         source = cfg["resolve_source"](secret, project_root)

@@ -1,4 +1,6 @@
 import difflib
+from typing import Any
+
 from rich.console import Console as RichConsole
 from rich.markup import escape
 from rich.table import Table
@@ -54,6 +56,24 @@ class PrintConsole:
         """Print a list of items with bullet points."""
         for item in items:
             self._console.print(f"🔹[bold]{escape(item)}[/bold]")
+
+    def build_table(
+        self,
+        title: str,
+        columns: list[tuple[str, dict[str, Any]]],
+        **table_kwargs,
+    ) -> Table:
+        """Create a pre-styled Rich Table with the given columns."""
+        table = Table(
+            title=title,
+            title_style="bold cyan",
+            header_style="bold",
+            border_style="bright_black",
+            **table_kwargs,
+        )
+        for name, options in columns:
+            table.add_column(name, **options)
+        return table
 
     def table(self, table: Table) -> None:
         """Render a Rich Table to the console."""

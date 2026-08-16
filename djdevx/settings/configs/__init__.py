@@ -7,7 +7,6 @@ from typing import Any, Literal
 import pydantic
 import typer
 from dotenv import set_key
-from rich.table import Table
 
 from ...utils.console.print import (
     ELLIPSIS,
@@ -76,19 +75,24 @@ def list_configs(
         return
 
     cfg = _ENV_CONFIG_LIST[env]
-    table = Table(
-        title=f"Config vars ({env})",
-        title_style="bold cyan",
-        header_style="bold",
-        border_style="bright_black",
+    table = print_console.build_table(
+        f"Config vars ({env})",
+        [
+            ("Status", {"width": 8, "justify": "center", "no_wrap": True}),
+            ("Name", {"style": "bold", "min_width": 16, "no_wrap": True}),
+            ("Type", {"style": "dim", "min_width": 10, "no_wrap": True}),
+            ("Source", {"style": "dim", "overflow": "ellipsis"}),
+            (
+                "Value",
+                {
+                    "style": "dim italic",
+                    "min_width": 24,
+                    "no_wrap": True,
+                    "overflow": "ellipsis",
+                },
+            ),
+        ],
         show_lines=False,
-    )
-    table.add_column("Status", width=8, justify="center", no_wrap=True)
-    table.add_column("Name", style="bold", min_width=16, no_wrap=True)
-    table.add_column("Type", style="dim", min_width=10, no_wrap=True)
-    table.add_column("Source", style="dim", overflow="ellipsis")
-    table.add_column(
-        "Value", style="dim italic", min_width=24, no_wrap=True, overflow="ellipsis"
     )
 
     for config_var in result.config_vars:

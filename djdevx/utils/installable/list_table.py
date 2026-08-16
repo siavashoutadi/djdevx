@@ -1,5 +1,3 @@
-from rich.table import Table
-
 from ..console.print import GREEN_CHECK_MARK, RED_CROSS_MARK, print_console
 from .tracking import get_available_names, get_display_name, get_installed_names
 
@@ -11,10 +9,14 @@ def build_list_table(cls, label: str) -> None:
     installed_names = sorted(n for n in all_names if n in installed)
     not_installed_names = sorted(n for n in all_names if n not in installed)
 
-    table = Table(title=f"{label}s")
-    table.add_column("", style="", width=1, no_wrap=True)
-    table.add_column(label, style="")
-    table.add_column("Display Name", style="")
+    table = print_console.build_table(
+        f"{label}s",
+        [
+            ("", {"width": 1, "no_wrap": True}),
+            (label, {}),
+            ("Display Name", {}),
+        ],
+    )
 
     for name in installed_names:
         table.add_row(
