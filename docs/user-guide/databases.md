@@ -42,6 +42,22 @@ Only one database can be installed at a time.
 
 Remove the existing database first, then install the new one.
 
+## Pixi-Native Local Dev
+
+`ddx database add postgres` wires up Docker Compose for the devcontainer path.
+For day-to-day local development, `ddx dev` runs PostgreSQL **natively** via
+pixi conda packages (`initdb`/`pg_ctl`) — no Docker — with data under
+`.pixi/devdata/postgres`:
+
+```bash
+ddx dev up              # start postgres
+ddx dev database init   # start postgres + migrate if pending
+ddx dev database reset  # flush all data, keep running
+ddx dev database purge  # stop + delete .pixi/devdata/postgres
+```
+
+See [Local Development](dev.md) for details.
+
 ## Example
 
 ```bash

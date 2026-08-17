@@ -42,6 +42,22 @@ Only one cache can be installed at a time.
 
 Remove the existing cache first, then install the new one.
 
+## Pixi-Native Local Dev
+
+`ddx cache add redis` wires up Docker Compose for the devcontainer path.
+For day-to-day local development, `ddx dev` runs Redis **natively** via pixi
+conda packages (`redis-server`) — no Docker — with data under
+`.pixi/devdata/redis`:
+
+```bash
+ddx dev up          # start redis
+ddx dev cache init  # start redis
+ddx dev cache reset # FLUSHALL, keep running
+ddx dev cache purge # stop + delete .pixi/devdata/redis
+```
+
+See [Local Development](dev.md) for details.
+
 ## Example
 
 ```bash

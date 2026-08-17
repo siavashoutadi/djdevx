@@ -1,8 +1,11 @@
 """PostgreSQL database provider."""
 
+import shutil
+
 from .._base import BaseDatabase
 from .._registry import register
 from ...utils.devcontainer import ServiceConfig, VolumeConfig, DockerComposeManager
+from ...utils.services import PostgresService
 from ...utils.types.pixi_types import PixiPackageSpec
 
 POSTGRES_ENV_VARIABLES = {
@@ -73,3 +76,13 @@ class PostgresDatabase(BaseDatabase):
         compose = DockerComposeManager(self.structure.root)
         compose.remove_service(POSTGRES_DOCKER_SERVICE, POSTGRES_VOLUMES)
         compose.remove_service(PGADMIN_DOCKER_SERVICE, PGADMIN_VOLUMES)
+        self._wipe_dev_data()
+
+    def _wipe_dev_data(self) -> None:
+        service = PostgresService(self.structure.root)
+        try:
+            if service.is_up():
+                service.down()
+        except OSError:
+            pass
+        shutil.rmtree(service.data_dir, ignore_errors=True)

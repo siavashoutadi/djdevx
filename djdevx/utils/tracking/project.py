@@ -121,3 +121,7 @@ class ProjectTracking:
             else:
                 result[k] = {}
         return result
+
+    def installed(self, section: Section) -> Optional[str]:
+        """Return the single installed name in the section, or None."""
+        return next(iter(self.list(section)), None)

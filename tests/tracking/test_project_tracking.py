@@ -136,6 +136,30 @@ class TestList:
         assert "memcached" in result
 
 
+# ── installed ─────────────────────────────────────────────────────────────────
+
+
+class TestInstalled:
+    """Tests for ProjectTracking.installed."""
+
+    def test_none_when_empty(self, project: ProjectTracking, section: str) -> None:
+        assert project.installed(section) is None
+
+    def test_returns_name_after_add(
+        self, project: ProjectTracking, section: str
+    ) -> None:
+        project.add(section, "redis", "Redis")
+        assert project.installed(section) == "redis"
+
+    def test_returns_remaining_after_remove(
+        self, project: ProjectTracking, section: str
+    ) -> None:
+        project.add(section, "redis", "Redis")
+        project.add(section, "memcached", "Memcached")
+        project.remove(section, "redis")
+        assert project.installed(section) == "memcached"
+
+
 # ── get_variants ──────────────────────────────────────────────────────────────
 
 

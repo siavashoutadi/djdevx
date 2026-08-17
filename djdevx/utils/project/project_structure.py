@@ -117,3 +117,11 @@ class ProjectStructure:
     @property
     def tailwind_input_css(self) -> Path:
         return self._root / "tailwind" / "src" / "css" / "input.css"
+
+    # ------------------------------------------------------------------
+    # Local dev data
+    # ------------------------------------------------------------------
+
+    @property
+    def dev_data_dir(self) -> Path:
+        return self._root / ".pixi" / "devdata"

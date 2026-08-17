@@ -12,6 +12,7 @@ nav = [
     { "Managing Features" = "user-guide/managing-features.md" },
     { "Database" = "user-guide/databases.md" },
     { "Cache" = "user-guide/caching.md" },
+    { "Local Development" = "user-guide/dev.md" },
     { "Managing Settings" = "user-guide/managing-settings.md" },
     { "Deployment" = [
       { "Overview" = "user-guide/deployment.md" },

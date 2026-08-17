@@ -44,6 +44,15 @@ class PixiRunner:
         run_kwargs.update(kwargs)
         return subprocess.run(cmd, **run_kwargs)
 
+    def run_interactive(self, *args: str, **kwargs) -> subprocess.CompletedProcess:
+        """Run a pixi command in the foreground with inherited stdio.
+
+        Used for long-running processes (e.g. the dev server) so their output
+        is streamed directly to the user's terminal.
+        """
+        cmd = ["pixi"] + list(args)
+        return subprocess.run(cmd, cwd=self.project_root, **kwargs)
+
     def add_conda_package(
         self, package_name: str, feature: Optional[str] = None
     ) -> subprocess.CompletedProcess:

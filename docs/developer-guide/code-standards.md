@@ -83,6 +83,28 @@
 
 > Read the [CLI Architecture](cli-architecture.md) for detailed CLI conventions and patterns.
 
+### Django Manage.py Commands
+
+- Route Django `manage.py` commands through `ManageCommands`
+  (`djdevx/utils/django/manage_commands.py`) — never call `pixi` directly from
+  command modules
+- `ManageCommands` owns a `PixiRunner` instance — its only dependency. Pass the
+  shared runner in when one already exists, otherwise it builds its own:
+  `ManageCommands(runner)`
+- Expose one named method per `manage.py` command (e.g. `migrations_pending()`);
+  the generic `run(command, *args, check=...)` is the low-level delegate to
+  `PixiRunner.run_manage_command`
+- New `manage.py` helpers belong in `manage_commands.py`, keeping command modules
+  thin
+
+```python
+from djdevx.utils.django.manage_commands import ManageCommands
+
+commands = ManageCommands(runner)  # or ManageCommands() for a default runner
+if commands.migrations_pending():
+    commands.run("migrate")
+```
+
 ### Template Conventions
 
 - Templates use `.jinja2` extension (stripped on render)
@@ -117,8 +139,9 @@
 - Sections are `Section` enum members (`Section.PACKAGES`, `Section.FEATURES`,
   `Section.FRAMEWORKS`, `Section.DATABASE`, `Section.CACHE`)
 - `TrackingOps(section)` wraps `ProjectTracking` for the installable lifecycle
-- `PixiOps` wraps `pixi add`, `pixi remove`, `pixi run`, and Django manage.py
-  commands — replaces the deprecated `PixiRunner`
+- `PixiOps` wraps `pixi add` / `pixi remove` for the installable lifecycle
+- `PixiRunner` is the low-level pixi process runner; Django `manage.py` commands
+  go through `ManageCommands` (see [Django Manage.py Commands](#django-managepy-commands))
 - `Scaffold` centralizes path, template, and file operations — replaces the
   deprecated `DjangoProjectManager`
 - Package names normalized per PEP 503 (hyphens vs underscores vs dots)

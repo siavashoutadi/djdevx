@@ -46,6 +46,14 @@ ddx
 ├── settings
 │   ├── secrets {init,list,verify} [ENV]
 │   └── configs {init,list,verify} [ENV]
+├── dev
+│   ├── start [args...] [--skip-settings] [--skip-migrate] [-v]
+│   ├── runserver [args...]                  # tailwind-aware; args forwarded
+│   ├── up                                   # start installed db/cache services
+│   ├── down                                 # stop installed db/cache services
+│   ├── status                               # services up/down, migrations, settings
+│   ├── database {init,reset,purge}          # pixi-native postgres
+│   └── cache {init,reset,purge}             # pixi-native redis
 └── deployment
     └── docker-compose {generate,verify}
 ```
@@ -118,6 +126,35 @@ ddx
 - **Error exits** — Commands abort with `typer.Exit(code=1)` on failures
   (missing dependencies, invalid state). Early success exits use
   `typer.Exit(0)` (e.g., empty list results).
+
+- **Argument passthrough** — `ddx dev start` and `ddx dev runserver` forward
+  unknown arguments to the underlying Django command using
+  `context_settings={"ignore_unknown_options": True, "allow_extra_args": True}`
+  plus a `typer.Context` parameter read via `ctx.args`. Flags on the outer
+  command must come before forwarded arguments. `runserver` additionally
+  disables its own `--help` option so `ddx dev runserver --help` is forwarded
+  to the Django command.
+
+## Dev Command Group
+
+`ddx dev` is split into thin command modules under `djdevx/dev/` (`start.py`,
+`runserver.py`, `up.py`, `down.py`, `status.py`, `database.py`,
+`cache.py`). Shared behavior lives in:
+
+- **`utils/services/resolver.py`** — `resolve_database_dev_service()` and
+  `resolve_cache_dev_service()`. Each reads the project tracking
+  (`SectionTracking("database"/"cache").installed()`) to find the single
+  installed provider, maps its name to the native dev service, and returns an
+  instantiated `BaseDevService` or `None`. `utils/services` owns the
+  `name -> dev service` mapping and the concrete services.
+- **`utils/django/manage_commands.py`** — `ManageCommands` wraps Django
+  `manage.py` commands (e.g. `migrations_pending()`) over a `PixiRunner`, shared
+  by `start`, `status`, and `database`.
+- **`runserver.py`** — `server_command()` resolves the tailwind-aware dev
+  server command, shared by `runserver` and `start`.
+
+Because only one database and one cache can be installed at a time, the dev
+commands always act on that single installed provider.
 
 ## Installable Category Pattern
 

@@ -90,6 +90,16 @@ ddx database list                   # List all databases
 The `add` command uses `prompts.select()` (single-choice) since only one
 database can be installed.
 
+## Native Dev Services
+
+Databases can also run locally without Docker via `ddx dev`.
+`utils/services/` owns the pixi-native `BaseDevService` implementations.
+`utils/services/resolver.py` maps the installed provider (from tracking) to
+its dev service: `SectionTracking("database").installed()` returns the single
+installed name, which is looked up in the `name -> dev service` mapping.
+Providers that add native dev support must register their service class in
+`utils/services/resolver.py`.
+
 ## Related
 
 - [Installable System](installable-system.md) — Shared infrastructure

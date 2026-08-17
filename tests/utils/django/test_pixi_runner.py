@@ -130,6 +130,34 @@ class TestRunPixiCommand:
 
 
 # ---------------------------------------------------------------------------
+# run_interactive
+# ---------------------------------------------------------------------------
+
+
+class TestRunInteractive:
+    def test_builds_pixi_command_with_project_root(self):
+        runner = PixiRunner(project_root=Path("/tmp"))
+        with patch("subprocess.run") as mock_sub_run:
+            runner.run_interactive("run", "python", "manage.py", "runserver")
+            cmd = mock_sub_run.call_args[0][0]
+            assert cmd == ["pixi", "run", "python", "manage.py", "runserver"]
+            assert mock_sub_run.call_args[1]["cwd"] == Path("/tmp")
+
+    def test_inherits_stdio(self):
+        runner = PixiRunner(project_root=Path("/tmp"))
+        with patch("subprocess.run") as mock_sub_run:
+            runner.run_interactive("run", "python", "manage.py", "runserver")
+            assert "capture_output" not in mock_sub_run.call_args[1]
+
+    def test_returns_completed_process(self):
+        runner = PixiRunner(project_root=Path("/tmp"))
+        expected = MagicMock(returncode=0)
+        with patch("subprocess.run", return_value=expected):
+            result = runner.run_interactive("run", "python", "manage.py", "runserver")
+            assert result is expected
+
+
+# ---------------------------------------------------------------------------
 # add_conda_package / add_pypi_package / add_package
 # ---------------------------------------------------------------------------
 

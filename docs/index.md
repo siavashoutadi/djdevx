@@ -45,6 +45,7 @@ ddx packages add whitenoise
 | [Managing Features](user-guide/managing-features.md) | Add PWA support and CSS frameworks |
 | [Database](user-guide/databases.md) | Create and manage databases |
 | [Cache](user-guide/caching.md) | Create and manage caches |
+| [Local Development](user-guide/dev.md) | Run the dev environment natively with pixi |
 | [Managing Settings](user-guide/managing-settings.md) | Configure secrets, config vars, and environment |
 | [Content Security Policy](user-guide/content-security-policy.md) | Configure strict CSP defaults, directives, and nonces |
 | [Deployment](user-guide/deployment.md) | Generate Docker Compose / Kubernetes manifests |

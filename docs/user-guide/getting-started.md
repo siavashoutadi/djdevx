@@ -31,29 +31,38 @@ This scaffolds a complete Django project with:
 
 ## First Steps After Scaffolding
 
-After the project is created, inspect what secrets and config vars the
-project needs, then initialize and verify:
+After the project is created, start the local development environment with a
+single command:
 
 ```bash
 cd myproject
-ddx settings secrets list dev
-ddx settings configs list dev
-ddx settings secrets init dev
-ddx settings secrets verify dev
-ddx settings configs verify dev
+ddx dev start
 ```
 
-The `list` commands show every required field and its resolve source.
-`init` generates local `.secrets/` files with safe dev defaults. `verify`
-confirms everything is present before you start development.
+This handles everything automatically:
+
+- initializes dev configs and secrets
+- starts the dev database and cache natively (if installed) and applies
+  pending migrations
+- runs the dev server in the foreground
+
+`ddx dev start` is idempotent — running it again just starts whatever is
+missing and runs the server. See [Local Development](dev.md) for the full
+command reference.
 
 ## Navigate the Project
 
-The scaffolded project uses `pixi` as its package manager:
+The scaffolded project uses `pixi` as its package manager. Instead of running
+the server manually, use:
 
 ```bash
-cd myproject
-pixi run python manage.py runserver
+ddx dev start
+```
+
+or, to only run the server without any checks:
+
+```bash
+ddx dev runserver
 ```
 
 ## Install a Package
@@ -97,6 +106,9 @@ ddx --help                 # Top-level help
 | Task | Command |
 |------|---------|
 | New project | `ddx new --project-name <name>` |
+| Start dev environment | `ddx dev start` |
+| Run dev server only | `ddx dev runserver` |
+| Dev service status | `ddx dev status` |
 | Add package | `ddx packages add <name>` |
 | Remove package | `ddx packages remove <name>` |
 | List packages | `ddx packages list` |
@@ -110,6 +122,7 @@ ddx --help                 # Top-level help
 
 ## Next Steps
 
+- [Local Development](dev.md) -- Run the dev environment natively with pixi
 - [Managing Packages](managing-packages.md) -- Learn about the package system
 - [Managing Features](managing-features.md) -- Add PWA and more
 - [Database Management](databases.md) -- Set up databases

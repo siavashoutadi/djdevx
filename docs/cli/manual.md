@@ -24,6 +24,7 @@ $ djdevx [OPTIONS] COMMAND [ARGS]...
 * `database`: Manage database infrastructure
 * `cache`: Manage cache infrastructure
 * `settings`: Manage project secrets and configs
+* `dev`: Manage the local development environment
 * `deployment`: Generate deployment manifests
 
 ## djdevx version
@@ -669,6 +670,232 @@ $ djdevx settings configs verify [OPTIONS] ENV:{dev|prod}
 **Arguments**:
 
 * `ENV:{dev|prod}`: Environment: dev or prod  [required]
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx dev
+
+Manage the local development environment
+
+**Usage**:
+
+```console
+$ djdevx dev [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `start`: Start the local dev environment...
+* `runserver`: Run the dev server (tailwind-aware).
+* `up`: Start installed database/cache services...
+* `down`: Stop installed database/cache services.
+* `status`: Show service up/down, migrate state, and...
+* `database`: Manage the local dev database
+* `cache`: Manage the local dev cache
+
+## djdevx dev start
+
+Start the local dev environment (idempotent) and run the dev server.
+
+Any additional arguments are forwarded to the dev server command.
+
+**Usage**:
+
+```console
+$ djdevx dev start [OPTIONS]
+```
+
+**Options**:
+
+* `--skip-settings`: Skip settings configs/secrets init
+* `--skip-migrate`: Skip database migrations
+* `-v, --verbose`: Show full pixi output
+* `--help`: Show this message and exit.
+
+## djdevx dev runserver
+
+Run the dev server (tailwind-aware).
+
+Any additional arguments (including ``--help``) are forwarded to the
+underlying Django ``runserver`` command.
+
+**Usage**:
+
+```console
+$ djdevx dev runserver [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx dev up
+
+Start installed database/cache services (pixi-native, idempotent).
+
+**Usage**:
+
+```console
+$ djdevx dev up [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx dev down
+
+Stop installed database/cache services.
+
+**Usage**:
+
+```console
+$ djdevx dev down [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx dev status
+
+Show service up/down, migrate state, and settings state.
+
+**Usage**:
+
+```console
+$ djdevx dev status [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx dev database
+
+Manage the local dev database
+
+**Usage**:
+
+```console
+$ djdevx dev database [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `init`: Start the dev database and apply pending...
+* `reset`: Flush all data, keeping the service running.
+* `purge`: Stop the service and delete its data under...
+
+## djdevx dev database init
+
+Start the dev database and apply pending migrations.
+
+**Usage**:
+
+```console
+$ djdevx dev database init [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx dev database reset
+
+Flush all data, keeping the service running.
+
+**Usage**:
+
+```console
+$ djdevx dev database reset [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx dev database purge
+
+Stop the service and delete its data under .pixi/devdata/.
+
+**Usage**:
+
+```console
+$ djdevx dev database purge [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx dev cache
+
+Manage the local dev cache
+
+**Usage**:
+
+```console
+$ djdevx dev cache [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `init`: Start the dev cache.
+* `reset`: Flush all data, keeping the service running.
+* `purge`: Stop the service and delete its data under...
+
+## djdevx dev cache init
+
+Start the dev cache.
+
+**Usage**:
+
+```console
+$ djdevx dev cache init [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx dev cache reset
+
+Flush all data, keeping the service running.
+
+**Usage**:
+
+```console
+$ djdevx dev cache reset [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx dev cache purge
+
+Stop the service and delete its data under .pixi/devdata/.
+
+**Usage**:
+
+```console
+$ djdevx dev cache purge [OPTIONS]
+```
 
 **Options**:
 
