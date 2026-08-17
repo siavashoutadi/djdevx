@@ -8,5 +8,6 @@ class DjangoExtensionsPackage(BasePackage):
     name: str = "django-extensions"
     display_name: str = "Django Extensions"
     pixi_packages: list[PixiPackageSpec] = [
-        PixiPackageSpec("django-extensions", pixi_feature="dev")
+        PixiPackageSpec("django-extensions", pixi_feature="dev"),
+        PixiPackageSpec("werkzeug", pixi_feature="dev"),
     ]
