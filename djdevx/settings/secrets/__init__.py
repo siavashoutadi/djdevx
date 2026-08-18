@@ -51,7 +51,7 @@ def list_secrets(
         return
 
     cfg = ENV_CONFIG_LIST[env]
-    table = print_console.build_table(
+    with print_console.table(
         f"Secrets ({env})",
         [
             ("Status", {"width": 8, "justify": "center", "no_wrap": True}),
@@ -59,19 +59,16 @@ def list_secrets(
             ("Source", {"style": "dim", "overflow": "ellipsis"}),
         ],
         show_lines=False,
-    )
-
-    for secret in result.secrets:
-        source = cfg["resolve_source"](secret, project_root)
-        if source == SecretSource.CLASS_DEFAULT:
-            status = YELLOW_CHECKMARK
-        elif source != SecretSource.MISSING:
-            status = GREEN_CHECK_MARK
-        else:
-            status = RED_CROSS_MARK
-        table.add_row(status, secret.name, source)
-
-    print_console.table(table)
+    ) as tbl:
+        for secret in result.secrets:
+            source = cfg["resolve_source"](secret, project_root)
+            if source == SecretSource.CLASS_DEFAULT:
+                status = YELLOW_CHECKMARK
+            elif source != SecretSource.MISSING:
+                status = GREEN_CHECK_MARK
+            else:
+                status = RED_CROSS_MARK
+            tbl.add_row(status, secret.name, source)
 
 
 # ------ secrets init ------

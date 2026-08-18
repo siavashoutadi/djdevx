@@ -7,11 +7,11 @@ from typing import Any, Literal
 import pydantic
 import typer
 from dotenv import set_key
-from rich.markup import escape
 
 from ...utils.console.print import (
     ELLIPSIS,
     GREEN_CHECK_MARK,
+    Markup,
     RED_CROSS_MARK,
     YELLOW_CHECKMARK,
     print_console,
@@ -38,7 +38,7 @@ app = typer.Typer(no_args_is_help=True)
 
 def _format_value(value) -> str:
     if value is None:
-        return "[red](none)[/red]"
+        return Markup("[red](none)[/red]")
     raw = repr(value)
     return raw if len(raw) <= 50 else raw[:47] + ELLIPSIS
 
@@ -77,7 +77,7 @@ def list_configs(
         return
 
     cfg = _ENV_CONFIG_LIST[env]
-    table = print_console.build_table(
+    with print_console.table(
         f"Config vars ({env})",
         [
             ("Status", {"width": 8, "justify": "center", "no_wrap": True}),
@@ -95,28 +95,29 @@ def list_configs(
             ),
         ],
         show_lines=False,
-    )
-
-    for config_var in result.config_vars:
-        source = cfg["resolve_source"](config_var, project_root)
-        if source == ConfigSource.CLASS_DEFAULT:
-            status = YELLOW_CHECKMARK
-            value_str = "(class default)"
-        elif source != ConfigSource.MISSING:
-            status = GREEN_CHECK_MARK
-            value_str = _format_value(cfg["resolve_value"](config_var, project_root))
-        else:
-            status = RED_CROSS_MARK
-            value_str = _format_value(cfg["resolve_value"](config_var, project_root))
-        table.add_row(
-            status,
-            config_var.name,
-            escape(config_var.type_annotation),
-            source,
-            value_str,
-        )
-
-    print_console.table(table)
+    ) as tbl:
+        for config_var in result.config_vars:
+            source = cfg["resolve_source"](config_var, project_root)
+            if source == ConfigSource.CLASS_DEFAULT:
+                status = YELLOW_CHECKMARK
+                value_str = "(class default)"
+            elif source != ConfigSource.MISSING:
+                status = GREEN_CHECK_MARK
+                value_str = _format_value(
+                    cfg["resolve_value"](config_var, project_root)
+                )
+            else:
+                status = RED_CROSS_MARK
+                value_str = _format_value(
+                    cfg["resolve_value"](config_var, project_root)
+                )
+            tbl.add_row(
+                status,
+                config_var.name,
+                config_var.type_annotation,
+                source,
+                value_str,
+            )
 
 
 # ------ configs init ------

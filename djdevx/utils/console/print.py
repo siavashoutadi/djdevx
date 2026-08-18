@@ -10,9 +10,44 @@ CHECK_MARK = "\u2713"
 CROSS_MARK = "\u2717"
 ELLIPSIS = "\u2026"
 
-GREEN_CHECK_MARK = f"[bold green]{CHECK_MARK}[/bold green]"
-RED_CROSS_MARK = f"[bold red]{CROSS_MARK}[/bold red]"
-YELLOW_CHECKMARK = f"[bold yellow]{CHECK_MARK}[/bold yellow]"
+
+class Markup(str):
+    """String containing intentional Rich markup. Won't be escaped by TableBuilder."""
+
+    pass
+
+
+GREEN_CHECK_MARK = Markup(f"[bold green]{CHECK_MARK}[/bold green]")
+RED_CROSS_MARK = Markup(f"[bold red]{CROSS_MARK}[/bold red]")
+YELLOW_CHECKMARK = Markup(f"[bold yellow]{CHECK_MARK}[/bold yellow]")
+
+
+class TableBuilder:
+    """Wrapper around a Rich Table with auto-escaping and context manager support."""
+
+    def __init__(self, console: RichConsole, rich_table: Table):
+        self._console = console
+        self._table = rich_table
+
+    def add_row(self, *cells: Any) -> None:
+        """Add a row, auto-escaping plain strings."""
+        escaped = []
+        for cell in cells:
+            if isinstance(cell, str) and not isinstance(cell, Markup):
+                escaped.append(escape(cell))
+            else:
+                escaped.append(cell)
+        self._table.add_row(*escaped)
+
+    def render(self) -> None:
+        """Render the table to the console."""
+        self._console.print(self._table)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.render()
 
 
 class PrintConsole:
@@ -58,14 +93,14 @@ class PrintConsole:
         for item in items:
             self._console.print(f"🔹[bold]{escape(item)}[/bold]")
 
-    def build_table(
+    def table(
         self,
         title: str,
         columns: list[tuple[str, dict[str, Any]]],
         **table_kwargs,
-    ) -> Table:
-        """Create a pre-styled Rich Table with the given columns."""
-        table = Table(
+    ) -> TableBuilder:
+        """Create a styled table. Use as a context manager for auto-rendering."""
+        rich_table = Table(
             title=title,
             title_style="bold cyan",
             header_style="bold",
@@ -73,12 +108,8 @@ class PrintConsole:
             **table_kwargs,
         )
         for name, options in columns:
-            table.add_column(name, **options)
-        return table
-
-    def table(self, table: Table) -> None:
-        """Render a Rich Table to the console."""
-        self._console.print(table)
+            rich_table.add_column(name, **options)
+        return TableBuilder(self._console, rich_table)
 
     def diff(self, old: str, new: str, title_old="(current)", title_new="(new)"):
         """Print a diff comparison between old and new content."""

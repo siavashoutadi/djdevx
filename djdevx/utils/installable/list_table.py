@@ -9,27 +9,24 @@ def build_list_table(cls, label: str) -> None:
     installed_names = sorted(n for n in all_names if n in installed)
     not_installed_names = sorted(n for n in all_names if n not in installed)
 
-    table = print_console.build_table(
+    with print_console.table(
         f"{label}s",
         [
             ("", {"width": 1, "no_wrap": True}),
             (label, {}),
             ("Display Name", {}),
         ],
-    )
+    ) as tbl:
+        for name in installed_names:
+            tbl.add_row(
+                GREEN_CHECK_MARK,
+                name,
+                get_display_name(cls, name),
+            )
 
-    for name in installed_names:
-        table.add_row(
-            GREEN_CHECK_MARK,
-            name,
-            get_display_name(cls, name),
-        )
-
-    for name in not_installed_names:
-        table.add_row(
-            RED_CROSS_MARK,
-            name,
-            get_display_name(cls, name),
-        )
-
-    print_console.table(table)
+        for name in not_installed_names:
+            tbl.add_row(
+                RED_CROSS_MARK,
+                name,
+                get_display_name(cls, name),
+            )

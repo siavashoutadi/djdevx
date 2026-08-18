@@ -14,20 +14,17 @@ def status() -> None:
     runner = PixiRunner()
     commands = ManageCommands(runner)
 
-    table = print_console.build_table(
+    with print_console.table(
         "Dev services",
         [
             ("Status", {"width": 8, "justify": "center", "no_wrap": True}),
             ("Service", {"style": "bold", "min_width": 12, "no_wrap": True}),
             ("Type", {"style": "dim", "min_width": 10, "no_wrap": True}),
         ],
-    )
-
-    for service in services:
-        status_mark = GREEN_CHECK_MARK if service.is_up() else RED_CROSS_MARK
-        table.add_row(status_mark, service.display_name, service.name)
-
-    print_console.table(table)
+    ) as tbl:
+        for service in services:
+            status_mark = GREEN_CHECK_MARK if service.is_up() else RED_CROSS_MARK
+            tbl.add_row(status_mark, service.display_name, service.name)
 
     migrate_ok = not commands.migrations_pending()
     print_console.info(f"Migrations: {'up to date' if migrate_ok else 'pending'}")

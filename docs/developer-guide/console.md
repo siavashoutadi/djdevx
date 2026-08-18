@@ -26,8 +26,7 @@ from djdevx.utils.console.print import print_console
 | `ok(message)` | Green ✓ | Green checkmark with message |
 | `fail(message)` | Red ✗ | Red cross with message |
 | `list(items)` | Bullet points | Print a list with 🔹 bullets |
-| `build_table(title, columns, ...)` | Rich Table (styled) | Create a pre-styled Rich `Table` with bold header, cyan title, bright-black border |
-| `table(table)` | Rich Table | Render a Rich `Table` object |
+| `table(title, columns, ...)` | TableBuilder | Create a styled table. Returns a `TableBuilder` with `.add_row()` and `.render()`, or use as a context manager for auto-rendering |
 | `diff(old, new)` | Side-by-side | Print a diff comparison |
 
 ### Usage Patterns
@@ -49,18 +48,30 @@ print_console.warning("This is deprecated")
 print_console.info("No packages selected.")
 print_console.list(["item1", "item2", "item3"])
 
-# Tables (build then render)
+# Tables (context manager auto-renders on exit)
 columns = [
     ("Status", {"width": 8, "justify": "center", "no_wrap": True}),
     ("Name", {"style": "bold", "min_width": 16, "no_wrap": True}),
     ("Source", {"style": "dim", "overflow": "ellipsis"}),
 ]
-table = print_console.build_table("Secrets (dev)", columns, show_lines=False)
-table.add_row("✓", "SECRET_KEY", "environment")
-print_console.table(table)
+with print_console.table("Secrets (dev)", columns, show_lines=False) as tbl:
+    tbl.add_row("✓", "SECRET_KEY", "environment")
 
 # Diff comparison
 print_console.diff(old_content, new_content, title_old="before", title_new="after")
+```
+
+### Markup Sentinel
+
+For intentional Rich markup strings (like styled checkmarks), use the `Markup`
+class to prevent auto-escaping by `TableBuilder.add_row`:
+
+```python
+from djdevx.utils.console.print import Markup
+
+styled = Markup("[bold green]✓[/bold green]")
+with print_console.table("Title", columns) as tbl:
+    tbl.add_row(styled, "plain text")  # styled not escaped
 ```
 
 ## Prompt Wrappers
@@ -135,10 +146,10 @@ secret = prompts.password("Secret value:")
 - Use `warning()` for non-fatal issues
 - Use `info()` for neutral messages (selections, no-ops)
 - Use `list()` for displaying multiple items
-- Use `build_table()` to create a pre-styled Rich `Table`, then `table()` to render it for structured data (package lists, status tables)
+- Use `table()` with a context manager to build and render tables (auto-escapes plain strings)
 - Use `diff()` when showing file changes to the user
 
-All methods auto-escape Rich markup in user-provided strings via `escape()`.
+All table row values are auto-escaped via `escape()` unless wrapped in `Markup`. Use `Markup` for intentional Rich markup strings (e.g., styled checkmarks).
 
 ## Related
 
