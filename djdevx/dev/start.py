@@ -9,6 +9,7 @@ from ..utils.django.manage_commands import ManageCommands
 from ..utils.project.pixi_runner import PixiRunner
 from ..utils.services import resolve_cache_dev_service, resolve_database_dev_service
 from .runserver import server_command
+from ..settings.source import DEV
 
 
 def _init_settings() -> None:
@@ -16,8 +17,8 @@ def _init_settings() -> None:
     from ..settings.configs import init as configs_init
     from ..settings.secrets import init as secrets_init
 
-    configs_init("dev")
-    secrets_init("dev")
+    configs_init(DEV)
+    secrets_init(DEV)
 
 
 def start(

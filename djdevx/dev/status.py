@@ -6,6 +6,7 @@ from ..utils.console.print import GREEN_CHECK_MARK, RED_CROSS_MARK, print_consol
 from ..utils.django.manage_commands import ManageCommands
 from ..utils.project.pixi_runner import PixiRunner
 from ..utils.services import resolve_dev_services
+from ..settings.source import DEV
 
 
 def status() -> None:
@@ -29,5 +30,5 @@ def status() -> None:
     migrate_ok = not commands.migrations_pending()
     print_console.info(f"Migrations: {'up to date' if migrate_ok else 'pending'}")
 
-    list_secrets("dev")
-    list_configs("dev")
+    list_secrets(DEV)
+    list_configs(DEV)
