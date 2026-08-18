@@ -13,7 +13,7 @@ from ...utils.console.print import (
 from ...utils.project.project_structure import ProjectStructure
 from ...utils.project.secret_manager import SecretManager
 from ...utils.project.setting_collector import SettingCollector
-from .._source import (
+from ..source import (
     DEV,
     PROD,
     SecretSource,

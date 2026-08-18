@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 from typer.testing import CliRunner
 
 from djdevx.main import app
-from djdevx.settings._source import DEV
+from djdevx.settings.source import DEV
 from djdevx.utils.django.manage_commands import ManageCommands
 
 runner = CliRunner()

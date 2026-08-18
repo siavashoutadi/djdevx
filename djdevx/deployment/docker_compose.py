@@ -8,7 +8,7 @@ from typing import Any, Self
 import yaml
 from dotenv import dotenv_values
 
-from ..settings._source import setup_readline
+from ..settings.source import setup_readline
 from ..utils.console import prompts
 from ..utils.console.print import print_console
 from ..utils.project.setting_collector import CollectedSettings, SettingCollector

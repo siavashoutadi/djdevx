@@ -7,7 +7,7 @@ import pytest
 
 from dotenv import set_key
 
-from djdevx.settings._source import (
+from djdevx.settings.source import (
     ConfigSource,
     SecretSource,
     read_env_file,
