@@ -12,6 +12,7 @@ ELLIPSIS = "\u2026"
 
 GREEN_CHECK_MARK = f"[bold green]{CHECK_MARK}[/bold green]"
 RED_CROSS_MARK = f"[bold red]{CROSS_MARK}[/bold red]"
+YELLOW_CHECKMARK = f"[bold yellow]{CHECK_MARK}[/bold yellow]"
 
 
 class PrintConsole:

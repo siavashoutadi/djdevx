@@ -7,6 +7,7 @@ import typer
 from ...utils.console.print import (
     GREEN_CHECK_MARK,
     RED_CROSS_MARK,
+    YELLOW_CHECKMARK,
     print_console,
 )
 from ...utils.project.project_structure import ProjectStructure
@@ -62,7 +63,12 @@ def list_secrets(
 
     for secret in result.secrets:
         source = cfg["resolve_source"](secret, project_root)
-        status = GREEN_CHECK_MARK if source != SecretSource.MISSING else RED_CROSS_MARK
+        if source == SecretSource.CLASS_DEFAULT:
+            status = YELLOW_CHECKMARK
+        elif source != SecretSource.MISSING:
+            status = GREEN_CHECK_MARK
+        else:
+            status = RED_CROSS_MARK
         table.add_row(status, secret.name, source)
 
     print_console.table(table)
@@ -216,9 +222,18 @@ def verify(
 
     cfg = ENV_CONFIG_VERIFY[env]
     missing: list[str] = []
+    optional: list[str] = []
     for secret in result.secrets:
-        if cfg["resolve_source"](secret, project_root) == SecretSource.MISSING:
+        source = cfg["resolve_source"](secret, project_root)
+        if source == SecretSource.MISSING:
             missing.append(secret.name)
+        elif source == SecretSource.CLASS_DEFAULT:
+            optional.append(secret.name)
+
+    if optional:
+        names = ", ".join(optional)
+        print_console.info(f"{len(optional)} optional secret(s) using class defaults:")
+        typer.echo(f"  {names}")
 
     if missing:
         print_console.error(f"{len(missing)} secret(s) missing {cfg['error_msg']}:")

@@ -7,11 +7,13 @@ from typing import Any, Literal
 import pydantic
 import typer
 from dotenv import set_key
+from rich.markup import escape
 
 from ...utils.console.print import (
     ELLIPSIS,
     GREEN_CHECK_MARK,
     RED_CROSS_MARK,
+    YELLOW_CHECKMARK,
     print_console,
 )
 from ...utils.project.project_structure import ProjectStructure
@@ -97,10 +99,21 @@ def list_configs(
 
     for config_var in result.config_vars:
         source = cfg["resolve_source"](config_var, project_root)
-        status = GREEN_CHECK_MARK if source != ConfigSource.MISSING else RED_CROSS_MARK
-        value_str = _format_value(cfg["resolve_value"](config_var, project_root))
+        if source == ConfigSource.CLASS_DEFAULT:
+            status = YELLOW_CHECKMARK
+            value_str = "(class default)"
+        elif source != ConfigSource.MISSING:
+            status = GREEN_CHECK_MARK
+            value_str = _format_value(cfg["resolve_value"](config_var, project_root))
+        else:
+            status = RED_CROSS_MARK
+            value_str = _format_value(cfg["resolve_value"](config_var, project_root))
         table.add_row(
-            status, config_var.name, config_var.type_annotation, source, value_str
+            status,
+            config_var.name,
+            escape(config_var.type_annotation),
+            source,
+            value_str,
         )
 
     print_console.table(table)
@@ -320,9 +333,20 @@ def verify(
 
     cfg = _ENV_CONFIG_VERIFY[env]
     missing: list[str] = []
+    optional: list[str] = []
     for config_var in result.config_vars:
-        if cfg["resolve_source"](config_var, project_root) == ConfigSource.MISSING:
+        source = cfg["resolve_source"](config_var, project_root)
+        if source == ConfigSource.MISSING:
             missing.append(config_var.name)
+        elif source == ConfigSource.CLASS_DEFAULT:
+            optional.append(config_var.name)
+
+    if optional:
+        names = ", ".join(optional)
+        print_console.info(
+            f"{len(optional)} optional config var(s) using class defaults:"
+        )
+        typer.echo(f"  {names}")
 
     if missing:
         msg = f"{len(missing)} config var(s) missing{cfg['error_suffix']}:"
@@ -334,4 +358,5 @@ def verify(
             typer.echo(f"\nRun: {fix_cmd}")
         raise typer.Exit(code=1)
 
-    print_console.ok(f"All {len(result.config_vars)} config var(s) are present.")
+    total = len(result.config_vars)
+    print_console.ok(f"All {total} config var(s) are present.")

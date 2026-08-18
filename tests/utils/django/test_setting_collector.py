@@ -484,3 +484,102 @@ class MySettings(AppBaseSettings):
         assert si.auto_generatable is False
         si2 = SecretInfo(name="y", source_file=Path("y.py"), generator=lambda: "val")
         assert si2.auto_generatable is True
+
+
+# ── has_class_default ──────────────────────────────────────────────────────────
+
+
+class TestHasClassDefault:
+    """Tests for has_class_default detection in _parse_settings_file."""
+
+    def test_literal_default_has_class_default(self, tmp_path: Path) -> None:
+        file = tmp_path / "settings.py"
+        file.write_text("""
+from settings.utils.base_settings import AppBaseSettings
+
+class MySettings(AppBaseSettings):
+    debug: bool = True
+""")
+        _, configs = _parse_settings_file(file)
+        assert len(configs) == 1
+        assert configs[0][5] is True  # has_class_default
+
+    def test_no_default_no_class_default(self, tmp_path: Path) -> None:
+        file = tmp_path / "settings.py"
+        file.write_text("""
+from pydantic import SecretStr
+from settings.utils.base_settings import AppBaseSettings
+
+class MySettings(AppBaseSettings):
+    secret_key: SecretStr
+""")
+        secrets, _ = _parse_settings_file(file)
+        assert len(secrets) == 1
+        assert secrets[0][4] is False  # has_class_default
+
+    def test_none_default_has_class_default(self, tmp_path: Path) -> None:
+        """A field with = None should have has_class_default=True."""
+        file = tmp_path / "settings.py"
+        file.write_text("""
+from settings.utils.base_settings import AppBaseSettings
+
+class MySettings(AppBaseSettings):
+    csp_sandbox: str | None = None
+""")
+        _, configs = _parse_settings_file(file)
+        assert len(configs) == 1
+        assert configs[0][5] is True  # has_class_default
+
+    def test_attribute_default_has_class_default(self, tmp_path: Path) -> None:
+        """A field with attribute access default (e.g. CSP.SELF) should have has_class_default=True."""
+        file = tmp_path / "settings.py"
+        file.write_text("""
+from settings.utils.base_settings import AppBaseSettings
+
+class CSP:
+    SELF = "'self'"
+
+class MySettings(AppBaseSettings):
+    csp_default_src: str = CSP.SELF
+""")
+        _, configs = _parse_settings_file(file)
+        assert len(configs) == 1
+        assert configs[0][5] is True  # has_class_default
+
+    def test_secret_with_none_default_has_class_default(self, tmp_path: Path) -> None:
+        """A secret field with = None should have has_class_default=True."""
+        file = tmp_path / "settings.py"
+        file.write_text("""
+from typing import Any, Optional
+from pydantic import SecretStr
+from settings.utils.base_settings import AppBaseSettings
+
+class MySettings(AppBaseSettings):
+    secure_csp_report_only: Optional[dict[str, Any]] = None
+""")
+        secrets, configs = _parse_settings_file(file)
+        assert len(configs) == 1
+        assert configs[0][5] is True  # has_class_default
+
+    def test_collector_passes_has_class_default(self, tmp_path: Path) -> None:
+        """SettingCollector.collect() should populate has_class_default on ConfigVarInfo."""
+        subdir = tmp_path / "settings" / "django"
+        subdir.mkdir(parents=True)
+        file = subdir / "base.py"
+        file.write_text("""
+from settings.utils.base_settings import AppBaseSettings
+
+class CSP:
+    SELF = "'self'"
+
+class MySettings(AppBaseSettings):
+    debug: bool = True
+    csp_default_src: str = CSP.SELF
+    secret_key_missing: str
+""")
+        collector = SettingCollector(tmp_path)
+        result = collector.collect()
+        cfg = {c.name: c for c in result.config_vars}
+        assert cfg["debug"].has_class_default is True
+        assert cfg["csp_default_src"].has_class_default is True
+        assert cfg["secret_key_missing"].has_class_default is False

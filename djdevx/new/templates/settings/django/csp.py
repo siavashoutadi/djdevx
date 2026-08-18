@@ -1,4 +1,4 @@
-from typing import Any, Literal
+from typing import Any, Literal, Optional
 
 from django.utils.csp import CSP
 
@@ -64,7 +64,7 @@ _FIELD_TO_DIRECTIVE: dict[str, CSPDirective] = {
 
 
 class CspSettings(AppBaseSettings):
-    secure_csp_report_only: dict[str, Any] | None = None
+    secure_csp_report_only: Optional[dict[str, Any]] = None
 
     csp_default_src: str = CSP.SELF
     csp_script_src: str = CSP.SELF
@@ -79,20 +79,20 @@ class CspSettings(AppBaseSettings):
     csp_form_action: str = CSP.SELF
     csp_frame_src: str = CSP.SELF
 
-    csp_script_src_elem: str | None = None
-    csp_script_src_attr: str | None = None
-    csp_style_src_elem: str | None = None
-    csp_style_src_attr: str | None = None
-    csp_child_src: str | None = None
-    csp_worker_src: str | None = None
-    csp_fenced_frame_src: str | None = None
-    csp_manifest_src: str | None = None
-    csp_prefetch_src: str | None = None
-    csp_sandbox: str | None = None
-    csp_report_to: str | None = None
-    csp_require_trusted_types_for: str | None = None
-    csp_trusted_types: str | None = None
-    csp_upgrade_insecure_requests: bool | None = None
+    csp_script_src_elem: Optional[str] = None
+    csp_script_src_attr: Optional[str] = None
+    csp_style_src_elem: Optional[str] = None
+    csp_style_src_attr: Optional[str] = None
+    csp_child_src: Optional[str] = None
+    csp_worker_src: Optional[str] = None
+    csp_fenced_frame_src: Optional[str] = None
+    csp_manifest_src: Optional[str] = None
+    csp_prefetch_src: Optional[str] = None
+    csp_sandbox: Optional[str] = None
+    csp_report_to: Optional[str] = None
+    csp_require_trusted_types_for: Optional[str] = None
+    csp_trusted_types: Optional[str] = None
+    csp_upgrade_insecure_requests: Optional[bool] = None
 
     @classmethod
     def get_dev_defaults(cls) -> dict[str, Any]:

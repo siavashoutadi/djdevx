@@ -23,12 +23,14 @@ class ConfigSource(StrEnum):
     ENV_PROD = ".env.prod"
     DEV_DEFAULT = "dev default"
     PROD_DEFAULT = "prod default"
+    CLASS_DEFAULT = "class default"
     MISSING = "(missing)"
 
 
 class SecretSource(StrEnum):
     DEV_DEFAULT = "dev default"
     PROD_DEFAULT = "prod default"
+    CLASS_DEFAULT = "class default"
     MISSING = "(missing)"
 
 
@@ -54,6 +56,8 @@ def resolve_config_source_dev(config_var, backend_root: Path) -> str:
         return ConfigSource.DOT_ENV
     if config_var.dev_default is not None:
         return ConfigSource.DEV_DEFAULT
+    if config_var.has_class_default:
+        return ConfigSource.CLASS_DEFAULT
     return ConfigSource.MISSING
 
 
@@ -71,6 +75,8 @@ def resolve_config_source_prod(config_var, backend_root: Path) -> str:
         return ConfigSource.ENV_PROD
     if config_var.prod_default is not None:
         return ConfigSource.PROD_DEFAULT
+    if config_var.has_class_default:
+        return ConfigSource.CLASS_DEFAULT
     return ConfigSource.MISSING
 
 
@@ -109,6 +115,8 @@ def resolve_secret_source_dev(secret, backend_root: Path) -> str:
         return f"/run/secrets/{secret.name}"
     if secret.has_dev_default:
         return SecretSource.DEV_DEFAULT
+    if secret.has_class_default:
+        return SecretSource.CLASS_DEFAULT
     return SecretSource.MISSING
 
 
@@ -122,6 +130,8 @@ def resolve_secret_source_prod(secret, backend_root: Path) -> str:
         return f".secrets.prod/{secret.name}"
     if secret.prod_default is not None:
         return SecretSource.PROD_DEFAULT
+    if secret.has_class_default:
+        return SecretSource.CLASS_DEFAULT
     return SecretSource.MISSING
 
 

@@ -32,6 +32,7 @@ class SecretInfo:
     generator: Optional[Callable[[], str]] = None
     dev_default: Any = None
     prod_default: Any = None
+    has_class_default: bool = False
 
     @property
     def auto_generatable(self) -> bool:
@@ -51,6 +52,7 @@ class ConfigVarInfo:
     type_annotation: str = "str"
     dev_default: Any = None
     prod_default: Any = None
+    has_class_default: bool = False
 
 
 @dataclass
@@ -157,7 +159,9 @@ def _extract_class_default(annotation_node: ast.AnnAssign) -> Any:
 
 def _parse_settings_file(
     filepath: Path,
-) -> tuple[list[tuple[str, Any, Any, Any]], list[tuple[str, str, Any, Any, Any]]]:
+) -> tuple[
+    list[tuple[str, Any, Any, Any, bool]], list[tuple[str, str, Any, Any, Any, bool]]
+]:
     """Parse a single settings file via AST."""
     try:
         source = filepath.read_text(encoding="utf-8")
@@ -165,8 +169,8 @@ def _parse_settings_file(
     except (OSError, SyntaxError):
         return [], []
 
-    secret_fields: list[tuple[str, Any, Any, Any]] = []
-    config_vars: list[tuple[str, str, Any, Any, Any]] = []
+    secret_fields: list[tuple[str, Any, Any, Any, bool]] = []
+    config_vars: list[tuple[str, str, Any, Any, Any, bool]] = []
 
     for node in ast.walk(tree):
         if not isinstance(node, ast.ClassDef):
@@ -196,6 +200,7 @@ def _parse_settings_file(
                 continue
 
             class_default = _extract_class_default(item)
+            has_class_default = item.value is not None
 
             if _is_secret_str(item.annotation):
                 secret_fields.append(
@@ -204,6 +209,7 @@ def _parse_settings_file(
                         dev_defaults.get(fname),
                         prod_defaults.get(fname),
                         class_default,
+                        has_class_default,
                     )
                 )
             else:
@@ -215,6 +221,7 @@ def _parse_settings_file(
                         dev_defaults.get(fname),
                         prod_defaults.get(fname),
                         class_default,
+                        has_class_default,
                     )
                 )
 
@@ -245,7 +252,13 @@ class SettingCollector:
         for settings_file in self._iter_settings_files():
             secret_fields, config_vars_raw = _parse_settings_file(settings_file)
 
-            for name, dev_default, prod_default, class_default in secret_fields:
+            for (
+                name,
+                dev_default,
+                prod_default,
+                class_default,
+                has_class_default,
+            ) in secret_fields:
                 if name in seen_secrets:
                     continue
                 seen_secrets.add(name)
@@ -256,6 +269,7 @@ class SettingCollector:
                         generator=generators.get(name),
                         dev_default=dev_default,
                         prod_default=prod_default or class_default,
+                        has_class_default=has_class_default,
                     )
                 )
 
@@ -265,6 +279,7 @@ class SettingCollector:
                 dev_default,
                 prod_default,
                 class_default,
+                has_class_default,
             ) in config_vars_raw:
                 if name in seen_configs:
                     continue
@@ -276,6 +291,7 @@ class SettingCollector:
                         type_annotation=annotation_str,
                         dev_default=dev_default,
                         prod_default=prod_default or class_default,
+                        has_class_default=has_class_default,
                     )
                 )
 
