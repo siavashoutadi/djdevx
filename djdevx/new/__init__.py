@@ -11,6 +11,7 @@ from ..utils.project.secret_manager import SecretManager
 from ..utils.project.pixi_runner import PixiRunner
 from ..utils.generators import generate_random_password
 from ..utils.templates.manager import TemplateManager
+from ..utils.prek.prek import format_all_files_in_project
 from ..requirement import verify as requirement_check
 
 app = typer.Typer()
@@ -89,6 +90,8 @@ def new(
         _init_git(dest_dir, verbose=verbose)
         print_console.step_done("Git repository is initialized successfully.")
 
+    format_all_files_in_project(dest_dir)
+
     print_console.step_done("Project is initialized successfully.")
 
 
@@ -115,6 +118,7 @@ def install_dependencies(project_root: Path):
         "rich<16",
         "django-upgrade<2",
         "ruff<0.16",
+        "prek>=0.4.14,<0.5",
     ]
 
     for pkg in dev_dependencies:

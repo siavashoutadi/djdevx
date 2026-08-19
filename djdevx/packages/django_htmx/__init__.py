@@ -2,6 +2,7 @@ import re
 from pathlib import Path
 
 from .._base import BasePackage
+from djdevx.utils.templates.load_tags import LoadTagManager
 from djdevx.utils.types.pixi_types import PixiPackageSpec
 from .._registry import register
 
@@ -20,11 +21,7 @@ class DjangoHtmxPackage(BasePackage):
         path = self._base_template_path
         content = path.read_text()
 
-        if "{% load django_htmx %}" not in content:
-            content = content.replace(
-                "{% load i18n %}",
-                "{% load i18n %}\n{% load django_htmx %}",
-            )
+        content = LoadTagManager.add_load_tag(content, "django_htmx")
 
         if "{% htmx_script %}" not in content:
             content = content.replace(
@@ -49,9 +46,7 @@ class DjangoHtmxPackage(BasePackage):
         path = self._base_template_path
         content = path.read_text()
 
-        content = content.replace("{% load django_htmx %}\n", "")
-        content = content.replace("\n{% load django_htmx %}", "")
-        content = content.replace("{% load django_htmx %}", "")
+        content = LoadTagManager.remove_load_tag(content, "django_htmx")
 
         content = content.replace("{% htmx_script %}\n    ", "")
         content = content.replace("{% htmx_script %}\n", "")

@@ -1,6 +1,7 @@
 """DjangoSnakeoilPackage — SEO meta tags management."""
 
 from .._base import BasePackage
+from djdevx.utils.templates.load_tags import LoadTagManager
 from djdevx.utils.types.pixi_types import PixiPackageSpec
 from ...utils.installable.types import InstallParam
 from .._registry import register
@@ -83,10 +84,7 @@ class DjangoSnakeoilPackage(BasePackage):
         if "{% load snakeoil %}" in content and "{% meta %}" in content:
             return
 
-        if "{% load snakeoil %}" not in content:
-            content = content.replace(
-                "{% load static %}", "{% load static %}\n{% load snakeoil %}"
-            )
+        content = LoadTagManager.add_load_tag(content, "snakeoil")
 
         if "{% meta %}" not in content:
             viewport_marker = (
@@ -101,15 +99,17 @@ class DjangoSnakeoilPackage(BasePackage):
 
     def _remove_snakeoil_snippets(self) -> None:
         base_template_path = self.structure.base_template
+        content = base_template_path.read_text()
+
+        content = LoadTagManager.remove_load_tag(content, "snakeoil")
 
         new_lines = []
         removed = False
-        with base_template_path.open("r") as f:
-            for line in f:
-                if "{% load snakeoil %}" in line or "{% meta %}" in line:
-                    removed = True
-                    continue
-                new_lines.append(line)
+        for line in content.split("\n"):
+            if "{% meta %}" in line:
+                removed = True
+                continue
+            new_lines.append(line)
 
         if removed:
-            base_template_path.write_text("".join(new_lines))
+            base_template_path.write_text("\n".join(new_lines))

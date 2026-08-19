@@ -36,7 +36,7 @@ def test_django_snakeoil_install_and_remove(temp_dir):
     base_template_path = temp_dir / "templates" / "_base.html"
     if base_template_path.exists():
         base_content = base_template_path.read_text()
-        assert "{% load snakeoil %}" in base_content
+        assert "snakeoil" in base_content
         assert "{% meta %}" in base_content
 
     result = runner.invoke(app, ["packages", "remove", "django_snakeoil"])

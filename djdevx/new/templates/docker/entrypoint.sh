@@ -1,4 +1,5 @@
-#!/bin/bash -euo pipefail
+#!/bin/bash
+set -euo pipefail
 
 python manage.py showmigrations | grep '\[ \]' && python manage.py migrate
 

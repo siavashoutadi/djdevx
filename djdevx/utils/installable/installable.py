@@ -8,6 +8,7 @@ from typing import Any, Optional
 from pydantic import Field
 
 from ..console.print import print_console
+from ..prek.prek import format_files
 from ..project.project_structure import ProjectStructure
 from ..tracking import Section
 from .pixi_ops import PixiOps
@@ -15,6 +16,7 @@ from .scaffold import (
     cleanup_files,
     copy_templates,
     restore_original_templates,
+    template_output_files,
 )
 from .secrets import SecretsOps
 from .tracking import TrackingOps
@@ -112,6 +114,9 @@ class Installable(InstallableConfig):
         copy_templates(self, variant)
         print_console.ok("Finished configuration")
         self.after_copy_templates()
+
+        copied = template_output_files(self, variant)
+        format_files([self.structure.root / f for f in copied], self.structure.root)
 
         SecretsOps(self.structure.root).generate(self, variant)
 

@@ -42,7 +42,8 @@ def test_django_htmx_install_and_remove(temp_dir):
     assert base_template.exists(), "Base template not found"
 
     template_content = base_template.read_text()
-    assert "{% load django_htmx %}" in template_content, "HTMX load tag not added"
+    assert "django_htmx" in template_content, "HTMX load tag not added"
+    assert template_content.count("{% load") >= 1, "No load tag found"
     assert "{% htmx_script %}" in template_content, "HTMX script tag not added"
     assert "hx-headers=" in template_content and "csrf_token" in template_content, (
         "CSRF headers not added"
