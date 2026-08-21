@@ -1,0 +1,12 @@
+from settings.django.base import INSTALLED_APPS, MIDDLEWARE
+
+
+INSTALLED_APPS += [
+    "waffle",
+]
+
+{% if use_middleware -%}
+MIDDLEWARE += [
+    "waffle.middleware.WaffleMiddleware",
+]
+{% endif -%}

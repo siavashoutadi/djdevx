@@ -1,6 +1,6 @@
 # Managing Packages
 
-`djdevx` can install and configure 39+ Django packages with a single command.
+`djdevx` can install and configure 35+ Django packages with a single command.
 Each package handles its own dependencies, settings, URL patterns, and
 templates automatically.
 
@@ -32,6 +32,7 @@ ddx packages remove
 | django-debug-toolbar | `ddx packages add django-debug-toolbar` | Debug toolbar for development |
 | djangorestframework | `ddx packages add djangorestframework` | REST API framework |
 | django-cors-headers | `ddx packages add django-cors-headers` | CORS header support |
+| django-waffle | `ddx packages add django-waffle` | Feature flags, switches, and samples |
 
 ## Shell Autocompletion
 

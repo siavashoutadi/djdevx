@@ -11,7 +11,7 @@ streamline your workflow and make development enjoyable.
 - **Simplified Project Setup** — Quickly scaffold Django applications with best
   practices, including devcontainer, Docker, prek, and environment
   management out of the box.
-- **Package Management** — Install and configure 39+ popular Django packages
+- **Package Management** — Install and configure 35+ popular Django packages
   (`django-allauth`, `djangorestframework`, `django-debug-toolbar`, `channels`,
   and more) with a single command.
 - **Feature Addition** — Add PWA support, CSS frameworks (Bootstrap, FrankenUI,
