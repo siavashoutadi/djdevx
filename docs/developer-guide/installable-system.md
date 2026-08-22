@@ -79,6 +79,25 @@ Declares a CLI parameter collected during add and passed to templates:
 | `message_before_prompt` | `Optional[str]` | Message printed before the prompt |
 | `hide_input` | `bool` | Use password input (hidden) |
 
+### ConditionalPackage
+
+A single pixi package guarded by an arbitrary condition:
+
+```python
+ConditionalCheck = Callable[..., bool]
+
+@dataclass(frozen=True)
+class ConditionalPackage:
+    package: PixiPackageSpec
+    when: ConditionalCheck
+```
+
+`when` is called with the owning installable instance as its first positional
+argument (`when(installable)`). Return `True` to include the package, `False`
+to skip it. Evaluated by `Installable.add()`/`remove()` via
+`_active_conditional_packages()`. Use an unbound method reference to read
+instance state, or a lambda taking one parameter.
+
 ### InstallableConfig
 
 The shared pydantic `BaseModel` that all installables extend:
@@ -88,6 +107,7 @@ The shared pydantic `BaseModel` that all installables extend:
 | `name` | `str` | Unique identifier (underscores normalized to hyphens) |
 | `display_name` | `str` | Human-readable name for CLI output |
 | `pixi_packages` | `list[PixiPackageSpec]` | PyPI/conda packages (set `pixi_feature="dev"` for dev-only) |
+| `conditional_packages` | `list[ConditionalPackage]` | Pixi packages installed only when their `when(installable)` condition holds |
 | `template_path` | `str` | Override auto-derived template directory |
 | `install_params` | `list[InstallParam]` | Parameters collected at install time |
 | `needs` | `list[InstallableRef]` | Dependencies that must be installed first |
@@ -136,12 +156,13 @@ lifecycle hooks and add/remove logic.
 add(variant_name, install_kwargs):
   1. before_pixi_install()                   ← hook
   2. PixiOps(root).add_packages(packages, variant)  ← pixi add
-  3. after_pixi_install()                    ← hook (e.g. Docker Compose config)
-  4. before_copy_templates()                 ← hook
-  5. scaffold.copy_templates(installable, variant)  ← Jinja2 rendering + copy
-  6. after_copy_templates()                  ← hook (e.g. CSS download, icon gen)
-  7. SecretsOps(root).generate(installable, variant)  ← auto-generate secret files
-  8. TrackingOps(section).track_install(installable, variant)  ← write djdevx.toml
+  3. PixiOps(root).add_packages(conditional)  ← conditional packages whose when(self) is True
+  4. after_pixi_install()                    ← hook (e.g. Docker Compose config)
+  5. before_copy_templates()                 ← hook
+  6. scaffold.copy_templates(installable, variant)  ← Jinja2 rendering + copy
+  7. after_copy_templates()                  ← hook (e.g. CSS download, icon gen)
+  8. SecretsOps(root).generate(installable, variant)  ← auto-generate secret files
+  9. TrackingOps(section).track_install(installable, variant)  ← write djdevx.toml
 ```
 
 ### Remove Lifecycle
@@ -150,11 +171,12 @@ add(variant_name, install_kwargs):
 remove(variant_name):
   1. before_pixi_remove()                    ← hook (e.g. Docker Compose cleanup)
   2. PixiOps(root).remove_packages(packages, variant)  ← pixi remove
-  3. after_pixi_remove()                     ← hook
-  4. scaffold.cleanup_files(installable, variant)  ← delete generated files
-  5. SecretsOps(root).remove(installable, variant)  ← delete secret files
-  6. scaffold.restore_original_templates(installable)  ← restore originals
-  7. TrackingOps(section).remove(name)       ← update djdevx.toml
+  3. PixiOps(root).remove_packages(conditional)  ← conditional packages whose when(self) still holds
+  4. after_pixi_remove()                     ← hook
+  5. scaffold.cleanup_files(installable, variant)  ← delete generated files
+  6. SecretsOps(root).remove(installable, variant)  ← delete secret files
+  7. scaffold.restore_original_templates(installable)  ← restore originals
+  8. TrackingOps(section).remove(name)       ← update djdevx.toml
 ```
 
 ### Lifecycle Hooks

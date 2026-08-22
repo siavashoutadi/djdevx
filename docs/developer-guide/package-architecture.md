@@ -28,6 +28,7 @@ A `Variant` represents a backend or optional feature. It extends
 | `display_name` | `str` | Human-readable name |
 | `required` | `bool` | Auto-installed when the package is added |
 | `pixi_packages` | `list[PixiPackageSpec]` | Variant-specific dependencies (set `pixi_feature="dev"` for dev-only) |
+| `conditional_packages` | `list[ConditionalPackage]` | Variant-specific gated dependencies (conditions receive the parent installable) |
 | `template_path` | `str` | Override template directory for this variant |
 | `install_params` | `list[InstallParam]` | Variant-specific parameters |
 | `secret_generators` | `dict[str, Callable]` | Variant-specific secret generators |

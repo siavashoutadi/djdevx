@@ -81,6 +81,7 @@ Key rules:
 | `display_name` | `str` | Yes | Human-readable name for CLI output |
 | `description` | `str` | No | Longer description |
 | `pixi_packages` | `list[PixiPackageSpec]` | No | Dependencies via pixi (set `pixi_feature="dev"` for dev-only) |
+| `conditional_packages` | `list[ConditionalPackage]` | No | Pixi packages installed only when their `when(installable)` condition holds |
 | `needs` | `list[InstallableRef]` | No | Other installables that must be installed first |
 | `template_path` | `str` | No | Override auto-derived template directory |
 | `install_params` | `list[InstallParam]` | No | Parameters collected at install time |
@@ -122,6 +123,46 @@ pixi_packages: list[PixiPackageSpec] = [
     PixiPackageSpec("psutil", kind="pypi"),
 ]
 ```
+
+### ConditionalPackage
+
+Each entry in `conditional_packages` wraps **one** `PixiPackageSpec` with its
+own `when` callable:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `package` | `PixiPackageSpec` | The dependency to install when the condition holds |
+| `when` | `Callable[..., bool]` | Called with the installable instance as first argument; `True` includes the package |
+
+The condition runs during both add and remove. Pass an unbound method
+reference to read instance state, or a lambda with a single parameter:
+
+```python
+from djdevx.utils.installable import ConditionalPackage
+
+
+class ChannelsPackage(BasePackage):
+    name: str = "channels"
+    display_name: str = "Channels"
+    use_redis: bool = False
+
+    def _needs_redis(self) -> bool:
+        return self.use_redis
+
+    conditional_packages: list[ConditionalPackage] = [
+        ConditionalPackage(
+            package=PixiPackageSpec("channels-redis", kind="pypi"),
+            when=_needs_redis,
+        ),
+        ConditionalPackage(
+            package=PixiPackageSpec("daphne", kind="pypi"),
+            when=lambda self: self.use_daphne,
+        ),
+    ]
+```
+
+Variants can carry their own `conditional_packages` too — their conditions
+receive the parent installable instance.
 
 ---
 
@@ -168,6 +209,7 @@ their own `pixi_packages`, `template_path`, `install_params`,
 | `display_name` | `str` | Human-readable name |
 | `required` | `bool` | Auto-installed when parent is added |
 | `pixi_packages` | `list[PixiPackageSpec]` | Variant-specific dependencies |
+| `conditional_packages` | `list[ConditionalPackage]` | Variant-specific gated dependencies (conditions receive the parent installable) |
 | `template_path` | `str` | Override template directory |
 | `install_params` | `list[InstallParam]` | Variant-specific install parameters |
 | `secret_generators` | `dict[str, Callable]` | Variant-specific secret generators |

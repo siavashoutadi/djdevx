@@ -12,6 +12,7 @@ from ..prek.prek import format_files
 from ..project.project_structure import ProjectStructure
 from ..tracking import Section
 from .pixi_ops import PixiOps
+from ..types.pixi_types import PixiPackageSpec
 from .scaffold import (
     cleanup_files,
     copy_templates,
@@ -81,6 +82,15 @@ class Installable(InstallableConfig):
     def reset_state(self) -> None:
         self._structure = None
 
+    def _active_conditional_packages(
+        self, variant: Optional[Variant] = None
+    ) -> list[PixiPackageSpec]:
+        """Specs whose condition currently holds, from self and optionally variant."""
+        result = [c.package for c in self.conditional_packages if c.when(self)]
+        if variant is not None:
+            result += [c.package for c in variant.conditional_packages if c.when(self)]
+        return result
+
     # ------------------------------------------------------------------
     # Lifecycle — add / remove
     # ------------------------------------------------------------------
@@ -104,9 +114,11 @@ class Installable(InstallableConfig):
         self._install_context = install_kwargs
 
         self.before_pixi_install()
-        PixiOps(self.structure.root, self.verbose).add_packages(
-            self.pixi_packages, variant
-        )
+        pixi_ops = PixiOps(self.structure.root, self.verbose)
+        pixi_ops.add_packages(self.pixi_packages, variant)
+        conditional = self._active_conditional_packages(variant)
+        if conditional:
+            pixi_ops.add_packages(conditional)
         print_console.ok("Installed dependency")
         self.after_pixi_install()
 
@@ -139,6 +151,10 @@ class Installable(InstallableConfig):
 
         if variant is None or not updated:
             pixi_ops.remove_packages(self.pixi_packages)
+
+        conditional = self._active_conditional_packages(variant)
+        if conditional:
+            pixi_ops.remove_packages(conditional)
 
         print_console.ok("Removed dependency")
         self.after_pixi_remove()

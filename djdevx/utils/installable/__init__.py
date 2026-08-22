@@ -2,9 +2,17 @@ from .installable import Installable
 from .discovery import discover_and_register
 from .list_table import build_list_table
 from .registry import Registry
-from .types import InstallParam, InstallableRef, Variant
+from .types import (
+    ConditionalCheck,
+    ConditionalPackage,
+    InstallParam,
+    InstallableRef,
+    Variant,
+)
 
 __all__ = [
+    "ConditionalCheck",
+    "ConditionalPackage",
     "Installable",
     "InstallParam",
     "InstallableRef",

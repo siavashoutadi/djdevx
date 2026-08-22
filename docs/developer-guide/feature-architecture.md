@@ -26,6 +26,7 @@ templates (e.g., PWA support). They use the same
 | `display_name` | `str` | Human-readable name |
 | `required` | `bool` | Auto-installed when the feature is added |
 | `pixi_packages` | `list[PixiPackageSpec]` | Variant-specific dependencies |
+| `conditional_packages` | `list[ConditionalPackage]` | Variant-specific gated dependencies (conditions receive the parent installable) |
 | `template_path` | `str` | Override template directory |
 | `files_to_remove` | `list[str]` | Files to delete on uninstall |
 | `folders_to_remove` | `list[str]` | Folders to delete on uninstall |

@@ -45,9 +45,9 @@
 - Five categories: packages (`BasePackage`), features (`BaseFeature`),
   frameworks (`BaseFramework`), database (`BaseDatabase`), cache (`BaseCache`)
 - Declare class attributes: `name`, `display_name`, `pixi_packages`,
-  `needs`, `variants`, `exclusive_variants`, `install_params`,
-  `files_to_remove`, `folders_to_remove`, `restore_on_remove`,
-  `secret_generators`
+  `conditional_packages`, `needs`, `variants`, `exclusive_variants`,
+  `install_params`, `files_to_remove`, `folders_to_remove`,
+  `restore_on_remove`, `secret_generators`
 - Use `@register` decorator from the category's `_registry.py` — no manual
   `__init__.py` registration needed
 - Auto-discovery via `discover_and_register()` in each category's `__init__.py`,

@@ -49,7 +49,7 @@ that sets `section` and returns the correct registry.
 
 ```
 InstallableConfig (pydantic BaseModel)    ← utils/installable/types.py
-  ├── install_params, pixi_packages, needs, secret_generators...
+  ├── install_params, pixi_packages, conditional_packages, needs, secret_generators...
   └── Variant                              ← extends InstallableConfig (adds required=True)
         └── Installable                    ← utils/installable/installable.py (adds lifecycle hooks)
               ├── BasePackage              ← packages/_base.py
@@ -69,7 +69,8 @@ dedicated modules named by domain:
 | `utils/types/pixi_types.py` | `PixiPackageSpec` — conda/pypi dependency spec |
 
 Installable-specific types live in `utils/installable/types.py` — tightly
-coupled to that subsystem and not needed outside it.
+coupled to that subsystem and not needed outside it (`InstallableRef`,
+`ConditionalPackage`, `Variant`, ...).
 
 ## Lifecycle
 

@@ -42,6 +42,21 @@ class InstallableRef:
     kind: InstallableKind
 
 
+ConditionalCheck = Callable[..., bool]
+
+
+@dataclass(frozen=True)
+class ConditionalPackage:
+    """A single pixi package guarded by an arbitrary condition.
+
+    ``when`` is called with the owning installable instance as its first
+    positional argument. Return True to include the package, False to skip it.
+    """
+
+    package: PixiPackageSpec
+    when: ConditionalCheck
+
+
 class InstallableConfig(BaseModel):
     """Shared configuration for all installables — single source of truth."""
 
@@ -50,6 +65,7 @@ class InstallableConfig(BaseModel):
     name: str
     display_name: str = ""
     pixi_packages: list[PixiPackageSpec] = Field(default_factory=list)
+    conditional_packages: list[ConditionalPackage] = Field(default_factory=list)
     template_path: str = ""
     install_params: list[InstallParam] = Field(default_factory=list)
     needs: list[InstallableRef] = Field(default_factory=list)

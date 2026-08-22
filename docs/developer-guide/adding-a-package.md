@@ -12,14 +12,15 @@ install params, secrets, hooks, templates, testing) live in
 
 1. [Minimal package](#minimal-package)
 2. [pixi_packages edge cases](#pixi_packages-edge-cases)
-3. [Install params](#install-params)
-4. [Exclusive variants](#exclusive-variants)
-5. [Additive variants](#additive-variants)
-6. [Secret generators](#secret-generators)
-7. [Custom pre/post hooks](#custom-prepost-hooks)
-8. [Reverting from the new template (restore_on_remove)](#reverting-from-the-new-template-restore_on_remove)
-9. [Package templates directory](#package-templates-directory)
-10. [Testing](#testing)
+3. [Conditionally installed dependencies](#conditionally-installed-dependencies)
+4. [Install params](#install-params)
+5. [Exclusive variants](#exclusive-variants)
+6. [Additive variants](#additive-variants)
+7. [Secret generators](#secret-generators)
+8. [Custom pre/post hooks](#custom-prepost-hooks)
+9. [Reverting from the new template (restore_on_remove)](#reverting-from-the-new-template-restore_on_remove)
+10. [Package templates directory](#package-templates-directory)
+11. [Testing](#testing)
 
 ---
 
@@ -78,6 +79,37 @@ PixiPackageSpec(
     kind="pypi",
 )
 ```
+
+## Conditionally installed dependencies
+
+When a dependency is only needed in some configurations, wrap it in a
+`ConditionalPackage`. Each entry carries **one** package plus its own `when`
+callable, which receives the installable instance and returns a bool:
+
+```python
+from djdevx.utils.installable import ConditionalPackage
+
+
+class ChannelsPackage(BasePackage):
+    name: str = "channels"
+    display_name: str = "Channels"
+    use_redis: bool = False
+
+    def _needs_redis(self) -> bool:
+        return self.use_redis
+
+    conditional_packages: list[ConditionalPackage] = [
+        ConditionalPackage(
+            package=PixiPackageSpec("channels-redis", kind="pypi"),
+            when=_needs_redis,
+        ),
+    ]
+```
+
+The condition is evaluated during both add and remove — the package is
+installed/removed only while `when(installable)` returns `True`. Variants can
+also carry `conditional_packages`; their conditions receive the parent
+installable instance.
 
 ## Install params
 
