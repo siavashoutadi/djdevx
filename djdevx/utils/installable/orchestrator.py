@@ -7,6 +7,7 @@ from ..console import prompts
 from ..console.print import print_console
 from ..tracking import ProjectTracking
 
+from .resolver import resolve
 from .tracking import (
     get_installed_names,
     get_installed_variants,
@@ -18,8 +19,6 @@ from .types import InstallParam, InstallableRef
 
 def _auto_install_needs(needs: list[InstallableRef], verbose: bool) -> None:
     """Resolve and install unmet dependencies recursively."""
-    from .resolver import resolve  # local import to avoid circular imports
-
     project = ProjectTracking()
     for ref in needs:
         cls = resolve(ref)

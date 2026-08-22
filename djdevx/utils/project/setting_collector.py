@@ -22,6 +22,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Optional, cast
 
+from ..installable.registry import REGISTRIES
+
 
 @dataclass
 class SecretInfo:
@@ -232,7 +234,7 @@ class SettingCollector:
     """
     Discovers all secrets and config vars in a generated Django project by
     AST-parsing the settings files. Merges in generator callables from the
-    djdevx package registry.
+    djdevx installable registries.
     """
 
     _SETTINGS_SUBDIRS = ("django", "packages", "apps")
@@ -310,17 +312,16 @@ class SettingCollector:
 
     def _build_generators_index(self) -> dict[str, Callable[[], str]]:
         """Build a flat mapping of {field_name: generator} from all registered
-        BasePackage subclasses, database/cache plugins, and core Django secrets."""
+        installable classes (packages, features, frameworks, database/cache
+        plugins) and core Django secrets."""
         if self._generators_index is not None:
             return self._generators_index
 
         index: dict[str, Callable[[], str]] = {}
 
-        try:
-            from djdevx.packages._registry import PACKAGE_REGISTRY
-
-            for pkg_class in PACKAGE_REGISTRY.values():
-                field_info = pkg_class.model_fields["secret_generators"]
+        for registry in REGISTRIES.values():
+            for installable_class in registry.values():
+                field_info = installable_class.model_fields["secret_generators"]
                 if field_info.default_factory is not None:
                     generators = cast(Callable[[], Any], field_info.default_factory)()
                 elif isinstance(field_info.default, dict):
@@ -329,8 +330,6 @@ class SettingCollector:
                     generators = {}
                 if generators:
                     index.update(generators)
-        except ImportError:
-            pass
 
         # Core Django secrets — always present in every generated project.
         from djdevx.utils.generators import generate_random_password
