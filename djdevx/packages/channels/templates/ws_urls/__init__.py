@@ -1,7 +1,6 @@
 import importlib
 from pathlib import Path
 from django.urls import URLPattern, URLResolver
-from typing import List, Union
 
 
 WS_URLS_DIR = Path(__file__).parent
@@ -10,7 +9,7 @@ ws_url_files = [
     str(f) for f in Path(WS_URLS_DIR).rglob("*.py") if f.name != "__init__.py"
 ]
 
-websocket_urlpatterns: List[Union[URLPattern, URLResolver]] = []
+websocket_urlpatterns: list[URLPattern | URLResolver] = []
 
 for file_path in ws_url_files:
     relative_path = Path(file_path).relative_to(WS_URLS_DIR).with_suffix("")
