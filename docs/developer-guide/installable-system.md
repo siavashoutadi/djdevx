@@ -116,6 +116,11 @@ The shared pydantic `BaseModel` that all installables extend:
 | `folders_to_remove` | `list[str]` | Folders to delete on uninstall |
 | `restore_on_remove` | `dict[str, str]` | Template overrides (project_rel → template_rel) |
 
+Names are normalized in one place — `InstallableConfig.normalize_name()`
+(underscores → hyphens). `get_installable_name()` returns the normalized
+form, registry keys always use it, and tracking entries store it. Call
+sites should never inline `.replace("_", "-")`.
+
 ### Variant
 
 A `Variant` extends `InstallableConfig` with one additional field:
@@ -220,8 +225,8 @@ All other discovery methods are provided by standalone functions in
 
 ## Registry — `registry.py`
 
-`Registry[T]` is a generic type registry keyed by normalized name
-(underscores → hyphens).
+`Registry[T]` is a generic type registry keyed by the normalized name from
+`InstallableConfig.get_installable_name()`.
 
 ```python
 from djdevx.utils.installable import Registry
@@ -229,12 +234,14 @@ from djdevx.utils.installable import Registry
 MY_REGISTRY: Registry[BaseThing] = Registry(KIND)
 register = MY_REGISTRY.register  # decorator
 get_thing = MY_REGISTRY.get       # name → class
-list_things = MY_REGISTRY.list    # sorted names
+list_things = MY_REGISTRY.names   # sorted names
 ```
 
-- `register(cls)` — stores the class under `cls.name` (normalizes underscores to hyphens)
-- `get(name)` — returns the class or raises `KeyError` with available items listed
-- `list()` — returns sorted name strings
+- `register(cls)` — stores the class under `cls.get_installable_name()`
+  (already normalized via `InstallableConfig.normalize_name`)
+- `get(name)` — normalizes the input name and returns the class, or raises
+  `KeyError` with available items listed
+- `names()` — returns sorted name strings
 - `values()` — returns the class objects
 
 Each category instantiates its own `Registry` in `_registry.py`:
@@ -246,7 +253,7 @@ from ._base import BaseFramework
 FRAMEWORK_REGISTRY: Registry[BaseFramework] = Registry(FRAMEWORK)
 register = FRAMEWORK_REGISTRY.register
 get_framework = FRAMEWORK_REGISTRY.get
-list_frameworks = FRAMEWORK_REGISTRY.list
+list_frameworks = FRAMEWORK_REGISTRY.names
 ```
 
 The `register` decorator is used on concrete classes:
