@@ -21,7 +21,7 @@ from .scaffold import (
 )
 from .secrets import SecretsOps
 from .tracking import TrackingOps
-from .types import InstallableConfig, Variant
+from .types import InstallableConfig, InstallableRef, KIND_BY_SECTION, Variant
 
 
 class Installable(InstallableConfig):
@@ -60,6 +60,11 @@ class Installable(InstallableConfig):
     def model_post_init(self, __context: Any) -> None:
         self._structure: Optional[ProjectStructure] = None
         self._install_context: dict[str, Any] = {}
+
+    @cached_property
+    def ref(self) -> InstallableRef:
+        """This installable's identity as an ``InstallableRef``."""
+        return InstallableRef(name=self.name, kind=KIND_BY_SECTION[self.section])
 
     @classmethod
     def get_registry(cls):

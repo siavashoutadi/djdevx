@@ -19,10 +19,11 @@ For type-specific guides, see:
 2. [Working with Variants](#working-with-variants)
 3. [Install Parameters](#install-parameters)
 4. [Secret Generators](#secret-generators)
-5. [Dependencies (needs)](#dependencies-needs)
-6. [Lifecycle Hooks](#lifecycle-hooks)
-7. [Templates](#templates)
-8. [Testing](#testing)
+5. [Name normalization](#name-normalization)
+6. [Dependencies (needs)](#dependencies-needs)
+7. [Lifecycle Hooks](#lifecycle-hooks)
+8. [Templates](#templates)
+9. [Testing](#testing)
 
 ---
 
@@ -351,13 +352,35 @@ the generator is called and the result written to `.secrets/<field_name>`.
 ### Secret generators on variants
 
 ```python
-"oidc_provider": Variant(
-    name="oidc_provider",
+"oidc-provider": Variant(
+    name="oidc-provider",
     secret_generators={
         "idp_oidc_private_key": generate_rsa_private_key,
     },
 ),
 ```
+
+---
+
+## Name normalization
+
+Installable names use **hyphens** as word separators (e.g. `"open-telemetry"`).
+To prevent mismatches, both `InstallableConfig` and `InstallableRef` normalize
+their name fields at construction time — any underscore is silently converted to
+a hyphen:
+
+```python
+from djdevx.utils.installable.types import InstallableConfig, InstallableRef, FEATURE
+
+InstallableConfig(name="open_telemetry").name   # → "open-telemetry"
+InstallableRef("open_telemetry", FEATURE).name  # → "open-telemetry"
+```
+
+This means:
+
+- You never have to call `normalize_name()` yourself; just construct the object.
+- `InstallableRef("some_pkg", PACKAGE) == InstallableRef("some-pkg", PACKAGE)` — refs compare equal regardless of which form was written.
+- Registry lookups, tracking keys, and CLI input are all normalized at their respective entry points, so every name inside the system is already canonical.
 
 ---
 

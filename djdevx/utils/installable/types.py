@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import Any, Callable, Optional, cast
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from ..tracking.sections import Section
 from ..types.pixi_types import PixiPackageSpec
@@ -35,11 +35,24 @@ FRAMEWORK = InstallableKind("framework", Section.FRAMEWORKS)
 DATABASE = InstallableKind("database", Section.DATABASE)
 CACHE = InstallableKind("cache", Section.CACHE)
 
+KIND_BY_SECTION: dict[Section, InstallableKind] = {
+    kind.section: kind for kind in (PACKAGE, FEATURE, FRAMEWORK, DATABASE, CACHE)
+}
 
-@dataclass
+
+@dataclass(frozen=True)
 class InstallableRef:
+    """Typed reference to a specific installable (dependency or integration peer).
+
+    The name is normalized (``_`` → ``-``) at construction, so refs compare
+    equal to registry and tracking keys without extra handling.
+    """
+
     name: str
     kind: InstallableKind
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "name", self.name.replace("_", "-"))
 
 
 ConditionalCheck = Callable[..., bool]
@@ -73,6 +86,11 @@ class InstallableConfig(BaseModel):
     files_to_remove: list[str] = Field(default_factory=list)
     folders_to_remove: list[str] = Field(default_factory=list)
     restore_on_remove: dict[str, str] = Field(default_factory=dict)
+
+    @field_validator("name")
+    @classmethod
+    def _normalize_name(cls, value: str) -> str:
+        return value.replace("_", "-")
 
     @staticmethod
     def normalize_name(name: str) -> str:

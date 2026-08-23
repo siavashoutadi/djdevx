@@ -117,9 +117,11 @@ The shared pydantic `BaseModel` that all installables extend:
 | `restore_on_remove` | `dict[str, str]` | Template overrides (project_rel → template_rel) |
 
 Names are normalized in one place — `InstallableConfig.normalize_name()`
-(underscores → hyphens). `get_installable_name()` returns the normalized
-form, registry keys always use it, and tracking entries store it. Call
-sites should never inline `.replace("_", "-")`.
+(underscores → hyphens). Normalization happens automatically at construction
+(`InstallableConfig`, `Variant`, `InstallableRef`), registry lookup, and in the
+orchestrator's add/remove entry points; call sites never normalize manually.
+`get_installable_name()` returns the normalized form, registry keys always use
+it, and tracking entries store it.
 
 ### Variant
 

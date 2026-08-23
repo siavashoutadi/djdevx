@@ -24,13 +24,13 @@ class Registry(Generic[T]):
         return cls
 
     def get(self, name: str) -> Type[T]:
-        normalized = InstallableConfig.normalize_name(name)
-        if normalized not in self._entries:
+        name = InstallableConfig.normalize_name(name)
+        if name not in self._entries:
             raise KeyError(
                 f"Unknown {self._label} '{name}'. "
                 f"Available: {', '.join(sorted(self._entries.keys()))}"
             )
-        return self._entries[normalized]
+        return self._entries[name]
 
     def names(self) -> list[str]:
         return sorted(self._entries.keys())

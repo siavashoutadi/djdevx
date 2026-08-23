@@ -1,4 +1,4 @@
-"""AllauthPackage — django-allauth with account (required), mfa, and oidc_provider."""
+"""AllauthPackage — django-allauth with account (required), mfa, and oidc-provider."""
 
 from .._base import BasePackage
 from djdevx.utils.types.pixi_types import PixiPackageSpec
@@ -61,8 +61,8 @@ class AllauthPackage(BasePackage):
                 InstallParam(name="trust_cookie_age_days", type_=int, default=14),
             ],
         ),
-        "oidc_provider": Variant(
-            name="oidc_provider",
+        "oidc-provider": Variant(
+            name="oidc-provider",
             display_name="OIDC Provider",
             template_path="oidc_provider",
             secret_generators={

@@ -50,8 +50,10 @@
   `restore_on_remove`, `secret_generators`
 - Use `@register` decorator from the category's `_registry.py` — no manual
   `__init__.py` registration needed
-- Normalize installable names only via `InstallableConfig.normalize_name()` —
-  `get_installable_name()` already returns the normalized form; never inline
+- Names are normalized automatically — at construction (`InstallableConfig`,
+  `Variant`, `InstallableRef`), registry lookup (`Registry.get()`), and in
+  `add_installable()` / `remove_installable()`. Never call
+  `InstallableConfig.normalize_name()` manually and never inline
   `.replace("_", "-")` at call sites
 - Auto-discovery via `discover_and_register()` in each category's `__init__.py`,
   or `pkgutil.iter_modules` with `_internal` set to skip infrastructure files

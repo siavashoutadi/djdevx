@@ -391,7 +391,7 @@ def test_django_allauth_oidc_provider_install_without_account(temp_dir):
             "add",
             "django-allauth",
             "--provider",
-            "oidc_provider",
+            "oidc-provider",
         ],
     )
 
@@ -425,7 +425,7 @@ def test_django_allauth_oidc_provider_install_remove(temp_dir):
             "add",
             "django-allauth",
             "--provider",
-            "oidc_provider",
+            "oidc-provider",
         ],
     )
 
@@ -514,7 +514,7 @@ def test_django_allauth_oidc_provider_install_remove(temp_dir):
             "remove",
             "django-allauth",
             "--provider",
-            "oidc_provider",
+            "oidc-provider",
         ],
     )
 

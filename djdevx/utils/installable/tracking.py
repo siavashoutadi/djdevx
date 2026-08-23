@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Optional
 
 from ..tracking import ProjectTracking, Section
-from .types import InstallableConfig
 
 
 class TrackingOps:
@@ -15,7 +14,7 @@ class TrackingOps:
         self._project = ProjectTracking(project_root)
 
     def track_install(self, instance, variant=None) -> None:
-        name = InstallableConfig.normalize_name(instance.name)
+        name = instance.name
         if variant:
             existing = self._project.get_variants(self._section, name)
             variant_name = variant.name
@@ -28,20 +27,13 @@ class TrackingOps:
             self._project.add(self._section, name, instance.display_name)
 
     def get_variants(self, name: str) -> list[str]:
-        return self._project.get_variants(
-            self._section, InstallableConfig.normalize_name(name)
-        )
+        return self._project.get_variants(self._section, name)
 
     def remove(self, name: str) -> None:
-        self._project.remove(self._section, InstallableConfig.normalize_name(name))
+        self._project.remove(self._section, name)
 
     def add(self, name: str, display_name: str, variants=None) -> None:
-        self._project.add(
-            self._section,
-            InstallableConfig.normalize_name(name),
-            display_name,
-            variants=variants,
-        )
+        self._project.add(self._section, name, display_name, variants=variants)
 
 
 def get_section(cls) -> Section:

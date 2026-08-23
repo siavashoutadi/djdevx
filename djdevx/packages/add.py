@@ -5,7 +5,6 @@ from typing import Annotated, Optional
 import typer
 
 from ._base import BasePackage
-from ..utils.installable.types import InstallableConfig
 from ._registry import get_package
 from .list import list_packages_table
 from ..utils.console.print import print_console
@@ -34,11 +33,7 @@ def add(
     ] = False,
 ) -> None:
     """Install a package."""
-    names = (
-        select_installable(BasePackage, "package")
-        if name is None
-        else [InstallableConfig.normalize_name(name)]
-    )
+    names = select_installable(BasePackage, "package") if name is None else [name]
     if not names:
         raise typer.Exit()
 

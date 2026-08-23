@@ -15,13 +15,16 @@ from .tracking import (
     get_installable_names,
     get_section,
 )
-from .types import InstallParam, InstallableRef
+from .types import KIND_BY_SECTION, InstallParam, InstallableConfig, InstallableRef
 
 
 def _find_dependents(target_cls) -> list[str]:
     """Display names of installed installables that declare a need for target_cls."""
     project = ProjectTracking()
-    target_name = target_cls.get_installable_name()
+    target_ref = InstallableRef(
+        name=target_cls.get_installable_name(),
+        kind=KIND_BY_SECTION[get_section(target_cls)],
+    )
     dependents: list[str] = []
     for registry in REGISTRIES.values():
         for entry_cls in registry.values():
@@ -34,14 +37,11 @@ def _find_dependents(target_cls) -> list[str]:
                 continue
             needs = needs_field.get_default(call_default_factory=True)
             for ref in needs or []:
-                try:
-                    resolved = resolve(ref)
-                except KeyError:
+                if ref != target_ref:
                     continue
-                if resolved.get_installable_name() == target_name:
-                    display = entry_cls.model_fields["display_name"].default
-                    dependents.append(display or entry_cls.get_installable_name())
-                    break
+                display = entry_cls.model_fields["display_name"].default
+                dependents.append(display or entry_cls.get_installable_name())
+                break
     return sorted(dependents)
 
 
@@ -184,6 +184,7 @@ def add_installable(
     Returns True if installed, False if skipped.
     Handles dependencies, variants, and interactive prompts.
     """
+    name = InstallableConfig.normalize_name(name)
     installable = cls(verbose=verbose)
 
     _auto_install_needs(installable.needs, verbose)
@@ -315,6 +316,7 @@ def remove_installable(
     Returns True if removed, False if skipped.
     Handles variants and interactive prompts.
     """
+    name = InstallableConfig.normalize_name(name)
     installable = cls(verbose=verbose)
 
     if name not in get_installed_names(type(installable)):
