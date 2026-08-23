@@ -36,7 +36,7 @@ class Registry(Generic[T]):
             )
         return self._entries[normalized]
 
-    def list(self) -> list[str]:
+    def names(self) -> list[str]:
         return sorted(self._entries.keys())
 
     def values(self) -> list[Type[T]]:

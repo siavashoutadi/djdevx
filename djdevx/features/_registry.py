@@ -7,4 +7,4 @@ from ._base import BaseFeature
 FEATURE_REGISTRY: Registry[BaseFeature] = Registry(FEATURE)
 register = FEATURE_REGISTRY.register
 get_feature = FEATURE_REGISTRY.get
-list_features = FEATURE_REGISTRY.list
+list_features = FEATURE_REGISTRY.names

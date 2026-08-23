@@ -57,7 +57,7 @@ def get_installed_names(cls) -> dict:
 
 
 def get_available_names(cls) -> list[str]:
-    return cls.get_registry().list()
+    return cls.get_registry().names()
 
 
 def get_installed_variants(cls, name: str) -> list[str]:

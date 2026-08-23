@@ -7,4 +7,4 @@ from ._base import BaseFramework
 FRAMEWORK_REGISTRY: Registry[BaseFramework] = Registry(FRAMEWORK)
 register = FRAMEWORK_REGISTRY.register
 get_framework = FRAMEWORK_REGISTRY.get
-list_frameworks = FRAMEWORK_REGISTRY.list
+list_frameworks = FRAMEWORK_REGISTRY.names
