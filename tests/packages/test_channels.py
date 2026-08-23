@@ -3,6 +3,7 @@ import os
 from typer.testing import CliRunner
 from djdevx.main import app
 from djdevx.utils.project.pixi_runner import PixiRunner
+from djdevx.utils.tracking import ProjectTracking, Section
 from tests.test_helpers import create_test_django_project
 
 runner = CliRunner()
@@ -53,6 +54,33 @@ def test_channels_install_and_remove(temp_dir):
         "channels dependency not found after installation"
     )
 
+    assert PixiRunner().has_dependency("channels-redis"), (
+        "channels-redis dependency not found after installation"
+    )
+
+    project_tracking = ProjectTracking()
+    assert project_tracking.is_installed(Section.CACHE, "redis"), (
+        "redis cache was not auto-installed as a need"
+    )
+
+    os.chdir(temp_dir)
+    result = runner.invoke(
+        app,
+        [
+            "cache",
+            "remove",
+            "redis",
+        ],
+    )
+
+    assert result.exit_code == 0, f"Cache remove failed unexpectedly: {result.output}"
+    assert "required by" in result.output, (
+        f"Redis cache removal was not blocked while channels installed: {result.output}"
+    )
+    assert ProjectTracking().is_installed(Section.CACHE, "redis"), (
+        "redis cache tracking entry was removed despite being needed"
+    )
+
     os.chdir(temp_dir)
     result = runner.invoke(
         app,
@@ -69,4 +97,19 @@ def test_channels_install_and_remove(temp_dir):
 
     assert not PixiRunner().has_dependency("channels"), (
         "channels dependency found after removal"
+    )
+
+    os.chdir(temp_dir)
+    result = runner.invoke(
+        app,
+        [
+            "cache",
+            "remove",
+            "redis",
+        ],
+    )
+
+    assert result.exit_code == 0, f"Cache remove failed: {result.output}"
+    assert not ProjectTracking().is_installed(Section.CACHE, "redis"), (
+        "redis cache tracking entry still present after removal"
     )

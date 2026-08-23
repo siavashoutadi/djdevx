@@ -7,6 +7,7 @@ from ..console import prompts
 from ..console.print import print_console
 from ..tracking import ProjectTracking
 
+from .registry import REGISTRIES
 from .resolver import resolve
 from .tracking import (
     get_installed_names,
@@ -15,6 +16,49 @@ from .tracking import (
     get_section,
 )
 from .types import InstallParam, InstallableRef
+
+
+def _normalize(name: str) -> str:
+    return name.replace("_", "-")
+
+
+def _find_dependents(target_cls) -> list[str]:
+    """Display names of installed installables that declare a need for target_cls."""
+    project = ProjectTracking()
+    target_name = _normalize(target_cls.get_installable_name())
+    dependents: list[str] = []
+    for registry in REGISTRIES.values():
+        for entry_cls in registry.values():
+            if not project.is_installed(
+                get_section(entry_cls), _normalize(entry_cls.get_installable_name())
+            ):
+                continue
+            needs_field = entry_cls.model_fields.get("needs")
+            if needs_field is None:
+                continue
+            needs = needs_field.get_default(call_default_factory=True)
+            for ref in needs or []:
+                try:
+                    resolved = resolve(ref)
+                except KeyError:
+                    continue
+                if _normalize(resolved.get_installable_name()) == target_name:
+                    display = entry_cls.model_fields["display_name"].default
+                    dependents.append(display or entry_cls.get_installable_name())
+                    break
+    return sorted(dependents)
+
+
+def _check_not_needed(installable, name: str) -> bool:
+    """Block removal while other installed installables still need this one."""
+    dependents = _find_dependents(type(installable))
+    if not dependents:
+        return True
+    print_console.fail(
+        f"Cannot remove {installable.display_name or name} — "
+        f"required by: {', '.join(dependents)}. Remove them first."
+    )
+    return False
 
 
 def _auto_install_needs(needs: list[InstallableRef], verbose: bool) -> None:
@@ -284,6 +328,9 @@ def remove_installable(
             )
             return False
         print_console.ok(f"{installable.display_name or name} is not installed.")
+        return False
+
+    if not _check_not_needed(installable, name):
         return False
 
     if not installable.variants:

@@ -82,7 +82,7 @@ Key rules:
 | `description` | `str` | No | Longer description |
 | `pixi_packages` | `list[PixiPackageSpec]` | No | Dependencies via pixi (set `pixi_feature="dev"` for dev-only) |
 | `conditional_packages` | `list[ConditionalPackage]` | No | Pixi packages installed only when their `when(installable)` condition holds |
-| `needs` | `list[InstallableRef]` | No | Other installables that must be installed first |
+| `needs` | `list[InstallableRef]` | No | Other installables auto-installed first; removal of a needed installable is blocked while dependents exist |
 | `template_path` | `str` | No | Override auto-derived template directory |
 | `install_params` | `list[InstallParam]` | No | Parameters collected at install time |
 | `secret_generators` | `dict[str, Callable]` | No | Maps field names to generator callables |
@@ -141,22 +141,18 @@ reference to read instance state, or a lambda with a single parameter:
 from djdevx.utils.installable import ConditionalPackage
 
 
-class ChannelsPackage(BasePackage):
-    name: str = "channels"
-    display_name: str = "Channels"
-    use_redis: bool = False
+class MyPackage(BasePackage):
+    name: str = "my-package"
+    display_name: str = "My Package"
+    use_extra: bool = False
 
-    def _needs_redis(self) -> bool:
-        return self.use_redis
+    def _needs_extra(self) -> bool:
+        return self.use_extra
 
     conditional_packages: list[ConditionalPackage] = [
         ConditionalPackage(
-            package=PixiPackageSpec("channels-redis", kind="pypi"),
-            when=_needs_redis,
-        ),
-        ConditionalPackage(
-            package=PixiPackageSpec("daphne", kind="pypi"),
-            when=lambda self: self.use_daphne,
+            package=PixiPackageSpec("some-extra-dep", kind="pypi"),
+            when=_needs_extra,
         ),
     ]
 ```
@@ -368,7 +364,9 @@ the generator is called and the result written to `.secrets/<field_name>`.
 ## Dependencies (needs)
 
 Use `needs` to declare dependencies on other installables. Dependencies are
-automatically installed before the target.
+automatically installed before the target, and a dependency cannot be removed
+while an installed dependent still needs it — the removal is refused with
+`Cannot remove <name> — required by: ...`.
 
 ```python
 from djdevx.utils.installable.types import InstallableRef

@@ -2,7 +2,7 @@ from typing import Any
 
 from pydantic import SecretStr
 
-from settings.django.base import INSTALLED_APPS
+from settings.django.base import DEBUG, INSTALLED_APPS
 from settings.utils.base_settings import AppBaseSettings
 
 
@@ -29,10 +29,12 @@ class ChannelsSettings(AppBaseSettings):
 
 _channels = ChannelsSettings()
 
-INSTALLED_APPS.insert(0, "daphne")
 INSTALLED_APPS += [
     "channels",
 ]
+
+if DEBUG:
+    INSTALLED_APPS.insert(0, "daphne")
 
 
 CHANNEL_LAYERS = {

@@ -110,7 +110,7 @@ The shared pydantic `BaseModel` that all installables extend:
 | `conditional_packages` | `list[ConditionalPackage]` | Pixi packages installed only when their `when(installable)` condition holds |
 | `template_path` | `str` | Override auto-derived template directory |
 | `install_params` | `list[InstallParam]` | Parameters collected at install time |
-| `needs` | `list[InstallableRef]` | Dependencies that must be installed first |
+| `needs` | `list[InstallableRef]` | Dependencies auto-installed first; also blocks removal while dependents are installed (works across sections, e.g. package → cache) |
 | `secret_generators` | `dict[str, Callable]` | Maps field names to generator callables |
 | `files_to_remove` | `list[str]` | Files to delete on uninstall |
 | `folders_to_remove` | `list[str]` | Folders to delete on uninstall |
@@ -291,6 +291,13 @@ The orchestrator provides the centralized `add_installable()` and
 
 - **Dependency resolution** (`_auto_install_needs`) — recursively installs
   unmet `needs` before the target installable.
+- **Reverse-dependency blocking** (`_find_dependents` / `_check_not_needed`) —
+  before removing an installable, the orchestrator scans every registry for
+  installed installables whose `needs` reference it. If any dependents are
+  found the removal is refused:
+  `Cannot remove Redis — required by: Channels. Remove them first.`
+  This keeps `needs` safe in both directions: dependencies are auto-installed
+  on add and protected from orphaning on remove.
 - **Variant selection** — three modes:
   - **Simple** — no variants, just install
   - **Exclusive variants** — choose exactly one (database provider, cache

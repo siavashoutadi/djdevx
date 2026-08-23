@@ -12,15 +12,16 @@ install params, secrets, hooks, templates, testing) live in
 
 1. [Minimal package](#minimal-package)
 2. [pixi_packages edge cases](#pixi_packages-edge-cases)
-3. [Conditionally installed dependencies](#conditionally-installed-dependencies)
-4. [Install params](#install-params)
-5. [Exclusive variants](#exclusive-variants)
-6. [Additive variants](#additive-variants)
-7. [Secret generators](#secret-generators)
-8. [Custom pre/post hooks](#custom-prepost-hooks)
-9. [Reverting from the new template (restore_on_remove)](#reverting-from-the-new-template-restore_on_remove)
-10. [Package templates directory](#package-templates-directory)
-11. [Testing](#testing)
+3. [Declaring dependencies (needs)](#declaring-dependencies-needs)
+4. [Conditionally installed dependencies](#conditionally-installed-dependencies)
+5. [Install params](#install-params)
+6. [Exclusive variants](#exclusive-variants)
+7. [Additive variants](#additive-variants)
+8. [Secret generators](#secret-generators)
+9. [Custom pre/post hooks](#custom-prepost-hooks)
+10. [Reverting from the new template (restore_on_remove)](#reverting-from-the-new-template-restore_on_remove)
+11. [Package templates directory](#package-templates-directory)
+12. [Testing](#testing)
 
 ---
 
@@ -80,6 +81,43 @@ PixiPackageSpec(
 )
 ```
 
+## Declaring dependencies (needs)
+
+When a package requires another installable — even from a different section —
+declare it in `needs`. The orchestrator auto-installs unmet needs during
+`add` and blocks removal of a dependency while installed dependents exist.
+
+The real-world example is the channels package, which needs the redis cache
+(a different installable kind, resolved via `InstallableRef(name, kind)`):
+
+```python
+# djdevx/packages/channels/__init__.py
+from .._base import BasePackage
+from djdevx.utils.installable.types import CACHE, InstallableRef
+from djdevx.utils.types.pixi_types import PixiPackageSpec
+from .._registry import register
+
+
+@register
+class ChannelsPackage(BasePackage):
+    name: str = "channels"
+    display_name: str = "Channels"
+    pixi_packages: list[PixiPackageSpec] = [
+        PixiPackageSpec("channels"),
+        PixiPackageSpec("channels-redis<5", kind="pypi"),
+        PixiPackageSpec("daphne<5", pixi_feature="dev"),
+    ]
+    needs: list[InstallableRef] = [InstallableRef(name="redis", kind=CACHE)]
+```
+
+With this in place:
+
+- `ddx packages add channels` first runs the full redis cache install if it
+  isn't already present (including its docker compose service and secrets).
+- `ddx cache remove redis` fails with
+  `Cannot remove Redis — required by: Channels. Remove them first.`
+  until channels has been removed.
+
 ## Conditionally installed dependencies
 
 When a dependency is only needed in some configurations, wrap it in a
@@ -90,18 +128,18 @@ callable, which receives the installable instance and returns a bool:
 from djdevx.utils.installable import ConditionalPackage
 
 
-class ChannelsPackage(BasePackage):
-    name: str = "channels"
-    display_name: str = "Channels"
-    use_redis: bool = False
+class MyPackage(BasePackage):
+    name: str = "my-package"
+    display_name: str = "My Package"
+    use_extra: bool = False
 
-    def _needs_redis(self) -> bool:
-        return self.use_redis
+    def _needs_extra(self) -> bool:
+        return self.use_extra
 
     conditional_packages: list[ConditionalPackage] = [
         ConditionalPackage(
-            package=PixiPackageSpec("channels-redis", kind="pypi"),
-            when=_needs_redis,
+            package=PixiPackageSpec("some-extra-dep", kind="pypi"),
+            when=_needs_extra,
         ),
     ]
 ```
