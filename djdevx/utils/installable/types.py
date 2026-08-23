@@ -74,6 +74,10 @@ class InstallableConfig(BaseModel):
     folders_to_remove: list[str] = Field(default_factory=list)
     restore_on_remove: dict[str, str] = Field(default_factory=dict)
 
+    @staticmethod
+    def normalize_name(name: str) -> str:
+        return name.replace("_", "-")
+
     @classmethod
     def get_installable_name(cls) -> str:
         field = cls.model_fields["name"]
@@ -88,7 +92,7 @@ class InstallableConfig(BaseModel):
             raise AttributeError(
                 f"{cls.__name__} must set 'name' (e.g. name: str = \"my-package\")"
             )
-        return value
+        return cls.normalize_name(value)
 
 
 class Variant(InstallableConfig):

@@ -18,19 +18,15 @@ from .tracking import (
 from .types import InstallParam, InstallableRef
 
 
-def _normalize(name: str) -> str:
-    return name.replace("_", "-")
-
-
 def _find_dependents(target_cls) -> list[str]:
     """Display names of installed installables that declare a need for target_cls."""
     project = ProjectTracking()
-    target_name = _normalize(target_cls.get_installable_name())
+    target_name = target_cls.get_installable_name()
     dependents: list[str] = []
     for registry in REGISTRIES.values():
         for entry_cls in registry.values():
             if not project.is_installed(
-                get_section(entry_cls), _normalize(entry_cls.get_installable_name())
+                get_section(entry_cls), entry_cls.get_installable_name()
             ):
                 continue
             needs_field = entry_cls.model_fields.get("needs")
@@ -42,7 +38,7 @@ def _find_dependents(target_cls) -> list[str]:
                     resolved = resolve(ref)
                 except KeyError:
                     continue
-                if _normalize(resolved.get_installable_name()) == target_name:
+                if resolved.get_installable_name() == target_name:
                     display = entry_cls.model_fields["display_name"].default
                     dependents.append(display or entry_cls.get_installable_name())
                     break

@@ -18,17 +18,13 @@ class Registry(Generic[T]):
     def kind(self) -> InstallableKind:
         return self._kind
 
-    @staticmethod
-    def _normalize(name: str) -> str:
-        return name.replace("_", "-")
-
     def register(self, cls: Type[T]) -> Type[T]:
         name = cls.get_installable_name()
-        self._entries[self._normalize(name)] = cls
+        self._entries[name] = cls
         return cls
 
     def get(self, name: str) -> Type[T]:
-        normalized = self._normalize(name)
+        normalized = InstallableConfig.normalize_name(name)
         if normalized not in self._entries:
             raise KeyError(
                 f"Unknown {self._label} '{name}'. "
