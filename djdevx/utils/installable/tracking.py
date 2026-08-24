@@ -14,7 +14,7 @@ class TrackingOps:
         self._project = ProjectTracking(project_root)
 
     def track_install(self, instance, variant=None) -> None:
-        name = instance.name
+        name = type(instance).get_installable_name()
         if variant:
             existing = self._project.get_variants(self._section, name)
             variant_name = variant.name

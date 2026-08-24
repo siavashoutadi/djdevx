@@ -151,7 +151,7 @@ class Installable(InstallableConfig):
         updated: list[str] = []
         if variant is not None:
             pixi_ops.remove_packages(self.pixi_packages, variant=variant)
-            existing = tracking.get_variants(self.name)
+            existing = tracking.get_variants(type(self).get_installable_name())
             updated = [v for v in existing if v != variant_name]
 
         if variant is None or not updated:
@@ -169,11 +169,13 @@ class Installable(InstallableConfig):
         print_console.ok("Finished cleanup")
 
         if updated:
-            tracking.add(self.name, self.display_name, variants=updated)
+            tracking.add(
+                type(self).get_installable_name(), self.display_name, variants=updated
+            )
             return
 
         restore_original_templates(self)
-        tracking.remove(self.name)
+        tracking.remove(type(self).get_installable_name())
 
     # ------------------------------------------------------------------
     # Lifecycle hooks (override in subclasses)
