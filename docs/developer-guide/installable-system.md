@@ -11,6 +11,7 @@ utils/installable/
 ├── __init__.py           # Re-exports Installable, Registry, InstallParam, Variant, discover_and_register, build_list_table
 ├── types.py              # InstallableConfig, InstallParam, Variant, InstallableKind, InstallableRef
 ├── installable.py        # Installable — pydantic BaseModel, add/remove lifecycle, hooks
+├── peers.py              # Peer integration engine (sync_on_add / sync_on_remove / when_peer / call_peer)
 ├── registry.py           # Registry[T] — generic type registry with @register
 ├── discovery.py          # discover_and_register() — auto-import modules to trigger @register
 ├── orchestrator.py       # add_installable() / remove_installable() — dependency resolution, interactive selection, parameter collection
@@ -84,7 +85,7 @@ Declares a CLI parameter collected during add and passed to templates:
 A single pixi package guarded by an arbitrary condition:
 
 ```python
-ConditionalCheck = Callable[..., bool]
+ConditionalCheck = Callable[["ConditionContext"], bool]
 
 @dataclass(frozen=True)
 class ConditionalPackage:
@@ -92,11 +93,12 @@ class ConditionalPackage:
     when: ConditionalCheck
 ```
 
-`when` is called with the owning installable instance as its first positional
-argument (`when(installable)`). Return `True` to include the package, `False`
-to skip it. Evaluated by `Installable.add()`/`remove()` via
-`_active_conditional_packages()`. Use an unbound method reference to read
-instance state, or a lambda taking one parameter.
+`when` receives a single `ConditionContext` with `ctx.installable` (the owning
+instance), `ctx.variant` (when evaluating variant conditionals), and a lazily
+created `ctx.project` (`ProjectTracking`). Return `True` to include the
+package, `False` to skip it. Evaluated by `Installable.add()`/`remove()` via
+`_active_conditional_packages()` and reconciled by the integration engine on
+peer add/remove.
 
 ### InstallableConfig
 
@@ -107,10 +109,11 @@ The shared pydantic `BaseModel` that all installables extend:
 | `name` | `str` | Unique identifier (underscores normalized to hyphens) |
 | `display_name` | `str` | Human-readable name for CLI output |
 | `pixi_packages` | `list[PixiPackageSpec]` | PyPI/conda packages (set `pixi_feature="dev"` for dev-only) |
-| `conditional_packages` | `list[ConditionalPackage]` | Pixi packages installed only when their `when(installable)` condition holds |
+| `conditional_packages` | `list[ConditionalPackage]` | Pixi packages installed only when their `when(ctx)` condition holds |
 | `template_path` | `str` | Override auto-derived template directory |
 | `install_params` | `list[InstallParam]` | Parameters collected at install time |
 | `needs` | `list[InstallableRef]` | Dependencies auto-installed first; also blocks removal while dependents are installed (works across sections, e.g. package → cache) |
+| `listens_to` | `list[InstallableRef]` | Peers that trigger integration hooks (`when_peer` gates are derived automatically) |
 | `secret_generators` | `dict[str, Callable]` | Maps field names to generator callables |
 | `files_to_remove` | `list[str]` | Files to delete on uninstall |
 | `folders_to_remove` | `list[str]` | Folders to delete on uninstall |
@@ -163,13 +166,14 @@ lifecycle hooks and add/remove logic.
 add(variant_name, install_kwargs):
   1. before_pixi_install()                   ← hook
   2. PixiOps(root).add_packages(packages, variant)  ← pixi add
-  3. PixiOps(root).add_packages(conditional)  ← conditional packages whose when(self) is True
+  3. PixiOps(root).add_packages(conditional)  ← conditional packages whose when(ctx) is True
   4. after_pixi_install()                    ← hook (e.g. Docker Compose config)
   5. before_copy_templates()                 ← hook
   6. scaffold.copy_templates(installable, variant)  ← Jinja2 rendering + copy
   7. after_copy_templates()                  ← hook (e.g. CSS download, icon gen)
   8. SecretsOps(root).generate(installable, variant)  ← auto-generate secret files
   9. TrackingOps(section).track_install(installable, variant)  ← write djdevx.toml
+  10. integration.sync_on_add(installable, variant)  ← peer integration sync
 ```
 
 ### Remove Lifecycle
@@ -178,12 +182,13 @@ add(variant_name, install_kwargs):
 remove(variant_name):
   1. before_pixi_remove()                    ← hook (e.g. Docker Compose cleanup)
   2. PixiOps(root).remove_packages(packages, variant)  ← pixi remove
-  3. PixiOps(root).remove_packages(conditional)  ← conditional packages whose when(self) still holds
+  3. PixiOps(root).remove_packages(conditional)  ← conditional packages whose when(ctx) still holds
   4. after_pixi_remove()                     ← hook
   5. scaffold.cleanup_files(installable, variant)  ← delete generated files
   6. SecretsOps(root).remove(installable, variant)  ← delete secret files
   7. scaffold.restore_original_templates(installable)  ← restore originals
   8. TrackingOps(section).remove(name)       ← update djdevx.toml
+  9. peers.sync_on_remove(installable, variant)  ← peer integration unwind
 ```
 
 ### Lifecycle Hooks
@@ -475,6 +480,37 @@ def resolve(ref: InstallableRef) -> type:
 
 Used by the orchestrator's `_auto_install_needs()` to find and install
 dependencies across categories.
+
+## Peer Integration — `orchestrator.py`
+
+The integration engine makes installables **order-independently
+inter-installable**: every installable can declare which peers it reacts to and
+re-render its own artifacts when they arrive or leave.
+
+```python
+from djdevx.utils.installable.types import InstallableRef, FRAMEWORK
+
+class MyPackage(BasePackage):
+    listens_to: list[InstallableRef] = [InstallableRef("bootstrap", FRAMEWORK)]
+
+    def on_peer_added(self, peer, variant=None) -> None:
+        ...  # adapt my artifacts to the peer's presence (idempotent)
+
+    def on_peer_removed(self, peer, variant=None) -> None:
+        ...  # undo the adaptation (idempotent)
+```
+
+`sync_on_add()` runs at the end of `add()`: it pulls notifications from already
+installed peers I listen to and pushes mine to already installed listeners.
+`sync_on_remove()` runs before untracking: it unwinds interested listeners and
+self-cleans my engine-managed conditional packages. Hooks are error-isolated,
+guarded against recursion, and unregistered peers are treated as "not
+installed". Conditional pixi packages (`ConditionalPackage`) are added/removed
+by the engine and tracked as `extra_packages` in `djdevx.toml`.
+
+> Full protocol reference — matching rules, multi-variant behavior,
+> `call_peer`, guarantees, and worked examples:
+> [Integration Protocol](integration.md).
 
 ## Creating a New Category
 

@@ -1,11 +1,15 @@
 """Data types for installable config and references."""
 
 from dataclasses import dataclass
-from typing import Any, Callable, Optional, cast
+from functools import cached_property
+from typing import TYPE_CHECKING, Any, Callable, Optional, cast
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from ..tracking.sections import Section
+
+if TYPE_CHECKING:
+    from ..tracking import ProjectTracking
 from ..types.pixi_types import PixiPackageSpec
 
 
@@ -42,10 +46,13 @@ KIND_BY_SECTION: dict[Section, InstallableKind] = {
 
 @dataclass(frozen=True)
 class InstallableRef:
-    """Typed reference to a specific installable (dependency or integration peer).
+    """Reference to a specific installable (dependency or integration peer).
 
     The name is normalized (``_`` → ``-``) at construction, so refs compare
-    equal to registry and tracking keys without extra handling.
+    equal to registry and tracking keys without extra handling. Used in
+    ``needs`` (auto-installed dependencies) and ``listens_to`` (peers whose
+    presence triggers integration hooks) — peers must be declared explicitly,
+    one ref per installable.
     """
 
     name: str
@@ -55,15 +62,62 @@ class InstallableRef:
         object.__setattr__(self, "name", self.name.replace("_", "-"))
 
 
-ConditionalCheck = Callable[..., bool]
+ConditionalCheck = Callable[["ConditionContext"], bool]
+
+
+class ConditionContext:
+    """Everything a ``when`` condition may inspect.
+
+    ``project`` is created lazily on first access, so conditions that only
+    look at instance state never pay for loading the tracking file. The peer
+    engine injects its already-loaded instance to share state.
+    """
+
+    def __init__(
+        self,
+        installable: "InstallableConfig",
+        variant: Optional["Variant"] = None,
+        project: Optional["ProjectTracking"] = None,
+    ) -> None:
+        self.installable = installable
+        self.variant = variant
+        self._project = project
+
+    @property
+    def project(self) -> "ProjectTracking":
+        if self._project is None:
+            from ..tracking import ProjectTracking
+
+            self._project = ProjectTracking()
+        return self._project
 
 
 @dataclass(frozen=True)
 class ConditionalPackage:
-    """A single pixi package guarded by an arbitrary condition.
+    """A pixi package that is included only when a condition passes.
 
-    ``when`` is called with the owning installable instance as its first
-    positional argument. Return True to include the package, False to skip it.
+    ``when`` receives a single :class:`ConditionContext` with the owning
+    installable (and optionally the active variant and the project tracking):
+
+        def when(ctx): return ctx.installable.use_extra
+
+    Realistic example — add a Redis instrumentation client only while the
+    open-telemetry feature is installed:
+
+        from djdevx.utils.installable import when_peer
+        from djdevx.utils.installable.types import FEATURE, InstallableRef
+
+        @register
+        class RedisCache(BaseCache):
+            name = "redis"
+            conditional_packages: list[ConditionalPackage] = [
+                ConditionalPackage(
+                    package=PixiPackageSpec(
+                        "opentelemetry-instrumentation-redis", kind="pypi"
+                    ),
+                    when=when_peer(InstallableRef("open-telemetry", FEATURE)),
+                )
+            ]
     """
 
     package: PixiPackageSpec
@@ -77,15 +131,18 @@ class InstallableConfig(BaseModel):
 
     name: str
     display_name: str = ""
+    section: Section = Section.PACKAGES
     pixi_packages: list[PixiPackageSpec] = Field(default_factory=list)
     conditional_packages: list[ConditionalPackage] = Field(default_factory=list)
     template_path: str = ""
     install_params: list[InstallParam] = Field(default_factory=list)
     needs: list[InstallableRef] = Field(default_factory=list)
+    listens_to: list[InstallableRef] = Field(default_factory=list)
     secret_generators: dict[str, Callable] = Field(default_factory=dict)
     files_to_remove: list[str] = Field(default_factory=list)
     folders_to_remove: list[str] = Field(default_factory=list)
     restore_on_remove: dict[str, str] = Field(default_factory=dict)
+    variants: "dict[str, Variant]" = Field(default_factory=dict)
 
     @field_validator("name")
     @classmethod
@@ -111,6 +168,21 @@ class InstallableConfig(BaseModel):
                 f"{cls.__name__} must set 'name' (e.g. name: str = \"my-package\")"
             )
         return cls.normalize_name(value)
+
+    @cached_property
+    def ref(self) -> InstallableRef:
+        """This installable's identity as an ``InstallableRef``."""
+        return InstallableRef(name=self.name, kind=KIND_BY_SECTION[self.section])
+
+    def on_peer_added(
+        self, peer: "InstallableConfig", variant: Optional["Variant"] = None
+    ) -> None:
+        """Apply the presence of *peer* (idempotent). Override in subclasses."""
+
+    def on_peer_removed(
+        self, peer: "InstallableConfig", variant: Optional["Variant"] = None
+    ) -> None:
+        """Undo the presence of *peer* (idempotent). Override in subclasses."""
 
 
 class Variant(InstallableConfig):

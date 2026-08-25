@@ -18,7 +18,8 @@ install params, secrets, hooks, templates, testing) live in
 6. [Generating files in hooks](#generating-files-in-hooks)
 7. [Variants](#variants)
 8. [Feature templates directory](#feature-templates-directory)
-9. [Testing](#testing)
+9. [Peer integration](#peer-integration)
+10. [Testing](#testing)
 
 ---
 
@@ -198,6 +199,49 @@ djdevx/features/<name>/
 
 Templates render to the project root.
 
+## Peer integration
+
+Features often enhance whatever database, cache, or package is present. Use
+`when_peer`-gated `conditional_packages` for pixi deps that only make sense
+while a peer is installed — the engine adds and removes them (tracked as
+`extra_packages` in `djdevx.toml`) automatically. Add the peer to `listens_to`
+only when you also implement hooks:
+
+```python
+# djdevx/features/my_instrumentation/__init__.py
+from .._base import BaseFeature
+from ...utils.installable.types import (
+    ConditionalPackage, InstallableRef, DATABASE,
+)
+from ...utils.installable import when_peer
+from djdevx.utils.types.pixi_types import PixiPackageSpec
+from .._registry import register
+
+
+@register
+class MyInstrumentationFeature(BaseFeature):
+    name: str = "my-instrumentation"
+    display_name: str = "My Instrumentation"
+    listens_to: list[InstallableRef] = [InstallableRef("postgres", DATABASE)]
+    conditional_packages: list[ConditionalPackage] = [
+        ConditionalPackage(
+            package=PixiPackageSpec("my-db-instrumentation", kind="pypi"),
+            when=when_peer(InstallableRef("postgres", DATABASE)),
+        )
+    ]
+
+    def on_peer_added(self, peer, variant=None) -> None:
+        # append an instrumentation snippet to my own settings artifact
+        self._write_snippet(peer.name)
+
+    def on_peer_removed(self, peer, variant=None) -> None:
+        self._remove_snippet(peer.name)
+```
+
+Install the feature before or after the database — the same hooks fire either
+way, and removing either side cleans up both snippets and gated pixi packages.
+See [Integration Protocol](integration.md) for full semantics.
+
 ## Testing
 
 ```bash
@@ -212,6 +256,7 @@ test pattern and golden-file fixtures.
 ## Related
 
 - [Common Concepts](creating-an-installable.md) — shared pattern, variants, params, hooks, templates
+- [Integration Protocol](integration.md) — peer integration reference
 - [Feature Architecture](feature-architecture.md) — BaseFeature details
 - [Installable System](installable-system.md) — Shared infrastructure
 - [Template System](template-system.md) — Jinja2 rendering conventions

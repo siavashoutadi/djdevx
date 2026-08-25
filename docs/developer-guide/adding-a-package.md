@@ -21,7 +21,8 @@ install params, secrets, hooks, templates, testing) live in
 9. [Custom pre/post hooks](#custom-prepost-hooks)
 10. [Reverting from the new template (restore_on_remove)](#reverting-from-the-new-template-restore_on_remove)
 11. [Package templates directory](#package-templates-directory)
-12. [Testing](#testing)
+12. [Peer integration](#peer-integration)
+13. [Testing](#testing)
 
 ---
 
@@ -133,8 +134,8 @@ class MyPackage(BasePackage):
     display_name: str = "My Package"
     use_extra: bool = False
 
-    def _needs_extra(self) -> bool:
-        return self.use_extra
+    def _needs_extra(ctx) -> bool:
+        return ctx.installable.use_extra
 
     conditional_packages: list[ConditionalPackage] = [
         ConditionalPackage(
@@ -145,9 +146,9 @@ class MyPackage(BasePackage):
 ```
 
 The condition is evaluated during both add and remove — the package is
-installed/removed only while `when(installable)` returns `True`. Variants can
-also carry `conditional_packages`; their conditions receive the parent
-installable instance.
+installed/removed only while `when(ctx)` returns `True`. Variants can
+also carry `conditional_packages`; their conditions get `ctx.variant`
+set in addition to `ctx.installable`.
 
 ## Install params
 
@@ -483,6 +484,50 @@ djdevx/packages/<name>/
             └── <name>.py.j2          # → urls/packages/<name>.py
 ```
 
+## Peer integration
+
+Packages that ship framework-styled output should **listen** to frameworks
+instead of depending on them. Declare the interest and keep the styled overlays
+inside your own package — never write another installable's files:
+
+```python
+# djdevx/packages/my_styled_pkg/__init__.py
+from .._base import BasePackage
+from ...utils.installable.types import InstallableRef, FRAMEWORK
+from .._registry import register
+
+
+@register
+class MyStyledPackage(BasePackage):
+    name: str = "my-styled-pkg"
+    display_name: str = "My Styled Package"
+    pixi_packages: list[PixiPackageSpec] = [PixiPackageSpec("my-styled-pkg")]
+    listens_to: list[InstallableRef] = [InstallableRef("bootstrap", FRAMEWORK)]
+
+    def on_peer_added(self, peer, variant=None) -> None:
+        # copy my framework-styled overlay over my own base output
+        overlay = self.template_dir / "frameworks" / peer.name
+        ...
+
+    def on_peer_removed(self, peer, variant=None) -> None:
+        # re-copy my base templates over the styled ones
+        ...
+```
+
+```
+djdevx/packages/my_styled_pkg/templates/
+├── settings/packages/my_styled_pkg.py      # base output
+└── frameworks/
+    └── bootstrap/                          # overlay applied when bootstrap is present
+        └── settings/packages/my_styled_pkg.py
+```
+
+Both orders work with one code path: if a framework is already installed, the
+engine pulls (`on_peer_added` during your install); if you are already
+installed when a framework arrives, it pushes (your hook fires after the
+framework's `add()`). Removing the framework unwinds via `on_peer_removed`.
+See [Integration Protocol](integration.md) for full semantics.
+
 ## Testing
 
 ```bash
@@ -505,6 +550,7 @@ test pattern and golden-file fixtures.
 ## Related
 
 - [Common Concepts](creating-an-installable.md) — shared pattern, variants, params, hooks, templates
+- [Integration Protocol](integration.md) — peer integration reference
 - [Package Architecture](package-architecture.md) — BasePackage details
 - [Installable System](installable-system.md) — Shared infrastructure
 - [Template System](template-system.md) — Jinja2 rendering conventions

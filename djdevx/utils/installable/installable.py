@@ -10,9 +10,9 @@ from pydantic import Field
 from ..console.print import print_console
 from ..prek.prek import format_files
 from ..project.project_structure import ProjectStructure
-from ..tracking import Section
 from .pixi_ops import PixiOps
 from ..types.pixi_types import PixiPackageSpec
+from .peers import sync_on_add, sync_on_remove
 from .scaffold import (
     cleanup_files,
     copy_templates,
@@ -21,7 +21,11 @@ from .scaffold import (
 )
 from .secrets import SecretsOps
 from .tracking import TrackingOps
-from .types import InstallableConfig, InstallableRef, KIND_BY_SECTION, Variant
+from .types import (
+    ConditionContext,
+    InstallableConfig,
+    Variant,
+)
 
 
 class Installable(InstallableConfig):
@@ -40,6 +44,8 @@ class Installable(InstallableConfig):
         after_copy_templates()
         SecretsOps(project_root).generate(installable, variant)
         TrackingOps(section).track_install(installable, variant)
+        peers.sync_on_add(installable, variant)  # see peers.py
+
     Lifecycle — remove:
 
         before_pixi_remove()
@@ -49,22 +55,16 @@ class Installable(InstallableConfig):
         SecretsOps(project_root).remove(installable, variant)
         restore_original_templates(installable)
         TrackingOps(section).remove(name)
+        peers.sync_on_remove(installable, variant)
     """
 
     description: str = ""
-    section: Section = Section.PACKAGES
     exclusive_variants: bool = False
-    variants: dict[str, Variant] = Field(default_factory=dict)
     verbose: bool = Field(default=False, exclude=True, repr=False)
 
     def model_post_init(self, __context: Any) -> None:
         self._structure: Optional[ProjectStructure] = None
         self._install_context: dict[str, Any] = {}
-
-    @cached_property
-    def ref(self) -> InstallableRef:
-        """This installable's identity as an ``InstallableRef``."""
-        return InstallableRef(name=self.name, kind=KIND_BY_SECTION[self.section])
 
     @classmethod
     def get_registry(cls):
@@ -91,9 +91,17 @@ class Installable(InstallableConfig):
         self, variant: Optional[Variant] = None
     ) -> list[PixiPackageSpec]:
         """Specs whose condition currently holds, from self and optionally variant."""
-        result = [c.package for c in self.conditional_packages if c.when(self)]
+        result = [
+            c.package
+            for c in self.conditional_packages
+            if c.when(ConditionContext(self))
+        ]
         if variant is not None:
-            result += [c.package for c in variant.conditional_packages if c.when(self)]
+            result += [
+                c.package
+                for c in variant.conditional_packages
+                if c.when(ConditionContext(self, variant))
+            ]
         return result
 
     # ------------------------------------------------------------------
@@ -139,7 +147,12 @@ class Installable(InstallableConfig):
 
         TrackingOps(self.section).track_install(self, variant)
 
-    def remove(self, variant_name: Optional[str] = None) -> None:
+        sync_on_add(self, variant)
+
+    def remove(
+        self,
+        variant_name: Optional[str] = None,
+    ) -> None:
         """Remove this item: pixi remove -> cleanup -> restore -> untrack."""
         variant = self.variants.get(variant_name) if variant_name else None
 
@@ -172,10 +185,13 @@ class Installable(InstallableConfig):
             tracking.add(
                 type(self).get_installable_name(), self.display_name, variants=updated
             )
-            return
+            fully_removed = False
+        else:
+            restore_original_templates(self)
+            tracking.remove(type(self).get_installable_name())
+            fully_removed = True
 
-        restore_original_templates(self)
-        tracking.remove(type(self).get_installable_name())
+        sync_on_remove(self, variant, fully_removed=fully_removed)
 
     # ------------------------------------------------------------------
     # Lifecycle hooks (override in subclasses)

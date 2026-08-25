@@ -34,6 +34,7 @@ All five installable categories share a common foundation:
 | `registry.py` | `Registry[T]` — generic type registry with `@register` decorator |
 | `discovery.py` | `discover_and_register()` — auto-imports modules to trigger `@register` |
 | `orchestrator.py` | `add_installable()` / `remove_installable()` — dependency resolution, interactive variant selection, parameter collection |
+| `peers.py` | Peer integration engine — `sync_on_add()` / `sync_on_remove()`, `when_peer()`, `call_peer()` |
 | `scaffold.py` | `copy_templates()` / `cleanup_files()` / `restore_original_templates()` — template rendering and file lifecycle |
 | `pixi_ops.py` | `PixiOps` — pixi package add/remove operations |
 | `secrets.py` | `SecretsOps` — secret generation and cleanup |
@@ -108,6 +109,7 @@ remove_installable(cls, name, provider=None):
 ## Component Architecture
 
 - [Installable System](installable-system.md) — Installable, Registry, types, orchestrator, scaffold, auto-discovery
+- [Integration Protocol](integration.md) — Peer integration engine: `listens_to`, hooks, conditional packages
 - [Package Architecture](package-architecture.md) — BasePackage, variants, install params, secret generators
 - [Feature Architecture](feature-architecture.md) — BaseFeature, dependencies, variants
 - [Framework Architecture](framework-architecture.md) — BaseFramework, CSS/JS injection

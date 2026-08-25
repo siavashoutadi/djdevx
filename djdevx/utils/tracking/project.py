@@ -70,6 +70,7 @@ class ProjectTracking:
         *,
         variant: Optional[str] = None,
         variants: Optional[list[str]] = None,
+        metadata: Optional[dict[str, Any]] = None,
     ) -> None:
         table = self._ensure_table(section)
         if name not in table:
@@ -82,6 +83,9 @@ class ProjectTracking:
             entry["variant"] = variant
         if variants is not None:
             entry["variants"] = variants
+        if metadata:
+            for key, value in metadata.items():
+                entry[key] = value
         self.save()
 
     def remove(self, section: Section, name: str) -> None:
@@ -116,6 +120,8 @@ class ProjectTracking:
                 info["variant"] = v["variant"]
             if "variants" in v:
                 info["variants"] = list(v["variants"])
+            if "extra_packages" in v:
+                info["extra_packages"] = list(v["extra_packages"])
             if info:
                 result[k] = info
             else:

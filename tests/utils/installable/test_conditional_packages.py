@@ -17,7 +17,7 @@ class LambdaGatedPackage(BasePackage):
     conditional_packages: list[ConditionalPackage] = [
         ConditionalPackage(
             package=PixiPackageSpec(name="lambda-extra", kind="pypi"),
-            when=lambda self: self.use_extra,
+            when=lambda ctx: ctx.installable.use_extra,
         )
     ]
 
@@ -27,8 +27,8 @@ class MethodGatedPackage(BasePackage):
     display_name: str = "Method Gated"
     use_redis: bool = False
 
-    def _needs_redis(self) -> bool:
-        return self.use_redis
+    def _needs_redis(ctx) -> bool:
+        return ctx.installable.use_redis
 
     conditional_packages: list[ConditionalPackage] = [
         ConditionalPackage(
@@ -46,11 +46,11 @@ class MixedGatedPackage(BasePackage):
     conditional_packages: list[ConditionalPackage] = [
         ConditionalPackage(
             package=PixiPackageSpec(name="always-a", kind="pypi"),
-            when=lambda self: self.flag_a,
+            when=lambda ctx: ctx.installable.flag_a,
         ),
         ConditionalPackage(
             package=PixiPackageSpec(name="never-b", kind="pypi"),
-            when=lambda self: self.flag_b,
+            when=lambda ctx: ctx.installable.flag_b,
         ),
     ]
 
@@ -60,8 +60,8 @@ class VariantGatedPackage(BasePackage):
     display_name: str = "Variant Gated"
     use_variant_extra: bool = False
 
-    def _needs_variant_extra(self) -> bool:
-        return self.use_variant_extra
+    def _needs_variant_extra(ctx) -> bool:
+        return ctx.installable.use_variant_extra
 
     variants: dict[str, Variant] = {
         "pro": Variant(
@@ -84,6 +84,13 @@ def make_pkg(pkg_cls, **kwargs):
     return pkg
 
 
+def _fake_tracking():
+    tracker = MagicMock()
+    tracker.list.return_value = {}
+    tracker.get_variants.return_value = []
+    return tracker
+
+
 @pytest.fixture
 def add_mocks():
     with (
@@ -93,6 +100,14 @@ def add_mocks():
         patch("djdevx.utils.installable.installable.format_files", MagicMock()),
         patch.object(SecretsOps, "generate", MagicMock()),
         patch.object(SecretsOps, "__init__", return_value=None),
+        patch(
+            "djdevx.utils.installable.peers.ProjectStructure",
+            **{"return_value.root": "/tmp/fake-root"},
+        ),
+        patch(
+            "djdevx.utils.installable.peers.ProjectTracking",
+            return_value=_fake_tracking(),
+        ),
         patch("djdevx.utils.installable.tracking.ProjectTracking"),
     ):
         yield mock_add
@@ -156,6 +171,14 @@ class TestConditionalPackagesRemove:
             ),
             patch.object(SecretsOps, "remove", MagicMock()),
             patch.object(SecretsOps, "__init__", return_value=None),
+            patch(
+                "djdevx.utils.installable.peers.ProjectStructure",
+                **{"return_value.root": "/tmp/fake-root"},
+            ),
+            patch(
+                "djdevx.utils.installable.peers.ProjectTracking",
+                return_value=_fake_tracking(),
+            ),
             patch("djdevx.utils.installable.tracking.ProjectTracking"),
         ):
             yield mock_rem

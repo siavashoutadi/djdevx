@@ -21,9 +21,10 @@ For type-specific guides, see:
 4. [Secret Generators](#secret-generators)
 5. [Name normalization](#name-normalization)
 6. [Dependencies (needs)](#dependencies-needs)
-7. [Lifecycle Hooks](#lifecycle-hooks)
-8. [Templates](#templates)
-9. [Testing](#testing)
+7. [Peer Integration](#peer-integration)
+8. [Lifecycle Hooks](#lifecycle-hooks)
+9. [Templates](#templates)
+10. [Testing](#testing)
 
 ---
 
@@ -82,8 +83,9 @@ Key rules:
 | `display_name` | `str` | Yes | Human-readable name for CLI output |
 | `description` | `str` | No | Longer description |
 | `pixi_packages` | `list[PixiPackageSpec]` | No | Dependencies via pixi (set `pixi_feature="dev"` for dev-only) |
-| `conditional_packages` | `list[ConditionalPackage]` | No | Pixi packages installed only when their `when(installable)` condition holds |
+| `conditional_packages` | `list[ConditionalPackage]` | No | Pixi packages installed only when their `when(ctx)` condition holds (variants inherit) |
 | `needs` | `list[InstallableRef]` | No | Other installables auto-installed first; removal of a needed installable is blocked while dependents exist |
+| `listens_to` | `list[InstallableRef]` | No | Peers that trigger integration hooks (variants inherit); `when_peer` gates are picked up even without it |
 | `template_path` | `str` | No | Override auto-derived template directory |
 | `install_params` | `list[InstallParam]` | No | Parameters collected at install time |
 | `secret_generators` | `dict[str, Callable]` | No | Maps field names to generator callables |
@@ -147,8 +149,8 @@ class MyPackage(BasePackage):
     display_name: str = "My Package"
     use_extra: bool = False
 
-    def _needs_extra(self) -> bool:
-        return self.use_extra
+    def _needs_extra(ctx) -> bool:
+        return ctx.installable.use_extra
 
     conditional_packages: list[ConditionalPackage] = [
         ConditionalPackage(
@@ -159,7 +161,7 @@ class MyPackage(BasePackage):
 ```
 
 Variants can carry their own `conditional_packages` too — their conditions
-receive the parent installable instance.
+get `ctx.variant` set in addition to `ctx.installable`.
 
 ---
 
@@ -420,6 +422,88 @@ for a real cross-category example (`sso` → `django-allauth`).
 
 ---
 
+## Peer Integration
+
+`needs` installs a hard dependency **before** you. Peer integration is
+different: it declares interest in *optional* peers whose presence should adapt
+your artifacts — without installing them. The integration engine guarantees the
+same code runs no matter which side was installed first.
+
+### Declaration
+
+```python
+from djdevx.utils.installable.types import (
+    ConditionalPackage,
+    InstallableRef,
+    FRAMEWORK,
+)
+from djdevx.utils.installable import when_peer
+
+class MyPackage(BasePackage):
+    # peers I react to via hooks — only needed if you override the hooks;
+    # when_peer gates below are picked up automatically
+    listens_to: list[InstallableRef] = [InstallableRef("bootstrap", FRAMEWORK)]
+
+    # pixi packages gated behind a condition (engine-managed)
+    conditional_packages: list[ConditionalPackage] = [
+        ConditionalPackage(
+            package=PixiPackageSpec("some-integration-lib", kind="pypi"),
+            when=when_peer(InstallableRef("bootstrap", FRAMEWORK)),
+        )
+    ]
+```
+
+`when_peer(...)` alone is enough for package install/remove sync. Add the peer
+to `listens_to` only when you also implement `on_peer_added` / `on_peer_removed`
+hooks (e.g. for template cleanup).
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `InstallableRef.name` | `str` | The peer's name; normalized `_` -> `-` at construction |
+| `InstallableRef.kind` | `InstallableKind` | Category of the peer (`PACKAGE`, `FEATURE`, `FRAMEWORK`, `DATABASE`, `CACHE`) |
+| `ConditionalPackage.when` | `Callable[..., bool]` | Gate: receives the installable instance; may declare `peer` (an `InstallableRef`)/`project` params the engine injects. Use `when_peer(InstallableRef(...))` for peer gates |
+| `ConditionalPackage.package` | `PixiPackageSpec` | Pixi spec added/removed by the engine, tracked as `extra_packages` |
+
+### Hook signatures
+
+```python
+def on_peer_added(self, peer, variant=None) -> None:
+    """Apply peer presence. Idempotent."""
+
+def on_peer_removed(self, peer, variant=None) -> None:
+    """Undo peer presence. Idempotent."""
+```
+
+`peer` is an instance of the peer's class; `variant` is its installed `Variant`
+(or `None`). With multiple variants installed you get one call per variant.
+Hooks are error-isolated (failures warn and continue) and must be idempotent.
+
+### Concrete example
+
+A package that ships framework-styled template overlays kept inside its own
+templates directory:
+
+```python
+class MyPackage(BasePackage):
+    name: str = "my-package"
+    display_name: str = "My Package"
+    listens_to: list[InstallableRef] = [InstallableRef("bootstrap", FRAMEWORK)]
+
+    def on_peer_added(self, peer, variant=None) -> None:
+        overlay = self.template_dir / "frameworks" / peer.name
+        if overlay.exists():
+            copy_tree_over(overlay, self.structure.root)  # re-render my own files
+
+    def on_peer_removed(self, peer, variant=None) -> None:
+        restore_base_templates(self)  # undo the adaptation
+```
+
+Install my package first or the framework first — the same hook runs either
+way. For full semantics (pull/push ordering, multi-variant calls, `call_peer`,
+guarantees), see [Integration Protocol](integration.md).
+
+---
+
 ## Lifecycle Hooks
 
 Override these in your installable for custom behavior:
@@ -617,6 +701,7 @@ See [Testing](testing.md) for full details on test patterns.
 ## Related
 
 - [Installable System](installable-system.md) — Full architecture reference
+- [Integration Protocol](integration.md) — Peer integration reference
 - [Add a Package](adding-a-package.md) — Package-specific how-to
 - [Add a Feature](adding-a-feature.md) — Feature-specific how-to
 - [Add a Framework](adding-a-framework.md) — Framework-specific how-to

@@ -32,16 +32,9 @@ def _find_dependents(target_cls) -> list[str]:
                 get_section(entry_cls), entry_cls.get_installable_name()
             ):
                 continue
-            needs_field = entry_cls.model_fields.get("needs")
-            if needs_field is None:
-                continue
-            needs = needs_field.get_default(call_default_factory=True)
-            for ref in needs or []:
-                if ref != target_ref:
-                    continue
-                display = entry_cls.model_fields["display_name"].default
-                dependents.append(display or entry_cls.get_installable_name())
-                break
+            entry = entry_cls()
+            if any(ref == target_ref for ref in entry.needs):
+                dependents.append(entry.display_name or entry.get_installable_name())
     return sorted(dependents)
 
 
