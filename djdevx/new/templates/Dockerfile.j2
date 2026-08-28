@@ -11,8 +11,8 @@ ADD . /app
 RUN --mount=type=cache,target=/root/.cache/pixi \
     curl -fsSL https://pixi.sh/install.sh | sh && \
     mkdir -p /app/locale/ && \
-    pixi run manage.py collectstatic --noinput && \
-    pixi run manage.py compilemessages
+    pixi run --frozen manage.py collectstatic --noinput && \
+    pixi run --frozen manage.py compilemessages
 
 FROM base AS builder
 
