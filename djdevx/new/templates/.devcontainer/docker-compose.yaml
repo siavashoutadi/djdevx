@@ -1,0 +1,16 @@
+services:
+  devcontainer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ../:/home/devuser/workspace:cached
+    environment:
+      DEVCONTAINER: 'true'
+    networks:
+      - devcontainer
+    command: sleep infinity
+
+networks:
+  devcontainer:
+    driver: bridge
