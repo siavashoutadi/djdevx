@@ -245,7 +245,11 @@ ddx packages add django-storages
 ## Install Parameters
 
 `InstallParam` declares CLI parameters collected at install time and passed
-to Jinja2 templates as context variables.
+to Jinja2 templates as context variables. The orchestrator handles prompting
+using `prompts.*()` wrappers under the hood — you never interact with
+questionary directly. For non-installable commands that need interactive
+input, use `prompts.*()` directly (see
+[Console Utilities](console.md#interactive-fallback-pattern)).
 
 ### Simple params
 

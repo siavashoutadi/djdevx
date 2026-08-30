@@ -157,6 +157,10 @@ if commands.migrations_pending():
 ### Console Output
 
 - Use `PrintConsole` singleton and prompt wrappers for all CLI output
+- Use `prompts.*()` wrappers for interactive input — never use
+  `typer.Option(prompt=...)`; make params `Optional[T]` with `None` default
+  and prompt via questionary in the function body (see
+  [Interactive Fallback Pattern](console.md#interactive-fallback-pattern))
 - See [Console Utilities](console.md) for the full API and style guidelines
 
 ### Code Quality

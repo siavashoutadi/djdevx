@@ -138,6 +138,82 @@ api_key = prompts.text("API key:", default="")
 secret = prompts.password("Secret value:")
 ```
 
+### Interactive Fallback Pattern
+
+For commands that accept both CLI flags and interactive input, make parameters
+`Optional` with `None` defaults and prompt via questionary when not provided.
+Never use `typer.Option(prompt=...)` — always use the `prompts` wrappers.
+
+```python
+import typer
+from typing import Optional
+from typing_extensions import Annotated
+from djdevx.utils.console import prompts
+
+def my_command(
+    name: Annotated[
+        Optional[str], typer.Option(help="Item name")
+    ] = None,
+    provider: Annotated[
+        Optional[str], typer.Option("--provider", "-p", help="Provider")
+    ] = None,
+    verbose: Annotated[
+        bool, typer.Option("--verbose", "-v", help="Verbose output")
+    ] = False,
+) -> None:
+    if name is None:
+        name = prompts.text("Item name")
+        if name is None:
+            raise typer.Abort()
+
+    if provider is None:
+        provider = prompts.select(
+            "Which provider?", choices=["postgres", "mysql", "sqlite"]
+        )
+        if provider is None:
+            raise typer.Abort()
+
+    # ... command logic using name, provider, verbose
+```
+
+When the user runs `my-command --name foo --provider postgres`, the questionary
+prompts are skipped entirely. When flags are omitted, the interactive prompts
+fill in the gaps.
+
+### Handling Ctrl+C
+
+All prompt functions return `None` when the user presses Ctrl+C or Escape.
+Always check for `None` and abort:
+
+```python
+result = prompts.text("Enter a value")
+if result is None:
+    raise typer.Abort()
+```
+
+### Prompt Type Guide
+
+| Scenario | Function | Example |
+|----------|----------|---------|
+| Pick one from a known list | `prompts.select()` | Database provider, cache backend |
+| Pick many from a known list | `prompts.checkbox()` | Packages to install, features to enable |
+| Yes/no decision | `prompts.confirm()` | Initialize git? Enable debug mode? |
+| Free-form string input | `prompts.text()` | Project name, description |
+| Sensitive/hidden input | `prompts.password()` | API keys, tokens, secrets |
+
+For select and checkbox, use `Choice` objects when you need display titles
+different from the underlying values:
+
+```python
+from djdevx.utils.console.prompts import Choice
+
+choices = [
+    Choice(title="PostgreSQL", value="postgres"),
+    Choice(title="MySQL", value="mysql"),
+]
+db = prompts.select("Which database?", choices=choices)
+```
+
 ## Style Guidelines
 
 - Use `step()` / `step_done()` for progress indication during install/remove

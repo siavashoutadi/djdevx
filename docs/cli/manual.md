@@ -103,10 +103,10 @@ $ djdevx new [OPTIONS] COMMAND [ARGS]...
 
 **Options**:
 
-* `--project-name TEXT`: The name of the project  [default: my-project]
-* `--project-description TEXT`: The description of the project  [default: My project is awesome]
-* `--project-directory PATH`: The directory to initialize the project in  [default: .]
-* `--python-version TEXT`: The minimum python version for the project  [default: 3.14]
+* `--project-name TEXT`: The name of the project
+* `--project-description TEXT`: The description of the project
+* `--project-directory PATH`: The directory to initialize the project in
+* `--python-version TEXT`: The minimum python version for the project
 * `--git-init / --no-git-init`: whether to initialize a git repository in the project directory  [default: git-init]
 * `-v, --verbose`: Show full output of all commands
 * `--help`: Show this message and exit.

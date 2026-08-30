@@ -3,10 +3,12 @@
 import subprocess
 import typer
 
+from typing import Optional
 from typing_extensions import Annotated
 from pathlib import Path
 
 from ..utils.console.print import print_console
+from ..utils.console import prompts
 from ..utils.project.secret_manager import SecretManager
 from ..utils.project.pixi_runner import PixiRunner
 from ..utils.generators import generate_random_password
@@ -17,37 +19,29 @@ from ..requirement import verify as requirement_check
 app = typer.Typer()
 
 DJANGO_VERSION = "6.0"
+DJANGO_PYTHON_VERSIONS: dict[str, list[str]] = {
+    "6.0": ["3.12", "3.13", "3.14"],
+}
 
 
 @app.callback(invoke_without_command=True)
 def new(
     project_name: Annotated[
-        str,
-        typer.Option(
-            help="The name of the project", prompt="Please enter the project name"
-        ),
-    ] = "my-project",
+        Optional[str],
+        typer.Option(help="The name of the project"),
+    ] = None,
     project_description: Annotated[
-        str,
-        typer.Option(
-            help="The description of the project",
-            prompt="Please enter the project description",
-        ),
-    ] = "My project is awesome",
+        Optional[str],
+        typer.Option(help="The description of the project"),
+    ] = None,
     project_directory: Annotated[
-        Path,
-        typer.Option(
-            help="The directory to initialize the project in",
-            prompt="Please enter directory to initialize the project in",
-        ),
-    ] = Path("."),
+        Optional[Path],
+        typer.Option(help="The directory to initialize the project in"),
+    ] = None,
     python_version: Annotated[
-        str,
-        typer.Option(
-            help="The minimum python version for the project",
-            prompt="Please enter the minimum python version for the project",
-        ),
-    ] = "3.14",
+        Optional[str],
+        typer.Option(help="The minimum python version for the project"),
+    ] = None,
     git_init: Annotated[
         bool,
         typer.Option(
@@ -61,6 +55,32 @@ def new(
 ):
     """Create a new Django project."""
     requirement_check()
+
+    if project_name is None:
+        project_name = prompts.text("Project name:", default="my-project")
+        if project_name is None:
+            raise typer.Abort()
+
+    if project_description is None:
+        project_description = prompts.text(
+            "Project description:", default="My project is awesome"
+        )
+        if project_description is None:
+            raise typer.Abort()
+
+    if project_directory is None:
+        raw = prompts.text("Directory to initialize the project in:", default=".")
+        if raw is None:
+            raise typer.Abort()
+        project_directory = Path(raw)
+
+    if python_version is None:
+        python_version = prompts.select(
+            "Select the minimum Python version",
+            choices=DJANGO_PYTHON_VERSIONS[DJANGO_VERSION],
+        )
+        if python_version is None:
+            raise typer.Abort()
 
     print_console.step("Initializing the project ...")
 
