@@ -118,9 +118,7 @@ class Installable(InstallableConfig):
         variant = self.variants.get(variant_name) if variant_name else None
 
         if not variant_name and self.exclusive_variants and self.variants:
-            raise ValueError(
-                f"{self.name} has exclusive variants \u2014 must specify one"
-            )
+            raise ValueError(f"{self.name} has exclusive variants — must specify one")
 
         if install_kwargs is None:
             install_kwargs = {}
