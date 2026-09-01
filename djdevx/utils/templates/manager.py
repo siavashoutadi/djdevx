@@ -37,6 +37,7 @@ class TemplateManager:
         dest_dir: Path,
         template_context: Optional[dict] = None,
         exclude_files: Optional[List[Path]] = None,
+        exclude_dirs: Optional[List[str]] = None,
     ) -> None:
         """
         Copy template files from source to destination with Jinja2 processing.
@@ -46,11 +47,14 @@ class TemplateManager:
             dest_dir: Destination directory for processed files
             template_context: Context variables for template rendering
             exclude_files: List of file patterns to exclude from copying
+            exclude_dirs: List of directory names to skip during traversal
         """
         if template_context is None:
             template_context = {}
         if exclude_files is None:
             exclude_files = []
+        if exclude_dirs is None:
+            exclude_dirs = []
 
         dest_dir.mkdir(parents=True, exist_ok=True)
         jinja_env = Environment(
@@ -63,6 +67,8 @@ class TemplateManager:
                 continue
 
             rel_path = source_path.relative_to(source_dir)
+            if any(part in exclude_dirs for part in rel_path.parts):
+                continue
 
             rendered_parts = [
                 self.render_template_string(part, template_context)
@@ -137,6 +143,7 @@ class TemplateManager:
         source_dir: Path,
         template_context: Optional[dict] = None,
         exclude_files: Optional[List[Path]] = None,
+        exclude_dirs: Optional[List[str]] = None,
     ) -> list[Path]:
         """
         Return list of relative paths that copy_templates would create.
@@ -147,11 +154,14 @@ class TemplateManager:
             source_dir: Source directory containing templates
             template_context: Context variables for Jinja2 rendering
             exclude_files: List of file patterns to exclude
+            exclude_dirs: List of directory names to skip during traversal
         """
         if template_context is None:
             template_context = {}
         if exclude_files is None:
             exclude_files = []
+        if exclude_dirs is None:
+            exclude_dirs = []
 
         result: list[Path] = []
 
@@ -162,6 +172,8 @@ class TemplateManager:
                 continue
 
             rel_path = source_path.relative_to(source_dir)
+            if any(part in exclude_dirs for part in rel_path.parts):
+                continue
 
             rendered_parts = [
                 self.render_template_string(part, template_context)
