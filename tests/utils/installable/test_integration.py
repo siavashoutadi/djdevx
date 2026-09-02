@@ -1,8 +1,9 @@
 """Unit tests for the peer integration engine (utils/installable/peers.py)."""
 
 import os
-import tomllib
+
 from pathlib import Path
+from typing import ClassVar
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -15,7 +16,9 @@ from djdevx.utils.installable.peers import (
     call_peer,
     sync_on_add,
     sync_on_remove,
-    when_peer,
+    copy_peer_templates,
+    cleanup_peer_templates,
+    cleanup_all_peer_templates,
 )
 from djdevx.utils.installable.installable import Installable
 from djdevx.utils.installable.pixi_ops import PixiOps
@@ -24,7 +27,6 @@ from djdevx.utils.installable.secrets import SecretsOps
 from djdevx.utils.installable.types import (
     FRAMEWORK,
     PACKAGE,
-    ConditionalPackage,
     InstallableRef,
     Variant,
 )
@@ -53,11 +55,6 @@ def track(root: Path, section: Section, name: str, variants=None) -> None:
     ProjectTracking(root).add(section, name, name.title(), variants=variants)
 
 
-def extra_packages_in_toml(root: Path, section: Section, name: str):
-    doc = tomllib.loads((root / "djdevx.toml").read_text())
-    return doc.get(section.value, {}).get(name, {}).get("extra_packages")
-
-
 # ── Dummy installables ─────────────────────────────────────────────────────────
 
 
@@ -79,9 +76,11 @@ class ListenerPackage(Installable):
     name: str = "listener"
     display_name: str = "Listener"
     section: Section = Section.PACKAGES
-    listens_to: list[InstallableRef] = [
-        InstallableRef(name="bootstrap", kind=FRAMEWORK)
-    ]
+    peer_pixi_packages: dict = {
+        InstallableRef(name="bootstrap", kind=FRAMEWORK): [
+            PixiPackageSpec(name="listener-extra", kind="pypi"),
+        ]
+    }
 
     def on_peer_added(self, peer, variant=None) -> None:
         CALLS.append(("added", peer.name, variant.name if variant else None))
@@ -95,15 +94,18 @@ class NamedListenerPackage(ListenerPackage):
 
     name: str = "named-listener"
     display_name: str = "Named Listener"
-    listens_to: list[InstallableRef] = [
-        InstallableRef(kind=FRAMEWORK, name="bootstrap")
-    ]
+    peer_pixi_packages: dict = {
+        InstallableRef(kind=FRAMEWORK, name="bootstrap"): [
+            PixiPackageSpec(name="listener-extra", kind="pypi"),
+        ]
+    }
 
 
 class UninterestedPackage(Installable):
     name: str = "uninterested"
     display_name: str = "Uninterested"
     section: Section = Section.PACKAGES
+    peer_pixi_packages: dict = {}
 
     def on_peer_added(self, peer, variant=None) -> None:
         CALLS.append(("added", peer.name, None))
@@ -113,43 +115,40 @@ class RaisingListenerPackage(Installable):
     name: str = "raising-listener"
     display_name: str = "Raising Listener"
     section: Section = Section.PACKAGES
-    listens_to: list[InstallableRef] = [
-        InstallableRef(name="bootstrap", kind=FRAMEWORK)
-    ]
+    peer_pixi_packages: dict = {
+        InstallableRef(name="bootstrap", kind=FRAMEWORK): [
+            PixiPackageSpec(name="raising-extra", kind="pypi"),
+        ]
+    }
 
     def on_peer_added(self, peer, variant=None) -> None:
         raise RuntimeError("boom")
 
 
 class GatedListenerPackage(Installable):
-    """Conditional packages gated on the bootstrap framework."""
+    """Peer packages gated on the bootstrap framework."""
 
     name: str = "gated-listener"
     display_name: str = "Gated Listener"
     section: Section = Section.PACKAGES
-    listens_to: list[InstallableRef] = [
-        InstallableRef(name="bootstrap", kind=FRAMEWORK)
-    ]
-    conditional_packages: list[ConditionalPackage] = [
-        ConditionalPackage(
-            package=PixiPackageSpec(name="gated-extra", kind="pypi"),
-            when=when_peer(InstallableRef("bootstrap", FRAMEWORK)),
-        )
-    ]
+    peer_pixi_packages: dict = {
+        InstallableRef(name="bootstrap", kind=FRAMEWORK): [
+            PixiPackageSpec(name="gated-extra", kind="pypi"),
+        ]
+    }
 
 
 class SelfCleanListenerPackage(Installable):
-    """No listens_to, but owns conditional packages gated on bootstrap."""
+    """No hooks, but owns peer packages gated on bootstrap."""
 
     name: str = "self-clean-listener"
     display_name: str = "Self Clean Listener"
     section: Section = Section.PACKAGES
-    conditional_packages: list[ConditionalPackage] = [
-        ConditionalPackage(
-            package=PixiPackageSpec(name="self-clean-extra", kind="pypi"),
-            when=when_peer(InstallableRef("bootstrap", FRAMEWORK)),
-        )
-    ]
+    peer_pixi_packages: dict = {
+        InstallableRef(name="bootstrap", kind=FRAMEWORK): [
+            PixiPackageSpec(name="self-clean-extra", kind="pypi"),
+        ]
+    }
 
 
 class RecursingListenerPackage(Installable):
@@ -158,9 +157,11 @@ class RecursingListenerPackage(Installable):
     name: str = "recursing-listener"
     display_name: str = "Recursing Listener"
     section: Section = Section.PACKAGES
-    listens_to: list[InstallableRef] = [
-        InstallableRef(name="bootstrap", kind=FRAMEWORK)
-    ]
+    peer_pixi_packages: dict = {
+        InstallableRef(name="bootstrap", kind=FRAMEWORK): [
+            PixiPackageSpec(name="recursing-extra", kind="pypi"),
+        ]
+    }
     sync_kwargs: dict = {}
 
     def on_peer_added(self, peer, variant=None) -> None:
@@ -204,7 +205,12 @@ class TestMatching:
 
 
 class TestPull:
-    def test_fires_when_peer_already_installed(self, root):
+    @pytest.fixture
+    def pixi_ops(self):
+        with patch("djdevx.utils.installable.peers.PixiOps") as ops:
+            yield ops.return_value
+
+    def test_fires_when_peer_already_installed(self, root, pixi_ops):
         track(root, Section.FRAMEWORKS, "bootstrap")
         registries = make_registries(ListenerPackage, FwPeer)
 
@@ -212,14 +218,14 @@ class TestPull:
 
         assert CALLS == [("added", "bootstrap", None)]
 
-    def test_does_not_fire_when_peer_absent(self, root):
+    def test_does_not_fire_when_peer_absent(self, root, pixi_ops):
         registries = make_registries(ListenerPackage, FwPeer)
 
         sync_on_add(ListenerPackage(), registries=registries, project_root=root)
 
         assert CALLS == []
 
-    def test_fires_once_per_installed_variant(self, root):
+    def test_fires_once_per_installed_variant(self, root, pixi_ops):
         track(root, Section.FRAMEWORKS, "bootstrap", variants=["account", "mfa"])
 
         class MultiVariantFw(FwPeer):
@@ -237,7 +243,7 @@ class TestPull:
             ("added", "bootstrap", "mfa"),
         ]
 
-    def test_unregistered_installed_peer_is_skipped_silently(self, root):
+    def test_unregistered_installed_peer_is_skipped_silently(self, root, pixi_ops):
         track(root, Section.FRAMEWORKS, "ghost-framework")
         registries = make_registries(ListenerPackage, FwPeer)
 
@@ -245,7 +251,7 @@ class TestPull:
 
         assert CALLS == []
 
-    def test_named_interest_filters_peers(self, root):
+    def test_named_interest_filters_peers(self, root, pixi_ops):
         track(root, Section.FRAMEWORKS, "tailwind-cli")
         registries = make_registries(NamedListenerPackage, FwPeer, OtherFwPeer)
 
@@ -258,7 +264,12 @@ class TestPull:
 
 
 class TestPush:
-    def test_fires_when_listener_already_installed(self, root):
+    @pytest.fixture
+    def pixi_ops(self):
+        with patch("djdevx.utils.installable.peers.PixiOps") as ops:
+            yield ops.return_value
+
+    def test_fires_when_listener_already_installed(self, root, pixi_ops):
         track(root, Section.PACKAGES, "listener")
         registries = make_registries(ListenerPackage, FwPeer)
 
@@ -266,14 +277,14 @@ class TestPush:
 
         assert CALLS == [("added", "bootstrap", None)]
 
-    def test_not_fired_for_non_installed_listeners(self, root):
+    def test_not_fired_for_non_installed_listeners(self, root, pixi_ops):
         registries = make_registries(ListenerPackage, FwPeer)
 
         sync_on_add(FwPeer(), registries=registries, project_root=root)
 
         assert CALLS == []
 
-    def test_cross_category_framework_to_package(self, root):
+    def test_cross_category_framework_to_package(self, root, pixi_ops):
         """Push works across categories: framework add reaches package listener."""
         track(root, Section.PACKAGES, "listener")
         registries = make_registries(ListenerPackage, FwPeer)
@@ -282,7 +293,7 @@ class TestPush:
 
         assert ("added", "bootstrap", None) in CALLS
 
-    def test_unregistered_installed_listener_is_skipped_silently(self, root):
+    def test_unregistered_installed_listener_is_skipped_silently(self, root, pixi_ops):
         track(root, Section.PACKAGES, "ghost-package")
         registries = make_registries(ListenerPackage, FwPeer)
 
@@ -295,7 +306,14 @@ class TestPush:
 
 
 class TestUnwind:
-    def test_remove_triggers_on_peer_removed_on_installed_listeners(self, root):
+    @pytest.fixture
+    def pixi_ops(self):
+        with patch("djdevx.utils.installable.peers.PixiOps") as ops:
+            yield ops.return_value
+
+    def test_remove_triggers_on_peer_removed_on_installed_listeners(
+        self, root, pixi_ops
+    ):
         track(root, Section.PACKAGES, "listener")
         registries = make_registries(ListenerPackage, FwPeer)
 
@@ -303,7 +321,7 @@ class TestUnwind:
 
         assert CALLS == [("removed", "bootstrap", None)]
 
-    def test_variant_scoped_removal_passes_variant(self, root):
+    def test_variant_scoped_removal_passes_variant(self, root, pixi_ops):
         class MultiVariantFw(FwPeer):
             variants: dict = {
                 "account": Variant(name="account", display_name="Account"),
@@ -322,7 +340,7 @@ class TestUnwind:
 
         assert CALLS == [("removed", "bootstrap", "mfa")]
 
-    def test_no_unwind_for_non_installed_listeners(self, root):
+    def test_no_unwind_for_non_installed_listeners(self, root, pixi_ops):
         registries = make_registries(ListenerPackage, FwPeer)
 
         sync_on_remove(FwPeer(), registries=registries, project_root=root)
@@ -330,49 +348,45 @@ class TestUnwind:
         assert CALLS == []
 
 
-# ── Implicit interest via when_peer gates ─────────────────────────────────────
+# ── Peer packages ──────────────────────────────────────────────────────────────
 
 
 class GateOnlyPackage(Installable):
-    """Reacts to bootstrap purely via a when_peer gate — no listens_to."""
+    """Reacts to bootstrap purely via peer_pixi_packages — no hooks."""
 
     name: str = "gate-only"
     display_name: str = "Gate Only"
     section: Section = Section.PACKAGES
-    conditional_packages: list[ConditionalPackage] = [
-        ConditionalPackage(
-            package=PixiPackageSpec(name="gate-only-extra", kind="pypi"),
-            when=when_peer(InstallableRef("bootstrap", FRAMEWORK)),
-        )
-    ]
+    peer_pixi_packages: dict = {
+        InstallableRef(name="bootstrap", kind=FRAMEWORK): [
+            PixiPackageSpec(name="gate-only-extra", kind="pypi"),
+        ]
+    }
 
 
 class HookedGatedPackage(Installable):
-    """Declares the same ref both ways — the hook must fire exactly once."""
+    """Declares peer packages and hooks for bootstrap."""
 
     name: str = "hooked-gated"
     display_name: str = "Hooked Gated"
     section: Section = Section.PACKAGES
-    listens_to: list[InstallableRef] = [InstallableRef("bootstrap", FRAMEWORK)]
-    conditional_packages: list[ConditionalPackage] = [
-        ConditionalPackage(
-            package=PixiPackageSpec(name="hooked-extra", kind="pypi"),
-            when=when_peer(InstallableRef("bootstrap", FRAMEWORK)),
-        )
-    ]
+    peer_pixi_packages: dict = {
+        InstallableRef(name="bootstrap", kind=FRAMEWORK): [
+            PixiPackageSpec(name="hooked-extra", kind="pypi"),
+        ]
+    }
 
     def on_peer_added(self, peer, variant=None) -> None:
         CALLS.append(("added", peer.name, None))
 
 
-class TestImplicitGateInterest:
+class TestPeerPackages:
     @pytest.fixture
     def pixi_ops(self):
         with patch("djdevx.utils.installable.peers.PixiOps") as ops:
             yield ops.return_value
 
-    def test_push_applies_gate_without_listens_to(self, root, pixi_ops):
-        # both sides tracked: sync runs after each side's own install
+    def test_push_applies_peer_packages(self, root, pixi_ops):
         track(root, Section.PACKAGES, "gate-only")
         track(root, Section.FRAMEWORKS, "bootstrap")
         registries = make_registries(GateOnlyPackage, FwPeer)
@@ -382,11 +396,8 @@ class TestImplicitGateInterest:
         pixi_ops.add_packages.assert_called_once_with(
             [PixiPackageSpec(name="gate-only-extra", kind="pypi")]
         )
-        assert extra_packages_in_toml(root, Section.PACKAGES, "gate-only") == [
-            "gate-only-extra"
-        ]
 
-    def test_pull_applies_gate_for_peer_installed_earlier(self, root, pixi_ops):
+    def test_pull_applies_peer_for_peer_installed_earlier(self, root, pixi_ops):
         track(root, Section.FRAMEWORKS, "bootstrap")
         registries = make_registries(GateOnlyPackage, FwPeer)
 
@@ -396,13 +407,9 @@ class TestImplicitGateInterest:
             [PixiPackageSpec(name="gate-only-extra", kind="pypi")]
         )
 
-    def test_gate_only_unwinds_when_peer_removed(self, root, pixi_ops):
+    def test_peer_unwinds_when_removed(self, root, pixi_ops):
         track(root, Section.PACKAGES, "gate-only")
-        ProjectTracking(root).add(
-            Section.PACKAGES,
-            "gate-only",
-            metadata={"extra_packages": ["gate-only-extra"]},
-        )
+
         registries = make_registries(GateOnlyPackage, FwPeer)
 
         sync_on_remove(FwPeer(), registries=registries, project_root=root)
@@ -410,9 +417,8 @@ class TestImplicitGateInterest:
         pixi_ops.remove_packages.assert_called_once_with(
             [PixiPackageSpec(name="gate-only-extra", kind="pypi")]
         )
-        assert extra_packages_in_toml(root, Section.PACKAGES, "gate-only") == []
 
-    def test_ref_declared_both_ways_fires_hook_once(self, root, pixi_ops):
+    def test_hook_and_package_synced_together(self, root, pixi_ops):
         track(root, Section.PACKAGES, "hooked-gated")
         track(root, Section.FRAMEWORKS, "bootstrap")
         registries = make_registries(HookedGatedPackage, FwPeer)
@@ -436,12 +442,11 @@ class GatedVariantOwner(Installable):
         "alpha": Variant(name="alpha", display_name="Alpha"),
         "beta": Variant(name="beta", display_name="Beta"),
     }
-    conditional_packages: list[ConditionalPackage] = [
-        ConditionalPackage(
-            package=PixiPackageSpec(name="owner-extra", kind="pypi"),
-            when=lambda ctx: True,
-        )
-    ]
+    peer_pixi_packages: dict = {
+        InstallableRef(name="bootstrap", kind=FRAMEWORK): [
+            PixiPackageSpec(name="owner-extra", kind="pypi"),
+        ]
+    }
 
 
 class TestPartialVariantRemoval:
@@ -457,11 +462,7 @@ class TestPartialVariantRemoval:
             "gated-variant-owner",
             variants=["alpha", "beta"],
         )
-        ProjectTracking(root).add(
-            Section.PACKAGES,
-            "gated-variant-owner",
-            metadata={"extra_packages": ["owner-extra"]},
-        )
+
         return make_registries(GatedVariantOwner)
 
     def test_variant_removal_keeps_records_and_packages(self, root, pixi_ops):
@@ -477,9 +478,6 @@ class TestPartialVariantRemoval:
         )
 
         pixi_ops.remove_packages.assert_not_called()
-        assert extra_packages_in_toml(
-            root, Section.PACKAGES, "gated-variant-owner"
-        ) == ["owner-extra"]
 
     def test_full_removal_still_drops_records_and_packages(self, root, pixi_ops):
         registries = self.seed(root)
@@ -493,9 +491,6 @@ class TestPartialVariantRemoval:
 
         pixi_ops.remove_packages.assert_called_once_with(
             [PixiPackageSpec(name="owner-extra", kind="pypi")]
-        )
-        assert (
-            extra_packages_in_toml(root, Section.PACKAGES, "gated-variant-owner") == []
         )
 
     @pytest.mark.parametrize(
@@ -541,225 +536,16 @@ class TestPartialVariantRemoval:
         assert received["fully_removed"] is expected
 
 
-# ── Conditional packages ───────────────────────────────────────────────────────
-
-
-class TestConditionalPackages:
-    @pytest.fixture
-    def pixi_ops(self):
-        with patch("djdevx.utils.installable.peers.PixiOps") as ops:
-            yield ops.return_value
-
-    def test_added_on_integration_and_recorded_in_tracking(self, root, pixi_ops):
-        track(root, Section.FRAMEWORKS, "bootstrap")
-        registries = make_registries(GatedListenerPackage, FwPeer)
-
-        sync_on_add(GatedListenerPackage(), registries=registries, project_root=root)
-
-        pixi_ops.add_packages.assert_called_once_with(
-            [PixiPackageSpec(name="gated-extra", kind="pypi")]
-        )
-        assert extra_packages_in_toml(root, Section.PACKAGES, "gated-listener") == [
-            "gated-extra"
-        ]
-
-    def test_removed_on_unwind_and_cleared_from_tracking(self, root, pixi_ops):
-        track(root, Section.PACKAGES, "gated-listener")
-        ProjectTracking(root).add(
-            Section.PACKAGES,
-            "gated-listener",
-            metadata={"extra_packages": ["gated-extra"]},
-        )
-        registries = make_registries(GatedListenerPackage, FwPeer)
-
-        sync_on_remove(FwPeer(), registries=registries, project_root=root)
-
-        pixi_ops.remove_packages.assert_called_once_with(
-            [PixiPackageSpec(name="gated-extra", kind="pypi")]
-        )
-        assert extra_packages_in_toml(root, Section.PACKAGES, "gated-listener") == []
-
-    def test_listener_self_cleanup_removes_gated_packages(self, root, pixi_ops):
-        """Removing the listening side clears its own gated packages."""
-        track(root, Section.FRAMEWORKS, "bootstrap")  # gate still installed
-        track(root, Section.PACKAGES, "self-clean-listener")
-        ProjectTracking(root).add(
-            Section.PACKAGES,
-            "self-clean-listener",
-            metadata={"extra_packages": ["self-clean-extra"]},
-        )
-        registries = make_registries(SelfCleanListenerPackage, FwPeer)
-
-        sync_on_remove(
-            SelfCleanListenerPackage(), registries=registries, project_root=root
-        )
-
-        pixi_ops.remove_packages.assert_called_once_with(
-            [PixiPackageSpec(name="self-clean-extra", kind="pypi")]
-        )
-        assert (
-            extra_packages_in_toml(root, Section.PACKAGES, "self-clean-listener") == []
-        )
-
-    def test_self_cleanup_skips_gate_already_gone(self, root, pixi_ops):
-        """When the gate was removed first, its unwind already handled cleanup."""
-        registries = make_registries(SelfCleanListenerPackage, FwPeer)
-
-        sync_on_remove(
-            SelfCleanListenerPackage(), registries=registries, project_root=root
-        )
-
-        pixi_ops.remove_packages.assert_not_called()
-
-    def test_not_added_when_gate_peer_absent(self, root, pixi_ops):
-        registries = make_registries(GatedListenerPackage, FwPeer)
-
-        sync_on_add(GatedListenerPackage(), registries=registries, project_root=root)
-
-        pixi_ops.add_packages.assert_not_called()
-        assert extra_packages_in_toml(root, Section.PACKAGES, "gated-listener") is None
-
-    def test_unwind_skips_unrelated_peer_removal(self, root, pixi_ops):
-        """Removing one framework must not unwind gates on another framework."""
-        track(root, Section.FRAMEWORKS, "bootstrap")  # gate still installed
-        track(root, Section.PACKAGES, "gated-listener")
-        registries = make_registries(GatedListenerPackage, FwPeer, OtherFwPeer)
-
-        sync_on_remove(OtherFwPeer(), registries=registries, project_root=root)
-
-        pixi_ops.remove_packages.assert_not_called()
-
-
-class ParamGatedPackage(Installable):
-    """Custom condition driven by instance config (no peer context needed)."""
-
-    name: str = "param-gated"
-    display_name: str = "Param Gated"
-    section: Section = Section.PACKAGES
-    listens_to: list[InstallableRef] = [
-        InstallableRef(name="bootstrap", kind=FRAMEWORK)
-    ]
-    use_extras: bool = False
-    conditional_packages: list[ConditionalPackage] = [
-        ConditionalPackage(
-            package=PixiPackageSpec(name="param-extra", kind="pypi"),
-            when=lambda ctx: ctx.installable.use_extras,
-        )
-    ]
-
-
-class CombinedConditionPackage(Installable):
-    """Condition combining peer presence (state) with instance state."""
-
-    name: str = "combined-condition"
-    display_name: str = "Combined Condition"
-    section: Section = Section.PACKAGES
-    listens_to: list[InstallableRef] = [
-        InstallableRef(name="bootstrap", kind=FRAMEWORK)
-    ]
-    require_flag: bool = True
-
-    def _when_bootstrap_and_flag(ctx) -> bool:
-        return ctx.installable.require_flag and ctx.project.is_installed(
-            FRAMEWORK.section, "bootstrap"
-        )
-
-    conditional_packages: list[ConditionalPackage] = [
-        ConditionalPackage(
-            package=PixiPackageSpec(name="combined-extra", kind="pypi"),
-            when=_when_bootstrap_and_flag,
-        )
-    ]
-
-
-class TestCustomConditions:
-    @pytest.fixture
-    def pixi_ops(self):
-        with patch("djdevx.utils.installable.peers.PixiOps") as ops:
-            yield ops.return_value
-
-    def test_param_condition_true_applies_on_sync(self, root, pixi_ops):
-        track(root, Section.FRAMEWORKS, "bootstrap")
-        registries = make_registries(ParamGatedPackage, FwPeer)
-
-        sync_on_add(
-            ParamGatedPackage(use_extras=True),
-            registries=registries,
-            project_root=root,
-        )
-
-        pixi_ops.add_packages.assert_called_once_with(
-            [PixiPackageSpec(name="param-extra", kind="pypi")]
-        )
-
-    def test_param_condition_false_skips_apply(self, root, pixi_ops):
-        track(root, Section.FRAMEWORKS, "bootstrap")
-        registries = make_registries(ParamGatedPackage, FwPeer)
-
-        sync_on_add(
-            ParamGatedPackage(use_extras=False),
-            registries=registries,
-            project_root=root,
-        )
-
-        pixi_ops.add_packages.assert_not_called()
-
-    def test_self_cleanup_drops_recorded_packages(self, root, pixi_ops):
-        """Owner removal cleans up everything the engine recorded, gate or not."""
-        track(root, Section.PACKAGES, "param-gated")
-        ProjectTracking(root).add(
-            Section.PACKAGES,
-            "param-gated",
-            metadata={"extra_packages": ["param-extra"]},
-        )
-        registries = make_registries(ParamGatedPackage)
-
-        sync_on_remove(
-            ParamGatedPackage(use_extras=False),
-            registries=registries,
-            project_root=root,
-        )
-
-        pixi_ops.remove_packages.assert_called_once_with(
-            [PixiPackageSpec(name="param-extra", kind="pypi")]
-        )
-        assert extra_packages_in_toml(root, Section.PACKAGES, "param-gated") == []
-
-    def test_self_cleanup_noop_without_records(self, root, pixi_ops):
-        track(root, Section.PACKAGES, "param-gated")
-        registries = make_registries(ParamGatedPackage)
-
-        sync_on_remove(
-            ParamGatedPackage(use_extras=True), registries=registries, project_root=root
-        )
-
-        pixi_ops.remove_packages.assert_not_called()
-
-    def test_combined_condition_uses_peer_state(self, root, pixi_ops):
-        track(root, Section.FRAMEWORKS, "bootstrap")
-        track(root, Section.PACKAGES, "combined-condition")
-        registries = make_registries(CombinedConditionPackage, FwPeer)
-
-        sync_on_add(FwPeer(), registries=registries, project_root=root)
-
-        pixi_ops.add_packages.assert_called_once_with(
-            [PixiPackageSpec(name="combined-extra", kind="pypi")]
-        )
-
-    def test_combined_condition_false_without_peer(self, root, pixi_ops):
-        track(root, Section.PACKAGES, "combined-condition")
-        registries = make_registries(CombinedConditionPackage, OtherFwPeer)
-
-        sync_on_add(OtherFwPeer(), registries=registries, project_root=root)
-
-        pixi_ops.add_packages.assert_not_called()
-
-
 # ── Error isolation ────────────────────────────────────────────────────────────
 
 
 class TestErrorIsolation:
-    def test_raising_hook_is_caught_and_others_still_run(self, root, capsys):
+    @pytest.fixture
+    def pixi_ops(self):
+        with patch("djdevx.utils.installable.peers.PixiOps") as ops:
+            yield ops.return_value
+
+    def test_raising_hook_is_caught_and_others_still_run(self, root, pixi_ops, capsys):
         track(root, Section.PACKAGES, "raising-listener")
         track(root, Section.PACKAGES, "listener")
         registries = make_registries(RaisingListenerPackage, ListenerPackage, FwPeer)
@@ -774,7 +560,12 @@ class TestErrorIsolation:
 
 
 class TestRecursionGuard:
-    def test_hook_triggered_sync_does_not_loop(self, root):
+    @pytest.fixture
+    def pixi_ops(self):
+        with patch("djdevx.utils.installable.peers.PixiOps") as ops:
+            yield ops.return_value
+
+    def test_hook_triggered_sync_does_not_loop(self, root, pixi_ops):
         track(root, Section.FRAMEWORKS, "bootstrap")
         track(root, Section.PACKAGES, "recursing-listener")
         registries = make_registries(RecursingListenerPackage, FwPeer)
@@ -840,15 +631,26 @@ class TestCallPeer:
 
 
 class TestLifecycleWiring:
-    """Attach listens_to to whitenoise at runtime and verify both orders fire."""
+    """Attach peer_pixi_packages to whitenoise at runtime and verify both orders fire."""
+
+    @pytest.fixture
+    def pixi_ops(self):
+        with (
+            patch("djdevx.utils.installable.pixi_ops.PixiOps") as ops,
+            patch("djdevx.utils.installable.peers.PixiOps") as peer_ops,
+            patch("djdevx.utils.installable.installable.PixiOps") as inst_ops,
+        ):
+            yield ops.return_value, peer_ops.return_value, inst_ops.return_value
 
     def _install_listening_whitenoise(self, monkeypatch) -> list[str]:
         calls: list[str] = []
 
         class ListeningWhitenoise(WhitenoisePackage):
-            listens_to: list[InstallableRef] = [
-                InstallableRef(name="bootstrap", kind=FRAMEWORK)
-            ]
+            peer_pixi_packages: dict = {
+                InstallableRef(name="bootstrap", kind=FRAMEWORK): [
+                    PixiPackageSpec(name="whitenoise-extra", kind="pypi"),
+                ]
+            }
 
             def on_peer_added(self, peer, variant=None) -> None:
                 calls.append(peer.name)
@@ -858,7 +660,7 @@ class TestLifecycleWiring:
         )
         return calls
 
-    def test_framework_first_then_listener_pull(self, tmp_path, monkeypatch):
+    def test_framework_first_then_listener_pull(self, tmp_path, monkeypatch, pixi_ops):
         runner = CliRunner()
         create_test_django_project(tmp_path, runner)
         os.chdir(tmp_path)
@@ -872,7 +674,7 @@ class TestLifecycleWiring:
         assert result.exit_code == 0, result.output
         assert calls == ["bootstrap"]
 
-    def test_listener_first_then_framework_push(self, tmp_path, monkeypatch):
+    def test_listener_first_then_framework_push(self, tmp_path, monkeypatch, pixi_ops):
         runner = CliRunner()
         create_test_django_project(tmp_path, runner)
         os.chdir(tmp_path)
@@ -885,3 +687,261 @@ class TestLifecycleWiring:
         result = runner.invoke(app, ["frameworks", "add", "bootstrap"])
         assert result.exit_code == 0, result.output
         assert calls == ["bootstrap"]
+
+
+# ── Peer template cleanup ──────────────────────────────────────────────────────
+
+
+class _TemplatePeer(Installable):
+    name: str = "tpl-peer"
+    display_name: str = "Template Peer"
+    section: Section = Section.FRAMEWORKS
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._tpl_dir = MagicMock()
+        self._tpl_dir.exists.return_value = True
+        self._tpl_dir.joinpath.return_value = self._tpl_dir
+        self.template_dir = self._tpl_dir
+        self.variants = {}
+        self._install_context = {}
+
+
+class TestPeerTemplateCleanup:
+    def test_cleanup_removes_files_when_peer_dir_exists(self, root):
+        listener = ListenerPackage()
+        listener._install_context = {}
+        listener._structure = MagicMock()
+        listener._structure.root = root
+        peer_tpl_dir = root / "peer_templates" / "peer_templates"
+        peer_tpl_dir.mkdir(parents=True)
+        (peer_tpl_dir / "style.css").write_text("body {}")
+        (root / "style.css").write_text("body {}")
+
+        class StubPeer(Installable):
+            name: str = "stub-peer"
+            display_name: str = "Stub Peer"
+            section: Section = Section.FRAMEWORKS
+            template_dir: ClassVar[Path] = root / "peer_templates"
+            variants: dict = {}
+            _install_context: dict = {}
+
+        peer = StubPeer()
+
+        with patch("djdevx.utils.installable.peers.TemplateManager") as mock_tm_cls:
+            mock_tm = MagicMock()
+            mock_tm_cls.return_value = mock_tm
+            mock_tm.scan_templates.return_value = ["style.css"]
+            cleanup_peer_templates(listener, peer)
+
+        assert not (root / "style.css").exists()
+
+    def test_cleanup_noop_when_peer_dir_absent(self, root):
+        listener = ListenerPackage()
+        listener._install_context = {}
+        listener._structure = MagicMock()
+        listener._structure.root = root
+        peer = _TemplatePeer()
+        peer.template_dir = MagicMock()
+        peer.template_dir.exists.return_value = False
+
+        with patch("djdevx.utils.installable.peers.TemplateManager"):
+            cleanup_peer_templates(listener, peer)
+
+    def test_cleanup_all_skips_unregistered_peers(self, root):
+        """cleanup_all_peer_templates silently skips peers that are not registered."""
+        listener = ListenerPackage()
+        listener._install_context = {}
+        listener._structure = MagicMock()
+        listener._structure.root = root
+        with (
+            patch("djdevx.utils.installable.peers.resolve", side_effect=KeyError),
+            patch("djdevx.utils.installable.peers.cleanup_peer_templates"),
+        ):
+            cleanup_all_peer_templates(listener)
+
+    def test_copy_skips_when_peer_dir_absent(self, root):
+        listener = ListenerPackage()
+        listener._install_context = {}
+        listener._structure = MagicMock()
+        listener._structure.root = root
+        peer = _TemplatePeer()
+        peer.template_dir = MagicMock()
+        peer.template_dir.exists.return_value = False
+        with patch("djdevx.utils.installable.peers.TemplateManager"):
+            copy_peer_templates(listener, peer)
+
+
+# ── Variant-scoped peer interest ───────────────────────────────────────────────
+
+
+class VariantOnlyListener(Installable):
+    """Declares peer interest only on a variant — no base-level packages."""
+
+    name: str = "variant-only"
+    display_name: str = "Variant Only"
+    section: Section = Section.PACKAGES
+    peer_pixi_packages: dict = {}
+    variants: dict[str, Variant] = {
+        "pro": Variant(
+            name="pro",
+            display_name="Pro",
+            peer_pixi_packages={
+                InstallableRef(name="bootstrap", kind=FRAMEWORK): [
+                    PixiPackageSpec(name="pro-extra", kind="pypi"),
+                ]
+            },
+        ),
+    }
+
+    def on_peer_added(self, peer, variant=None) -> None:
+        CALLS.append(("added", peer.name, variant.name if variant else None))
+
+    def on_peer_removed(self, peer, variant=None) -> None:
+        CALLS.append(("removed", peer.name, variant.name if variant else None))
+
+
+class VariantOwner(Installable):
+    """Framework with two installed variants."""
+
+    name: str = "multi-firmware"
+    display_name: str = "Multi Firmware"
+    section: Section = Section.FRAMEWORKS
+    variants: dict[str, Variant] = {
+        "account": Variant(name="account", display_name="Account"),
+        "mfa": Variant(name="mfa", display_name="MFA"),
+    }
+    peer_pixi_packages: dict = {
+        InstallableRef(name="bootstrap", kind=FRAMEWORK): [
+            PixiPackageSpec(name="fw-extra", kind="pypi"),
+        ]
+    }
+
+
+def _seed_variant_tracking(root: Path, name: str, variants: list[str]) -> None:
+    tracking = ProjectTracking(root)
+    tracking.add(Section.PACKAGES, name, name.title(), variants=variants)
+
+
+class TestVariantScopedInterest:
+    @pytest.fixture
+    def pixi_ops(self):
+        with patch("djdevx.utils.installable.peers.PixiOps") as ops:
+            yield ops.return_value
+
+    def test_pullof_variant_only_listener_adds_variant_package(self, root, pixi_ops):
+        """PULL: listener with variant-only interest fires hook and adds package."""
+        track(root, Section.FRAMEWORKS, "bootstrap")
+        registries = make_registries(VariantOnlyListener, FwPeer)
+        listener = VariantOnlyListener()
+        variant = listener.variants["pro"]
+
+        sync_on_add(
+            listener,
+            registries=registries,
+            variant=variant,
+            project_root=root,
+        )
+
+        # Hook fires with peer variant (bootstrap has none), packages are variant-scoped
+        assert CALLS == [("added", "bootstrap", None)]
+        pixi_ops.add_packages.assert_called_once_with(
+            [PixiPackageSpec(name="pro-extra", kind="pypi")]
+        )
+
+    def test_push_fires_variant_listener_for_each_installed_variant(
+        self, root, pixi_ops
+    ):
+        """PUSH: listener with two installed variants fires hooks and adds packages for both."""
+        _seed_variant_tracking(root, "variant-only", ["pro"])
+        track(root, Section.FRAMEWORKS, "bootstrap")
+        registries = make_registries(VariantOnlyListener, FwPeer)
+
+        sync_on_add(FwPeer(), registries=registries, project_root=root)
+
+        # Hook fires once (bootstrap has no variants)
+        assert CALLS == [("added", "bootstrap", None)]
+        pixi_ops.add_packages.assert_called_once_with(
+            [PixiPackageSpec(name="pro-extra", kind="pypi")]
+        )
+
+    def test_unwind_drops_variant_packages(self, root, pixi_ops):
+        """UNWIND: removing peer drops packages for listener's installed variants."""
+        _seed_variant_tracking(root, "variant-only", ["pro"])
+        track(root, Section.FRAMEWORKS, "bootstrap")
+        registries = make_registries(VariantOnlyListener, FwPeer)
+
+        # Pre-seed applied metadata for the peer package
+        tracking = ProjectTracking(root)
+        tracking.set_metadata(
+            Section.PACKAGES,
+            "variant-only",
+            "peer_pixi_applied",
+            ["pypi:pro-extra"],
+        )
+
+        sync_on_remove(FwPeer(), registries=registries, project_root=root)
+
+        assert CALLS == [("removed", "bootstrap", None)]
+        pixi_ops.remove_packages.assert_called_once_with(
+            [PixiPackageSpec(name="pro-extra", kind="pypi")]
+        )
+
+    def test_idempotent_add_no_double_packages(self, root, pixi_ops):
+        """Re-running add on an already-synced listener does not double-add packages."""
+        track(root, Section.FRAMEWORKS, "bootstrap")
+        registries = make_registries(GatedListenerPackage, FwPeer)
+
+        sync_on_add(GatedListenerPackage(), registries=registries, project_root=root)
+        pixi_ops.add_packages.reset_mock()
+
+        sync_on_add(GatedListenerPackage(), registries=registries, project_root=root)
+
+        pixi_ops.add_packages.assert_not_called()
+
+
+# ── Hook-only listener ─────────────────────────────────────────────────────────
+
+
+class HookOnlyListener(Installable):
+    """Hook-only: peer_pixi_packages has a key with an empty list."""
+
+    name: str = "hook-only"
+    display_name: str = "Hook Only"
+    section: Section = Section.PACKAGES
+    peer_pixi_packages: dict = {
+        InstallableRef(name="bootstrap", kind=FRAMEWORK): [],
+    }
+
+    def on_peer_added(self, peer, variant=None) -> None:
+        CALLS.append(("added", peer.name, None))
+
+    def on_peer_removed(self, peer, variant=None) -> None:
+        CALLS.append(("removed", peer.name, None))
+
+
+class TestHookOnlyListener:
+    @pytest.fixture
+    def pixi_ops(self):
+        with patch("djdevx.utils.installable.peers.PixiOps") as ops:
+            yield ops.return_value
+
+    def test_hook_fires_without_any_packages_added(self, root, pixi_ops):
+        track(root, Section.FRAMEWORKS, "bootstrap")
+        registries = make_registries(HookOnlyListener, FwPeer)
+
+        sync_on_add(HookOnlyListener(), registries=registries, project_root=root)
+
+        assert CALLS == [("added", "bootstrap", None)]
+        pixi_ops.add_packages.assert_not_called()
+        pixi_ops.remove_packages.assert_not_called()
+
+    def test_unwind_fires_hook_and_no_packages_removed(self, root, pixi_ops):
+        track(root, Section.PACKAGES, "hook-only")
+        track(root, Section.FRAMEWORKS, "bootstrap")
+        registries = make_registries(HookOnlyListener, FwPeer)
+
+        sync_on_remove(FwPeer(), registries=registries, project_root=root)
+
+        assert CALLS == [("removed", "bootstrap", None)]
+        pixi_ops.remove_packages.assert_not_called()

@@ -176,6 +176,37 @@ class TestGetVariants:
         assert project.get_variants(section, "redis") == ["base", "mfa"]
 
 
+# ── applied peers ─────────────────────────────────────────────────────────────
+
+
+class TestAppliedPeers:
+    """Tests for ProjectTracking applied peer package operations."""
+
+    def test_empty_for_untracked(self, project: ProjectTracking, section: str) -> None:
+        assert project.get_applied_peers(section, "redis") == set()
+
+    def test_empty_before_any_set(self, project: ProjectTracking, section: str) -> None:
+        project.add(section, "redis", "Redis")
+        assert project.get_applied_peers(section, "redis") == set()
+
+    def test_get_after_set(self, project: ProjectTracking, section: str) -> None:
+        project.add(section, "redis", "Redis")
+        project.set_applied_peers(section, "redis", {"bootstrap", "postgres"})
+        assert project.get_applied_peers(section, "redis") == {"bootstrap", "postgres"}
+
+    def test_set_overwrites(self, project: ProjectTracking, section: str) -> None:
+        project.add(section, "redis", "Redis")
+        project.set_applied_peers(section, "redis", {"bootstrap"})
+        project.set_applied_peers(section, "redis", {"postgres"})
+        assert project.get_applied_peers(section, "redis") == {"postgres"}
+
+    def test_persists_to_toml(self, project: ProjectTracking, section: str) -> None:
+        project.add(section, "redis", "Redis")
+        project.set_applied_peers(section, "redis", {"bootstrap"})
+        doc = tomllib.loads(project._djdevx_path.read_text())
+        assert doc[section]["redis"]["peer_pixi_applied"] == ["bootstrap"]
+
+
 # ── persistence ───────────────────────────────────────────────────────────────
 
 

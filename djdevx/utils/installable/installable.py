@@ -11,8 +11,9 @@ from ..console.print import print_console
 from ..prek.prek import format_files
 from ..project.project_structure import ProjectStructure
 from .pixi_ops import PixiOps
-from ..types.pixi_types import PixiPackageSpec
 from .peers import sync_on_add, sync_on_remove
+from ..tracking import ProjectTracking
+
 from .scaffold import (
     cleanup_files,
     copy_templates,
@@ -21,11 +22,7 @@ from .scaffold import (
 )
 from .secrets import SecretsOps
 from .tracking import TrackingOps
-from .types import (
-    ConditionContext,
-    InstallableConfig,
-    Variant,
-)
+from .types import InstallableConfig, Variant  # noqa: F401 — needed for Pydantic forward-ref resolution
 
 
 class Installable(InstallableConfig):
@@ -87,23 +84,6 @@ class Installable(InstallableConfig):
     def reset_state(self) -> None:
         self._structure = None
 
-    def _active_conditional_packages(
-        self, variant: Optional[Variant] = None
-    ) -> list[PixiPackageSpec]:
-        """Specs whose condition currently holds, from self and optionally variant."""
-        result = [
-            c.package
-            for c in self.conditional_packages
-            if c.when(ConditionContext(self))
-        ]
-        if variant is not None:
-            result += [
-                c.package
-                for c in variant.conditional_packages
-                if c.when(ConditionContext(self, variant))
-            ]
-        return result
-
     # ------------------------------------------------------------------
     # Lifecycle — add / remove
     # ------------------------------------------------------------------
@@ -127,9 +107,6 @@ class Installable(InstallableConfig):
         self.before_pixi_install()
         pixi_ops = PixiOps(self.structure.root, self.verbose)
         pixi_ops.add_packages(self.pixi_packages, variant)
-        conditional = self._active_conditional_packages(variant)
-        if conditional:
-            pixi_ops.add_packages(conditional)
         print_console.ok("Installed dependency")
         self.after_pixi_install()
 
@@ -157,6 +134,12 @@ class Installable(InstallableConfig):
         pixi_ops = PixiOps(self.structure.root, self.verbose)
         tracking = TrackingOps(self.section)
 
+        # Capture applied peer packages before untracking
+        project = ProjectTracking(self.structure.root)
+        applied = project.get_applied_peers(
+            self.section, type(self).get_installable_name()
+        )
+
         self.before_pixi_remove()
 
         updated: list[str] = []
@@ -167,10 +150,6 @@ class Installable(InstallableConfig):
 
         if variant is None or not updated:
             pixi_ops.remove_packages(self.pixi_packages)
-
-        conditional = self._active_conditional_packages(variant)
-        if conditional:
-            pixi_ops.remove_packages(conditional)
 
         print_console.ok("Removed dependency")
         self.after_pixi_remove()
@@ -189,7 +168,7 @@ class Installable(InstallableConfig):
             tracking.remove(type(self).get_installable_name())
             fully_removed = True
 
-        sync_on_remove(self, variant, fully_removed=fully_removed)
+        sync_on_remove(self, variant, applied=applied, fully_removed=fully_removed)
 
     # ------------------------------------------------------------------
     # Lifecycle hooks (override in subclasses)

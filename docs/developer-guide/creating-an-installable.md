@@ -83,9 +83,8 @@ Key rules:
 | `display_name` | `str` | Yes | Human-readable name for CLI output |
 | `description` | `str` | No | Longer description |
 | `pixi_packages` | `list[PixiPackageSpec]` | No | Dependencies via pixi (set `pixi_feature="dev"` for dev-only) |
-| `conditional_packages` | `list[ConditionalPackage]` | No | Pixi packages installed only when their `when(ctx)` condition holds (variants inherit) |
+| `peer_pixi_packages` | `dict[InstallableRef, list[PixiPackageSpec]]` | No | Packages added when a declared peer is installed, removed when it leaves |
 | `needs` | `list[InstallableRef]` | No | Other installables auto-installed first; removal of a needed installable is blocked while dependents exist |
-| `listens_to` | `list[InstallableRef]` | No | Peers that trigger integration hooks (variants inherit); `when_peer` gates are picked up even without it |
 | `template_path` | `str` | No | Override auto-derived template directory |
 | `install_params` | `list[InstallParam]` | No | Parameters collected at install time |
 | `secret_generators` | `dict[str, Callable]` | No | Maps field names to generator callables |
@@ -126,42 +125,6 @@ pixi_packages: list[PixiPackageSpec] = [
     PixiPackageSpec("psutil", kind="pypi"),
 ]
 ```
-
-### ConditionalPackage
-
-Each entry in `conditional_packages` wraps **one** `PixiPackageSpec` with its
-own `when` callable:
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `package` | `PixiPackageSpec` | The dependency to install when the condition holds |
-| `when` | `Callable[..., bool]` | Called with the installable instance as first argument; `True` includes the package |
-
-The condition runs during both add and remove. Pass an unbound method
-reference to read instance state, or a lambda with a single parameter:
-
-```python
-from djdevx.utils.installable import ConditionalPackage
-
-
-class MyPackage(BasePackage):
-    name: str = "my-package"
-    display_name: str = "My Package"
-    use_extra: bool = False
-
-    def _needs_extra(ctx) -> bool:
-        return ctx.installable.use_extra
-
-    conditional_packages: list[ConditionalPackage] = [
-        ConditionalPackage(
-            package=PixiPackageSpec("some-extra-dep", kind="pypi"),
-            when=_needs_extra,
-        ),
-    ]
-```
-
-Variants can carry their own `conditional_packages` too — their conditions
-get `ctx.variant` set in addition to `ctx.installable`.
 
 ---
 
@@ -208,7 +171,7 @@ their own `pixi_packages`, `template_path`, `install_params`,
 | `display_name` | `str` | Human-readable name |
 | `required` | `bool` | Auto-installed when parent is added |
 | `pixi_packages` | `list[PixiPackageSpec]` | Variant-specific dependencies |
-| `conditional_packages` | `list[ConditionalPackage]` | Variant-specific gated dependencies (conditions receive the parent installable) |
+| `peer_pixi_packages` | `dict[InstallableRef, list[PixiPackageSpec]]` | Peer-scoped packages for this variant |
 | `template_path` | `str` | Override template directory |
 | `install_params` | `list[InstallParam]` | Variant-specific install parameters |
 | `secret_generators` | `dict[str, Callable]` | Variant-specific secret generators |
@@ -435,76 +398,37 @@ same code runs no matter which side was installed first.
 
 ### Declaration
 
+Use `peer_pixi_packages` to define packages that should be added when a peer
+is installed. A key with an empty list (`{ref: []}`) is a valid
+**hook-only** declaration — the engine fires `on_peer_added` / `on_peer_removed`
+but does not install or remove any pixi packages for that peer. Interest is
+determined by keys at both the base level and on any installed variant.
+
 ```python
-from djdevx.utils.installable.types import (
-    ConditionalPackage,
-    InstallableRef,
-    FRAMEWORK,
-)
-from djdevx.utils.installable import when_peer
+from djdevx.utils.installable.types import InstallableRef, FRAMEWORK
 
 class MyPackage(BasePackage):
-    # peers I react to via hooks — only needed if you override the hooks;
-    # when_peer gates below are picked up automatically
-    listens_to: list[InstallableRef] = [InstallableRef("bootstrap", FRAMEWORK)]
-
-    # pixi packages gated behind a condition (engine-managed)
-    conditional_packages: list[ConditionalPackage] = [
-        ConditionalPackage(
-            package=PixiPackageSpec("some-integration-lib", kind="pypi"),
-            when=when_peer(InstallableRef("bootstrap", FRAMEWORK)),
-        )
-    ]
-```
-
-`when_peer(...)` alone is enough for package install/remove sync. Add the peer
-to `listens_to` only when you also implement `on_peer_added` / `on_peer_removed`
-hooks (e.g. for template cleanup).
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `InstallableRef.name` | `str` | The peer's name; normalized `_` -> `-` at construction |
-| `InstallableRef.kind` | `InstallableKind` | Category of the peer (`PACKAGE`, `FEATURE`, `FRAMEWORK`, `DATABASE`, `CACHE`) |
-| `ConditionalPackage.when` | `Callable[..., bool]` | Gate: receives the installable instance; may declare `peer` (an `InstallableRef`)/`project` params the engine injects. Use `when_peer(InstallableRef(...))` for peer gates |
-| `ConditionalPackage.package` | `PixiPackageSpec` | Pixi spec added/removed by the engine, tracked as `extra_packages` |
-
-### Hook signatures
-
-```python
-def on_peer_added(self, peer, variant=None) -> None:
-    """Apply peer presence. Idempotent."""
-
-def on_peer_removed(self, peer, variant=None) -> None:
-    """Undo peer presence. Idempotent."""
-```
-
-`peer` is an instance of the peer's class; `variant` is its installed `Variant`
-(or `None`). With multiple variants installed you get one call per variant.
-Hooks are error-isolated (failures warn and continue) and must be idempotent.
-
-### Concrete example
-
-A package that ships framework-styled template overlays kept inside its own
-templates directory:
-
-```python
-class MyPackage(BasePackage):
-    name: str = "my-package"
-    display_name: str = "My Package"
-    listens_to: list[InstallableRef] = [InstallableRef("bootstrap", FRAMEWORK)]
+    peer_pixi_packages: dict[InstallableRef, list[PixiPackageSpec]] = {
+        # Packages to sync with bootstrap presence
+        InstallableRef("bootstrap", FRAMEWORK): [
+            PixiPackageSpec("some-integration-lib", kind="pypi"),
+        ],
+        # Hook-only: bootstrap presence triggers hooks, no packages
+        InstallableRef("styling-framework", FRAMEWORK): [],
+    }
 
     def on_peer_added(self, peer, variant=None) -> None:
         overlay = self.template_dir / "frameworks" / peer.name
         if overlay.exists():
-            copy_tree_over(overlay, self.structure.root)  # re-render my own files
+            copy_tree_over(overlay, self.structure.root)
 
     def on_peer_removed(self, peer, variant=None) -> None:
-        restore_base_templates(self)  # undo the adaptation
+        restore_base_templates(self)
 ```
 
-Install my package first or the framework first — the same hook runs either
-way. For full semantics (pull/push ordering, multi-variant calls, `call_peer`,
-guarantees), see [Integration Protocol](integration.md).
+The engine automatically adds/removes the listed packages when the peer is
+installed or removed. For full semantics (pull/push ordering, multi-variant
+support, `call_peer`, guarantees), see [Integration Protocol](integration.md).
 
 ---
 

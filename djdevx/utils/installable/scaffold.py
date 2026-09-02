@@ -4,6 +4,8 @@ import shutil
 from pathlib import Path
 from ..templates.manager import TemplateManager
 
+from .types import PEER_TEMPLATES_DIRNAME
+
 
 def resolve_template_source(installable, variant=None) -> Path | None:
     if variant and variant.template_path:
@@ -26,6 +28,7 @@ def copy_templates(installable, variant=None) -> None:
             source_dir=source_dir,
             dest_dir=installable.structure.root,
             template_context=context,
+            exclude_dirs=[PEER_TEMPLATES_DIRNAME],
         )
 
 
@@ -38,6 +41,7 @@ def template_output_files(installable, variant=None) -> list[Path]:
     return manager.scan_templates(
         source_dir=source_dir,
         template_context=context,
+        exclude_dirs=[PEER_TEMPLATES_DIRNAME],
     )
 
 

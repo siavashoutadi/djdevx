@@ -201,19 +201,14 @@ Templates render to the project root.
 
 ## Peer integration
 
-Features often enhance whatever database, cache, or package is present. Use
-`when_peer`-gated `conditional_packages` for pixi deps that only make sense
-while a peer is installed — the engine adds and removes them (tracked as
-`extra_packages` in `djdevx.toml`) automatically. Add the peer to `listens_to`
-only when you also implement hooks:
+Features can declare `peer_pixi_packages` to add pixi dependencies only when a
+specific peer is installed. The engine adds/removes them during `add`/`remove`.
+For more complex adaptation, override `on_peer_added` / `on_peer_removed`.
 
 ```python
 # djdevx/features/my_instrumentation/__init__.py
 from .._base import BaseFeature
-from ...utils.installable.types import (
-    ConditionalPackage, InstallableRef, DATABASE,
-)
-from ...utils.installable import when_peer
+from ...utils.installable.types import InstallableRef, DATABASE
 from djdevx.utils.types.pixi_types import PixiPackageSpec
 from .._registry import register
 
@@ -222,13 +217,9 @@ from .._registry import register
 class MyInstrumentationFeature(BaseFeature):
     name: str = "my-instrumentation"
     display_name: str = "My Instrumentation"
-    listens_to: list[InstallableRef] = [InstallableRef("postgres", DATABASE)]
-    conditional_packages: list[ConditionalPackage] = [
-        ConditionalPackage(
-            package=PixiPackageSpec("my-db-instrumentation", kind="pypi"),
-            when=when_peer(InstallableRef("postgres", DATABASE)),
-        )
-    ]
+    peer_pixi_packages: dict[InstallableRef, list[PixiPackageSpec]] = {
+        InstallableRef("postgres", DATABASE): [PixiPackageSpec("my-db-instrumentation", kind="pypi")],
+    }
 
     def on_peer_added(self, peer, variant=None) -> None:
         # append an instrumentation snippet to my own settings artifact
@@ -239,7 +230,7 @@ class MyInstrumentationFeature(BaseFeature):
 ```
 
 Install the feature before or after the database — the same hooks fire either
-way, and removing either side cleans up both snippets and gated pixi packages.
+way, and removing either side cleans up both snippets and peer packages.
 See [Integration Protocol](integration.md) for full semantics.
 
 ## Testing

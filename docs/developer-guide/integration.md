@@ -15,66 +15,44 @@ orders run through one code path.
 
 ## Declaration
 
-Two class attributes on every installable (inherited by variants):
+The sole mechanism to declare peer interest is `peer_pixi_packages`, a dict
+mapping an `InstallableRef` to a list of `PixiPackageSpec`. The engine uses
+**keys** as interest declarations and **values** as the packages to add or
+remove. A key with an empty list (`{ref: []}`) is a valid hook-only
+declaration — the engine fires `on_peer_added` / `on_peer_removed` but never
+touches pixi packages for that peer.
 
 ```python
-from djdevx.utils.installable.types import (
-    ConditionalPackage, InstallableRef, FRAMEWORK, FEATURE,
-)
-from djdevx.utils.installable import when_peer
+from djdevx.utils.installable.types import InstallableRef, FRAMEWORK
 
 class MyPackage(BasePackage):
-    # Peers I react to via hooks. Only needed when you override the
-    # on_peer_added / on_peer_removed hooks — package gates below are
-    # picked up automatically.
-    listens_to: list[InstallableRef] = [
-        InstallableRef(name="bootstrap", kind=FRAMEWORK),
-    ]
+    peer_pixi_packages: dict[InstallableRef, list[PixiPackageSpec]] = {
+        # Packages to add/remove when bootstrap is present
+        InstallableRef("bootstrap", FRAMEWORK): [
+            PixiPackageSpec("some-integration-lib", kind="pypi"),
+        ],
+        # Hook-only: bootstrap presence triggers hooks, no packages
+        InstallableRef("another", FRAMEWORK): [],
+    }
 
-    # Pixi packages gated behind a condition
-    conditional_packages: list[ConditionalPackage] = [
-        ConditionalPackage(
-            package=PixiPackageSpec("opentelemetry-instrumentation-psycopg", kind="pypi"),
-            when=when_peer(InstallableRef("opentelemetry", FEATURE)),
-        )
-    ]
+    def on_peer_added(self, peer, variant=None) -> None:
+        # Adapt artifacts to peer presence
+        ...
+
+    def on_peer_removed(self, peer, variant=None) -> None:
+        # Revert to base artifacts
+        ...
 ```
 
 | Declaration | Description |
 |-------------|-------------|
-| `InstallableRef(name, kind)` | Interested in a specific peer (name normalized `_` -> `-` at construction) |
-| `ConditionalPackage(package, when)` | One pixi package the engine adds while `when` holds and removes when it does not |
+| `peer_pixi_packages[InstallableRef]` | Packages to add when the peer is installed, remove when it leaves |
+| `on_peer_added` / `on_peer_removed` | Optional hooks for custom adaptation (templates, settings) |
 
-An installable **reacts to** a peer if it names the peer in `listens_to` *or*
-gates a package on it with `when_peer(...)` — the engine derives interests
-from both, deduplicated. In short: `when_peer` alone is enough for package
-sync; add `listens_to` only when hooks are involved too.
-
-### Conditions
-
-`when` is any callable receiving a single `ConditionContext`:
-
-- `ctx.installable` — the owning installable instance (and `ctx.variant` when
-  evaluating variant-scoped conditionals),
-- `ctx.project` — a `ProjectTracking`, created lazily on first access.
-
-```python
-from djdevx.utils.installable import when_peer
-
-# Peer present (primary use case)
-when=when_peer(InstallableRef("opentelemetry", FEATURE))
-
-# Driven by install params / instance config
-def _needs_celery(ctx) -> bool:
-    return ctx.installable.use_celery
-
-# Combining peer state with instance config
-def _when_otel_and_async(ctx) -> bool:
-    return (
-        ctx.project.is_installed(FEATURE.section, "opentelemetry")
-        and ctx.installable.async_mode
-    )
-```
+The engine automatically syncs these packages during `add` and `remove`.
+Interest is determined by the union of keys at the base level and on every
+**installed variant** of the installable, so a variant can declare packages
+or hooks that only apply when that variant is active.
 
 ## Hooks
 
@@ -97,60 +75,42 @@ def on_peer_removed(self, peer, variant=None) -> None:
 
 `sync_on_add(installable, variant)` runs at the end of `Installable.add()`
 (after tracking); `sync_on_remove(installable, variant)` runs at the end of
-`remove()` **after** untracking, so gates evaluate against the new state.
+`remove()` **after** untracking.
 
 ```
 sync_on_add(installable, variant)
-  PULL:   my interests × installed peers  → my.on_peer_added(peer, v)
-          (once per installed variant of the peer)
-          + reconcile my gated packages against tracking state (once per sync)
-  PUSH:   installed listeners × me        → listener.on_peer_added(me)
-          + reconcile their gated packages
+  PULL:   my peer_pixi_packages × installed peers → add packages
+          + my.on_peer_added(peer, v) for each peer (once per variant)
+  PUSH:   installed listeners × me → listener.on_peer_added(me)
+          + add their peer packages
 
 sync_on_remove(installable, variant, fully_removed)
   UNWIND:        interested installed peers → peer.on_peer_removed(me)
-                 + on full removal, engine reconciles their conditional
-                 packages (gates on me now fail → those packages drop out)
-  SELF-CLEANUP:  on full removal, every engine-recorded package of mine
-                 goes away with me
+                 + remove their peer packages if fully_removed
+  SELF-CLEANUP:  remove my peer packages (if fully_removed)
 ```
 
 ### Semantics
 
-- **Matching** — an interest matches a peer when the `InstallableRef`s are
-  equal (kind and normalized name; `_` → `-`, same rule as the Registry).
+- **Matching** — a peer matches when the `InstallableRef`s are equal (kind and
+  normalized name; `_` → `-`).
 - **Order independence** — PULL covers "I came later", PUSH covers "they came
   later". Both orders trigger the identical `on_peer_added`.
 - **Cross-category** — the push/unwind scan covers all five registries
-  (packages, features, frameworks, databases, caches), so frameworks ↔ packages
-  ↔ features integrate freely.
+  (packages, features, frameworks, databases, caches).
 - **Removal** — the leaving installable is untracked first, then peers are
-  unwound. A *full* removal additionally reconciles listeners' gates and drops
-  the owner's recorded packages. Removing just one variant of a multi-variant
-  installable keeps it installed: hooks still fire (with the removed `variant`
-  passed through) so templates can adapt, but gated packages and their records
-  stay untouched.
-- **Listener self-cleanup** — when the *listening* side is fully removed, the
-  engine removes every pixi package it added via `conditional_packages`
-  (recorded in `extra_packages`) — nobody else would clean them up.
-
-## Conditional packages & `extra_packages` tracking
-
-When integration fires, the engine automatically:
-
-1. `pixi add`s each `conditional_packages` entry whose `when` condition holds,
-2. records the specs as `extra_packages = [...]` in the listener's own
-   `[<section>.<name>]` tracking entry in `djdevx.toml`.
-
-On unwind or self-cleanup it `pixi remove`s them and clears the recorded list.
-This keeps cleanup correct even when things are removed out of order.
-
-```toml
-[database.postgres]
-installed = true
-display_name = "Postgres"
-extra_packages = ["opentelemetry-instrumentation-psycopg"]
-```
+  unwound (`sync_on_remove` runs after untracking). Removing just one variant
+  of a multi-variant installable keeps it installed: hooks still fire (with
+  the removed `variant` passed through) so templates can adapt, and
+  `peer_pixi_packages` are reconciled across all installed variants.
+- **UNWIND on full removal** — when a *peer* is fully removed, every installed
+  listener's `peer_pixi_packages` declared **for that peer** are dropped
+  (across base and all installed variants of the listener) and removed from
+  the listener's `peer_pixi_applied` metadata.
+- **SELF-CLEANUP** — on full removal the owner drops its `peer_pixi_packages`
+  that were **actually applied** (recorded in `peer_pixi_applied`); a direct /
+  legacy call without applied info drops **all** of them. Either way the entry
+  is not recreated in `djdevx.toml`.
 
 ## Guarantees
 
@@ -165,10 +125,9 @@ extra_packages = ["opentelemetry-instrumentation-psycopg"]
 - **Unregistered peers are soft** — everywhere the engine looks up a peer
   (pull matching, push scan, `call_peer`), an unregistered name is treated
   exactly like "not installed" and skipped, never fatal.
-- **Composability** — `needs` and peer interests (`listens_to` / `when_peer`)
-  are orthogonal and may point at the same peer: `needs` auto-installs a hard
-  dependency *before* me; interests adapt my artifacts to an optional presence
-  *without* installing it.
+- **Composability** — `needs` and peer integration are orthogonal: `needs`
+  auto-installs a hard dependency *before* me; peer integration adapts my
+  artifacts to an optional presence *without* installing it.
 
 ## Escape hatch — `call_peer()`
 
@@ -187,26 +146,39 @@ registered.
 
 ## Worked examples
 
-### allauth × bootstrap (both orders)
+### Allauth × bootstrap (both orders)
 
-`AllauthPackage.listens_to = [InstallableRef("bootstrap", FRAMEWORK)]`, with framework-styled
-overlay templates inside the owning installable:
-`django_allauth/templates/account/frameworks/bootstrap/**`.
+```python
+class AllauthPackage(BasePackage):
+    peer_pixi_packages: dict[InstallableRef, list[PixiPackageSpec]] = {
+        InstallableRef("bootstrap", FRAMEWORK): [],
+    }
 
-- Framework installed first → PULL copies overlays over base account output.
-- Allauth installed first → PUSH after bootstrap's `add()` calls
-  `allauth.on_peer_added(bootstrap)` — identical code path.
-- Framework removed → UNWIND calls `allauth.on_peer_removed(bootstrap)`,
-  which re-copies base templates over the styled ones.
+    def on_peer_added(self, peer, variant=None) -> None:
+        # copy framework-styled overlays over base account output
+        ...
 
-### otel × postgres (both orders)
+    def on_peer_removed(self, peer, variant=None) -> None:
+        # revert to base templates
+        ...
+```
 
-`PostgresDatabase.listens_to = [InstallableRef("opentelemetry", FEATURE)]`, plus
-`conditional_packages = [ConditionalPackage(package=PixiPackageSpec("opentelemetry-instrumentation-psycopg", kind="pypi"), when=when_peer(...))]`.
+`AllauthPackage` listens for bootstrap and applies styled overlays when it arrives.
+Removing bootstrap reverts the templates. The engine handles both installation orders.
 
+### OTel × postgres
+
+`PostgresDatabase` declares `peer_pixi_packages` for OTel:
+```python
+peer_pixi_packages = {
+    InstallableRef("opentelemetry", FEATURE): [
+        PixiPackageSpec("opentelemetry-instrumentation-psycopg", kind="pypi")
+    ]
+}
+```
 `on_peer_added(otel)` writes instrumentation settings; `on_peer_removed(otel)`
 removes them. OTel never needs to know its providers — no reverse dependency.
-Removing either side cleans up both settings and pixi packages.
+Removing either side cleans up both settings and peer packages.
 
 ## Related
 

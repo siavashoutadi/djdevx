@@ -119,37 +119,6 @@ With this in place:
   `Cannot remove Redis — required by: Channels. Remove them first.`
   until channels has been removed.
 
-## Conditionally installed dependencies
-
-When a dependency is only needed in some configurations, wrap it in a
-`ConditionalPackage`. Each entry carries **one** package plus its own `when`
-callable, which receives the installable instance and returns a bool:
-
-```python
-from djdevx.utils.installable import ConditionalPackage
-
-
-class MyPackage(BasePackage):
-    name: str = "my-package"
-    display_name: str = "My Package"
-    use_extra: bool = False
-
-    def _needs_extra(ctx) -> bool:
-        return ctx.installable.use_extra
-
-    conditional_packages: list[ConditionalPackage] = [
-        ConditionalPackage(
-            package=PixiPackageSpec("some-extra-dep", kind="pypi"),
-            when=_needs_extra,
-        ),
-    ]
-```
-
-The condition is evaluated during both add and remove — the package is
-installed/removed only while `when(ctx)` returns `True`. Variants can
-also carry `conditional_packages`; their conditions get `ctx.variant`
-set in addition to `ctx.installable`.
-
 ## Install params
 
 For packages that need user input at install time. The richest example is
@@ -486,14 +455,16 @@ djdevx/packages/<name>/
 
 ## Peer integration
 
-Packages that ship framework-styled output should **listen** to frameworks
-instead of depending on them. Declare the interest and keep the styled overlays
-inside your own package — never write another installable's files:
+Packages that ship framework-styled output should **react** to frameworks
+instead of depending on them. Declare the interest via `peer_pixi_packages` and
+keep the styled overlays inside your own package — never write another
+installable's files:
 
 ```python
 # djdevx/packages/my_styled_pkg/__init__.py
 from .._base import BasePackage
 from ...utils.installable.types import InstallableRef, FRAMEWORK
+from ...utils.installable.pixi_package import PixiPackageSpec
 from .._registry import register
 
 
@@ -502,11 +473,13 @@ class MyStyledPackage(BasePackage):
     name: str = "my-styled-pkg"
     display_name: str = "My Styled Package"
     pixi_packages: list[PixiPackageSpec] = [PixiPackageSpec("my-styled-pkg")]
-    listens_to: list[InstallableRef] = [InstallableRef("bootstrap", FRAMEWORK)]
+    peer_pixi_packages: dict[InstallableRef, list[PixiPackageSpec]] = {
+        InstallableRef("bootstrap", FRAMEWORK): [],
+    }
 
     def on_peer_added(self, peer, variant=None) -> None:
         # copy my framework-styled overlay over my own base output
-        overlay = self.template_dir / "frameworks" / peer.name
+        overlay = self.template_dir / "peer_templates" / peer.name
         ...
 
     def on_peer_removed(self, peer, variant=None) -> None:
@@ -517,7 +490,7 @@ class MyStyledPackage(BasePackage):
 ```
 djdevx/packages/my_styled_pkg/templates/
 ├── settings/packages/my_styled_pkg.py      # base output
-└── frameworks/
+└── peer_templates/
     └── bootstrap/                          # overlay applied when bootstrap is present
         └── settings/packages/my_styled_pkg.py
 ```

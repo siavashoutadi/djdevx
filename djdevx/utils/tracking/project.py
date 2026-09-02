@@ -10,6 +10,8 @@ from .sections import Section
 
 Table = dict[str, Any]
 
+_APPLIED_PEERS_KEY = "peer_pixi_applied"
+
 
 class ProjectTracking:
     """The project tracking facade.
@@ -107,6 +109,31 @@ class ProjectTracking:
                 return list(v) if v else []
         return []
 
+    def get_metadata(self, section: Section, name: str, key: str, default=None) -> Any:
+        table = self._get_table(section)
+        if table is not None:
+            entry = table.get(name)
+            if entry is not None and hasattr(entry, "get"):
+                return entry.get(key, default)
+        return default
+
+    def set_metadata(self, section: Section, name: str, key: str, value: Any) -> None:
+        table = self._ensure_table(section)
+        if name not in table:
+            table[name] = tomlkit.table()
+        entry = table[name]
+        entry[key] = value
+        self.save()
+
+    def get_applied_peers(self, section: Section, name: str) -> set[str]:
+        """Return the set of applied peer packages for *name* in *section*."""
+        value = self.get_metadata(section, name, _APPLIED_PEERS_KEY, [])
+        return set(value) if value else set()
+
+    def set_applied_peers(self, section: Section, name: str, keys: set[str]) -> None:
+        """Persist the set of applied peer packages for *name* in *section*."""
+        self.set_metadata(section, name, _APPLIED_PEERS_KEY, list(keys))
+
     def list(self, section: Section) -> dict[str, dict[str, Any]]:
         table = self._get_table(section)
         result: dict[str, dict[str, Any]] = {}
@@ -120,8 +147,7 @@ class ProjectTracking:
                 info["variant"] = v["variant"]
             if "variants" in v:
                 info["variants"] = list(v["variants"])
-            if "extra_packages" in v:
-                info["extra_packages"] = list(v["extra_packages"])
+
             if info:
                 result[k] = info
             else:

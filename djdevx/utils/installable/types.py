@@ -2,15 +2,14 @@
 
 from dataclasses import dataclass
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Callable, Optional, cast
+from typing import Any, Callable, Optional, cast
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from ..tracking.sections import Section
-
-if TYPE_CHECKING:
-    from ..tracking import ProjectTracking
 from ..types.pixi_types import PixiPackageSpec
+
+PEER_TEMPLATES_DIRNAME = "peer_templates"
 
 
 @dataclass
@@ -50,9 +49,9 @@ class InstallableRef:
 
     The name is normalized (``_`` → ``-``) at construction, so refs compare
     equal to registry and tracking keys without extra handling. Used in
-    ``needs`` (auto-installed dependencies) and ``listens_to`` (peers whose
-    presence triggers integration hooks) — peers must be declared explicitly,
-    one ref per installable.
+    ``needs`` (auto-installed dependencies) and ``peer_pixi_packages``
+    (peers whose presence triggers integration hooks and package sync) —
+    peers must be declared explicitly, one ref per installable.
     """
 
     name: str
@@ -60,68 +59,6 @@ class InstallableRef:
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "name", self.name.replace("_", "-"))
-
-
-ConditionalCheck = Callable[["ConditionContext"], bool]
-
-
-class ConditionContext:
-    """Everything a ``when`` condition may inspect.
-
-    ``project`` is created lazily on first access, so conditions that only
-    look at instance state never pay for loading the tracking file. The peer
-    engine injects its already-loaded instance to share state.
-    """
-
-    def __init__(
-        self,
-        installable: "InstallableConfig",
-        variant: Optional["Variant"] = None,
-        project: Optional["ProjectTracking"] = None,
-    ) -> None:
-        self.installable = installable
-        self.variant = variant
-        self._project = project
-
-    @property
-    def project(self) -> "ProjectTracking":
-        if self._project is None:
-            from ..tracking import ProjectTracking
-
-            self._project = ProjectTracking()
-        return self._project
-
-
-@dataclass(frozen=True)
-class ConditionalPackage:
-    """A pixi package that is included only when a condition passes.
-
-    ``when`` receives a single :class:`ConditionContext` with the owning
-    installable (and optionally the active variant and the project tracking):
-
-        def when(ctx): return ctx.installable.use_extra
-
-    Realistic example — add a Redis instrumentation client only while the
-    open-telemetry feature is installed:
-
-        from djdevx.utils.installable import when_peer
-        from djdevx.utils.installable.types import FEATURE, InstallableRef
-
-        @register
-        class RedisCache(BaseCache):
-            name = "redis"
-            conditional_packages: list[ConditionalPackage] = [
-                ConditionalPackage(
-                    package=PixiPackageSpec(
-                        "opentelemetry-instrumentation-redis", kind="pypi"
-                    ),
-                    when=when_peer(InstallableRef("open-telemetry", FEATURE)),
-                )
-            ]
-    """
-
-    package: PixiPackageSpec
-    when: ConditionalCheck
 
 
 class InstallableConfig(BaseModel):
@@ -133,11 +70,12 @@ class InstallableConfig(BaseModel):
     display_name: str = ""
     section: Section = Section.PACKAGES
     pixi_packages: list[PixiPackageSpec] = Field(default_factory=list)
-    conditional_packages: list[ConditionalPackage] = Field(default_factory=list)
+    peer_pixi_packages: dict[InstallableRef, list[PixiPackageSpec]] = Field(
+        default_factory=dict
+    )
     template_path: str = ""
     install_params: list[InstallParam] = Field(default_factory=list)
     needs: list[InstallableRef] = Field(default_factory=list)
-    listens_to: list[InstallableRef] = Field(default_factory=list)
     secret_generators: dict[str, Callable] = Field(default_factory=dict)
     files_to_remove: list[str] = Field(default_factory=list)
     folders_to_remove: list[str] = Field(default_factory=list)

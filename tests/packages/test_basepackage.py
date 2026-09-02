@@ -146,6 +146,7 @@ class TestHookOrdering:
             ) as mock_restore,
             patch.object(SecretsOps, "remove") as mock_rem,
             patch("djdevx.utils.installable.tracking.ProjectTracking"),
+            patch("djdevx.utils.installable.installable.ProjectTracking"),
         ):
             mock_rem_pixi.side_effect = lambda *a, **kw: call_order.append(
                 "pixi_remove_all"

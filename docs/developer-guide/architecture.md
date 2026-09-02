@@ -34,7 +34,7 @@ All five installable categories share a common foundation:
 | `registry.py` | `Registry[T]` — generic type registry with `@register` decorator |
 | `discovery.py` | `discover_and_register()` — auto-imports modules to trigger `@register` |
 | `orchestrator.py` | `add_installable()` / `remove_installable()` — dependency resolution, interactive variant selection, parameter collection |
-| `peers.py` | Peer integration engine — `sync_on_add()` / `sync_on_remove()`, `when_peer()`, `call_peer()` |
+| `peers.py` | Peer integration engine — `sync_on_add()` / `sync_on_remove()`, `call_peer()` |
 | `scaffold.py` | `copy_templates()` / `cleanup_files()` / `restore_original_templates()` — template rendering and file lifecycle |
 | `pixi_ops.py` | `PixiOps` — pixi package add/remove operations |
 | `secrets.py` | `SecretsOps` — secret generation and cleanup |
@@ -50,7 +50,7 @@ that sets `section` and returns the correct registry.
 
 ```
 InstallableConfig (pydantic BaseModel)    ← utils/installable/types.py
-  ├── install_params, pixi_packages, conditional_packages, needs, secret_generators...
+  ├── install_params, pixi_packages, peer_pixi_packages, needs, secret_generators...
   └── Variant                              ← extends InstallableConfig (adds required=True)
         └── Installable                    ← utils/installable/installable.py (adds lifecycle hooks)
               ├── BasePackage              ← packages/_base.py
@@ -71,7 +71,7 @@ dedicated modules named by domain:
 
 Installable-specific types live in `utils/installable/types.py` — tightly
 coupled to that subsystem and not needed outside it (`InstallableRef`,
-`ConditionalPackage`, `Variant`, ...).
+`InstallableRef`, `Variant`, `InstallableRef`, etc.).
 
 ## Lifecycle
 
@@ -109,7 +109,7 @@ remove_installable(cls, name, provider=None):
 ## Component Architecture
 
 - [Installable System](installable-system.md) — Installable, Registry, types, orchestrator, scaffold, auto-discovery
-- [Integration Protocol](integration.md) — Peer integration engine: `listens_to`, hooks, conditional packages
+- [Integration Protocol](integration.md) — Peer integration engine: `peer_pixi_packages`, hooks, peer templates
 - [Package Architecture](package-architecture.md) — BasePackage, variants, install params, secret generators
 - [Feature Architecture](feature-architecture.md) — BaseFeature, dependencies, variants
 - [Framework Architecture](framework-architecture.md) — BaseFramework, CSS/JS injection

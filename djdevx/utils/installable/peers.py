@@ -9,16 +9,14 @@ first:
   to that is already installed.
 - PUSH — installed installables that react to a newly added one get their
   ``on_peer_added`` / ``on_peer_removed``.
-- Conditional packages gated by ``when_peer`` are reconciled against the
-  current tracking state and recorded under ``extra_packages``.
+- Peer pixi packages declared in ``peer_pixi_packages`` are reconciled
+  against the current tracking state and added/removed idempotently.
 
-An installable "reacts to" a peer if the peer is named in ``listens_to``
-(needed for hooks) *or* appears in any ``when_peer`` gate (package sync
-works from gates alone — no ``listens_to`` required).
+Interest is declared via keys in ``peer_pixi_packages``. An empty list
+value ({ref: []}) is a valid hook-only declaration.
 """
 
 import functools
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Iterator, Optional
 
@@ -29,12 +27,12 @@ from ..tracking import ProjectTracking
 from .pixi_ops import PixiOps
 from .registry import Registry, all_registries
 from .resolver import resolve
+from .scaffold import remove_empty_parents
+from .types import PEER_TEMPLATES_DIRNAME
+from ..templates.manager import TemplateManager
 from .tracking import get_section
-from .types import (
-    ConditionContext,
-    InstallableConfig,
-    InstallableRef,
-)
+from .types import InstallableConfig, InstallableRef
+from ..types.pixi_types import PixiPackageSpec
 
 _syncing = False
 
@@ -54,29 +52,6 @@ def _guard(fn):
             _syncing = False
 
     return wrapper
-
-
-@dataclass(frozen=True)
-class PeerCheck:
-    """``when`` condition gating packages on whether a peer is installed.
-
-    Carries its ``InstallableRef`` so the engine can derive the owner's peer
-    interests straight from ``conditional_packages`` — ``listens_to`` is only
-    needed when hooks are used as well.
-    """
-
-    ref: InstallableRef
-
-    def __call__(self, ctx: ConditionContext) -> bool:
-        return ctx.project.is_installed(self.ref.kind.section, self.ref.name)
-
-
-def when_peer(ref: InstallableRef) -> PeerCheck:
-    """Build a condition gating packages on a peer installable.
-
-    The package is included exactly while *ref* is tracked as installed.
-    """
-    return PeerCheck(ref)
 
 
 def call_peer(
@@ -118,76 +93,227 @@ def _installed_variants(project: ProjectTracking, cls: type, name: str) -> list[
     return project.get_variants(get_section(cls), name)
 
 
-def _set_extra_packages(
-    project: ProjectTracking, cls: type, name: str, packages: set[str]
+# ── Interest and spec helpers ──────────────────────────────────────────────────
+
+
+def _all_interests(
+    installable: InstallableConfig,
+    variant=None,
+    installed_variant_names: list[str] | None = None,
+) -> set[InstallableRef]:
+    """Peer refs this installable reacts to, across base, optional variant,
+    and optional pre-looked-up installed variant names."""
+    interests: set[InstallableRef] = set(installable.peer_pixi_packages.keys())
+    extras: list[Any] = []
+    if variant is not None:
+        extras.append(variant)
+    if installed_variant_names is not None:
+        extras.extend(installable.variants.get(n) for n in installed_variant_names)
+    for v in extras:
+        if v is not None and hasattr(v, "peer_pixi_packages"):
+            interests.update(v.peer_pixi_packages.keys())
+    return interests
+
+
+def _all_specs(
+    installable: InstallableConfig,
+    variant=None,
+    installed_variant_names: list[str] | None = None,
+) -> dict[str, PixiPackageSpec]:
+    """Flatten peer specs across base, optional *variant*, and optional
+    pre-looked-up *installed_variant_names*."""
+    specs: dict[str, PixiPackageSpec] = {}
+    for _ref, package_specs in installable.peer_pixi_packages.items():
+        for spec in package_specs:
+            specs[_spec_key(spec)] = spec
+    extras: list[Any] = []
+    if variant is not None:
+        extras.append(variant)
+    if installed_variant_names is not None:
+        extras.extend(installable.variants.get(n) for n in installed_variant_names)
+    for v in extras:
+        if v is not None and hasattr(v, "peer_pixi_packages"):
+            for _ref, package_specs in v.peer_pixi_packages.items():
+                for spec in package_specs:
+                    specs[_spec_key(spec)] = spec
+    return specs
+
+
+def _read_applied(project: ProjectTracking, installable: InstallableConfig) -> set[str]:
+    return project.get_applied_peers(installable.section, installable.name)
+
+
+def _write_applied(
+    project: ProjectTracking, installable: InstallableConfig, keys: set[str]
 ) -> None:
-    section = get_section(cls)
-    project.add(section, name, metadata={"extra_packages": sorted(packages)})
+    project.set_applied_peers(installable.section, installable.name, keys)
 
 
-def _reconcile_gated_packages(
-    owner: InstallableConfig,
+def _spec_key(spec: PixiPackageSpec) -> str:
+    """Stable toml-friendly identity key for a PixiPackageSpec."""
+    feature = f":{spec.pixi_feature}" if spec.pixi_feature else ""
+    return f"{spec.kind}:{spec.name}{feature}"
+
+
+def _installed_variant_names(
+    project: ProjectTracking, installable: InstallableConfig
+) -> list[str]:
+    """Return installed variant names for *installable* from tracking."""
+    return project.get_variants(installable.section, installable.name)
+
+
+# ── Reconciliation ─────────────────────────────────────────────────────────────
+
+
+def _sync_peer_packages(
+    installable: InstallableConfig,
     root: Path,
     project: ProjectTracking,
+    variant=None,
 ) -> None:
-    """Make owner's engine-managed pixi packages match its current gates.
+    """Ensure pixi packages match current installed peers.
 
-    Packages whose gate passes but aren't applied yet are added; recorded
-    packages whose gate no longer passes are pixi-removed. The recorded set
-    (``extra_packages`` in tracking) is the source of truth for what the
-    engine manages, so gates that flip back and forth stay consistent.
+    Reconciles declared ``peer_pixi_packages`` against tracking state:
+    adds packages for peers that are present, removes packages whose peer
+    has left. Stale entries (present in metadata but no longer declared)
+    are silently cleaned up without crashing.
     """
-    section = get_section(type(owner))
-    recorded = set(project.list(section).get(owner.name, {}).get("extra_packages", []))
-    specs_by_name = {c.package.name: c.package for c in owner.conditional_packages}
-    ctx = ConditionContext(owner, project=project)
-    passing = {c.package.name for c in owner.conditional_packages if c.when(ctx)}
+    installed_var_names = []
+    if variant is not None:
+        installed_var_names = [variant.name]
+    else:
+        installed_var_names = _installed_variant_names(project, installable)
 
-    fresh = sorted(passing - recorded)
-    stale = sorted(recorded - passing)
-    if not fresh and not stale:
+    all_specs = _all_specs(
+        installable, variant=None, installed_variant_names=installed_var_names
+    )
+
+    desired_keys: set[str] = set()
+    for peer_ref, package_specs in installable.peer_pixi_packages.items():
+        if project.is_installed(peer_ref.kind.section, peer_ref.name):
+            for spec in package_specs:
+                desired_keys.add(_spec_key(spec))
+    for v in (
+        [variant]
+        if variant is not None
+        else [installable.variants.get(n) for n in installed_var_names]
+    ):
+        if v is not None and hasattr(v, "peer_pixi_packages"):
+            for peer_ref, package_specs in v.peer_pixi_packages.items():
+                if project.is_installed(peer_ref.kind.section, peer_ref.name):
+                    for spec in package_specs:
+                        desired_keys.add(_spec_key(spec))
+
+    stored_applied = _read_applied(project, installable)
+    to_add = desired_keys - stored_applied
+    to_remove = stored_applied - desired_keys
+
+    if not to_add and not to_remove:
         return
 
     pixi_ops = PixiOps(root)
-    if fresh:
-        pixi_ops.add_packages([specs_by_name[name] for name in fresh])
-    if stale:
-        pixi_ops.remove_packages([specs_by_name[name] for name in stale])
+    declared_keys = set(all_specs.keys())
+    safe_to_remove = to_remove & declared_keys
+    if safe_to_remove:
+        pixi_ops.remove_packages([all_specs[k] for k in safe_to_remove])
+    if to_add:
+        pixi_ops.add_packages([all_specs[k] for k in to_add])
 
-    _set_extra_packages(project, type(owner), owner.name, passing)
+    _write_applied(project, installable, desired_keys)
 
 
-def _drop_gated_packages(
-    owner: InstallableConfig,
+def _remove_peer_packages_for_ref(
+    installable: InstallableConfig,
     root: Path,
     project: ProjectTracking,
+    peer_ref: InstallableRef,
+    variant=None,
 ) -> None:
-    """Remove every engine-managed package of an owner being fully removed."""
-    section = get_section(type(owner))
-    recorded = sorted(
-        project.list(section).get(owner.name, {}).get("extra_packages", [])
-    )
-    if not recorded:
-        return
-    specs_by_name = {c.package.name: c.package for c in owner.conditional_packages}
-    removable = [specs_by_name[n] for n in recorded if n in specs_by_name]
-    if removable:
-        PixiOps(root).remove_packages(removable)
-    _set_extra_packages(project, type(owner), owner.name, set())
+    """Remove *installable*'s peer packages declared for *peer_ref*.
 
-
-def _interests_of(installable: InstallableConfig) -> list[InstallableRef]:
-    """Peer refs this installable reacts to: ``listens_to`` plus any gates.
-
-    Deduplicated, order preserved, so a ref declared both ways triggers
-    hooks exactly once.
+    Called by the UNWIND path of ``sync_on_remove`` so that when a peer
+    leaves, every listener's packages declared for it drop out regardless
+    of what was previously recorded as applied.
     """
-    gate_refs = [
-        c.when.ref
-        for c in installable.conditional_packages
-        if isinstance(c.when, PeerCheck)
-    ]
-    return list(dict.fromkeys([*installable.listens_to, *gate_refs]))
+    installed_var_names = []
+    if variant is not None:
+        installed_var_names = [variant.name]
+    else:
+        installed_var_names = _installed_variant_names(project, installable)
+
+    all_specs = _all_specs(
+        installable, variant=None, installed_variant_names=installed_var_names
+    )
+    removed_keys: set[str] = set()
+    for ref, package_specs in installable.peer_pixi_packages.items():
+        if ref == peer_ref:
+            for spec in package_specs:
+                removed_keys.add(_spec_key(spec))
+    for v in (
+        [variant]
+        if variant is not None
+        else [installable.variants.get(n) for n in installed_var_names]
+    ):
+        if v is not None and hasattr(v, "peer_pixi_packages"):
+            for ref, package_specs in v.peer_pixi_packages.items():
+                if ref == peer_ref:
+                    for spec in package_specs:
+                        removed_keys.add(_spec_key(spec))
+
+    removed = [all_specs[k] for k in removed_keys if k in all_specs]
+    if removed:
+        PixiOps(root).remove_packages(removed)
+
+    stored = _read_applied(project, installable)
+    stored -= removed_keys
+    _write_applied(project, installable, stored)
+
+
+# ── Template helpers ───────────────────────────────────────────────────────────
+
+
+def copy_peer_templates(installable, peer) -> None:
+    """Copy peer-specific templates from *peer* into the project root."""
+    peer_template_dir = peer.template_dir / PEER_TEMPLATES_DIRNAME
+    if not peer_template_dir.exists():
+        return
+    manager = TemplateManager()
+    manager.copy_templates(
+        source_dir=peer_template_dir,
+        dest_dir=installable.structure.root,
+        template_context=installable._install_context.copy(),
+    )
+
+
+def cleanup_peer_templates(installable, peer) -> None:
+    """Remove peer-specific templates that were copied from *peer*."""
+    peer_template_dir = peer.template_dir / PEER_TEMPLATES_DIRNAME
+    if not peer_template_dir.exists():
+        return
+    manager = TemplateManager()
+    for rel_path in manager.scan_templates(
+        source_dir=peer_template_dir,
+        template_context=installable._install_context.copy(),
+    ):
+        full_path = installable.structure.root / rel_path
+        if full_path.exists():
+            full_path.unlink()
+            remove_empty_parents(installable.structure.root, full_path)
+
+
+def cleanup_all_peer_templates(installable) -> None:
+    """Remove all peer-specific templates copied into the project root."""
+    interests = _all_interests(installable)
+    for peer_ref in interests:
+        try:
+            peer_cls = resolve(peer_ref, all_registries())
+            peer = peer_cls(name=peer_ref.name)
+            cleanup_peer_templates(installable, peer)
+        except KeyError:
+            continue
+
+
+# ── Engine entry points ────────────────────────────────────────────────────────
 
 
 def _installed_listeners(
@@ -207,7 +333,13 @@ def _installed_listeners(
             except KeyError:
                 continue
             listener = listener_cls(name=listener_name)
-            if any(interest == my_ref for interest in _interests_of(listener)):
+            installed = project.get_variants(listener.section, listener.name)
+            if any(
+                interest == my_ref
+                for interest in _all_interests(
+                    listener, installed_variant_names=installed
+                )
+            ):
                 yield listener
 
 
@@ -222,20 +354,20 @@ def sync_on_add(
     """Sync peer integrations after *installable* has been installed and tracked.
 
     PULL — peers already installed that I react to get my ``on_peer_added``
-    (once per installed variant of the peer), then my gated packages are
+    (once per installed variant of the peer), then my peer packages are
     reconciled once.
     PUSH — installed listeners that react to me get their ``on_peer_added``.
     """
     registries = registries if registries is not None else all_registries()
-    root = project_root if project_root is not None else ProjectStructure().root
+    root = Path(project_root) if project_root is not None else ProjectStructure().root
     project = ProjectTracking(root)
 
     my_ref = installable.ref
 
     # PULL — peers that arrived earlier
     pulled = False
-    for interest in _interests_of(installable):
-        for peer_name in sorted(project.list(interest.kind.section)):
+    for interest in _all_interests(installable, variant):
+        for peer_name in sorted(project.list(interest.kind.section).keys()):
             peer_ref = InstallableRef(name=peer_name, kind=interest.kind)
             if peer_ref != interest or peer_ref == my_ref:
                 continue
@@ -246,17 +378,19 @@ def sync_on_add(
             peer = peer_cls(name=peer_name)
             variants = _installed_variants(project, peer_cls, peer_name)
             peer_variants = [peer.variants.get(v) for v in variants] or [None]
+            hook_kwargs = {"peer": peer, "variant": None}
             for v in peer_variants:
+                hook_kwargs["variant"] = v
                 _safe_hook(
                     installable.on_peer_added,
                     f"{installable.name} <- {peer.name}",
-                    peer=peer,
-                    variant=v,
+                    **hook_kwargs,
                 )
+            copy_peer_templates(installable, peer)
             pulled = True
 
     if pulled:
-        _reconcile_gated_packages(installable, root, project)
+        _sync_peer_packages(installable, root, project, variant=variant)
 
     # PUSH — listeners that arrived earlier
     for listener in _installed_listeners(registries, project, my_ref):
@@ -266,13 +400,15 @@ def sync_on_add(
             peer=installable,
             variant=variant,
         )
-        _reconcile_gated_packages(listener, root, project)
+        copy_peer_templates(listener, installable)
+        _sync_peer_packages(listener, root, project)
 
 
 @_guard
 def sync_on_remove(
     installable: InstallableConfig,
     variant=None,
+    applied: Optional[set[str]] = None,
     *,
     registries: Optional[list[Registry]] = None,
     project_root: Optional[Path] = None,
@@ -281,14 +417,14 @@ def sync_on_remove(
     """Sync peer integrations after *installable* (or a variant) was removed.
 
     UNWIND — installed listeners that react to me get their
-    ``on_peer_removed``; on full removal their gated packages are reconciled
-    too (gates on me now fail, so those packages drop out).
+    ``on_peer_removed``; on full removal their peer packages are reconciled
+    too (peers now gone, so those packages drop out).
     SELF-CLEANUP — on full removal, every engine-managed package recorded for
-    me goes away with me, regardless of gate state. A variant-only removal
-    leaves both my records and my applied gated packages intact.
+    me goes away with me, regardless of peer state. A variant-only removal
+    leaves both my records and my applied peer packages intact.
     """
     registries = registries if registries is not None else all_registries()
-    root = project_root if project_root is not None else ProjectStructure().root
+    root = Path(project_root) if project_root is not None else ProjectStructure().root
     project = ProjectTracking(root)
 
     my_ref = installable.ref
@@ -301,12 +437,25 @@ def sync_on_remove(
             peer=installable,
             variant=variant,
         )
+        cleanup_peer_templates(listener, installable)
         if fully_removed:
-            _reconcile_gated_packages(listener, root, project)
+            # The peer is gone, so drop its packages from the listener and
+            # record the removal in the listener's applied metadata.
+            _remove_peer_packages_for_ref(listener, root, project, my_ref)
 
     # SELF-CLEANUP
     if fully_removed:
-        _drop_gated_packages(installable, root, project)
+        declared = _all_specs(installable, variant=None)
+        if applied is not None:
+            # Only packages that were actually applied go away with me.
+            to_remove = [declared[k] for k in applied if k in declared]
+            if to_remove:
+                PixiOps(root).remove_packages(to_remove)
+        else:
+            # Legacy/direct call without applied info: full cleanup.
+            if declared:
+                PixiOps(root).remove_packages(list(declared.values()))
+        cleanup_all_peer_templates(installable)
 
 
-__all__ = ["call_peer", "sync_on_add", "sync_on_remove", "when_peer"]
+__all__ = ["call_peer", "sync_on_add", "sync_on_remove"]

@@ -11,7 +11,7 @@ utils/installable/
 ├── __init__.py           # Re-exports Installable, Registry, InstallParam, Variant, discover_and_register, build_list_table
 ├── types.py              # InstallableConfig, InstallParam, Variant, InstallableKind, InstallableRef
 ├── installable.py        # Installable — pydantic BaseModel, add/remove lifecycle, hooks
-├── peers.py              # Peer integration engine (sync_on_add / sync_on_remove / when_peer / call_peer)
+├── peers.py              # Peer integration engine (sync_on_add / sync_on_remove / call_peer)
 ├── registry.py           # Registry[T] — generic type registry with @register
 ├── discovery.py          # discover_and_register() — auto-import modules to trigger @register
 ├── orchestrator.py       # add_installable() / remove_installable() — dependency resolution, interactive selection, parameter collection
@@ -80,26 +80,6 @@ Declares a CLI parameter collected during add and passed to templates:
 | `message_before_prompt` | `Optional[str]` | Message printed before the prompt |
 | `hide_input` | `bool` | Use password input (hidden) |
 
-### ConditionalPackage
-
-A single pixi package guarded by an arbitrary condition:
-
-```python
-ConditionalCheck = Callable[["ConditionContext"], bool]
-
-@dataclass(frozen=True)
-class ConditionalPackage:
-    package: PixiPackageSpec
-    when: ConditionalCheck
-```
-
-`when` receives a single `ConditionContext` with `ctx.installable` (the owning
-instance), `ctx.variant` (when evaluating variant conditionals), and a lazily
-created `ctx.project` (`ProjectTracking`). Return `True` to include the
-package, `False` to skip it. Evaluated by `Installable.add()`/`remove()` via
-`_active_conditional_packages()` and reconciled by the integration engine on
-peer add/remove.
-
 ### InstallableConfig
 
 The shared pydantic `BaseModel` that all installables extend:
@@ -109,11 +89,10 @@ The shared pydantic `BaseModel` that all installables extend:
 | `name` | `str` | Unique identifier (underscores normalized to hyphens) |
 | `display_name` | `str` | Human-readable name for CLI output |
 | `pixi_packages` | `list[PixiPackageSpec]` | PyPI/conda packages (set `pixi_feature="dev"` for dev-only) |
-| `conditional_packages` | `list[ConditionalPackage]` | Pixi packages installed only when their `when(ctx)` condition holds |
+| `peer_pixi_packages` | `dict[InstallableRef, list[PixiPackageSpec]]` | Packages added when a declared peer is installed, removed when it leaves |
 | `template_path` | `str` | Override auto-derived template directory |
 | `install_params` | `list[InstallParam]` | Parameters collected at install time |
 | `needs` | `list[InstallableRef]` | Dependencies auto-installed first; also blocks removal while dependents are installed (works across sections, e.g. package → cache) |
-| `listens_to` | `list[InstallableRef]` | Peers that trigger integration hooks (`when_peer` gates are derived automatically) |
 | `secret_generators` | `dict[str, Callable]` | Maps field names to generator callables |
 | `files_to_remove` | `list[str]` | Files to delete on uninstall |
 | `folders_to_remove` | `list[str]` | Folders to delete on uninstall |
@@ -484,14 +463,19 @@ dependencies across categories.
 ## Peer Integration — `orchestrator.py`
 
 The integration engine makes installables **order-independently
-inter-installable**: every installable can declare which peers it reacts to and
-re-render its own artifacts when they arrive or leave.
+inter-installable**: every installable can declare peer pixi packages and react
+to peers arriving or leaving.
 
 ```python
 from djdevx.utils.installable.types import InstallableRef, FRAMEWORK
+from djdevx.utils.installable.pixi_package import PixiPackageSpec
 
 class MyPackage(BasePackage):
-    listens_to: list[InstallableRef] = [InstallableRef("bootstrap", FRAMEWORK)]
+    peer_pixi_packages: dict[InstallableRef, list[PixiPackageSpec]] = {
+        InstallableRef("bootstrap", FRAMEWORK): [
+            PixiPackageSpec("some-integration-lib", kind="pypi"),
+        ],
+    }
 
     def on_peer_added(self, peer, variant=None) -> None:
         ...  # adapt my artifacts to the peer's presence (idempotent)
@@ -501,12 +485,12 @@ class MyPackage(BasePackage):
 ```
 
 `sync_on_add()` runs at the end of `add()`: it pulls notifications from already
-installed peers I listen to and pushes mine to already installed listeners.
-`sync_on_remove()` runs before untracking: it unwinds interested listeners and
-self-cleans my engine-managed conditional packages. Hooks are error-isolated,
+installed peers I react to and pushes mine to already installed reactors.
+`sync_on_remove()` runs after untracking: it unwinds interested reactors and
+self-cleans my engine-managed peer packages. Hooks are error-isolated,
 guarded against recursion, and unregistered peers are treated as "not
-installed". Conditional pixi packages (`ConditionalPackage`) are added/removed
-by the engine and tracked as `extra_packages` in `djdevx.toml`.
+installed". Peer pixi packages are added/removed by the engine and tracked as
+`peer_pixi_applied` in `djdevx.toml`.
 
 > Full protocol reference — matching rules, multi-variant behavior,
 > `call_peer`, guarantees, and worked examples:
