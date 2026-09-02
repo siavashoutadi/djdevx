@@ -50,6 +50,21 @@ def test_is_up_false_when_pg_isready_fails(tmp_path):
     assert service.is_up() is False
 
 
+def test_describe_down_mentions_log_when_initialized(tmp_path):
+    service, _ = make_service(tmp_path)
+    service.data_dir.mkdir(parents=True)
+    (service.data_dir / "PG_VERSION").write_text("16\n")
+    (service.service_dir / "postgres.log").write_text("")
+    reason = service.describe_down()
+    assert "not responding on port" in reason
+    assert "postgres.log" in reason
+
+
+def test_describe_down_plain_when_not_initialized(tmp_path):
+    service, _ = make_service(tmp_path)
+    assert service.describe_down() == f"not responding on port {service.port}"
+
+
 def test_initdb_command(tmp_path):
     service, runner = make_service(tmp_path)
     service._init_db()
@@ -109,12 +124,13 @@ def test_reset_flushes_django(tmp_path):
 def test_up_initializes_then_starts(tmp_path):
     ok = MagicMock(returncode=0, stdout=b"")
     not_ready = MagicMock(returncode=1, stdout=b"")
-    side_effects = [ok, not_ready, ok]  # initdb, pg_isready, pg_ctl start
+    # order: pg_isready (down), initdb, pg_ctl start
+    side_effects = [not_ready, ok, ok]
     service, runner = make_service(tmp_path, side_effect=side_effects)
     service.up()
     calls = [c.args for c in runner.run_pixi_command.call_args_list]
-    assert calls[0][1] == "initdb"
-    assert calls[1] == _pg_isready_args(service.port)
+    assert calls[0] == _pg_isready_args(service.port)
+    assert calls[1][1] == "initdb"
     assert calls[2][1] == "pg_ctl"
     assert calls[2][-1] == "start"
 
@@ -131,7 +147,7 @@ def test_up_skips_start_when_already_running(tmp_path):
 def test_up_sets_port_env(tmp_path):
     ok = MagicMock(returncode=0, stdout=b"")
     not_ready = MagicMock(returncode=1, stdout=b"")
-    service, _ = make_service(tmp_path, side_effect=[ok, not_ready, ok])
+    service, _ = make_service(tmp_path, side_effect=[not_ready, ok, ok])
     service.up()
     import os
 
@@ -155,3 +171,31 @@ def test_start_failure_raises(tmp_path):
 
     with pytest.raises(RuntimeError, match="pg_ctl start failed"):
         service._start()
+
+
+def test_up_emits_step_group_children(tmp_path):
+    """Starting a DB renders a single nested step with ✓ children."""
+    from io import StringIO
+
+    from rich.console import Console
+
+    from djdevx.utils.console.print import print_console
+
+    ok = MagicMock(returncode=0, stdout=b"")
+    not_ready = MagicMock(returncode=1, stdout=b"")
+    # order: pg_isready (down), initdb, pg_ctl start
+    service, _ = make_service(tmp_path, side_effect=[not_ready, ok, ok])
+
+    buf = StringIO()
+    console = Console(file=buf, width=120, force_terminal=False)
+    old = print_console._console
+    print_console._console = console
+    try:
+        service.up()
+    finally:
+        print_console._console = old
+    out = buf.getvalue()
+    assert "Starting PostgreSQL" in out
+    assert "initialized postgresql data directory" in out
+    assert "started postgresql on port" in out
+    assert "set POSTGRES_PORT" in out

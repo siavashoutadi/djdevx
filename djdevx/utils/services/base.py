@@ -71,29 +71,40 @@ class BaseDevService(ABC):
             return secret_path.read_text().strip()
         return self.dev_default_password
 
-    def _set_port_env(self) -> None:
-        """Set the service port as an environment variable for subprocesses."""
+    def _set_port_env(self, quiet: bool = False) -> None:
+        """Set the service port as an environment variable for subprocesses.
+
+        When *quiet* is True the variable is set without printing (callers
+        render a ``✓ set KEY=value`` line themselves inside a step group).
+        """
         if self.port_env_key:
             os.environ[self.port_env_key] = str(self.port)
-            print_console.step_done(f"Set {self.port_env_key}={self.port}")
+            if not quiet:
+                print_console.step_done(f"Set {self.port_env_key}={self.port}")
 
-    def run_pixi(self, *args: str) -> subprocess.CompletedProcess:
-        return self.runner.run_pixi_command(*args, check=False)
+    def run_pixi(
+        self, *args: str, timeout: int | None = None
+    ) -> subprocess.CompletedProcess:
+        return self.runner.run_pixi_command(*args, check=False, timeout=timeout)
 
     @abstractmethod
-    def up(self) -> None:
+    def up(self, step=None) -> None:
         """Ensure the service is running (idempotent)."""
 
     @abstractmethod
-    def down(self) -> None:
+    def down(self, step=None) -> None:
         """Stop the service if it is running."""
 
     @abstractmethod
-    def is_up(self) -> bool:
+    def is_up(self, step=None) -> bool:
         """Return True if the service is currently reachable."""
 
+    def describe_down(self) -> str:
+        """Return a short reason this service reports as not up."""
+        return f"not responding on port {self.port}"
+
     @abstractmethod
-    def reset(self) -> None:
+    def reset(self, step=None) -> None:
         """Flush all data while keeping the service running."""
 
     def status(self) -> bool:

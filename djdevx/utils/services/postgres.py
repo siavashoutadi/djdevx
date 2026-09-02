@@ -29,49 +29,104 @@ class PostgresService(BaseDevService):
     def _initialized(self) -> bool:
         return (self.data_dir / "PG_VERSION").exists()
 
-    def is_up(self) -> bool:
-        print_console.step(f"Checking if {self.display_name} is running...")
+    def is_up(self, step=None) -> bool:
+        group = (
+            step
+            if step is not None
+            else print_console.step_group(
+                f"Checking if {self.display_name} is running..."
+            )
+        )
         try:
             result = self.run_pixi(
-                "run", "pg_isready", "-h", "localhost", "-p", str(self.port)
+                "run",
+                "pg_isready",
+                "-h",
+                "localhost",
+                "-p",
+                str(self.port),
+                timeout=15,
             )
         except OSError:
-            print_console.step_done(f"{self.display_name} is not running")
-            return False
-        up = result.returncode == 0
-        if up:
-            print_console.step_done(f"{self.display_name} is up on port {self.port}")
+            up = False
         else:
-            print_console.step_done(f"{self.display_name} is not running")
+            up = result.returncode == 0
+        if up:
+            group.ok(f"{self.display_name} is up on port {self.port}")
+        else:
+            group.info(f"{self.display_name} is not running")
+        if step is None:
+            group.done()
         return up
 
-    def up(self) -> None:
-        self.structure.dev_data_dir.mkdir(parents=True, exist_ok=True)
-        if not self._initialized:
-            self._init_db()
-        if not self.is_up():
-            self._start()
-        else:
-            print_console.step_done(f"{self.display_name} is already running")
-        self._set_port_env()
-
-    def down(self) -> None:
-        if not self.is_up():
-            print_console.step_done(
-                f"{self.display_name} is not running, nothing to stop"
+    def describe_down(self) -> str:
+        if self._initialized and self._log_file.exists():
+            return (
+                f"not responding on port {self.port} — "
+                f"log: {self._log_file.relative_to(self.structure.root)}"
             )
+        return f"not responding on port {self.port}"
+
+    def up(self, step=None) -> None:
+        self.structure.dev_data_dir.mkdir(parents=True, exist_ok=True)
+        if self.is_up(step=step):
+            self._set_port_env(quiet=True)
             return
-        print_console.step(f"Stopping {self.display_name}...")
-        self.run_pixi("run", "pg_ctl", "-D", str(self.data_dir), "stop")
-        print_console.ok(f"{self.display_name} stopped")
+        group = (
+            step
+            if step is not None
+            else print_console.step_group(
+                f"Starting {self.display_name}", done=f"started {self.display_name}"
+            )
+        )
+        try:
+            if not self._initialized:
+                self._init_db(group)
+            self._start(group)
+            self._set_port_env(quiet=True)
+            group.ok(f"set {self.port_env_key}={self.port}")
+        finally:
+            if step is None:
+                group.done()
 
-    def reset(self) -> None:
-        print_console.step(f"Flushing {self.display_name} data...")
-        self.runner.run_manage_command("flush", "--noinput", check=False)
-        print_console.ok(f"{self.display_name} data flushed")
+    def down(self, step=None) -> None:
+        if not self.is_up(step=step):
+            print_console.info(f"{self.display_name} is not running, nothing to stop")
+            return
+        group = (
+            step
+            if step is not None
+            else print_console.step_group(
+                f"Stopping {self.display_name}", done=f"stopped {self.display_name}"
+            )
+        )
+        try:
+            self.run_pixi("run", "pg_ctl", "-D", str(self.data_dir), "stop")
+            group.ok(f"stopped {self.display_name.lower()} on port {self.port}")
+        finally:
+            if step is None:
+                group.done()
 
-    def _init_db(self) -> None:
-        print_console.step(f"Initializing {self.display_name} data directory...")
+    def reset(self, step=None) -> None:
+        group = (
+            step
+            if step is not None
+            else print_console.step_group(
+                f"Flushing {self.display_name} data",
+                done=f"{self.display_name} data flushed",
+            )
+        )
+        try:
+            if not self.is_up(step=group):
+                group.info(f"{self.display_name} not running, skip flush")
+            else:
+                self.runner.run_manage_command("flush", "--noinput", check=False)
+                group.ok(f"flushed {self.display_name.lower()} data")
+        finally:
+            if step is None:
+                group.done()
+
+    def _init_db(self, group=None) -> None:
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self._pwfile.write_text(self.password + "\n")
         try:
@@ -91,12 +146,12 @@ class PostgresService(BaseDevService):
                     f"initdb failed (exit {result.returncode}): "
                     f"{result.stderr.decode().strip()}"
                 )
-            print_console.ok(f"{self.display_name} data initialized")
+            if group is not None:
+                group.ok(f"initialized {self.display_name.lower()} data directory")
         finally:
             self._pwfile.unlink(missing_ok=True)
 
-    def _start(self) -> None:
-        print_console.step(f"Starting {self.display_name} server...")
+    def _start(self, group=None) -> None:
         self.data_dir.mkdir(parents=True, exist_ok=True)
         result = self.run_pixi(
             "run",
@@ -114,4 +169,5 @@ class PostgresService(BaseDevService):
                 f"pg_ctl start failed (exit {result.returncode}). "
                 f"Check log: {self._log_file}"
             )
-        print_console.ok(f"{self.display_name} server started on port {self.port}")
+        if group is not None:
+            group.ok(f"started {self.display_name.lower()} on port {self.port}")

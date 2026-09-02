@@ -17,8 +17,14 @@ class RedisService(BaseDevService):
     dev_default_password: ClassVar[str] = "redis_password"
     port_env_key: ClassVar[str] = "REDIS_PORT"
 
-    def is_up(self) -> bool:
-        print_console.step(f"Checking if {self.display_name} is running...")
+    def is_up(self, step=None) -> bool:
+        group = (
+            step
+            if step is not None
+            else print_console.step_group(
+                f"Checking if {self.display_name} is running..."
+            )
+        )
         try:
             result = self.run_pixi(
                 "run",
@@ -28,81 +34,113 @@ class RedisService(BaseDevService):
                 "-a",
                 self.password,
                 "ping",
+                timeout=15,
             )
         except OSError:
-            print_console.step_done(f"{self.display_name} is not running")
-            return False
-        stdout = (
-            result.stdout.decode()
-            if isinstance(result.stdout, bytes)
-            else (result.stdout or "")
-        )
-        up = result.returncode == 0 and "PONG" in stdout
-        if up:
-            print_console.step_done(f"{self.display_name} is up on port {self.port}")
+            up = False
         else:
-            print_console.step_done(f"{self.display_name} is not running")
+            stdout = (
+                result.stdout.decode()
+                if isinstance(result.stdout, bytes)
+                else (result.stdout or "")
+            )
+            up = result.returncode == 0 and "PONG" in stdout
+        if up:
+            group.ok(f"{self.display_name} is up on port {self.port}")
+        else:
+            group.info(f"{self.display_name} is not running")
+        if step is None:
+            group.done()
         return up
 
-    def up(self) -> None:
+    def up(self, step=None) -> None:
         self.data_dir.mkdir(parents=True, exist_ok=True)
-        if self.is_up():
-            print_console.step_done(f"{self.display_name} is already running")
-            self._set_port_env()
+        if self.is_up(step=step):
+            self._set_port_env(quiet=True)
             return
-        print_console.step(f"Starting {self.display_name}...")
-        result = self.run_pixi(
-            "run",
-            "redis-server",
-            "--port",
-            str(self.port),
-            "--requirepass",
-            self.password,
-            "--dir",
-            str(self.data_dir),
-            "--daemonize",
-            "yes",
-            "--appendonly",
-            "yes",
+        group = (
+            step
+            if step is not None
+            else print_console.step_group(
+                f"Starting {self.display_name}", done=f"started {self.display_name}"
+            )
         )
-        if result.returncode != 0:
-            raise RuntimeError(
-                f"redis-server failed (exit {result.returncode}): "
-                f"{result.stderr.decode().strip()}"
+        try:
+            result = self.run_pixi(
+                "run",
+                "redis-server",
+                "--port",
+                str(self.port),
+                "--requirepass",
+                self.password,
+                "--dir",
+                str(self.data_dir),
+                "--daemonize",
+                "yes",
+                "--appendonly",
+                "yes",
             )
-        print_console.ok(f"{self.display_name} started on port {self.port}")
-        self._set_port_env()
+            if result.returncode != 0:
+                raise RuntimeError(
+                    f"redis-server failed (exit {result.returncode}): "
+                    f"{result.stderr.decode().strip()}"
+                )
+            group.ok(f"started {self.display_name.lower()} on port {self.port}")
+            self._set_port_env(quiet=True)
+            group.ok(f"set {self.port_env_key}={self.port}")
+        finally:
+            if step is None:
+                group.done()
 
-    def down(self) -> None:
-        if not self.is_up():
-            print_console.step_done(
-                f"{self.display_name} is not running, nothing to stop"
-            )
+    def down(self, step=None) -> None:
+        if not self.is_up(step=step):
+            print_console.info(f"{self.display_name} is not running, nothing to stop")
             return
-        print_console.step(f"Stopping {self.display_name}...")
-        self.run_pixi(
-            "run",
-            "redis-cli",
-            "-p",
-            str(self.port),
-            "-a",
-            self.password,
-            "shutdown",
+        group = (
+            step
+            if step is not None
+            else print_console.step_group(
+                f"Stopping {self.display_name}", done=f"stopped {self.display_name}"
+            )
         )
-        print_console.ok(f"{self.display_name} stopped")
+        try:
+            self.run_pixi(
+                "run",
+                "redis-cli",
+                "-p",
+                str(self.port),
+                "-a",
+                self.password,
+                "shutdown",
+            )
+            group.ok(f"stopped {self.display_name.lower()} on port {self.port}")
+        finally:
+            if step is None:
+                group.done()
 
-    def reset(self) -> None:
-        if not self.is_up():
+    def reset(self, step=None) -> None:
+        if not self.is_up(step=step):
             print_console.warning(f"{self.display_name} is not running, skipping flush")
             return
-        print_console.step(f"Flushing {self.display_name} data...")
-        self.run_pixi(
-            "run",
-            "redis-cli",
-            "-p",
-            str(self.port),
-            "-a",
-            self.password,
-            "FLUSHALL",
+        group = (
+            step
+            if step is not None
+            else print_console.step_group(
+                f"Flushing {self.display_name} data",
+                done=f"{self.display_name} data flushed",
+            )
         )
-        print_console.ok(f"{self.display_name} data flushed")
+        try:
+            self.run_pixi(
+                "run",
+                "redis-cli",
+                "-p",
+                str(self.port),
+                "-a",
+                self.password,
+                "FLUSHALL",
+            )
+            group.ok(f"flushed {self.display_name.lower()} data")
+        finally:
+            if step is None:
+                group.done()
