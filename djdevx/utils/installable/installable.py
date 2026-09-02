@@ -93,6 +93,7 @@ class Installable(InstallableConfig):
         variant_name: Optional[str] = None,
         *,
         install_kwargs: Optional[dict[str, Any]] = None,
+        step=None,
     ) -> None:
         """Install this item: pixi add -> copy templates -> track -> secrets."""
         variant = self.variants.get(variant_name) if variant_name else None
@@ -107,18 +108,20 @@ class Installable(InstallableConfig):
         self.before_pixi_install()
         pixi_ops = PixiOps(self.structure.root, self.verbose)
         pixi_ops.add_packages(self.pixi_packages, variant)
-        print_console.ok("Installed dependency")
+        (step.ok if step else print_console.ok)("Installed dependency")
         self.after_pixi_install()
 
         self.before_copy_templates()
         copy_templates(self, variant)
-        print_console.ok("Finished configuration")
+        (step.ok if step else print_console.ok)("Finished configuration")
         self.after_copy_templates()
 
         copied = template_output_files(self, variant)
-        format_files([self.structure.root / f for f in copied], self.structure.root)
+        format_files(
+            [self.structure.root / f for f in copied], self.structure.root, step=step
+        )
 
-        SecretsOps(self.structure.root).generate(self, variant)
+        SecretsOps(self.structure.root).generate(self, variant, step=step)
 
         TrackingOps(self.section).track_install(self, variant)
 
@@ -127,6 +130,7 @@ class Installable(InstallableConfig):
     def remove(
         self,
         variant_name: Optional[str] = None,
+        step=None,
     ) -> None:
         """Remove this item: pixi remove -> cleanup -> restore -> untrack."""
         variant = self.variants.get(variant_name) if variant_name else None
@@ -151,12 +155,12 @@ class Installable(InstallableConfig):
         if variant is None or not updated:
             pixi_ops.remove_packages(self.pixi_packages)
 
-        print_console.ok("Removed dependency")
+        (step.ok if step else print_console.ok)("Removed dependency")
         self.after_pixi_remove()
 
         cleanup_files(self, variant)
         SecretsOps(self.structure.root).remove(self, variant)
-        print_console.ok("Finished cleanup")
+        (step.ok if step else print_console.ok)("Finished cleanup")
 
         if updated:
             tracking.add(
