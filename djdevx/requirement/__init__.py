@@ -90,33 +90,33 @@ def _install_tool_guide(tool: str) -> str:
 @app.command()
 def verify():
     """Check the requirements for project creation."""
-    print_console.step("Checking the requirements ...")
+    with print_console.step_group(
+        "Checking the requirements ...", done="All requirements are met!"
+    ) as step:
+        pixi_installed = system_tools.is_tool_installed("pixi")
+        if pixi_installed:
+            step.ok("pixi is installed")
+        else:
+            step.fail(f"pixi is not installed - {PIXI_INSTALL_URL}")
 
-    pixi_installed = system_tools.is_tool_installed("pixi")
-    if pixi_installed:
-        print_console.ok("pixi is installed")
-    else:
-        print_console.fail(f"pixi is not installed - {PIXI_INSTALL_URL}")
+        git_installed = system_tools.is_tool_installed("git")
+        if git_installed:
+            step.ok("git is installed")
+        else:
+            step.fail(f"git is not installed - {GIT_INSTALL_URL}")
 
-    git_installed = system_tools.is_tool_installed("git")
-    if git_installed:
-        print_console.ok("git is installed")
-    else:
-        print_console.fail(f"git is not installed - {GIT_INSTALL_URL}")
+        docker_installed = system_tools.is_tool_installed("docker")
+        if docker_installed:
+            step.ok("Docker is installed")
+        else:
+            step.fail(f"Docker is not installed - {DOCKER_INSTALL_URL}")
 
-    docker_installed = system_tools.is_tool_installed("docker")
-    if docker_installed:
-        print_console.ok("Docker is installed")
-    else:
-        print_console.fail(f"Docker is not installed - {DOCKER_INSTALL_URL}")
-
-    if docker_installed and pixi_installed and git_installed:
-        print_console.step_done("All requirements are met!")
-    else:
-        print_console.fail(
-            "Some requirements are missing. Please follow the links above to install them."
-        )
-        raise typer.Exit(code=1)
+        if not (docker_installed and pixi_installed and git_installed):
+            step.fail(
+                "Some requirements are missing. Please follow the links above to install them."
+            )
+            raise typer.Exit(code=1)
+        step.done()
 
 
 @app.command()
@@ -181,19 +181,26 @@ def install(
             )
             failed = True
             continue
-        print_console.step(f"Installing {name} ...")
-        for command in commands:
-            if verbose or dry_run:
-                print_console.info(f"$ {command}")
-            if dry_run:
-                continue
-            result = subprocess.run(command, shell=True)
-            if result.returncode != 0:
-                print_console.fail(f"Failed to install {name}.")
-                failed = True
-                break
-        else:
-            print_console.step_done(f"{name} is installed successfully.")
+        with print_console.step_group(
+            f"Installing {name} ...", done=f"{name} is installed successfully."
+        ) as step:
+            install_failed = False
+            for command in commands:
+                if verbose or dry_run:
+                    step.info(f"$ {command}")
+                if dry_run:
+                    continue
+                result = subprocess.run(command, shell=True)
+                if result.returncode != 0:
+                    step.fail(f"Failed to install {name}.")
+                    failed = True
+                    install_failed = True
+                    break
+            if not install_failed and not dry_run:
+                step.done()
+            elif dry_run and not install_failed:
+                step.ok(f"{name} would be installed.")
+                step.done()
 
     if failed:
         raise typer.Exit(code=1)

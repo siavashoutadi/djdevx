@@ -3,6 +3,7 @@ from typing import Any
 
 from rich.console import Console as RichConsole
 from rich.markup import escape
+from rich.rule import Rule
 from rich.table import Table
 from rich.text import Text
 
@@ -50,8 +51,52 @@ class TableBuilder:
         self.render()
 
 
+class NestedStep:
+    """A step that holds indented ``✓`` sub-actions and closes with a ``☑`` line."""
+
+    INDENT = "  "
+
+    def __init__(
+        self, print_console: "PrintConsole", title: str, done: str | None = None
+    ) -> None:
+        self._pc = print_console
+        self.title = title
+        self.done_message = done or f"{title} done"
+        print_console.step(title)
+
+    def ok(self, message: str) -> None:
+        """Print an indented completed sub-action (``✓ message``)."""
+        self._pc._console.print(
+            f"{self.INDENT}[bold green]{CHECK_MARK}[/bold green] {escape(message)}"
+        )
+
+    def fail(self, message: str) -> None:
+        """Print an indented failed sub-action (``✗ message``)."""
+        self._pc._console.print(
+            f"{self.INDENT}[bold red]{CROSS_MARK}[/bold red] {escape(message)}"
+        )
+
+    def info(self, message: str) -> None:
+        """Print an indented plain child line (e.g. a footnote)."""
+        self._pc._console.print(f"{self.INDENT}{escape(message)}")
+
+    def done(self) -> None:
+        """Close the step by printing the ``☑ <done>`` line."""
+        self._pc.step_done(self.done_message)
+
+    def __enter__(self) -> "NestedStep":
+        return self
+
+    def __exit__(self, *exc) -> None:
+        self.done()
+
+
 class PrintConsole:
     """Styled output printer for djdevx messages."""
+
+    def step_group(self, title: str, done: str | None = None) -> NestedStep:
+        """Create a (possibly nested) step with indented ``✓`` sub-actions."""
+        return NestedStep(self, title, done)
 
     def __init__(self):
         self._console = RichConsole()
@@ -92,6 +137,18 @@ class PrintConsole:
         """Print a list of items with bullet points."""
         for item in items:
             self._console.print(f"🔹[bold]{escape(item)}[/bold]")
+
+    def section(self, title: str) -> None:
+        """Print a bold cyan section header."""
+        self._console.print(f"[bold cyan]{escape(title)}[/bold cyan]")
+
+    def rule(self, style: str = "bright_black") -> None:
+        """Print a horizontal separator line to split sections."""
+        self._console.print(Rule(style=style))
+
+    def link(self, text: str, url: str) -> None:
+        """Print a clickable Rich hyperlink."""
+        self._console.print(f"[link={url}]{escape(text)}[/link]")
 
     def table(
         self,
