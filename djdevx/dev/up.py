@@ -11,8 +11,11 @@ def up() -> None:
         print_console.info("No database or cache installed.")
         return
     for service in services:
-        if service.is_up():
-            print_console.info(f"{service.display_name} is already running")
-        else:
-            service.up()
-            print_console.ok(f"{service.display_name} started")
+        with print_console.step_group(
+            f"Starting {service.display_name}...",
+            done=f"{service.display_name} started",
+        ) as group:
+            if service.is_up():
+                group.info(f"{service.display_name} is already running")
+            else:
+                service.up(step=group)

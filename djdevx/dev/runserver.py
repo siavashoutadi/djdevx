@@ -29,9 +29,12 @@ def runserver(ctx: typer.Context) -> None:
 
     services = resolve_dev_services()
     if services:
-        print_console.step("Setting service port environment variables...")
-        for service in services:
-            service._set_port_env()
+        with print_console.step_group(
+            "Setting service port environment variables...",
+            done="Service port environment variables set",
+        ) as group:
+            for service in services:
+                service._set_port_env(quiet=True, step=group)
 
     runner = PixiRunner()
     runner.run_interactive(*server_command(runner), *ctx.args)

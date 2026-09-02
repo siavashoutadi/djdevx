@@ -71,15 +71,18 @@ class BaseDevService(ABC):
             return secret_path.read_text().strip()
         return self.dev_default_password
 
-    def _set_port_env(self, quiet: bool = False) -> None:
+    def _set_port_env(self, quiet: bool = False, step=None) -> None:
         """Set the service port as an environment variable for subprocesses.
 
         When *quiet* is True the variable is set without printing (callers
         render a ``✓ set KEY=value`` line themselves inside a step group).
+        When *step* is provided, emits an indented ``✓ set KEY=value`` child.
         """
         if self.port_env_key:
             os.environ[self.port_env_key] = str(self.port)
-            if not quiet:
+            if step is not None:
+                step.ok(f"set {self.port_env_key}={self.port}")
+            elif not quiet:
                 print_console.step_done(f"Set {self.port_env_key}={self.port}")
 
     def run_pixi(

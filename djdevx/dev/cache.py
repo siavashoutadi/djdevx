@@ -23,17 +23,23 @@ def _get_service() -> Optional[BaseDevService]:
 def init() -> None:
     """Start the dev cache."""
     service = _get_service()
-    if not service.is_up():
-        service.up()
-    print_console.ok(f"{service.display_name} is ready")
+    with print_console.step_group(
+        f"Starting {service.display_name}...",
+        done=f"{service.display_name} is ready",
+    ) as group:
+        if not service.is_up():
+            service.up(step=group)
 
 
 @app.command()
 def reset() -> None:
     """Flush all data, keeping the service running."""
     service = _get_service()
-    service.reset()
-    print_console.ok(f"{service.display_name} data flushed")
+    with print_console.step_group(
+        f"Flushing {service.display_name} data...",
+        done=f"{service.display_name} data flushed",
+    ) as group:
+        service.reset(step=group)
 
 
 @app.command()

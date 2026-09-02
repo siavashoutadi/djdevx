@@ -11,6 +11,9 @@ def down() -> None:
         print_console.info("No database or cache installed.")
         return
     for service in services:
-        if service.is_up():
-            service.down()
-            print_console.ok(f"{service.display_name} stopped")
+        with print_console.step_group(
+            f"Stopping {service.display_name}...",
+            done=f"{service.display_name} stopped",
+        ) as group:
+            if service.is_up():
+                service.down(step=group)

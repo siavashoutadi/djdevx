@@ -27,19 +27,24 @@ def _get_service() -> Optional[BaseDevService]:
 def init() -> None:
     """Start the dev database and apply pending migrations."""
     service = _get_service()
-    if not service.is_up():
-        service.up()
-    service._set_port_env()
+    with print_console.step_group(
+        f"Starting {service.display_name}...",
+        done=f"{service.display_name} is ready",
+    ) as group:
+        if not service.is_up():
+            service.up(step=group)
+        service._set_port_env(quiet=False, step=group)
     runner = PixiRunner()
     commands = ManageCommands(runner)
-    print_console.step("Checking for pending migrations...")
-    if commands.migrations_pending():
-        print_console.step_done("Migrations pending, applying...")
-        commands.run("migrate")
-        print_console.ok("Migrations applied")
-    else:
-        print_console.step_done("No pending migrations")
-    print_console.ok(f"{service.display_name} is ready")
+    with print_console.step_group(
+        "Checking for pending migrations...", done="Migration check complete"
+    ) as group:
+        if commands.migrations_pending():
+            group.ok("Migrations pending, applying...")
+            commands.run("migrate")
+            group.info("Migrations applied")
+        else:
+            group.ok("No pending migrations")
 
 
 @app.command()

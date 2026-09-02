@@ -25,8 +25,10 @@ class _Invocation:
         self.pixi = MagicMock()
         self.pixi.project_root = None
         self.log: list[object] = []
-        self.db.up = MagicMock(side_effect=lambda: self.log.append("db_up"))
-        self.cache.up = MagicMock(side_effect=lambda: self.log.append("cache_up"))
+        self.db.up = MagicMock(side_effect=lambda *a, **k: self.log.append("db_up"))
+        self.cache.up = MagicMock(
+            side_effect=lambda *a, **k: self.log.append("cache_up")
+        )
         self.pixi.run_interactive = MagicMock(
             side_effect=lambda *a, **k: self.log.append(("server", a))
         )
