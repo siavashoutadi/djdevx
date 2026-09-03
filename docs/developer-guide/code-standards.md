@@ -154,6 +154,38 @@ if commands.migrations_pending():
 
 > Read the [Installable System](installable-system.md#tracking-system) for details on the tracking and registry system.
 
+### Binary Downloads
+
+- Use `djdevx.utils.services.binary` for services shipped as release
+  artifacts (e.g. OpenObserve, otelcol-contrib) that have no usable pixi
+  package
+- Download into `.pixi/devdata/bin/` (`ProjectStructure.dev_data_dir / "bin"`) so
+  binaries don't pollute the pixi environment and are cleaned up by service
+  `purge`
+- `platform_key()` returns a `"<os>-<arch>"` key (e.g. `linux-amd64`,
+  `darwin-arm64`) for GitHub release asset names; `ensure_executable(path)`
+  chmods a binary so it can run
+- `download_and_extract()` downloads a URL, unpacks `tar.gz` or `zip`, and
+  returns the extracted executable `Path`, or `None` if nothing matched
+- The module never prints; callers use `print_console` for user-facing messages
+
+```python
+from djdevx.utils.services.binary import download_and_extract, platform_key
+from djdevx.utils.project.project_structure import ProjectStructure
+
+project = ProjectStructure()               # project root
+bin_dir = project.dev_data_dir / "bin"     # .pixi/devdata/bin/
+
+binary = download_and_extract(
+    f"https://example.com/releases/download/v1.0/tool-{platform_key()}.tar.gz",
+    bin_dir,
+    archive_type="tar.gz",
+    binary_glob="tool*",
+)
+if binary is not None:
+    print_console.ok(f"downloaded {binary}")
+```
+
 ### Console Output
 
 - Use `PrintConsole` singleton and prompt wrappers for all CLI output
