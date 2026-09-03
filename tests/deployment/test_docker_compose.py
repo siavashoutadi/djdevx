@@ -1,5 +1,7 @@
 """Unit tests for DockerComposePlugin imports and DeployInputs."""
 
+import yaml
+
 from djdevx.deployment.docker_compose import (
     DeployInputs,
     DockerComposePlugin,
@@ -74,3 +76,28 @@ class TestDeployInputs:
         assert DeployInputs._validate_email("test@example.com") is True
         assert DeployInputs._validate_email("invalid") is False
         assert DeployInputs._validate_email("@example.com") is False
+
+
+class TestBaseCompose:
+    """Tests for the generated production base compose manifest."""
+
+    def _build(self) -> dict:
+        manifest = DockerComposePlugin._build_base_compose(CollectedSettings())
+        data = yaml.safe_load(manifest)
+        return data["services"]["web"]
+
+    def test_has_env_file(self) -> None:
+        assert self._build()["env_file"] == [".env"]
+
+    def test_has_healthcheck(self) -> None:
+        healthcheck = self._build()["healthcheck"]
+        assert "".join(healthcheck["test"]).startswith("CMD")
+        assert "urlopen('http://localhost:8000/health')" in "".join(healthcheck["test"])
+        assert healthcheck["interval"] == "30s"
+        assert healthcheck["timeout"] == "5s"
+        assert healthcheck["retries"] == 3
+
+    def test_has_secure_traefik_routing_labels(self) -> None:
+        labels = self._build()["labels"]
+        assert "traefik.http.routers.web.entrypoints=websecure" in labels
+        assert "traefik.http.routers.web.tls.certresolver=letsencrypt" in labels

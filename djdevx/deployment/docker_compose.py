@@ -543,6 +543,8 @@ class DockerComposePlugin(BaseDeployPlugin):
         labels = [
             "traefik.enable=true",
             "traefik.http.routers.web.rule=Host(`$DOMAIN`)",
+            "traefik.http.routers.web.entrypoints=websecure",
+            "traefik.http.routers.web.tls.certresolver=letsencrypt",
             "traefik.http.services.web.loadbalancer.server.port=8000",
             "traefik.docker.network=traefik-public",
         ]
@@ -551,6 +553,18 @@ class DockerComposePlugin(BaseDeployPlugin):
             "image": "${IMAGE:-your-app:latest}",
             "restart": "unless-stopped",
             "labels": labels,
+            "env_file": [".env"],
+            "healthcheck": {
+                "test": [
+                    "CMD",
+                    "python",
+                    "-c",
+                    "import urllib.request;urllib.request.urlopen('http://localhost:8000/health')",
+                ],
+                "interval": "30s",
+                "timeout": "5s",
+                "retries": 3,
+            },
             "networks": ["traefik-public"],
         }
         if secrets_block:
