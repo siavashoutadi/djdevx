@@ -13,12 +13,12 @@ class DjangoTailwindCliPackage(BasePackage):
         PixiPackageSpec("django-tailwind-cli", kind="pypi")
     ]
 
-    def after_copy_templates(self) -> None:
+    def after_copy_templates(self, step=None) -> None:
         self._add_dark_mode_include()
         self._update_gitignore()
         self._update_dockerfile()
 
-    def before_pixi_remove(self) -> None:
+    def before_pixi_remove(self, step=None) -> None:
         self._remove_dark_mode_include()
         self._cleanup_gitignore()
         self._cleanup_dockerfile()

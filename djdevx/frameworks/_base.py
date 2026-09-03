@@ -5,6 +5,7 @@ import urllib.request
 from pathlib import Path
 
 from ..utils.installable.installable import Installable
+from ..utils.console.print import NestedStep
 from ..utils.tracking import Section
 
 
@@ -45,11 +46,11 @@ class BaseFramework(Installable):
         except Exception:
             dest.write_text("/* placeholder */\n")
 
-    def after_copy_templates(self) -> None:
+    def after_copy_templates(self, step: NestedStep | None = None) -> None:
         self._install_framework()
 
-    def before_pixi_remove(self) -> None:
-        super().before_pixi_remove()
+    def before_pixi_remove(self, step: NestedStep | None = None) -> None:
+        super().before_pixi_remove(step=step)
         self._uninstall_framework()
 
     def _install_framework(self) -> None:

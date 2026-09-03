@@ -85,13 +85,13 @@ class PWAFeature(BaseFeature):
         "static/images/icons/splash_screens",
     ]
 
-    def after_copy_templates(self) -> None:
+    def after_copy_templates(self, step=None) -> None:
         self._manifest_icons: list[dict] = []
         self._generate_icons()
         self._write_manifest()
         self._update_base_html()
 
-    def before_pixi_remove(self) -> None:
+    def before_pixi_remove(self, step=None) -> None:
         self._remove_from_base_html()
 
     # ------------------------------------------------------------------

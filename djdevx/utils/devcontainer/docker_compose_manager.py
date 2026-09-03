@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 from typing import TypedDict, NotRequired
 
-from ..console.print import print_console
+from ..console.print import NestedStep, print_console
 
 
 class ServiceConfig(TypedDict):
@@ -66,12 +66,14 @@ class DockerComposeManager:
         self,
         service: ServiceConfig,
         volumes: list[VolumeConfig],
+        step: NestedStep | None = None,
     ) -> None:
         """Add a service to docker-compose.yaml.
 
         Args:
             service: Dictionary containing the service configuration.
             volumes: List containing the volume configuration.
+            step: Optional parent NestedStep to emit an indented ``✓`` child into.
         """
         service_name = service.get("name")
         if "services" not in self.compose_data:
@@ -90,18 +92,26 @@ class DockerComposeManager:
                 }
 
         self._save_compose()
-        print_console.ok(
+        message = (
             f"Added service '{service_name}' to docker-compose.yaml for devcontainer"
         )
+        if step is not None:
+            step.ok(message)
+        else:
+            print_console.ok(message)
 
     def remove_service(
-        self, service: ServiceConfig, volumes: list[VolumeConfig]
+        self,
+        service: ServiceConfig,
+        volumes: list[VolumeConfig],
+        step: NestedStep | None = None,
     ) -> None:
         """Remove a service from docker-compose.yaml.
 
         Args:
             service: Dictionary containing the service configuration.
             volumes: List containing the volume configuration.
+            step: Optional parent NestedStep to emit an indented ``✓`` child into.
         """
         service_name = service.get("name")
         volume_keys = [volume.get("name") for volume in volumes]
@@ -116,9 +126,11 @@ class DockerComposeManager:
                         del self.compose_data["volumes"][volume_key]
 
         self._save_compose()
-        print_console.ok(
-            f"Removed service '{service_name}' from docker-compose.yaml for devcontainer"
-        )
+        message = f"Removed service '{service_name}' from docker-compose.yaml for devcontainer"
+        if step is not None:
+            step.ok(message)
+        else:
+            print_console.ok(message)
 
     def service_exists(self, service_name: str) -> bool:
         """Check if a service exists in docker-compose.yaml.

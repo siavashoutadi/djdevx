@@ -60,8 +60,8 @@ class DjangoHtmxPackage(BasePackage):
 
         path.write_text(content)
 
-    def after_copy_templates(self) -> None:
+    def after_copy_templates(self, step=None) -> None:
         self._add_htmx_snippets()
 
-    def before_pixi_remove(self) -> None:
+    def before_pixi_remove(self, step=None) -> None:
         self._remove_htmx_snippets()

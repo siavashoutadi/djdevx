@@ -23,7 +23,7 @@ class StartingPointUIFramework(BaseFramework):
     def _input_css_path(self) -> Path:
         return self.structure.tailwind_input_css
 
-    def after_copy_templates(self) -> None:
+    def after_copy_templates(self, step=None) -> None:
         self._css_path.parent.mkdir(parents=True, exist_ok=True)
         if not self._css_path.exists():
             self._css_path.write_text("/* starting-point placeholder */\n")
@@ -49,7 +49,7 @@ class StartingPointUIFramework(BaseFramework):
                 template = template.replace("</body>", f"    {tag}\n  </body>")
                 path.write_text(template)
 
-    def before_pixi_remove(self) -> None:
+    def before_pixi_remove(self, step=None) -> None:
         self._css_path.unlink(missing_ok=True)
         self._js_path.unlink(missing_ok=True)
 

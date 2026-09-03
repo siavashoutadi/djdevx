@@ -5,6 +5,7 @@ import shutil
 from .._base import BaseDatabase
 from .._registry import register
 from ...utils.devcontainer import ServiceConfig, VolumeConfig, DockerComposeManager
+from ...utils.console.print import NestedStep
 from ...utils.services import PostgresService
 from ...utils.types.pixi_types import PixiPackageSpec
 
@@ -67,15 +68,15 @@ class PostgresDatabase(BaseDatabase):
         "settings/django/database.py": "settings/django/database.py"
     }
 
-    def after_pixi_install(self) -> None:
+    def after_pixi_install(self, step: NestedStep | None = None) -> None:
         compose = DockerComposeManager(self.structure.root)
-        compose.add_service(POSTGRES_DOCKER_SERVICE, POSTGRES_VOLUMES)
-        compose.add_service(PGADMIN_DOCKER_SERVICE, PGADMIN_VOLUMES)
+        compose.add_service(POSTGRES_DOCKER_SERVICE, POSTGRES_VOLUMES, step=step)
+        compose.add_service(PGADMIN_DOCKER_SERVICE, PGADMIN_VOLUMES, step=step)
 
-    def after_pixi_remove(self) -> None:
+    def after_pixi_remove(self, step: NestedStep | None = None) -> None:
         compose = DockerComposeManager(self.structure.root)
-        compose.remove_service(POSTGRES_DOCKER_SERVICE, POSTGRES_VOLUMES)
-        compose.remove_service(PGADMIN_DOCKER_SERVICE, PGADMIN_VOLUMES)
+        compose.remove_service(POSTGRES_DOCKER_SERVICE, POSTGRES_VOLUMES, step=step)
+        compose.remove_service(PGADMIN_DOCKER_SERVICE, PGADMIN_VOLUMES, step=step)
         self._wipe_dev_data()
 
     def _wipe_dev_data(self) -> None:

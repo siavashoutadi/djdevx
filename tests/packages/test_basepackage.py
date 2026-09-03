@@ -89,16 +89,16 @@ class TestHookOrdering:
                 self._pixi = MagicMock()
                 self._tracking = MagicMock()
 
-            def before_pixi_install(self):
+            def before_pixi_install(self, step=None):
                 call_order.append("before_pixi_install")
 
-            def after_pixi_install(self):
+            def after_pixi_install(self, step=None):
                 call_order.append("after_pixi_install")
 
-            def before_copy_templates(self):
+            def before_copy_templates(self, step=None):
                 call_order.append("before_copy")
 
-            def after_copy_templates(self):
+            def after_copy_templates(self, step=None):
                 call_order.append("after_copy")
 
         with (
@@ -133,10 +133,10 @@ class TestHookOrdering:
             def model_post_init(self, __context):
                 self._structure = MagicMock()
 
-            def before_pixi_remove(self):
+            def before_pixi_remove(self, step=None):
                 call_order.append("before_pixi_remove")
 
-            def after_pixi_remove(self):
+            def after_pixi_remove(self, step=None):
                 call_order.append("after_pixi_remove")
 
         with (

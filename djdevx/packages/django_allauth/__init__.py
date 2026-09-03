@@ -71,7 +71,7 @@ class AllauthPackage(BasePackage):
         ),
     }
 
-    def after_pixi_remove(self) -> None:
+    def after_pixi_remove(self, step=None) -> None:
         import shutil
 
         shutil.rmtree(self.structure.root / "authentication", ignore_errors=True)

@@ -7,7 +7,7 @@ from typing import Any, Optional
 
 from pydantic import Field
 
-from ..console.print import print_console
+from ..console.print import NestedStep, print_console
 from ..prek.prek import format_files
 from ..project.project_structure import ProjectStructure
 from .pixi_ops import PixiOps
@@ -105,16 +105,16 @@ class Installable(InstallableConfig):
             install_kwargs = {}
         self._install_context = install_kwargs
 
-        self.before_pixi_install()
+        self.before_pixi_install(step=step)
         pixi_ops = PixiOps(self.structure.root, self.verbose)
         pixi_ops.add_packages(self.pixi_packages, variant)
         (step.ok if step else print_console.ok)("Installed dependency")
-        self.after_pixi_install()
+        self.after_pixi_install(step=step)
 
-        self.before_copy_templates()
+        self.before_copy_templates(step=step)
         copy_templates(self, variant)
         (step.ok if step else print_console.ok)("Finished configuration")
-        self.after_copy_templates()
+        self.after_copy_templates(step=step)
 
         copied = template_output_files(self, variant)
         format_files(
@@ -144,7 +144,7 @@ class Installable(InstallableConfig):
             self.section, type(self).get_installable_name()
         )
 
-        self.before_pixi_remove()
+        self.before_pixi_remove(step=step)
 
         updated: list[str] = []
         if variant is not None:
@@ -156,7 +156,7 @@ class Installable(InstallableConfig):
             pixi_ops.remove_packages(self.pixi_packages)
 
         (step.ok if step else print_console.ok)("Removed dependency")
-        self.after_pixi_remove()
+        self.after_pixi_remove(step=step)
 
         cleanup_files(self, variant)
         SecretsOps(self.structure.root).remove(self, variant)
@@ -178,20 +178,20 @@ class Installable(InstallableConfig):
     # Lifecycle hooks (override in subclasses)
     # ------------------------------------------------------------------
 
-    def before_pixi_install(self) -> None:
+    def before_pixi_install(self, step: NestedStep | None = None) -> None:
         pass
 
-    def after_pixi_install(self) -> None:
+    def after_pixi_install(self, step: NestedStep | None = None) -> None:
         pass
 
-    def before_copy_templates(self) -> None:
+    def before_copy_templates(self, step: NestedStep | None = None) -> None:
         pass
 
-    def after_copy_templates(self) -> None:
+    def after_copy_templates(self, step: NestedStep | None = None) -> None:
         pass
 
-    def before_pixi_remove(self) -> None:
+    def before_pixi_remove(self, step: NestedStep | None = None) -> None:
         pass
 
-    def after_pixi_remove(self) -> None:
+    def after_pixi_remove(self, step: NestedStep | None = None) -> None:
         pass

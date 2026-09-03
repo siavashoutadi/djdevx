@@ -9,10 +9,10 @@ class DjangoGuardianPackage(BasePackage):
     display_name: str = "Django Guardian"
     pixi_packages: list[PixiPackageSpec] = [PixiPackageSpec("django-guardian")]
 
-    def after_copy_templates(self) -> None:
+    def after_copy_templates(self, step=None) -> None:
         self._modify_user_model()
 
-    def before_pixi_remove(self) -> None:
+    def before_pixi_remove(self, step=None) -> None:
         self._revert_user_model()
 
     @property
