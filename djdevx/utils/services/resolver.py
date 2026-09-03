@@ -7,12 +7,17 @@ from ..tracking import ProjectTracking, Section
 from .base import BaseDevService
 from .postgres import PostgresService
 from .redis import RedisService
+from .otel import OtelCollectorService, OpenObserveService
 
 DATABASE_DEV_SERVICES: dict[str, type[BaseDevService]] = {
     PostgresService.name: PostgresService,
 }
 CACHE_DEV_SERVICES: dict[str, type[BaseDevService]] = {
     RedisService.name: RedisService,
+}
+OTEL_DEV_SERVICES: dict[str, type[BaseDevService]] = {
+    OtelCollectorService.name: OtelCollectorService,
+    OpenObserveService.name: OpenObserveService,
 }
 
 
@@ -44,6 +49,29 @@ def resolve_cache_dev_service(
     return _resolve_service(name, CACHE_DEV_SERVICES, project_root, verbose)
 
 
+def resolve_otel_dev_services(
+    project_root: Optional[Path] = None, verbose: bool = False
+) -> list[BaseDevService]:
+    """Return the OTel dev services (collector + OpenObserve), if installed."""
+    tracking = ProjectTracking(project_root)
+    if not tracking.is_installed(Section.FEATURES, "otel"):
+        return []
+    services = []
+    for name, cls in OTEL_DEV_SERVICES.items():
+        services.append(cls(project_root=project_root, verbose=verbose))
+    return services
+
+
+def resolve_openobserve_dev_service(
+    project_root: Optional[Path] = None, verbose: bool = False
+) -> Optional[BaseDevService]:
+    """Return the OpenObserve dev service if the otel feature is installed."""
+    tracking = ProjectTracking(project_root)
+    if not tracking.is_installed(Section.FEATURES, "otel"):
+        return None
+    return OpenObserveService(project_root=project_root, verbose=verbose)
+
+
 def resolve_dev_services(
     project_root: Optional[Path] = None, verbose: bool = False
 ) -> list[BaseDevService]:
@@ -53,6 +81,7 @@ def resolve_dev_services(
         for s in (
             resolve_database_dev_service(project_root, verbose),
             resolve_cache_dev_service(project_root, verbose),
+            *resolve_otel_dev_services(project_root, verbose),
         )
         if s is not None
     ]
