@@ -1,6 +1,5 @@
 """ddx dev database — manage the local pixi-native dev database."""
 
-import shutil
 from typing import Optional
 
 import typer
@@ -58,7 +57,4 @@ def reset() -> None:
 def purge() -> None:
     """Stop the service and delete its data under .pixi/devdata/."""
     service = _get_service()
-    if service.is_up():
-        service.down()
-    shutil.rmtree(service.data_dir, ignore_errors=True)
-    print_console.ok(f"{service.display_name} data purged")
+    service.purge()

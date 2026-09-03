@@ -99,6 +99,69 @@ step.done()
 
 `step_group(title, done=None)` — if `done` is omitted, defaults to `"<title> done"`.
 
+### NestedStep Best Practices
+
+Use `step_group()` for any parent operation with discrete sub-actions, instead
+of a series of flat `☐`/`☑` pairs. A single parent step with indented `✓`
+children communicates hierarchy and reads more cleanly.
+
+**Prefer the context-manager form** — it auto-calls `done()` on exit:
+
+```python
+with print_console.step_group("Starting Redis", done="Redis started.") as step:
+    step.ok(f"started redis on port {port}")
+    step.ok(f"set {PORT_ENV_KEY}={port}")
+```
+
+**Thread `step` through layered helpers.** Service methods (`up`, `down`,
+`reset`, `purge`) and installable lifecycle hooks take an optional `step=None`
+parameter so the top-level CLI command opens a group once and threads it down.
+When a helper is called **without** a parent step, it opens its own local group
+so it still works standalone. Emit indented children into `group`, and call
+`done()` **only when the helper opened its own group** (the parent owns closing
+otherwise):
+
+```python
+def ensure_running(self, step=None):
+    group = (
+        step
+        if step is not None
+        else print_console.step_group(
+            f"Starting {self.display_name}", done=f"started {self.display_name}"
+        )
+    )
+    try:
+        ...
+        group.ok("started service")
+    finally:
+        if step is None:
+            group.done()
+```
+
+The corresponding top-level command opens the parent group and passes it down:
+
+```python
+with print_console.step_group(f"Starting {service.display_name}...") as group:
+    service.up(step=group)
+```
+
+**Delegate data cleanup to `BaseDevService.purge(step=None)`.** `purge` stops
+the service (if running) and removes the whole service directory — data, log,
+and persisted port. CLI `purge` commands call `service.purge()`; do **not**
+re-implement `down()` + `shutil.rmtree` at the call site:
+
+```python
+@app.command()
+def purge() -> None:
+    service = _get_service()
+    service.purge()
+```
+
+**Flat status vs indented children.** Terminal, non-hierarchical status lines
+(already running, nothing to stop) use `step_done()` / `ok()` directly; only
+per-operation results that belong to a parent group become `step.ok()` /
+`step.info()` children.
+
 ### Markup Sentinel
 
 For intentional Rich markup strings (like styled checkmarks), use the `Markup`

@@ -161,6 +161,11 @@ if commands.migrations_pending():
   `typer.Option(prompt=...)`; make params `Optional[T]` with `None` default
   and prompt via questionary in the function body (see
   [Interactive Fallback Pattern](console.md#interactive-fallback-pattern))
+- Group related sub-actions in a `step_group()` and thread an optional
+  `step=None` parameter through layered helpers (service `up`/`down`/`reset`/
+  `purge`, lifecycle hooks). Helpers open a local group when `step is None` and
+  close it only when they opened it themselves (see
+  [NestedStep Best Practices](console.md#nestedstep-best-practices))
 - See [Console Utilities](console.md) for the full API and style guidelines
 
 ### Code Quality

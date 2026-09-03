@@ -52,8 +52,7 @@ def test_purge_stops_and_deletes_data(tmp_path, monkeypatch):
     service = _make_service(tmp_path, is_up=True)
     result, _ = _invoke(tmp_path, monkeypatch, ["purge"], service)
     assert result.exit_code == 0
-    service.down.assert_called_once()
-    assert not service.data_dir.exists()
+    service.purge.assert_called_once()
 
 
 def test_commands_guard_when_no_cache(tmp_path, monkeypatch):

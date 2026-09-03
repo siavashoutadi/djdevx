@@ -121,6 +121,29 @@ def test_reset_flushes_django(tmp_path):
     runner.run_manage_command.assert_called_once_with("flush", "--noinput", check=False)
 
 
+def test_purge_stops_then_removes_service_dir(tmp_path):
+    ok = MagicMock(returncode=0, stdout=b"")
+    # order: purge is_up (up), down is_up (up), pg_ctl stop
+    service, runner = make_service(tmp_path, side_effect=[ok, ok, ok])
+    service.data_dir.mkdir(parents=True)
+    (service.data_dir / "PG_VERSION").write_text("16\n")
+    port = service.port
+    service.purge()
+    calls = [c.args for c in runner.run_pixi_command.call_args_list]
+    assert calls[0] == _pg_isready_args(port)
+    assert calls[1] == _pg_isready_args(port)
+    assert calls[2] == ("run", "pg_ctl", "-D", str(service.data_dir), "stop")
+    assert not service.service_dir.exists()
+
+
+def test_purge_skips_stop_when_not_running(tmp_path):
+    not_ready = MagicMock(returncode=1, stdout=b"")
+    service, runner = make_service(tmp_path, side_effect=[not_ready])
+    service.purge()
+    assert runner.run_pixi_command.call_count == 1
+    assert not service.service_dir.exists()
+
+
 def test_up_initializes_then_starts(tmp_path):
     ok = MagicMock(returncode=0, stdout=b"")
     not_ready = MagicMock(returncode=1, stdout=b"")

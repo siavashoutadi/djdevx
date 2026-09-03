@@ -97,7 +97,7 @@ Per-service control is available under `ddx dev database` and
 - **reset** — flush all data, keep the service running
   (db: `manage.py flush --noinput`; cache: `redis-cli FLUSHALL`).
 - **purge** — stop (if running) and delete `.pixi/devdata/<provider>`; the
-  next `init`/`start` re-initializes from scratch.
+  next `init`/`start` re-initializes from scratch and picks a fresh port.
 
 All three commands warn and exit if the provider is not installed or has no
 native service support.

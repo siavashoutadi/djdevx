@@ -112,3 +112,27 @@ class BaseDevService(ABC):
 
     def status(self) -> bool:
         return self.is_up()
+
+    def purge(self, step=None) -> None:
+        """Stop (if running) and delete the service's data directory.
+
+        Subclasses may override to also remove downloaded binaries etc.
+        Accepts an optional parent *step* to emit ``✓`` children into.
+        """
+        import shutil
+
+        group = (
+            step
+            if step is not None
+            else print_console.step_group(
+                f"Purging {self.display_name}", done=f"purged {self.display_name}"
+            )
+        )
+        try:
+            if self.is_up():
+                self.down(step=group)
+            shutil.rmtree(self.service_dir, ignore_errors=True)
+            group.ok(f"removed {self.display_name.lower()} data")
+        finally:
+            if step is None:
+                group.done()
