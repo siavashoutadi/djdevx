@@ -186,6 +186,40 @@ if binary is not None:
     print_console.ok(f"downloaded {binary}")
 ```
 
+### Devcontainer Detection
+
+- Use `djdevx.utils.devcontainer.detect` to branch on whether the current
+  shell runs inside the project's VS Code devcontainer
+- **Detection relies only on the `DEVCONTAINER` env var** — the same signal the
+  generated devcontainer compose sets (`base_settings.py` `_EnvDefaultsSource`).
+  The mere presence of a `.devcontainer/` directory does **not** imply the shell
+  is inside a container
+- `in_devcontainer()` returns `True` when running inside the container; guard
+  `up`/`down`/`start`/`status` dev commands on it so daemons aren't launched
+  natively in Docker-managed setups (docker-compose owns those services)
+- `read_devcontainer_services()` loads the `services` mapping from
+  `.devcontainer/docker-compose.yaml`; `exported_http_port()` resolves a
+  service's first host-facing HTTP port from a bare `"5080"` or
+  `"HOST:CONTAINER"` entry
+- `ServiceEndpoint`/`DevelopmentContext` are plain dataclasses for bridging
+  native (`PixiRunner`) and devcontainer (docker-compose) endpoints into a
+  single connection table
+- Provider *management* of devcontainer docker-compose services (adding/removing
+  `db`/`cache` services) is separate and uses `DockerComposeManager` — see
+  [Adding a Database](adding-a-database.md) and [Adding a Cache](adding-a-cache.md)
+
+```python
+from djdevx.utils.devcontainer.detect import (
+    exported_http_port,
+    in_devcontainer,
+    read_devcontainer_services,
+)
+
+if in_devcontainer():
+    services = read_devcontainer_services()      # {name: config}
+    port = exported_http_port(next(iter(services.values())))
+```
+
 ### Console Output
 
 - Use `PrintConsole` singleton and prompt wrappers for all CLI output
