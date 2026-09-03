@@ -7,7 +7,7 @@ from typing import Optional
 from typing_extensions import Annotated
 from pathlib import Path
 
-from ..utils.console.print import print_console
+from ..utils.console.print import NestedStep, print_console
 from ..utils.console import prompts
 from ..utils.project.secret_manager import SecretManager
 from ..utils.project.pixi_runner import PixiRunner
@@ -82,8 +82,6 @@ def new(
         if python_version is None:
             raise typer.Abort()
 
-    print_console.step("Initializing the project ...")
-
     current_dir = Path(__file__).resolve().parent
     source_dir = current_dir / "templates"
     dest_dir = project_directory.absolute()
@@ -95,27 +93,29 @@ def new(
         "django_version": DJANGO_VERSION,
     }
 
-    template_manager = TemplateManager()
-    template_manager.copy_templates(
-        source_dir=source_dir, dest_dir=dest_dir, template_context=context
-    )
+    with print_console.step_group(
+        "Initializing the project ...",
+        done="Project is initialized successfully.",
+    ) as step:
+        template_manager = TemplateManager()
+        template_manager.copy_templates(
+            source_dir=source_dir, dest_dir=dest_dir, template_context=context
+        )
+        step.ok("Template files copied.")
 
-    secret_manager = SecretManager(dest_dir)
-    secret_manager.write_secret("secret_key", generate_random_password(length=64))
+        secret_manager = SecretManager(dest_dir)
+        secret_manager.write_secret("secret_key", generate_random_password(length=64))
+        step.ok("Secrets initialized.")
 
-    install_dependencies(dest_dir)
+        install_dependencies(dest_dir, step=step)
 
-    if git_init and not _is_git_repository(dest_dir):
-        print_console.step("Initializing the git repository ...")
-        _init_git(dest_dir, verbose=verbose)
-        print_console.step_done("Git repository is initialized successfully.")
+        if git_init and not _is_git_repository(dest_dir):
+            _init_git(dest_dir, verbose=verbose, step=step)
 
-    format_all_files_in_project(dest_dir)
-
-    print_console.step_done("Project is initialized successfully.")
+        format_all_files_in_project(dest_dir, step=step)
 
 
-def install_dependencies(project_root: Path):
+def install_dependencies(project_root: Path, step: NestedStep | None = None):
     """Install Python dependencies in the specified directory."""
     pixi = PixiRunner(project_root=project_root)
 
@@ -128,23 +128,29 @@ def install_dependencies(project_root: Path):
         "pydantic-settings",
         "email-validator",
     ]
-    print_console.step("Installing dependencies ...")
-    for pkg in dependencies:
-        pixi.add_package(pkg)
-        print_console.ok(f"{PixiRunner._extract_package_name(pkg)} is installed")
+    group = step or print_console.step_group(
+        "Installing dependencies ...",
+        done="Dependencies are installed successfully.",
+    )
+    try:
+        for pkg in dependencies:
+            pixi.add_package(pkg)
+            group.ok(f"{PixiRunner._extract_package_name(pkg)} is installed")
 
-    dev_dependencies: list[str] = [
-        "factory_boy<4",
-        "rich<16",
-        "django-upgrade<2",
-        "ruff<0.16",
-        "prek>=0.4.14,<0.5",
-    ]
+        dev_dependencies: list[str] = [
+            "factory_boy<4",
+            "rich<16",
+            "django-upgrade<2",
+            "ruff<0.16",
+            "prek>=0.4.14,<0.5",
+        ]
 
-    for pkg in dev_dependencies:
-        pixi.add_package(pkg, feature="dev")
-        print_console.ok(f"{PixiRunner._extract_package_name(pkg)} is installed")
-    print_console.step_done("Dependencies are installed successfully.")
+        for pkg in dev_dependencies:
+            pixi.add_package(pkg, feature="dev")
+            group.ok(f"{PixiRunner._extract_package_name(pkg)} is installed")
+    finally:
+        if step is None:
+            group.done()
 
 
 def _is_git_repository(project_dir: Path) -> bool:
@@ -152,23 +158,31 @@ def _is_git_repository(project_dir: Path) -> bool:
     return git_repository_dir.exists() and git_repository_dir.is_dir()
 
 
-def _init_git(project_dir: Path, verbose: bool = False):
+def _init_git(project_dir: Path, verbose: bool = False, step: NestedStep | None = None):
+    group = step or print_console.step_group(
+        "Initializing the git repository ...",
+        done="Git repository is initialized successfully.",
+    )
     git_commands: list[tuple[list[str], str]] = [
         (["git", "init", "--initial-branch=main"], "git init"),
         (["git", "add", "."], "git add"),
         (["git", "commit", "-m", "Initial commit"], "git commit"),
     ]
-    for cmd, label in git_commands:
-        if verbose:
-            subprocess.check_call(cmd, cwd=project_dir)
-        else:
-            result = subprocess.run(
-                cmd, cwd=project_dir, capture_output=True, text=True
-            )
-            if result.returncode != 0:
-                print_console.error(result.stderr)
-                result.check_returncode()
-        print_console.ok(label)
+    try:
+        for cmd, label in git_commands:
+            if verbose:
+                subprocess.check_call(cmd, cwd=project_dir)
+            else:
+                result = subprocess.run(
+                    cmd, cwd=project_dir, capture_output=True, text=True
+                )
+                if result.returncode != 0:
+                    print_console.error(result.stderr)
+                    result.check_returncode()
+            group.ok(label)
+    finally:
+        if step is None:
+            group.done()
 
 
 if __name__ == "__main__":
