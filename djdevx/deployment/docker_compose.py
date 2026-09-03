@@ -134,7 +134,7 @@ class DockerComposePlugin(BaseDeployPlugin):
     # Public API
     # ------------------------------------------------------------------
 
-    def generate(self, output_dir: Path, **kwargs: Any) -> None:
+    def generate(self, output_dir: Path, step=None, **kwargs: Any) -> None:
         settings = self._collect_settings()
 
         traefik_email = kwargs.get("traefik_email")
@@ -151,153 +151,154 @@ class DockerComposePlugin(BaseDeployPlugin):
         self._write(
             output_dir / "app" / "docker-compose.base.yml",
             self._build_base_compose(settings),
+            step=step,
         )
         self._write(
             output_dir / "traefik" / "docker-compose.yml",
             self._build_traefik_compose(inputs),
+            step=step,
         )
-        self._write_once(output_dir / "app" / "docker-compose.prod.yml", _OVERLAY_STUB)
+        self._write_once(
+            output_dir / "app" / "docker-compose.prod.yml", _OVERLAY_STUB, step=step
+        )
 
     def verify(self, output_dir: Path) -> bool:
         settings = self._collect_settings()
 
-        print_console.step(f"Verifying {self.name} deployment in {output_dir} \u2026")
-
         all_ok = True
 
-        # -- manifest files
-        for f in ("docker-compose.base.yml", "docker-compose.prod.yml"):
-            path = output_dir / "app" / f
-            if path.exists():
-                print_console.ok(f"  app/{f}")
-            else:
-                print_console.fail(f"  app/{f}  (missing \u2014 run generate first)")
-                all_ok = False
+        with print_console.step_group(
+            f"Verifying {self.name} deployment in {output_dir} \u2026",
+            done="All checks passed.",
+        ) as step:
+            # -- manifest files
+            for f in ("docker-compose.base.yml", "docker-compose.prod.yml"):
+                path = output_dir / "app" / f
+                if path.exists():
+                    step.ok(f"app/{f}")
+                else:
+                    step.fail(f"app/{f}  (missing \u2014 run generate first)")
+                    all_ok = False
 
-        # -- secrets
-        secrets_dir = output_dir / "app" / ".secrets"
-        for secret in settings.secrets:
-            secret_path = secrets_dir / secret.name
-            if secret_path.exists():
-                print_console.ok(
-                    f"  {secret.name}  ({secret_path.relative_to(output_dir)})"
-                )
-            elif self._resolve_secret_value(secret) is not None:
-                print_console.warning(
-                    f"  \u26a0  {secret.name}  (not written yet \u2014 run generate to create)"
-                )
-                all_ok = False
-            else:
-                hint = self._hint_secrets_command()
-                print_console.fail(f"  {secret.name}  (no value)")
-                print_console.info(f"     Run: {hint}")
-                all_ok = False
-
-        # -- config vars
-        for cv in settings.config_vars:
-            if cv.name.upper() == "DEBUG":
-                print_console.ok(f"  {cv.name}  (hardcoded to false)")
-            elif self._resolve_config_value(cv) is not None:
-                print_console.ok(f"  {cv.name}  (resolved)")
-            else:
-                hint = self._hint_configs_command()
-                print_console.fail(f"  {cv.name}  (no value)")
-                print_console.info(f"     Run: {hint}")
-                all_ok = False
-
-        # -- traefik/.env (inputs)
-        traefik_env = output_dir / "traefik" / ".env"
-        traefik_env_ok = False
-        if traefik_env.exists():
-            inputs = DeployInputs.load_from_env(traefik_env)
-            if inputs is not None:
-                traefik_env_ok = True
-                print_console.ok("  traefik/.env  (current)")
-            else:
-                print_console.fail("  traefik/.env  (missing TRAEFIK_EMAIL)")
-                all_ok = False
-        else:
-            print_console.fail("  traefik/.env  (missing)")
-            print_console.info("     Run: ddx deployment docker-compose generate")
-            all_ok = False
-
-        # -- drift: traefik/docker-compose.yml
-        if traefik_env_ok and inputs is not None:
-            traefik_yml = output_dir / "traefik" / "docker-compose.yml"
-            if traefik_yml.exists():
-                expected_traefik = self._build_traefik_compose(inputs)
-                current_traefik = traefik_yml.read_text()
-                if current_traefik != expected_traefik:
-                    print_console.diff(
-                        current_traefik,
-                        expected_traefik,
-                        title_old="traefik/docker-compose.yml (current)",
-                        title_new="traefik/docker-compose.yml (expected)",
+            # -- secrets
+            secrets_dir = output_dir / "app" / ".secrets"
+            for secret in settings.secrets:
+                secret_path = secrets_dir / secret.name
+                if secret_path.exists():
+                    step.ok(f"{secret.name}  ({secret_path.relative_to(output_dir)})")
+                elif self._resolve_secret_value(secret) is not None:
+                    step.warning(
+                        f"\u26a0  {secret.name}  (not written yet \u2014 run generate to create)"
                     )
                     all_ok = False
                 else:
-                    print_console.ok("  traefik/docker-compose.yml  (current)")
+                    hint = self._hint_secrets_command()
+                    step.fail(f"{secret.name}  (no value)")
+                    step.info(f"Run: {hint}")
+                    all_ok = False
+
+            # -- config vars
+            for cv in settings.config_vars:
+                if cv.name.upper() == "DEBUG":
+                    step.ok(f"{cv.name}  (hardcoded to false)")
+                elif self._resolve_config_value(cv) is not None:
+                    step.ok(f"{cv.name}  (resolved)")
+                else:
+                    hint = self._hint_configs_command()
+                    step.fail(f"{cv.name}  (no value)")
+                    step.info(f"Run: {hint}")
+                    all_ok = False
+
+            # -- traefik/.env (inputs)
+            traefik_env = output_dir / "traefik" / ".env"
+            traefik_env_ok = False
+            if traefik_env.exists():
+                inputs = DeployInputs.load_from_env(traefik_env)
+                if inputs is not None:
+                    traefik_env_ok = True
+                    step.ok("traefik/.env  (current)")
+                else:
+                    step.fail("traefik/.env  (missing TRAEFIK_EMAIL)")
+                    all_ok = False
             else:
-                print_console.fail(
-                    "  traefik/docker-compose.yml  (missing \u2014 run generate)"
-                )
+                step.fail("traefik/.env  (missing)")
+                step.info("Run: ddx deployment docker-compose generate")
                 all_ok = False
 
-        # -- drift: app/.env
-        app_env_path = output_dir / "app" / ".env"
-        if app_env_path.exists():
-            expected_env = self._build_app_env(output_dir)
-            if expected_env is not None:
-                current_env = app_env_path.read_text()
-                if current_env != expected_env:
-                    print_console.diff(
-                        current_env,
-                        expected_env,
-                        title_old="app/.env (current)",
-                        title_new="app/.env (expected)",
+            # -- drift: traefik/docker-compose.yml
+            if traefik_env_ok and inputs is not None:
+                traefik_yml = output_dir / "traefik" / "docker-compose.yml"
+                if traefik_yml.exists():
+                    expected_traefik = self._build_traefik_compose(inputs)
+                    current_traefik = traefik_yml.read_text()
+                    if current_traefik != expected_traefik:
+                        print_console.diff(
+                            current_traefik,
+                            expected_traefik,
+                            title_old="traefik/docker-compose.yml (current)",
+                            title_new="traefik/docker-compose.yml (expected)",
+                        )
+                        step.info("traefik/docker-compose.yml  (drift detected)")
+                        all_ok = False
+                    else:
+                        step.ok("traefik/docker-compose.yml  (current)")
+                else:
+                    step.fail(
+                        "traefik/docker-compose.yml  (missing \u2014 run generate)"
                     )
                     all_ok = False
-                else:
-                    print_console.ok("  app/.env  (current)")
-        else:
-            print_console.fail("  app/.env  (missing)")
-            print_console.info("     Run: ddx deployment docker-compose generate")
-            all_ok = False
 
-        # -- DOMAIN in app/.env
-        app_env_vars = dotenv_values(app_env_path) if app_env_path.exists() else {}
-        if not app_env_vars.get("DOMAIN"):
-            print_console.fail("  app/.env  (missing DOMAIN)")
-            print_console.info("     Run: ddx deployment docker-compose generate")
-            all_ok = False
-
-        # -- drift: docker-compose.base.yml
-        base_yml = output_dir / "app" / "docker-compose.base.yml"
-        if traefik_env_ok and inputs is not None and base_yml.exists():
-            expected_yml = self._build_base_compose(settings)
-            current_yml = base_yml.read_text()
-            if current_yml != expected_yml:
-                print_console.diff(
-                    current_yml,
-                    expected_yml,
-                    title_old="app/docker-compose.base.yml (current)",
-                    title_new="app/docker-compose.base.yml (expected)",
-                )
-                all_ok = False
+            # -- drift: app/.env
+            app_env_path = output_dir / "app" / ".env"
+            if app_env_path.exists():
+                expected_env = self._build_app_env(output_dir)
+                if expected_env is not None:
+                    current_env = app_env_path.read_text()
+                    if current_env != expected_env:
+                        print_console.diff(
+                            current_env,
+                            expected_env,
+                            title_old="app/.env (current)",
+                            title_new="app/.env (expected)",
+                        )
+                        step.info("app/.env  (drift detected)")
+                        all_ok = False
+                    else:
+                        step.ok("app/.env  (current)")
             else:
-                print_console.ok("  app/docker-compose.base.yml  (current)")
-        elif not base_yml.exists():
-            print_console.fail(
-                "  app/docker-compose.base.yml  (missing \u2014 run generate)"
-            )
-            all_ok = False
+                step.fail("app/.env  (missing)")
+                step.info("Run: ddx deployment docker-compose generate")
+                all_ok = False
 
-        if all_ok:
-            print_console.step_done("All checks passed.")
-        else:
-            print_console.fail(
-                "Some checks failed. Fix the issues above before deploying."
-            )
+            # -- DOMAIN in app/.env
+            app_env_vars = dotenv_values(app_env_path) if app_env_path.exists() else {}
+            if not app_env_vars.get("DOMAIN"):
+                step.fail("app/.env  (missing DOMAIN)")
+                step.info("Run: ddx deployment docker-compose generate")
+                all_ok = False
+
+            # -- drift: docker-compose.base.yml
+            base_yml = output_dir / "app" / "docker-compose.base.yml"
+            if traefik_env_ok and inputs is not None and base_yml.exists():
+                expected_yml = self._build_base_compose(settings)
+                current_yml = base_yml.read_text()
+                if current_yml != expected_yml:
+                    print_console.diff(
+                        current_yml,
+                        expected_yml,
+                        title_old="app/docker-compose.base.yml (current)",
+                        title_new="app/docker-compose.base.yml (expected)",
+                    )
+                    step.info("app/docker-compose.base.yml  (drift detected)")
+                    all_ok = False
+                else:
+                    step.ok("app/docker-compose.base.yml  (current)")
+            elif not base_yml.exists():
+                step.fail("app/docker-compose.base.yml  (missing \u2014 run generate)")
+                all_ok = False
+
+            if not all_ok:
+                step.fail("Some checks failed. Fix the issues above before deploying.")
 
         return all_ok
 

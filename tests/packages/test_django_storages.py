@@ -48,7 +48,7 @@ def test_django_storages_s3_install_and_remove(temp_dir):
     )
 
     assert result.exit_code == 0
-    assert "Django Storages removed." in result.stdout
+    assert "Django Storages" in result.stdout and "removed." in result.stdout
 
     assert not PixiRunner().has_dependency("django-storages")
     assert not settings_file.exists()
@@ -93,7 +93,7 @@ def test_django_storages_azure_install_and_remove(temp_dir):
     )
 
     assert result.exit_code == 0
-    assert "Django Storages removed." in result.stdout
+    assert "Django Storages" in result.stdout and "removed." in result.stdout
 
     assert not PixiRunner().has_dependency("django-storages")
     assert not settings_file.exists()
@@ -138,7 +138,7 @@ def test_django_storages_google_install_and_remove(temp_dir):
     )
 
     assert result.exit_code == 0
-    assert "Django Storages removed." in result.stdout
+    assert "Django Storages" in result.stdout and "removed." in result.stdout
 
     assert not PixiRunner().has_dependency("django-storages")
     assert not settings_file.exists()

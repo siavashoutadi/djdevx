@@ -105,13 +105,14 @@ class TestHookOrdering:
             patch.object(PixiOps, "add_packages") as mock_add,
             patch("djdevx.utils.installable.installable.copy_templates") as mock_copy,
             patch.object(SecretsOps, "generate") as mock_gen,
+            patch("djdevx.utils.installable.installable.sync_on_add"),
             patch("djdevx.utils.installable.tracking.ProjectTracking"),
         ):
             mock_add.side_effect = lambda *a, **kw: call_order.append("pixi_add_all")
             mock_copy.side_effect = lambda self, variant: call_order.append(
                 "copy_templates"
             )
-            mock_gen.side_effect = lambda installable, variant: call_order.append(
+            mock_gen.side_effect = lambda installable, variant, **kw: call_order.append(
                 "gen_secrets"
             )
             TestPkg().add()
@@ -145,6 +146,7 @@ class TestHookOrdering:
                 "djdevx.utils.installable.installable.restore_original_templates"
             ) as mock_restore,
             patch.object(SecretsOps, "remove") as mock_rem,
+            patch("djdevx.utils.installable.installable.sync_on_remove"),
             patch("djdevx.utils.installable.tracking.ProjectTracking"),
             patch("djdevx.utils.installable.installable.ProjectTracking"),
         ):

@@ -76,6 +76,12 @@ class NestedStep:
             f"{self.INDENT}[bold red]{CROSS_MARK}[/bold red] {escape(message)}"
         )
 
+    def warning(self, message: str) -> None:
+        """Print an indented warning child line (``⚠ message``)."""
+        self._pc._console.print(
+            f"{self.INDENT}[bold yellow]⚠[/bold yellow] {escape(message)}"
+        )
+
     def info(self, message: str) -> None:
         """Print an indented plain child line (e.g. a footnote)."""
         self._pc._console.print(f"{self.INDENT}{escape(message)}")

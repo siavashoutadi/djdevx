@@ -48,7 +48,7 @@ def test_django_anymail_ses_install_and_remove(temp_dir):
     )
 
     assert result.exit_code == 0
-    assert "Django Anymail removed." in result.stdout
+    assert "Django Anymail" in result.stdout and "removed." in result.stdout
 
     assert not PixiRunner().has_dependency("django-anymail")
     assert not settings_file.exists()
@@ -93,7 +93,7 @@ def test_django_anymail_brevo_install_and_remove(temp_dir):
     )
 
     assert result.exit_code == 0
-    assert "Django Anymail removed." in result.stdout
+    assert "Django Anymail" in result.stdout and "removed." in result.stdout
 
     assert not PixiRunner().has_dependency("django-anymail")
     assert not settings_file.exists()
@@ -138,7 +138,7 @@ def test_django_anymail_mailgun_install_and_remove(temp_dir):
     )
 
     assert result.exit_code == 0
-    assert "Django Anymail removed." in result.stdout
+    assert "Django Anymail" in result.stdout and "removed." in result.stdout
 
     assert not PixiRunner().has_dependency("django-anymail")
     assert not settings_file.exists()
@@ -183,7 +183,7 @@ def test_django_anymail_mailjet_install_and_remove(temp_dir):
     )
 
     assert result.exit_code == 0
-    assert "Django Anymail removed." in result.stdout
+    assert "Django Anymail" in result.stdout and "removed." in result.stdout
 
     assert not PixiRunner().has_dependency("django-anymail")
     assert not settings_file.exists()
@@ -228,7 +228,7 @@ def test_django_anymail_resend_install_and_remove(temp_dir):
     )
 
     assert result.exit_code == 0
-    assert "Django Anymail removed." in result.stdout
+    assert "Django Anymail" in result.stdout and "removed." in result.stdout
 
     assert not PixiRunner().has_dependency("django-anymail")
     assert not settings_file.exists()

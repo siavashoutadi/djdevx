@@ -50,11 +50,12 @@ class BaseDeployPlugin:
     # Subclass API
     # ------------------------------------------------------------------
 
-    def generate(self, output_dir: Path, **kwargs: Any) -> None:
+    def generate(self, output_dir: Path, step=None, **kwargs: Any) -> None:
         """Generate deployment manifests for this target.
 
         Args:
             output_dir: Directory to write manifest files into.
+            step: Optional parent NestedStep to emit ``✓`` children into.
             **kwargs: Target-specific CLI parameters declared in
                       ``generate_params``.
         """
@@ -109,11 +110,11 @@ class BaseDeployPlugin:
 
         def generate_cmd(**cli_kwargs: Any) -> None:
             output_dir = cli_kwargs.pop("output") or self._default_output_dir()
-            print_console.step(
-                f"Generating {self.name} deployment manifests in {output_dir} \u2026"
-            )
-            self.generate(output_dir=output_dir, **cli_kwargs)
-            print_console.step_done(f"{self.name} manifests generated.")
+            with print_console.step_group(
+                f"Generating {self.name} deployment manifests in {output_dir} \u2026",
+                done=f"{self.name} manifests generated.",
+            ) as group:
+                self.generate(output_dir=output_dir, step=group, **cli_kwargs)
 
         generate_cmd.__signature__ = inspect.Signature(params)  # type: ignore[attr-defined]
         generate_cmd.__name__ = "generate"
@@ -147,22 +148,34 @@ class BaseDeployPlugin:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _write(path: Path, content: str) -> None:
+    def _write(path: Path, content: str, step=None) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
         if path.exists() and path.read_text() == content:
-            print_console.info(f"  kept   {path}  (no change)")
+            if step is not None:
+                step.info(f"kept   {path}  (no change)")
+            else:
+                print_console.info(f"  kept   {path}  (no change)")
             return
         path.write_text(content)
-        print_console.info(f"  wrote  {path}")
+        if step is not None:
+            step.info(f"wrote  {path}")
+        else:
+            print_console.info(f"  wrote  {path}")
 
     @staticmethod
-    def _write_once(path: Path, content: str) -> None:
+    def _write_once(path: Path, content: str, step=None) -> None:
         if path.exists():
-            print_console.info(f"  kept   {path}  (no change)")
+            if step is not None:
+                step.info(f"kept   {path}  (no change)")
+            else:
+                print_console.info(f"  kept   {path}  (no change)")
             return
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content)
-        print_console.info(f"  wrote  {path}  (new)")
+        if step is not None:
+            step.info(f"wrote  {path}  (new)")
+        else:
+            print_console.info(f"  wrote  {path}  (new)")
 
     @staticmethod
     def _to_env_str(value: Any) -> str:

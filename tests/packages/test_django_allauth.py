@@ -123,7 +123,7 @@ def test_django_allauth_mfa_install_basic(temp_dir):
     )
 
     assert result.exit_code == 0, f"MFA install failed: {result.output}"
-    assert "Django Allauth installed." in result.output
+    assert "Django Allauth" in result.output and "installed." in result.output
 
     assert PixiRunner().has_dependency("django-allauth")
 
@@ -298,7 +298,7 @@ def test_django_allauth_mfa_remove(temp_dir):
     )
 
     assert result.exit_code == 0, f"MFA remove failed: {result.output}"
-    assert "Django Allauth removed." in result.output
+    assert "Django Allauth" in result.output and "removed." in result.output
 
     mfa_settings_file = temp_dir / "settings" / "packages" / "django_allauth_mfa.py"
     assert not mfa_settings_file.exists(), "MFA settings file not removed"
@@ -430,7 +430,7 @@ def test_django_allauth_oidc_provider_install_remove(temp_dir):
     )
 
     assert result.exit_code == 0, f"OIDC provider install failed: {result.output}"
-    assert "Django Allauth installed." in result.output
+    assert "Django Allauth" in result.output and "installed." in result.output
 
     settings_file = (
         temp_dir / "settings" / "packages" / "django_allauth_oidc_provider.py"
@@ -519,7 +519,7 @@ def test_django_allauth_oidc_provider_install_remove(temp_dir):
     )
 
     assert result.exit_code == 0, f"OIDC provider remove failed: {result.output}"
-    assert "Django Allauth removed." in result.output
+    assert "Django Allauth" in result.output and "removed." in result.output
 
     settings_file = (
         temp_dir / "settings" / "packages" / "django_allauth_oidc_provider.py"
