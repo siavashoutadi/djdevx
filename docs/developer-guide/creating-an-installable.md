@@ -436,14 +436,19 @@ support, `call_peer`, guarantees), see [Integration Protocol](integration.md).
 
 Override these in your installable for custom behavior:
 
-| Hook | Timing | Common uses |
-|------|--------|-------------|
-| `before_pixi_install()` | Before `pixi add` | Pre-install checks |
-| `after_pixi_install()` | After `pixi add` | Docker Compose setup, file prep |
-| `before_copy_templates()` | Before Jinja2 rendering | Create directories, prepare state |
-| `after_copy_templates()` | After Jinja2 rendering | CSS/JS download, icon generation, base template injection |
-| `before_pixi_remove()` | Before `pixi remove` | Docker Compose cleanup, tag removal from templates |
-| `after_pixi_remove()` | After `pixi remove` | Extra cleanup |
+| Hook | Timing | Parameters | Common uses |
+|------|--------|------------|-------------|
+| `before_pixi_install()` | Before `pixi add` | `step: NestedStep \| None` | Pre-install checks |
+| `after_pixi_install()` | After `pixi add` | `step: NestedStep \| None` | Docker Compose setup, file prep |
+| `before_copy_templates()` | Before Jinja2 rendering | `step: NestedStep \| None` | Create directories, prepare state |
+| `after_copy_templates()` | After Jinja2 rendering | `step: NestedStep \| None` | CSS/JS download, icon generation, base template injection |
+| `before_pixi_remove()` | Before `pixi remove` | `step: NestedStep \| None` | Docker Compose cleanup, tag removal from templates |
+| `after_pixi_remove()` | After `pixi remove` | `step: NestedStep \| None` | Extra cleanup |
+
+All hooks receive an optional `step: NestedStep | None` parameter for indented
+progress reporting ([Console Utilities](console.md#nestedstep)). When provided,
+use `step.ok()`, `step.fail()`, etc. to emit child lines under the parent step.
+When `None`, fall back to top-level `print_console` methods.
 
 The most common convention is a **mutate / revert pair**:
 
@@ -457,25 +462,29 @@ This is how `django-guardian`, `django-htmx`, `django-snakeoil`,
 ### Hook examples
 
 ```python
+from djdevx.utils.console.print import NestedStep
+
 # after_pixi_install — add Docker services
-def after_pixi_install(self) -> None:
+def after_pixi_install(self, step: NestedStep | None = None) -> None:
     compose = DockerComposeManager(self.structure.root)
-    compose.add_service(MY_SERVICE, MY_VOLUMES)
+    compose.add_service(MY_SERVICE, MY_VOLUMES, step=step)
 
 # after_copy_templates — download files, modify rendered templates
-def after_copy_templates(self) -> None:
+def after_copy_templates(self, step: NestedStep | None = None) -> None:
     # Download CSS
     dest = self.structure.static_css_dir / "vendor" / self.css_filename
     urllib.request.urlretrieve(self.css_url, dest)
+    (step.ok if step else print_console.ok)("Downloaded CSS")
 
     # Modify rendered template
     base = self.structure.base_template
     content = base.read_text()
     content = content.replace("</head>", f'  <link ...>\n</head>')
     base.write_text(content)
+    (step.ok if step else print_console.ok)("Injected tags into _base.html")
 
 # before_pixi_remove — clean up files that cleanup_files won't touch
-def before_pixi_remove(self) -> None:
+def before_pixi_remove(self, step: NestedStep | None = None) -> None:
     self.structure.django_settings_dir.joinpath("extra_generated.py").unlink(missing_ok=True)
 ```
 
@@ -484,7 +493,7 @@ def before_pixi_remove(self) -> None:
 Install-time parameter values are available via `self._install_context`:
 
 ```python
-def after_copy_templates(self) -> None:
+def after_copy_templates(self, step: NestedStep | None = None) -> None:
     icon_path = self._install_context.get("icon_path", "")
     if icon_path:
         self._generate_icons(icon_path)

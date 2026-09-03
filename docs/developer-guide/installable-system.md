@@ -174,14 +174,19 @@ remove(variant_name):
 
 Override these in subclasses for custom behavior:
 
-| Hook | Timing |
-|------|--------|
-| `before_pixi_install()` | Before running `pixi add` |
-| `after_pixi_install()` | After running `pixi add` |
-| `before_copy_templates()` | Before copying template files |
-| `after_copy_templates()` | After copying template files |
-| `before_pixi_remove()` | Before running `pixi remove` |
-| `after_pixi_remove()` | After running `pixi remove` |
+| Hook | Timing | Parameters |
+|------|--------|------------|
+| `before_pixi_install()` | Before running `pixi add` | `step: NestedStep \| None` |
+| `after_pixi_install()` | After running `pixi add` | `step: NestedStep \| None` |
+| `before_copy_templates()` | Before copying template files | `step: NestedStep \| None` |
+| `after_copy_templates()` | After copying template files | `step: NestedStep \| None` |
+| `before_pixi_remove()` | Before running `pixi remove` | `step: NestedStep \| None` |
+| `after_pixi_remove()` | After running `pixi remove` | `step: NestedStep \| None` |
+
+All hooks receive an optional `step: NestedStep | None` parameter for indented
+progress reporting ([Console Utilities](console.md#nestedstep)). When provided,
+use `step.ok()`, `step.fail()`, etc. to emit child lines under the parent step.
+When `None`, fall back to top-level `print_console` methods.
 
 Hooks can access install-time parameter values via `self._install_context`.
 

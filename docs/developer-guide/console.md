@@ -61,6 +61,44 @@ with print_console.table("Secrets (dev)", columns, show_lines=False) as tbl:
 print_console.diff(old_content, new_content, title_old="before", title_new="after")
 ```
 
+### NestedStep
+
+`NestedStep` groups indented sub-actions under a parent step, producing
+hierarchical console output. Created via `PrintConsole.step_group()`.
+
+```
+☐ Installing Redis ...            ← step_group() opens with this
+  ✓ Added service 'cache' ...     ← step.ok()
+  ✓ Files formatted.              ← step.ok()
+☑ Redis installed.                ← step.done() or context manager exit
+```
+
+#### Methods
+
+| Method | Output | Description |
+|--------|--------|-------------|
+| `ok(message)` | `  ✓ message` | Indented success child |
+| `fail(message)` | `  ✗ message` | Indented failure child |
+| `warning(message)` | `  ⚠ message` | Indented warning child |
+| `info(message)` | `  message` | Indented plain child |
+| `done()` | `☑ <done>` | Close the step |
+
+#### Usage
+
+```python
+# Context manager (auto-calls done() on exit)
+with print_console.step_group("Installing Redis", done="Redis installed.") as step:
+    step.ok("Added service 'cache' to docker-compose.yaml")
+    step.ok("Configured connection settings")
+
+# Manual lifecycle
+step = print_console.step_group("Purging cache")
+step.ok("Removed cached files")
+step.done()
+```
+
+`step_group(title, done=None)` — if `done` is omitted, defaults to `"<title> done"`.
+
 ### Markup Sentinel
 
 For intentional Rich markup strings (like styled checkmarks), use the `Markup`
@@ -217,6 +255,7 @@ db = prompts.select("Which database?", choices=choices)
 ## Style Guidelines
 
 - Use `step()` / `step_done()` for progress indication during install/remove
+- Use `step_group()` to group related sub-actions under a single parent step
 - Use `ok()` / `fail()` for final status of individual operations
 - Use `success()` / `error()` for top-level completion messages
 - Use `warning()` for non-fatal issues
