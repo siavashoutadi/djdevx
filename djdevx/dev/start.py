@@ -5,9 +5,17 @@ from typing import Annotated
 import typer
 
 from ..utils.console.print import print_console
+from ..utils.devcontainer.detect import in_devcontainer
 from ..utils.django.manage_commands import ManageCommands
 from ..utils.project.pixi_runner import PixiRunner
-from ..utils.services import resolve_cache_dev_service, resolve_database_dev_service
+from ..utils.services import (
+    BaseDevService,
+    resolve_cache_dev_service,
+    resolve_database_dev_service,
+    resolve_dev_services,
+)
+from .context import collect_context
+from .render import render_services_table
 from .runserver import server_command
 from ..settings.source import DEV
 
@@ -19,6 +27,32 @@ def _init_settings() -> None:
 
     configs_init(DEV)
     secrets_init(DEV)
+
+
+def _start_native_service(service: BaseDevService) -> None:
+    """Start a single pixi-native dev service (idempotent)."""
+    with print_console.step_group(
+        f"Checking {service.display_name}...",
+        done=f"Found {service.display_name}",
+    ) as group:
+        if not service.is_up():
+            service.up(step=group)
+        service._set_port_env(step=group)
+
+
+def _migrate_if_pending(commands: ManageCommands, skip_migrate: bool) -> None:
+    if skip_migrate:
+        print_console.step_done("Migration check skipped")
+        return
+    with print_console.step_group(
+        "Checking for pending migrations...", done="Migration check complete"
+    ) as group:
+        if commands.migrations_pending():
+            group.ok("Migrations pending, applying...")
+            commands.run("migrate")
+            group.info("Migrations applied")
+        else:
+            group.ok("No pending migrations")
 
 
 def start(
@@ -38,6 +72,11 @@ def start(
 ) -> None:
     """Start the local dev environment (idempotent) and run the dev server.
 
+    Inside a devcontainer the database/redis services are started by the
+    devcontainer compose, so only settings/migrations/server run here. On a
+    plain machine the pixi-native services are started. In both cases the
+    resolved service endpoints are printed.
+
     Any additional arguments are forwarded to the dev server command.
     """
     runner = PixiRunner(verbose=verbose)
@@ -51,40 +90,31 @@ def start(
     else:
         print_console.step_done("Settings init skipped")
 
-    db_service = resolve_database_dev_service(verbose=verbose)
-    if db_service is not None:
-        with print_console.step_group(
-            "Checking database...", done=f"Found database: {db_service.display_name}"
-        ) as group:
-            if not db_service.is_up():
-                db_service.up(step=group)
-            db_service._set_port_env(step=group)
+    if in_devcontainer():
+        print_console.step_done(
+            "Running inside a devcontainer — services are managed by docker compose"
+        )
+        _migrate_if_pending(commands, skip_migrate)
     else:
-        print_console.step_done("No database configured")
+        db_service = resolve_database_dev_service(verbose=verbose)
+        if db_service is not None:
+            _start_native_service(db_service)
+        else:
+            print_console.step_done("No database configured")
 
-    if not skip_migrate:
-        with print_console.step_group(
-            "Checking for pending migrations...", done="Migration check complete"
-        ) as group:
-            if commands.migrations_pending():
-                group.ok("Migrations pending, applying...")
-                commands.run("migrate")
-                group.info("Migrations applied")
-            else:
-                group.ok("No pending migrations")
-    else:
-        print_console.step_done("Migration check skipped")
+        _migrate_if_pending(commands, skip_migrate)
 
-    cache_service = resolve_cache_dev_service(verbose=verbose)
-    if cache_service is not None:
-        with print_console.step_group(
-            "Checking cache...", done=f"Found cache: {cache_service.display_name}"
-        ) as group:
-            if not cache_service.is_up():
-                cache_service.up(step=group)
-            cache_service._set_port_env(step=group)
-    else:
-        print_console.step_done("No cache configured")
+        cache_service = resolve_cache_dev_service(verbose=verbose)
+        if cache_service is not None:
+            _start_native_service(cache_service)
+        else:
+            print_console.step_done("No cache configured")
+
+        for service in resolve_dev_services(verbose=verbose):
+            if service.name in ("postgres", "redis"):
+                _start_native_service(service)
+
+    render_services_table(collect_context(verbose=verbose))
 
     with print_console.step_group(
         "Starting the dev server ...", done="Dev server started"
