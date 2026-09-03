@@ -696,6 +696,7 @@ $ djdevx dev [OPTIONS] COMMAND [ARGS]...
 * `up`: Start installed database/cache services...
 * `down`: Stop installed database/cache services.
 * `status`: Show service up/down, migrate state, and...
+* `credentials`: Show how to connect to each installed dev...
 * `database`: Manage the local dev database
 * `cache`: Manage the local dev cache
 
@@ -776,6 +777,20 @@ Show service up/down, migrate state, and settings state.
 
 ```console
 $ djdevx dev status [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx dev credentials
+
+Show how to connect to each installed dev service (host/port/credentials).
+
+**Usage**:
+
+```console
+$ djdevx dev credentials [OPTIONS]
 ```
 
 **Options**:

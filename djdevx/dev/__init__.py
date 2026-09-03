@@ -7,6 +7,7 @@ Postgres/Redis run natively via pixi conda packages; data lives under
 import typer
 
 from .cache import app as cache_app
+from .credentials import credentials as _credentials
 from .database import app as database_app
 from .down import down as _down
 from .runserver import runserver as _runserver
@@ -31,5 +32,6 @@ app.command(
 app.command(name="up")(_up)
 app.command(name="down")(_down)
 app.command(name="status")(_status)
+app.command(name="credentials")(_credentials)
 app.add_typer(database_app, name="database", help="Manage the local dev database")
 app.add_typer(cache_app, name="cache", help="Manage the local dev cache")
