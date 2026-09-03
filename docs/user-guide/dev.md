@@ -111,6 +111,10 @@ native service support.
 - the settings state via `settings secrets list dev` and
   `settings configs list dev`
 
+When services are reported down, a diagnostic summary is printed explaining
+why each failed service is unreachable (e.g. the Postgres log path when the
+log file exists).
+
 ## Data Directory
 
 All native service data lives under `.pixi/devdata/`:

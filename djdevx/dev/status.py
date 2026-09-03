@@ -15,6 +15,7 @@ def status() -> None:
     runner = PixiRunner()
     commands = ManageCommands(runner)
 
+    states: list[tuple] = []
     with print_console.table(
         "Dev services",
         [
@@ -24,11 +25,25 @@ def status() -> None:
         ],
     ) as tbl:
         for service in services:
-            status_mark = GREEN_CHECK_MARK if service.is_up() else RED_CROSS_MARK
+            is_up = service.is_up()
+            states.append((service, is_up))
+            status_mark = GREEN_CHECK_MARK if is_up else RED_CROSS_MARK
             tbl.add_row(status_mark, service.display_name, service.name)
+
+    _report_issues(states)
 
     migrate_ok = not commands.migrations_pending()
     print_console.info(f"Migrations: {'up to date' if migrate_ok else 'pending'}")
 
     list_secrets(DEV)
     list_configs(DEV)
+
+
+def _report_issues(states: list[tuple]) -> None:
+    """Print a short diagnostic line for every service that is not up."""
+    down = [(service, is_up) for service, is_up in states if not is_up]
+    if not down:
+        return
+    print_console.warning(f"{len(down)} of {len(states)} service(s) are down:")
+    for service, _ in down:
+        print_console.fail(f"{service.display_name}: {service.describe_down()}")

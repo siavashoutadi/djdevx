@@ -107,6 +107,34 @@ def test_down_stops_running_services(tmp_path, monkeypatch):
 # ---------------------------------------------------------------------------
 
 
+def test_status_reports_issues_for_down_services(tmp_path, monkeypatch):
+    db = _make_db(is_up=False)
+    db.describe_down.return_value = "not responding on port 5432"
+    cache = _make_cache(is_up=False)
+    cache.describe_down.return_value = "not responding on port 6379"
+    _project(tmp_path, monkeypatch)
+    with (
+        patch(
+            "djdevx.utils.services.resolver.resolve_database_dev_service",
+            return_value=db,
+        ),
+        patch(
+            "djdevx.utils.services.resolver.resolve_cache_dev_service",
+            return_value=cache,
+        ),
+        patch("djdevx.dev.status.PixiRunner") as pixi_cls,
+        patch.object(ManageCommands, "migrations_pending", return_value=False),
+        patch("djdevx.dev.status.list_secrets"),
+        patch("djdevx.dev.status.list_configs"),
+    ):
+        pixi_cls.return_value = MagicMock()
+        result = runner.invoke(app, ["dev", "status"])
+    assert result.exit_code == 0
+    assert "2 of 2 service(s) are down:" in result.output
+    assert "PostgreSQL: not responding on port 5432" in result.output
+    assert "Redis: not responding on port 6379" in result.output
+
+
 def test_status_shows_state_and_settings(tmp_path, monkeypatch):
     db = _make_db(is_up=True)
     cache = _make_cache(is_up=False)
