@@ -16,6 +16,7 @@ class PostgresService(BaseDevService):
     secret_file_name: ClassVar[str] = "postgres_password"
     dev_default_password: ClassVar[str] = "password"
     port_env_key: ClassVar[str] = "POSTGRES_PORT"
+    category: ClassVar[str] = "database"
 
     @property
     def _log_file(self) -> Path:

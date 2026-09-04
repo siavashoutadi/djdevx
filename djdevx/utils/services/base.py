@@ -54,6 +54,7 @@ class BaseDevService(ABC):
     secret_file_name: ClassVar[str] = ""
     dev_default_password: ClassVar[str] = ""
     port_env_key: ClassVar[str] = ""
+    category: ClassVar[str] = ""
 
     def __init__(self, project_root: Path | None = None, verbose: bool = False) -> None:
         self.structure = ProjectStructure(project_root)

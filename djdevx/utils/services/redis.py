@@ -16,6 +16,7 @@ class RedisService(BaseDevService):
     secret_file_name: ClassVar[str] = "redis_password"
     dev_default_password: ClassVar[str] = "redis_password"
     port_env_key: ClassVar[str] = "REDIS_PORT"
+    category: ClassVar[str] = "cache"
 
     def is_up(self, step=None) -> bool:
         group = (

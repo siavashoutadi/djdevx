@@ -71,6 +71,7 @@ class OtelCollectorService(BaseDevService):
     secret_file_name: ClassVar[str] = "otel_password"
     dev_default_password: ClassVar[str] = ""
     port_env_key: ClassVar[str] = "OTEL_COLLECTOR_PORT"
+    category: ClassVar[str] = "otel"
 
     def __init__(self, project_root: Path | None = None, verbose: bool = False) -> None:
         super().__init__(project_root, verbose)
@@ -242,6 +243,7 @@ class OpenObserveService(BaseDevService):
     secret_file_name: ClassVar[str] = "openobserve_password"
     dev_default_password: ClassVar[str] = OPENOBSERVE_DEFAULT_PASSWORD
     port_env_key: ClassVar[str] = "OPENOBSERVE_PORT"
+    category: ClassVar[str] = "otel"
 
     def __init__(self, project_root: Path | None = None, verbose: bool = False) -> None:
         super().__init__(project_root, verbose)
