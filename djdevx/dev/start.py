@@ -4,7 +4,7 @@ from typing import Annotated
 
 import typer
 
-from .pipeline import run_start
+from ..cli.dev import run_start
 
 
 def start(

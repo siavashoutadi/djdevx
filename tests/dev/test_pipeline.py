@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 from typer.testing import CliRunner
 
-from djdevx.dev.pipeline import run_start
+from djdevx.cli.dev import run_start
 from djdevx.main import app
 from djdevx.core.console import print_console
 from djdevx.utils.django.manage_commands import ManageCommands
@@ -40,13 +40,13 @@ def _run(
     cache = None if no_cache else _service(calls, "cache", cache_is_up)
     with (
         patch(
-            "djdevx.dev.pipeline._init_settings",
+            "djdevx.cli.dev._init_settings",
             side_effect=lambda: calls.append("settings"),
         ),
-        patch("djdevx.dev.pipeline.PixiRunner") as pixi_cls,
-        patch("djdevx.dev.pipeline.resolve_database_dev_service", return_value=db),
-        patch("djdevx.dev.pipeline.resolve_cache_dev_service", return_value=cache),
-        patch("djdevx.dev.pipeline.in_devcontainer", return_value=devcontainer),
+        patch("djdevx.cli.dev.PixiRunner") as pixi_cls,
+        patch("djdevx.cli.dev.resolve_database_dev_service", return_value=db),
+        patch("djdevx.cli.dev.resolve_cache_dev_service", return_value=cache),
+        patch("djdevx.cli.dev.in_devcontainer", return_value=devcontainer),
         patch.object(
             ManageCommands, "migrations_pending", return_value=pending
         ) as pend,
@@ -54,11 +54,11 @@ def _run(
             ManageCommands, "run", side_effect=lambda *a, **k: calls.append("migrate")
         ),
         patch(
-            "djdevx.dev.pipeline.render_services_table",
+            "djdevx.cli.dev.render_services_table",
             side_effect=lambda *a: calls.append("render"),
         ),
-        patch("djdevx.dev.pipeline.collect_context", return_value=MagicMock()),
-        patch("djdevx.dev.pipeline.server_command", return_value=("cmd",)),
+        patch("djdevx.cli.dev.collect_context", return_value=MagicMock()),
+        patch("djdevx.cli.dev.server_command", return_value=("cmd",)),
     ):
         pixi_cls.return_value.run_interactive.side_effect = lambda *a: calls.append(
             "server"
