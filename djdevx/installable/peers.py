@@ -273,8 +273,14 @@ def _remove_peer_packages_for_ref(
 
 
 def copy_peer_templates(installable, peer) -> None:
-    """Copy peer-specific templates from *peer* into the project root."""
-    peer_template_dir = peer.template_dir / PEER_TEMPLATES_DIRNAME
+    """Copy *installable*'s peer templates authored for *peer* into the project.
+
+    Listeners author their peer-facing payloads under
+    ``templates/peer_templates/<peer-name>/``; on a sync the matching subtree
+    (e.g. otel's ``peer_templates/postgres/``) is rendered into the project
+    root. *installable* is always the template owner, *peer* the subject.
+    """
+    peer_template_dir = installable.template_dir / PEER_TEMPLATES_DIRNAME / peer.name
     if not peer_template_dir.exists():
         return
     manager = TemplateManager()
@@ -286,8 +292,8 @@ def copy_peer_templates(installable, peer) -> None:
 
 
 def cleanup_peer_templates(installable, peer) -> None:
-    """Remove peer-specific templates that were copied from *peer*."""
-    peer_template_dir = peer.template_dir / PEER_TEMPLATES_DIRNAME
+    """Remove the copies of *installable*'s templates authored for *peer*."""
+    peer_template_dir = installable.template_dir / PEER_TEMPLATES_DIRNAME / peer.name
     if not peer_template_dir.exists():
         return
     manager = TemplateManager()

@@ -3,7 +3,6 @@
 import os
 
 from pathlib import Path
-from typing import ClassVar
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -707,20 +706,22 @@ class _TemplatePeer(Installable):
 
 class TestPeerTemplateCleanup:
     def test_cleanup_removes_files_when_peer_dir_exists(self, root):
+        # The template OWNER (listener) authors peer_templates/<peer.name>/;
+        # cleanup must remove exactly that subtree's copies from the project.
         listener = ListenerPackage()
         listener._install_context = {}
         listener._structure = MagicMock()
         listener._structure.root = root
-        peer_tpl_dir = root / "peer_templates" / "peer_templates"
+        peer_tpl_dir = root / "listener_templates" / "peer_templates" / "stub-peer"
         peer_tpl_dir.mkdir(parents=True)
         (peer_tpl_dir / "style.css").write_text("body {}")
+        listener.template_dir = root / "listener_templates"
         (root / "style.css").write_text("body {}")
 
         class StubPeer(Installable):
             name: str = "stub-peer"
             display_name: str = "Stub Peer"
             section: Section = Section.FRAMEWORKS
-            template_dir: ClassVar[Path] = root / "peer_templates"
             variants: dict = {}
             _install_context: dict = {}
 
