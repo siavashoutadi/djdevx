@@ -5,7 +5,6 @@ from PIL import Image
 
 from .._base import BaseFeature
 from .._registry import register
-from djdevx.core.console import print_console
 from ....installable.models import InstallParam
 
 
@@ -30,8 +29,11 @@ class PWAFeature(BaseFeature):
         ),
         InstallParam(
             name="icon_path",
-            prompt="Path to the icon file to be used for generating the PWA icons",
-            default="static/images/logo.svg",
+            prompt=(
+                "Path to the icon file to be used for generating the PWA icons "
+                "(PNG/JPEG)"
+            ),
+            default="static/images/logo.png",
         ),
         InstallParam(
             name="background_color",
@@ -86,6 +88,9 @@ class PWAFeature(BaseFeature):
         "static/images/icons/splash_screens",
     ]
 
+    def before_pixi_install(self, step=None) -> None:
+        self._validated_icon_path()
+
     def after_copy_templates(self, step=None) -> None:
         self._manifest_icons: list[dict] = []
         self._generate_icons()
@@ -99,28 +104,35 @@ class PWAFeature(BaseFeature):
     # Icon generation
     # ------------------------------------------------------------------
 
-    def _resolve_icon_path(self) -> Path | None:
-        icon_path = self._install_context.get("icon_path", "")
+    def _validated_icon_path(self) -> Path:
+        """Return the icon path or abort the install with a clear reason."""
+        icon_path = str(self._install_context.get("icon_path", "")).strip()
         if not icon_path:
-            return None
+            raise ValueError(
+                "No icon file specified — a PWA needs an icon to be installable."
+            )
         path = Path(icon_path)
         if not path.is_absolute():
             path = self.structure.root / path
-        return path if path.exists() else None
+        if not path.exists():
+            raise ValueError(f"Icon file not found: {path}")
+        try:
+            with Image.open(path) as probe:
+                probe.verify()
+        except (OSError, ValueError):
+            hint = (
+                " SVG icons are not supported — provide a PNG or JPEG image."
+                if path.suffix.lower() in (".svg", ".svgz")
+                else ""
+            )
+            raise ValueError(f"Could not read icon file: {path}.{hint}") from None
+        return path
 
     def _generate_icons(self) -> None:
-        icon_path = self._resolve_icon_path()
-        if icon_path is None:
-            return
-        try:
-            base_icon = Image.open(icon_path)
-            base_icon.verify()
-            base_icon = Image.open(icon_path)
-        except (OSError, ValueError) as exc:
-            print_console.info(
-                f"Could not read icon {icon_path} ({exc}); skipping generated icons."
-            )
-            return
+        icon_path = self._validated_icon_path()
+        base_icon = Image.open(icon_path)
+        base_icon.verify()
+        base_icon = Image.open(icon_path)
         self._resize_android_icons(base_icon.copy())
         self._resize_ios_icons(base_icon.copy())
         self._resize_windows11_icons(base_icon.copy())

@@ -84,8 +84,8 @@ from ...utils.installable.types import InstallParam
 
 install_params: list[InstallParam] = [
     InstallParam(name="app_name", prompt="Please enter the display name for the application"),
-    InstallParam(name="icon_path", default="static/images/logo.svg",
-                 prompt="Path to the icon file to be used for generating the PWA icons"),
+    InstallParam(name="icon_path", default="static/images/logo.png",
+                 prompt="Path to the icon file to be used for generating the PWA icons (PNG/JPEG)"),
     InstallParam(name="background_color", default="#ffffff",
                  prompt="Please enter the background color of the application"),
     InstallParam(name="theme_color", default="#000000",
@@ -121,8 +121,11 @@ later hooks via `self._install_context`.
 
 ## Generating files in hooks
 
-`pwa` is the heavyweight example: `after_copy_templates()` generates ~150 PNG
-icons and splash screens from the source icon (via PIL), writes the web app
+`pwa` is the heavyweight example: `before_pixi_install()` validates the icon
+and aborts the install (before anything is changed) when the icon file is
+missing, empty, or not a readable raster image (SVG is rejected — provide a
+PNG/JPEG). `after_copy_templates()` then generates ~150 PNG icons and splash
+screens from the source icon (via PIL), writes the web app
 manifest, writes `templates/apple_splash.html`, and injects the manifest link
 into `_base.html`. `before_pixi_remove()` removes the injected lines.
 

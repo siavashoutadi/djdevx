@@ -94,6 +94,8 @@ class NestedStep:
         return self
 
     def __exit__(self, *exc) -> None:
+        if exc[0] is not None:
+            return
         self.done()
 
 

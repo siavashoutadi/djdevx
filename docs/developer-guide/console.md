@@ -73,6 +73,9 @@ hierarchical console output. Created via `PrintConsole.step_group()`.
 ☑ Redis installed.                ← step.done() or context manager exit
 ```
 
+If an exception escapes the `with` block, the `☑` completion line is **not**
+printed — a failed step never reports success.
+
 #### Methods
 
 | Method | Output | Description |

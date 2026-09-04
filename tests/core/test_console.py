@@ -2,6 +2,7 @@
 
 from io import StringIO
 
+import pytest
 from rich.console import Console
 
 from djdevx.core.console import print_console
@@ -74,6 +75,21 @@ def test_step_group_info_child():
     assert "\u2610" in out
     assert "  a footnote" in out
     assert "\u2611" in out
+
+
+def test_step_group_no_done_line_on_exception():
+    """A failed step must not print the '☑ done' completion line."""
+    buf, old = _capture()
+    try:
+        with pytest.raises(RuntimeError):
+            with print_console.step_group("Installing PWA", done="PWA installed."):
+                raise RuntimeError("boom")
+    finally:
+        print_console._console = old
+    out = buf.getvalue()
+    assert "Installing PWA" in out
+    assert "PWA installed." not in out
+    assert "\u2611" not in out
 
 
 def test_section_header():

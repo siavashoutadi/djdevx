@@ -214,12 +214,12 @@ def _add_exclusive_variant(installable, name, provider, verbose, is_multi) -> bo
 
     variant = installable.variants[provider]
     _auto_install_needs(variant.needs, verbose)
-    install_kwargs = _collect_install_kwargs(variant)
 
     with print_console.step_group(
         f"Installing {installable.display_name}...",
         done=f"{installable.display_name} ({variant.display_name}) installed.",
     ) as group:
+        install_kwargs = _collect_install_kwargs(variant)
         installable.add(
             variant_name=provider, install_kwargs=install_kwargs, step=group
         )
@@ -233,12 +233,12 @@ def _add_additive_variants(installable, name, provider, verbose, is_multi) -> bo
     for rv_name, rv in installable.variants.items():
         if rv.required and rv_name not in installed:
             _auto_install_needs(rv.needs, verbose)
-            install_kwargs = _collect_install_kwargs(rv)
             installable.reset_state()
             with print_console.step_group(
                 f"Installing {installable.display_name} ({rv.display_name})...",
                 done=f"{installable.display_name} ({rv.display_name}) installed.",
             ) as group:
+                install_kwargs = _collect_install_kwargs(rv)
                 installable.add(
                     variant_name=rv_name, install_kwargs=install_kwargs, step=group
                 )
@@ -261,12 +261,12 @@ def _add_additive_variants(installable, name, provider, verbose, is_multi) -> bo
             return False
         variant = installable.variants[provider]
         _auto_install_needs(variant.needs, verbose)
-        install_kwargs = _collect_install_kwargs(variant)
         installable.reset_state()
         with print_console.step_group(
             f"Installing {installable.display_name} ({variant.display_name})...",
             done=f"{installable.display_name} ({variant.display_name}) installed.",
         ) as group:
+            install_kwargs = _collect_install_kwargs(variant)
             installable.add(
                 variant_name=provider, install_kwargs=install_kwargs, step=group
             )
@@ -276,12 +276,12 @@ def _add_additive_variants(installable, name, provider, verbose, is_multi) -> bo
             for var_name in selected:
                 variant = installable.variants[var_name]
                 _auto_install_needs(variant.needs, verbose)
-                install_kwargs = _collect_install_kwargs(variant)
                 installable.reset_state()
                 with print_console.step_group(
                     f"Installing {installable.display_name} ({variant.display_name})...",
                     done=f"{installable.display_name} ({variant.display_name}) installed.",
                 ) as group:
+                    install_kwargs = _collect_install_kwargs(variant)
                     installable.add(
                         variant_name=var_name, install_kwargs=install_kwargs, step=group
                     )
@@ -295,11 +295,11 @@ def _add_simple(installable, name, is_multi) -> bool:
         print_console.ok(f"{installable.display_name} is already installed.")
         return False
 
-    install_kwargs = _collect_install_kwargs(installable)
     with print_console.step_group(
         f"Installing {installable.display_name or name}...",
         done=f"{installable.display_name or name} installed.",
     ) as group:
+        install_kwargs = _collect_install_kwargs(installable)
         installable.add(install_kwargs=install_kwargs, step=group)
     return True
 

@@ -144,7 +144,13 @@ def domain_app(
             list_cmd()
             raise typer.Exit(code=1)
 
-        add_installable(cls, name, verbose=verbose)
+        try:
+            add_installable(cls, name, verbose=verbose)
+        except (typer.Exit, typer.Abort):
+            raise
+        except Exception as exc:
+            print_console.fail(str(exc))
+            raise typer.Exit(code=1) from exc
 
     # ----------------------------------------------------------------- remove
     @app.command(name="remove")
@@ -271,12 +277,15 @@ def _add_multi(names, get, label, list_cmd, provider, verbose):
             result = add_installable(cls, pkg_name, provider, verbose, is_multi)
             if not result and not is_multi:
                 raise typer.Exit()
+        except (typer.Exit, typer.Abort):
+            raise
         except Exception as exc:
             if is_multi:
                 print_console.fail(f"Failed to install {pkg_name}: {exc}. Skipping.")
                 failed = True
             else:
-                raise
+                print_console.fail(str(exc))
+                raise typer.Exit(code=1) from exc
 
     if is_multi and failed:
         raise typer.Exit(code=1)
