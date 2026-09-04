@@ -71,15 +71,13 @@ class CSSFrameworkProviderMixin:
     this; other domains inherit plain :class:`Provider`.
 
     The CSS/JS data fields (``css_url``, ``css_filename``, ``js_url``,
-    ``js_filename``, ``js_module``) live on the ``BaseFramework`` model in
+    ``js_filename``, ``js_module``) live on the ``CSSFramework`` model in
     ``frameworks/_base.py`` rather than here: declaring them as plain class
     attributes on a non-pydantic mixin would make pydantic warn when a
-    framework subclass redeclares them as fields.
+    framework subclass redeclares them as fields. ``_base_template_path`` also
+    lives on ``BaseFramework`` so every framework (CSS or not) can resolve the
+    base template.
     """
-
-    @property
-    def _base_template_path(self):
-        return self.structure.base_template
 
     @property
     def _style_tag(self) -> str:
