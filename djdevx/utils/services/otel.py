@@ -187,6 +187,7 @@ class OtelCollectorService(BaseDevService):
             binary.otelcol_contrib_release_url(),
             self.bin_dir,
             binary_glob="otelcol*",
+            expected_sha256=binary.otelcol_contrib_sha256(),
         )
         if result is None:
             print_console.fail(f"Failed to download {self.display_name} binary.")
@@ -280,6 +281,7 @@ class OpenObserveService(BaseDevService):
             self.bin_dir,
             binary_glob="openobserve*",
             archive_type="zip" if self._os_name() == "windows" else "tar.gz",
+            expected_sha256=binary.openobserve_sha256(),
         )
         if result is None:
             print_console.fail(f"Failed to download {self.display_name} binary.")
