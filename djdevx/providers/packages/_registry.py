@@ -1,7 +1,7 @@
 """Package registry — PACKAGE_REGISTRY dict and register decorator."""
 
-from ...utils.installable.registry import Registry
-from ...utils.installable.types import PACKAGE
+from ...installable.registry import Registry
+from ...installable.models import PACKAGE
 from ._base import BasePackage
 
 PACKAGE_REGISTRY: Registry[BasePackage] = Registry(PACKAGE)

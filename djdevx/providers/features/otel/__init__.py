@@ -1,4 +1,4 @@
-from ....utils.installable.types import (
+from ....installable.models import (
     CACHE,
     DATABASE,
     InstallableRef,

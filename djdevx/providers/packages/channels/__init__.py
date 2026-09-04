@@ -1,5 +1,5 @@
 from .._base import BasePackage
-from djdevx.utils.installable.types import CACHE, InstallableRef
+from djdevx.installable.models import CACHE, InstallableRef
 from djdevx.utils.types.pixi_types import PixiPackageSpec
 from .._registry import register
 

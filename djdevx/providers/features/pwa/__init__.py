@@ -6,7 +6,7 @@ from PIL import Image
 from .._base import BaseFeature
 from .._registry import register
 from ....utils.console.print import print_console
-from ....utils.installable.types import InstallParam
+from ....installable.models import InstallParam
 
 
 @register

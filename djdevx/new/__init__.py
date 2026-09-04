@@ -13,7 +13,7 @@ from ..utils.project.secret_manager import SecretManager
 from ..utils.project.pixi_runner import PixiRunner
 from ..utils.generators import generate_random_password
 from ..utils.templates.manager import TemplateManager
-from ..utils.prek.prek import format_all_files_in_project
+from ..installable.ops.format import format_all_files_in_project
 from ..requirement import verify as requirement_check
 
 app = typer.Typer()

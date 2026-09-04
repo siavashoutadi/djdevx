@@ -5,9 +5,9 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from djdevx.providers.packages._base import BasePackage
-from djdevx.utils.installable.pixi_ops import PixiOps
-from djdevx.utils.installable.secrets import SecretsOps
-from djdevx.utils.installable.types import DATABASE, FRAMEWORK, InstallableRef, Variant
+from djdevx.installable.ops.pixi import PixiOps
+from djdevx.installable.ops.secrets import SecretsOps
+from djdevx.installable.models import DATABASE, FRAMEWORK, InstallableRef, Variant
 from djdevx.utils.tracking.sections import Section
 from djdevx.utils.types.pixi_types import PixiPackageSpec
 
@@ -116,25 +116,25 @@ def add_mocks():
     with (
         patch.object(PixiOps, "__init__", return_value=None),
         patch.object(PixiOps, "add_packages") as mock_add,
-        patch("djdevx.utils.installable.installable.copy_templates", MagicMock()),
-        patch("djdevx.utils.installable.installable.format_files", MagicMock()),
+        patch("djdevx.installable.lifecycle.copy_templates", MagicMock()),
+        patch("djdevx.installable.lifecycle.format_files", MagicMock()),
         patch.object(SecretsOps, "generate", MagicMock()),
         patch.object(SecretsOps, "__init__", return_value=None),
         patch(
-            "djdevx.utils.installable.peers.ProjectStructure",
+            "djdevx.installable.peers.ProjectStructure",
             **{"return_value.root": Path("/tmp/fake-root")},
         ),
         patch(
-            "djdevx.utils.installable.peers.ProjectTracking",
+            "djdevx.installable.peers.ProjectTracking",
             return_value=_fake_tracking(),
         ),
-        patch("djdevx.utils.installable.tracking.ProjectTracking"),
+        patch("djdevx.installable.ops.tracking.ProjectTracking"),
         patch(
-            "djdevx.utils.installable.peers.resolve",
+            "djdevx.installable.peers.resolve",
             return_value=_DummyPeer,
         ),
         patch(
-            "djdevx.utils.installable.peers.get_section",
+            "djdevx.installable.peers.get_section",
             return_value=Section.FRAMEWORKS,
         ),
     ):
@@ -146,7 +146,7 @@ class TestPeerPackagesAdd:
         tracker = _fake_tracking(["bootstrap"])
         with (
             patch(
-                "djdevx.utils.installable.peers.ProjectTracking",
+                "djdevx.installable.peers.ProjectTracking",
                 return_value=tracker,
             ),
             patch(
@@ -171,7 +171,7 @@ class TestPeerPackagesAdd:
         tracker = _fake_tracking(["bootstrap"])
         with (
             patch(
-                "djdevx.utils.installable.peers.ProjectTracking",
+                "djdevx.installable.peers.ProjectTracking",
                 return_value=tracker,
             ),
             patch(
@@ -190,7 +190,7 @@ class TestPeerPackagesAdd:
         tracker = _fake_tracking(["bootstrap"])
         with (
             patch(
-                "djdevx.utils.installable.peers.ProjectTracking",
+                "djdevx.installable.peers.ProjectTracking",
                 return_value=tracker,
             ),
             patch(
@@ -213,28 +213,28 @@ class TestPeerPackagesRemove:
         with (
             patch.object(PixiOps, "__init__", return_value=None),
             patch.object(PixiOps, "remove_packages") as mock_rem,
-            patch("djdevx.utils.installable.installable.cleanup_files", MagicMock()),
+            patch("djdevx.installable.lifecycle.cleanup_files", MagicMock()),
             patch(
-                "djdevx.utils.installable.installable.restore_original_templates",
+                "djdevx.installable.lifecycle.restore_original_templates",
                 MagicMock(),
             ),
             patch.object(SecretsOps, "remove", MagicMock()),
             patch.object(SecretsOps, "__init__", return_value=None),
             patch(
-                "djdevx.utils.installable.peers.ProjectStructure",
+                "djdevx.installable.peers.ProjectStructure",
                 **{"return_value.root": Path("/tmp/fake-root")},
             ),
             patch(
-                "djdevx.utils.installable.peers.ProjectTracking",
+                "djdevx.installable.peers.ProjectTracking",
                 return_value=_fake_tracking(),
             ),
-            patch("djdevx.utils.installable.tracking.ProjectTracking"),
+            patch("djdevx.installable.ops.tracking.ProjectTracking"),
             patch(
-                "djdevx.utils.installable.peers.resolve",
+                "djdevx.installable.peers.resolve",
                 return_value=_DummyPeer,
             ),
             patch(
-                "djdevx.utils.installable.peers.get_section",
+                "djdevx.installable.peers.get_section",
                 return_value=Section.FRAMEWORKS,
             ),
         ):
@@ -256,7 +256,7 @@ class TestPeerPackagesRemove:
         )
         with (
             patch(
-                "djdevx.utils.installable.peers.ProjectTracking",
+                "djdevx.installable.peers.ProjectTracking",
                 return_value=tracker,
             ),
             patch(
@@ -264,7 +264,7 @@ class TestPeerPackagesRemove:
                 return_value=tracker,
             ),
             patch(
-                "djdevx.utils.installable.installable.ProjectTracking",
+                "djdevx.installable.lifecycle.ProjectTracking",
                 return_value=tracker,
             ),
         ):
@@ -285,7 +285,7 @@ class TestPeerPackagesRemove:
     def test_stale_metadata_is_cleaned_up(self, add_mocks):
         """A stale identity key in metadata that no longer matches any declared
         spec should not crash; it is silently dropped on the next sync."""
-        from djdevx.utils.installable.peers import _spec_key
+        from djdevx.installable.peers import _spec_key
 
         tracker = _fake_tracking(["bootstrap"])
         tracker.set_applied_peers(
@@ -295,7 +295,7 @@ class TestPeerPackagesRemove:
         )
         with (
             patch(
-                "djdevx.utils.installable.peers.ProjectTracking",
+                "djdevx.installable.peers.ProjectTracking",
                 return_value=tracker,
             ),
             patch(

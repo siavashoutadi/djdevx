@@ -7,8 +7,8 @@ should need to call ``normalize_name()`` manually after that point.
 
 import pytest
 
-from djdevx.utils.installable.registry import Registry
-from djdevx.utils.installable.types import (
+from djdevx.installable.registry import Registry
+from djdevx.installable.models import (
     CACHE,
     DATABASE,
     FEATURE,

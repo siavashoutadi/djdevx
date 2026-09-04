@@ -1,7 +1,7 @@
 """Resolve InstallableRef to its class via the appropriate registry."""
 
 from .registry import REGISTRIES, Registry
-from .types import InstallableConfig, InstallableRef
+from .models import InstallableConfig, InstallableRef
 
 
 def resolve(

@@ -3,8 +3,8 @@
 from pathlib import Path
 from typing import Any
 
-from ..console.print import print_console
-from ..project.secret_manager import SecretManager
+from ...utils.console.print import print_console
+from ...utils.project.secret_manager import SecretManager
 
 
 class SecretsOps:

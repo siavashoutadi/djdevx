@@ -1,9 +1,9 @@
-from .installable import Installable
+from .lifecycle import Installable
 from .discovery import discover_and_register
 from .list_table import build_list_table
 from .peers import call_peer, sync_on_add, sync_on_remove
 from .registry import Registry
-from .types import (
+from .models import (
     InstallParam,
     InstallableRef,
     Variant,

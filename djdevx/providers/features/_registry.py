@@ -1,7 +1,7 @@
 """Feature registry — FEATURE_REGISTRY dict and register decorator."""
 
-from ...utils.installable.registry import Registry
-from ...utils.installable.types import FEATURE
+from ...installable.registry import Registry
+from ...installable.models import FEATURE
 from ._base import BaseFeature
 
 FEATURE_REGISTRY: Registry[BaseFeature] = Registry(FEATURE)

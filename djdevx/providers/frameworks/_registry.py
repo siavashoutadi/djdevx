@@ -1,7 +1,7 @@
 """Framework registry — FRAMEWORK_REGISTRY dict and register decorator."""
 
-from ...utils.installable.registry import Registry
-from ...utils.installable.types import FRAMEWORK
+from ...installable.registry import Registry
+from ...installable.models import FRAMEWORK
 from ._base import BaseFramework
 
 FRAMEWORK_REGISTRY: Registry[BaseFramework] = Registry(FRAMEWORK)

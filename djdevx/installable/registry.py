@@ -1,6 +1,6 @@
 from typing import Generic, Type, TypeVar
 
-from .types import InstallableConfig, InstallableKind
+from .models import InstallableConfig, InstallableKind
 
 T = TypeVar("T", bound=InstallableConfig)
 

@@ -12,10 +12,10 @@ import typer
 
 from ..utils.console import prompts
 from ..utils.console.print import print_console
-from ..utils.installable.discovery import discover_and_register
-from ..utils.installable.list_table import build_list_table
-from ..utils.installable.orchestrator import add_installable, remove_installable
-from ..utils.installable.tracking import (
+from ..installable.discovery import discover_and_register
+from ..installable.list_table import build_list_table
+from ..installable.orchestrator import add_installable, remove_installable
+from ..installable.ops.tracking import (
     autocomplete_installable,
     autocomplete_installed,
     get_display_name,
@@ -130,7 +130,7 @@ def domain_app(
             _add_multi(names, get, label_lower, list_cmd, provider, verbose)
             return
         elif name is None:
-            from ..utils.installable.orchestrator import select_installable
+            from ..installable.orchestrator import select_installable
 
             names = select_installable(base, label_lower)
             if not names:
@@ -204,7 +204,7 @@ def domain_app(
             _remove_multi(names, get, label_lower, list_cmd, provider, verbose)
             return
         elif name is None:
-            from ..utils.installable.orchestrator import select_installed
+            from ..installable.orchestrator import select_installed
 
             names = select_installed(base, label_lower)
             if not names:
@@ -230,7 +230,7 @@ def domain_app(
 
 def _select_multi(base, label: str) -> list[str] | None:
     """Interactive multi-select from not-yet-installed providers."""
-    from ..utils.installable.tracking import get_installable_names
+    from ..installable.ops.tracking import get_installable_names
 
     available = get_installable_names(base)
     if not available:
@@ -241,7 +241,7 @@ def _select_multi(base, label: str) -> list[str] | None:
 
 def _select_installed_multi(base, label: str) -> list[str] | None:
     """Interactive multi-select from already-installed providers."""
-    from ..utils.installable.tracking import get_installed_names
+    from ..installable.ops.tracking import get_installed_names
 
     installed = get_installed_names(base)
     if not installed:

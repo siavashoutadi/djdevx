@@ -3,19 +3,19 @@
 import sys
 from typing import Any
 
-from ..console import prompts
-from ..console.print import print_console
-from ..tracking import ProjectTracking
+from ..utils.console import prompts
+from ..utils.console.print import print_console
+from ..utils.tracking import ProjectTracking
 
 from .registry import REGISTRIES
 from .resolver import resolve
-from .tracking import (
+from .ops.tracking import (
     get_installed_names,
     get_installed_variants,
     get_installable_names,
     get_section,
 )
-from .types import KIND_BY_SECTION, InstallParam, InstallableConfig, InstallableRef
+from .models import KIND_BY_SECTION, InstallParam, InstallableConfig, InstallableRef
 
 
 def _find_dependents(target_cls) -> list[str]:

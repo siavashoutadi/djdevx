@@ -2,7 +2,7 @@
 
 from .._base import BasePackage
 from djdevx.utils.types.pixi_types import PixiPackageSpec
-from ....utils.installable.types import InstallParam, Variant
+from ....installable.models import InstallParam, Variant
 from .._registry import register
 
 

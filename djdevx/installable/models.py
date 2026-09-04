@@ -6,8 +6,8 @@ from typing import Any, Callable, Optional, cast
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from ..tracking.sections import Section
-from ..types.pixi_types import PixiPackageSpec
+from ..utils.tracking.sections import Section
+from ..utils.types.pixi_types import PixiPackageSpec
 
 PEER_TEMPLATES_DIRNAME = "peer_templates"
 

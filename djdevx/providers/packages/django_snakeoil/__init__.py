@@ -3,7 +3,7 @@
 from .._base import BasePackage
 from djdevx.utils.templates.load_tags import LoadTagManager
 from djdevx.utils.types.pixi_types import PixiPackageSpec
-from ....utils.installable.types import InstallParam
+from ....installable.models import InstallParam
 from .._registry import register
 
 

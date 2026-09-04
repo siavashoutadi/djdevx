@@ -20,19 +20,19 @@ import functools
 from pathlib import Path
 from typing import Any, Callable, Iterator, Optional
 
-from ..console.print import print_console
-from ..project.project_structure import ProjectStructure
-from ..tracking import ProjectTracking
+from ..utils.console.print import print_console
+from ..utils.project.project_structure import ProjectStructure
+from ..utils.tracking import ProjectTracking
 
-from .pixi_ops import PixiOps
+from .ops.pixi import PixiOps
 from .registry import Registry, all_registries
 from .resolver import resolve
-from .scaffold import remove_empty_parents
-from .types import PEER_TEMPLATES_DIRNAME
-from ..templates.manager import TemplateManager
-from .tracking import get_section
-from .types import InstallableConfig, InstallableRef
-from ..types.pixi_types import PixiPackageSpec
+from .ops.scaffold import remove_empty_parents
+from .models import PEER_TEMPLATES_DIRNAME
+from ..utils.templates.manager import TemplateManager
+from .ops.tracking import get_section
+from .models import InstallableConfig, InstallableRef
+from ..utils.types.pixi_types import PixiPackageSpec
 
 _syncing = False
 

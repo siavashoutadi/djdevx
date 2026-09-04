@@ -2,9 +2,9 @@
 
 import shutil
 from pathlib import Path
-from ..templates.manager import TemplateManager
+from ...utils.templates.manager import TemplateManager
 
-from .types import PEER_TEMPLATES_DIRNAME
+from ..models import PEER_TEMPLATES_DIRNAME
 
 
 def resolve_template_source(installable, variant=None) -> Path | None:

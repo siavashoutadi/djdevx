@@ -3,7 +3,7 @@
 Historically each domain (packages, features, frameworks, database, cache)
 defined its own near-identical base class that differed only by ``section``
 and its ``get_registry()`` target. This module consolidates them into one
-:class:`Provider` parameterized by an :class:`~djdevx.utils.installable.types.InstallableKind`,
+:class:`Provider` parameterized by an :class:`~djdevx.installable.models.InstallableKind`,
 plus a :class:`CSSFrameworkProviderMixin` that carries the CSS/JS download and
 base-template-injection behavior previously living only in ``BaseFramework``.
 
@@ -17,8 +17,8 @@ from typing import ClassVar
 from pydantic import model_validator
 
 from .utils.console.print import print_console
-from .utils.installable.installable import Installable
-from .utils.installable.types import InstallableKind
+from .installable.lifecycle import Installable
+from .installable.models import InstallableKind
 from .utils.tracking import Section
 
 # Re-export the five canonical kinds so callers don't need a separate import.
@@ -60,7 +60,7 @@ class Provider(Installable):
 
     @classmethod
     def get_registry(cls):
-        from .utils.installable.registry import REGISTRIES
+        from .installable.registry import REGISTRIES
 
         return REGISTRIES[cls.kind.name]
 

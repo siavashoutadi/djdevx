@@ -3,11 +3,11 @@
 from unittest.mock import MagicMock, patch
 
 from djdevx.providers.packages._base import BasePackage
-from djdevx.utils.installable.pixi_ops import PixiOps
-from djdevx.utils.installable.scaffold import cleanup_files, restore_original_templates
-from djdevx.utils.installable.secrets import SecretsOps
-from djdevx.utils.installable.tracking import track_install
-from djdevx.utils.installable.types import (
+from djdevx.installable.ops.pixi import PixiOps
+from djdevx.installable.ops.scaffold import cleanup_files, restore_original_templates
+from djdevx.installable.ops.secrets import SecretsOps
+from djdevx.installable.ops.tracking import track_install
+from djdevx.installable.models import (
     InstallParam,
     Variant,
 )
@@ -103,10 +103,10 @@ class TestHookOrdering:
 
         with (
             patch.object(PixiOps, "add_packages") as mock_add,
-            patch("djdevx.utils.installable.installable.copy_templates") as mock_copy,
+            patch("djdevx.installable.lifecycle.copy_templates") as mock_copy,
             patch.object(SecretsOps, "generate") as mock_gen,
-            patch("djdevx.utils.installable.installable.sync_on_add"),
-            patch("djdevx.utils.installable.tracking.ProjectTracking"),
+            patch("djdevx.installable.lifecycle.sync_on_add"),
+            patch("djdevx.installable.ops.tracking.ProjectTracking"),
         ):
             mock_add.side_effect = lambda *a, **kw: call_order.append("pixi_add_all")
             mock_copy.side_effect = lambda self, variant: call_order.append(
@@ -141,14 +141,14 @@ class TestHookOrdering:
 
         with (
             patch.object(PixiOps, "remove_packages") as mock_rem_pixi,
-            patch("djdevx.utils.installable.installable.cleanup_files") as mock_cleanup,
+            patch("djdevx.installable.lifecycle.cleanup_files") as mock_cleanup,
             patch(
-                "djdevx.utils.installable.installable.restore_original_templates"
+                "djdevx.installable.lifecycle.restore_original_templates"
             ) as mock_restore,
             patch.object(SecretsOps, "remove") as mock_rem,
-            patch("djdevx.utils.installable.installable.sync_on_remove"),
-            patch("djdevx.utils.installable.tracking.ProjectTracking"),
-            patch("djdevx.utils.installable.installable.ProjectTracking"),
+            patch("djdevx.installable.lifecycle.sync_on_remove"),
+            patch("djdevx.installable.ops.tracking.ProjectTracking"),
+            patch("djdevx.installable.lifecycle.ProjectTracking"),
         ):
             mock_rem_pixi.side_effect = lambda *a, **kw: call_order.append(
                 "pixi_remove_all"
@@ -206,7 +206,7 @@ class TestPackageTracking:
         pkg = SimplePackage()
         mock_project = MagicMock()
         with patch(
-            "djdevx.utils.installable.tracking.ProjectTracking",
+            "djdevx.installable.ops.tracking.ProjectTracking",
             return_value=mock_project,
         ):
             track_install(pkg)
@@ -220,7 +220,7 @@ class TestPackageTracking:
         mock_project.get_variants.return_value = ["account"]
         variant = pkg.variants["mfa"]
         with patch(
-            "djdevx.utils.installable.tracking.ProjectTracking",
+            "djdevx.installable.ops.tracking.ProjectTracking",
             return_value=mock_project,
         ):
             track_install(pkg, variant)

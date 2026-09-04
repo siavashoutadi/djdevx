@@ -3,9 +3,9 @@
 from pathlib import Path
 from typing import Optional
 
-from ..project.pixi_runner import PixiRunner
-from ..types.pixi_types import PixiPackageSpec
-from .types import Variant
+from ...utils.project.pixi_runner import PixiRunner
+from ...utils.types.pixi_types import PixiPackageSpec
+from ..models import Variant
 
 
 class PixiOps:

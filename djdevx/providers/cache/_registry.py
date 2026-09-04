@@ -1,7 +1,7 @@
 """Cache registry — CACHE_REGISTRY dict and register decorator."""
 
-from ...utils.installable.registry import Registry
-from ...utils.installable.types import CACHE
+from ...installable.registry import Registry
+from ...installable.models import CACHE
 from ._base import BaseCache
 
 CACHE_REGISTRY: Registry[BaseCache] = Registry(CACHE)

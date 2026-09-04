@@ -1,7 +1,7 @@
 """Database registry — DATABASE_REGISTRY dict and register decorator."""
 
-from ...utils.installable.registry import Registry
-from ...utils.installable.types import DATABASE
+from ...installable.registry import Registry
+from ...installable.models import DATABASE
 from ._base import BaseDatabase
 
 DATABASE_REGISTRY: Registry[BaseDatabase] = Registry(DATABASE)

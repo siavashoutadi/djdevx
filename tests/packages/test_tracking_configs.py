@@ -8,8 +8,8 @@ from unittest.mock import MagicMock
 import tomlkit
 
 from djdevx.providers.packages._base import BasePackage
-from djdevx.utils.installable.tracking import TrackingOps
-from djdevx.utils.installable.types import Variant
+from djdevx.installable.ops.tracking import TrackingOps
+from djdevx.installable.models import Variant
 from djdevx.utils.tracking import ProjectTracking, Section
 from djdevx.utils.types.pixi_types import PixiPackageSpec
 

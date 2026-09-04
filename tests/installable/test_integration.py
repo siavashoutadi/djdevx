@@ -12,7 +12,7 @@ from typer.testing import CliRunner
 from djdevx.main import app
 from djdevx.providers.packages._registry import PACKAGE_REGISTRY
 from djdevx.providers.packages.whitenoise import WhitenoisePackage
-from djdevx.utils.installable.peers import (
+from djdevx.installable.peers import (
     call_peer,
     sync_on_add,
     sync_on_remove,
@@ -20,11 +20,11 @@ from djdevx.utils.installable.peers import (
     cleanup_peer_templates,
     cleanup_all_peer_templates,
 )
-from djdevx.utils.installable.installable import Installable
-from djdevx.utils.installable.pixi_ops import PixiOps
-from djdevx.utils.installable.registry import Registry
-from djdevx.utils.installable.secrets import SecretsOps
-from djdevx.utils.installable.types import (
+from djdevx.installable.lifecycle import Installable
+from djdevx.installable.ops.pixi import PixiOps
+from djdevx.installable.registry import Registry
+from djdevx.installable.ops.secrets import SecretsOps
+from djdevx.installable.models import (
     FRAMEWORK,
     PACKAGE,
     InstallableRef,
@@ -207,7 +207,7 @@ class TestMatching:
 class TestPull:
     @pytest.fixture
     def pixi_ops(self):
-        with patch("djdevx.utils.installable.peers.PixiOps") as ops:
+        with patch("djdevx.installable.peers.PixiOps") as ops:
             yield ops.return_value
 
     def test_fires_when_peer_already_installed(self, root, pixi_ops):
@@ -266,7 +266,7 @@ class TestPull:
 class TestPush:
     @pytest.fixture
     def pixi_ops(self):
-        with patch("djdevx.utils.installable.peers.PixiOps") as ops:
+        with patch("djdevx.installable.peers.PixiOps") as ops:
             yield ops.return_value
 
     def test_fires_when_listener_already_installed(self, root, pixi_ops):
@@ -308,7 +308,7 @@ class TestPush:
 class TestUnwind:
     @pytest.fixture
     def pixi_ops(self):
-        with patch("djdevx.utils.installable.peers.PixiOps") as ops:
+        with patch("djdevx.installable.peers.PixiOps") as ops:
             yield ops.return_value
 
     def test_remove_triggers_on_peer_removed_on_installed_listeners(
@@ -383,7 +383,7 @@ class HookedGatedPackage(Installable):
 class TestPeerPackages:
     @pytest.fixture
     def pixi_ops(self):
-        with patch("djdevx.utils.installable.peers.PixiOps") as ops:
+        with patch("djdevx.installable.peers.PixiOps") as ops:
             yield ops.return_value
 
     def test_push_applies_peer_packages(self, root, pixi_ops):
@@ -452,7 +452,7 @@ class GatedVariantOwner(Installable):
 class TestPartialVariantRemoval:
     @pytest.fixture
     def pixi_ops(self):
-        with patch("djdevx.utils.installable.peers.PixiOps") as ops:
+        with patch("djdevx.installable.peers.PixiOps") as ops:
             yield ops.return_value
 
     def seed(self, root: Path):
@@ -506,9 +506,7 @@ class TestPartialVariantRemoval:
         def fake_sync(installable, variant=None, **kwargs):
             received["fully_removed"] = kwargs.get("fully_removed")
 
-        monkeypatch.setattr(
-            "djdevx.utils.installable.installable.sync_on_remove", fake_sync
-        )
+        monkeypatch.setattr("djdevx.installable.lifecycle.sync_on_remove", fake_sync)
         tracker = MagicMock()
         tracker.list.return_value = {}
         tracker.get_variants.return_value = installed_variants
@@ -517,17 +515,17 @@ class TestPartialVariantRemoval:
             patch.object(PixiOps, "remove_packages"),
             patch.object(SecretsOps, "__init__", return_value=None),
             patch.object(SecretsOps, "remove"),
-            patch("djdevx.utils.installable.installable.cleanup_files", MagicMock()),
+            patch("djdevx.installable.lifecycle.cleanup_files", MagicMock()),
             patch(
-                "djdevx.utils.installable.installable.restore_original_templates",
+                "djdevx.installable.lifecycle.restore_original_templates",
                 MagicMock(),
             ),
             patch(
-                "djdevx.utils.installable.installable.ProjectStructure",
+                "djdevx.installable.lifecycle.ProjectStructure",
                 **{"return_value.root": root},
             ),
             patch(
-                "djdevx.utils.installable.tracking.ProjectTracking",
+                "djdevx.installable.ops.tracking.ProjectTracking",
                 return_value=tracker,
             ),
         ):
@@ -542,7 +540,7 @@ class TestPartialVariantRemoval:
 class TestErrorIsolation:
     @pytest.fixture
     def pixi_ops(self):
-        with patch("djdevx.utils.installable.peers.PixiOps") as ops:
+        with patch("djdevx.installable.peers.PixiOps") as ops:
             yield ops.return_value
 
     def test_raising_hook_is_caught_and_others_still_run(self, root, pixi_ops, capsys):
@@ -562,7 +560,7 @@ class TestErrorIsolation:
 class TestRecursionGuard:
     @pytest.fixture
     def pixi_ops(self):
-        with patch("djdevx.utils.installable.peers.PixiOps") as ops:
+        with patch("djdevx.installable.peers.PixiOps") as ops:
             yield ops.return_value
 
     def test_hook_triggered_sync_does_not_loop(self, root, pixi_ops):
@@ -636,9 +634,9 @@ class TestLifecycleWiring:
     @pytest.fixture
     def pixi_ops(self):
         with (
-            patch("djdevx.utils.installable.pixi_ops.PixiOps") as ops,
-            patch("djdevx.utils.installable.peers.PixiOps") as peer_ops,
-            patch("djdevx.utils.installable.installable.PixiOps") as inst_ops,
+            patch("djdevx.installable.ops.pixi.PixiOps") as ops,
+            patch("djdevx.installable.peers.PixiOps") as peer_ops,
+            patch("djdevx.installable.lifecycle.PixiOps") as inst_ops,
         ):
             yield ops.return_value, peer_ops.return_value, inst_ops.return_value
 
@@ -728,7 +726,7 @@ class TestPeerTemplateCleanup:
 
         peer = StubPeer()
 
-        with patch("djdevx.utils.installable.peers.TemplateManager") as mock_tm_cls:
+        with patch("djdevx.installable.peers.TemplateManager") as mock_tm_cls:
             mock_tm = MagicMock()
             mock_tm_cls.return_value = mock_tm
             mock_tm.scan_templates.return_value = ["style.css"]
@@ -745,7 +743,7 @@ class TestPeerTemplateCleanup:
         peer.template_dir = MagicMock()
         peer.template_dir.exists.return_value = False
 
-        with patch("djdevx.utils.installable.peers.TemplateManager"):
+        with patch("djdevx.installable.peers.TemplateManager"):
             cleanup_peer_templates(listener, peer)
 
     def test_cleanup_all_skips_unregistered_peers(self, root):
@@ -755,8 +753,8 @@ class TestPeerTemplateCleanup:
         listener._structure = MagicMock()
         listener._structure.root = root
         with (
-            patch("djdevx.utils.installable.peers.resolve", side_effect=KeyError),
-            patch("djdevx.utils.installable.peers.cleanup_peer_templates"),
+            patch("djdevx.installable.peers.resolve", side_effect=KeyError),
+            patch("djdevx.installable.peers.cleanup_peer_templates"),
         ):
             cleanup_all_peer_templates(listener)
 
@@ -768,7 +766,7 @@ class TestPeerTemplateCleanup:
         peer = _TemplatePeer()
         peer.template_dir = MagicMock()
         peer.template_dir.exists.return_value = False
-        with patch("djdevx.utils.installable.peers.TemplateManager"):
+        with patch("djdevx.installable.peers.TemplateManager"):
             copy_peer_templates(listener, peer)
 
 
@@ -826,7 +824,7 @@ def _seed_variant_tracking(root: Path, name: str, variants: list[str]) -> None:
 class TestVariantScopedInterest:
     @pytest.fixture
     def pixi_ops(self):
-        with patch("djdevx.utils.installable.peers.PixiOps") as ops:
+        with patch("djdevx.installable.peers.PixiOps") as ops:
             yield ops.return_value
 
     def test_pullof_variant_only_listener_adds_variant_package(self, root, pixi_ops):
@@ -923,7 +921,7 @@ class HookOnlyListener(Installable):
 class TestHookOnlyListener:
     @pytest.fixture
     def pixi_ops(self):
-        with patch("djdevx.utils.installable.peers.PixiOps") as ops:
+        with patch("djdevx.installable.peers.PixiOps") as ops:
             yield ops.return_value
 
     def test_hook_fires_without_any_packages_added(self, root, pixi_ops):

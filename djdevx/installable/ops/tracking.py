@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Optional
 
-from ..tracking import ProjectTracking, Section
+from ...utils.tracking import ProjectTracking, Section
 
 
 class TrackingOps:

@@ -7,22 +7,22 @@ from typing import Any, Optional
 
 from pydantic import Field
 
-from ..console.print import NestedStep, print_console
-from ..prek.prek import format_files
-from ..project.project_structure import ProjectStructure
-from .pixi_ops import PixiOps
+from ..utils.console.print import NestedStep, print_console
+from .ops.format import format_files
+from ..utils.project.project_structure import ProjectStructure
+from .ops.pixi import PixiOps
 from .peers import sync_on_add, sync_on_remove
-from ..tracking import ProjectTracking
+from ..utils.tracking import ProjectTracking
 
-from .scaffold import (
+from .ops.scaffold import (
     cleanup_files,
     copy_templates,
     restore_original_templates,
     template_output_files,
 )
-from .secrets import SecretsOps
-from .tracking import TrackingOps
-from .types import InstallableConfig, Variant  # noqa: F401 — needed for Pydantic forward-ref resolution
+from .ops.secrets import SecretsOps
+from .ops.tracking import TrackingOps
+from .models import InstallableConfig, Variant  # noqa: F401 — needed for Pydantic forward-ref resolution
 
 
 class Installable(InstallableConfig):
@@ -73,7 +73,8 @@ class Installable(InstallableConfig):
 
     @cached_property
     def new_templates_dir(self) -> Path:
-        return Path(__file__).resolve().parent.parent.parent / "new" / "templates"
+        # <pkg-root>/installable/lifecycle.py -> <pkg-root>/new/templates
+        return Path(__file__).resolve().parents[1] / "new" / "templates"
 
     @property
     def structure(self) -> ProjectStructure:

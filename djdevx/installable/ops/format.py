@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-from ..project.pixi_runner import PixiRunner
-from ..console.print import print_console, NestedStep
+from ...utils.project.pixi_runner import PixiRunner
+from ...utils.console.print import print_console, NestedStep
 
 
 def format_files(

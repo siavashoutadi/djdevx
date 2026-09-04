@@ -1,5 +1,5 @@
-from ..console.print import GREEN_CHECK_MARK, RED_CROSS_MARK, print_console
-from .tracking import get_available_names, get_display_name, get_installed_names
+from ..utils.console.print import GREEN_CHECK_MARK, RED_CROSS_MARK, print_console
+from .ops.tracking import get_available_names, get_display_name, get_installed_names
 
 
 def build_list_table(cls, label: str) -> None:

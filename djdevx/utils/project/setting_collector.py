@@ -22,7 +22,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Optional, cast
 
-from ..installable.registry import REGISTRIES
+from ...installable.registry import REGISTRIES
 
 
 @dataclass
