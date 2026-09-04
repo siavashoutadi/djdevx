@@ -7,13 +7,41 @@ data lives under ``.pixi/devdata/<provider>`` so nothing depends on Docker.
 import os
 import socket
 import subprocess
+import time
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from pathlib import Path
-from typing import ClassVar, Optional
+from typing import ClassVar
 
 from ..console.print import print_console
 from ..project.pixi_runner import PixiRunner
 from ..project.project_structure import ProjectStructure
+
+
+class _StepGroupWrapper:
+    """Thin adapter so a parent *step* and a standalone group share one "done".
+
+    Injects ``ok()``/``info()``/``warning()`` onto whatever object is wrapped so
+    subclasses can call ``group.ok(...)`` uniformly whether *step* was a real
+    parent step or a freshly created step group.
+    """
+
+    def __init__(self, group) -> None:
+        self._group = group
+
+    def ok(self, message: str) -> None:
+        getattr(self._group, "ok", print_console.step_done)(message)
+
+    def info(self, message: str) -> None:
+        getattr(self._group, "info", print_console.info)(message)
+
+    def warning(self, message: str) -> None:
+        getattr(self._group, "warning", print_console.warning)(message)
+
+    def done(self) -> None:
+        done = getattr(self._group, "done", None)
+        if done is not None:
+            done()
 
 
 class BaseDevService(ABC):
@@ -27,9 +55,7 @@ class BaseDevService(ABC):
     dev_default_password: ClassVar[str] = ""
     port_env_key: ClassVar[str] = ""
 
-    def __init__(
-        self, project_root: Optional[Path] = None, verbose: bool = False
-    ) -> None:
+    def __init__(self, project_root: Path | None = None, verbose: bool = False) -> None:
         self.structure = ProjectStructure(project_root)
         self.runner = PixiRunner(self.structure.root, verbose)
         self.verbose = verbose
@@ -89,6 +115,44 @@ class BaseDevService(ABC):
         self, *args: str, timeout: int | None = None
     ) -> subprocess.CompletedProcess:
         return self.runner.run_pixi_command(*args, check=False, timeout=timeout)
+
+    def step_group(self, title: str, done: str, *, step=None):
+        """Wrap the common "parent step or standalone step group" idiom.
+
+        Returns a group object (the passed-in parent *step* if given, otherwise
+        a fresh :class:`NestedStep`) so subclasses stop duplicating the
+        ``step if step is not None else print_console.step_group(...)`` pattern.
+        When a parent *step* is provided the returned object is used only for
+        emitting ``✓`` children and is never ``done()``'d by the caller; the
+        returned wrapper handles its own ``done()`` when standalone.
+        """
+        if step is not None:
+            return step
+        return _StepGroupWrapper(print_console.step_group(title, done=done))
+
+    def wait_until_ready(
+        self,
+        probe: Callable[[], bool],
+        *,
+        retries: int = 10,
+        delay: float = 0.5,
+        what: str = "service",
+    ) -> bool:
+        """Poll *probe* (a cheap readiness check) until it is True.
+
+        If *probe* is True within ``retries * delay`` seconds, return True.
+        Otherwise return False — callers decide whether to raise/warn. This is
+        the shared health-wait that Postgres/Redis/OTel use so ``up()`` only
+        returns once the service is actually ready to accept connections.
+        """
+        for _ in range(retries):
+            try:
+                if probe():
+                    return True
+            except OSError:
+                pass
+            time.sleep(delay)
+        return False
 
     @abstractmethod
     def up(self, step=None) -> None:
