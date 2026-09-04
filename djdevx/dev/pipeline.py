@@ -20,10 +20,10 @@ second time is removed: each native service is started exactly once.
 import typer
 
 from ..settings.source import DEV
-from ..utils.console.print import print_console
+from djdevx.core.console import print_console
 from ..utils.devcontainer.detect import in_devcontainer
 from ..utils.django.manage_commands import ManageCommands
-from ..utils.project.pixi_runner import PixiRunner
+from djdevx.core.process import PixiRunner
 from ..services import (
     BaseDevService,
     resolve_cache_dev_service,

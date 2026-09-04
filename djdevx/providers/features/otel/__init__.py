@@ -6,7 +6,7 @@ from ....installable.models import (
 from ....utils.tracking import ProjectTracking
 from ....utils.types.pixi_types import PixiPackageSpec
 from ....utils.devcontainer import DockerComposeManager, ServiceConfig
-from ....utils.console.print import NestedStep
+from djdevx.core.console import NestedStep
 from .._base import BaseFeature
 from .._registry import register
 

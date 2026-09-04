@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Optional
 
-from ...utils.project.pixi_runner import PixiRunner
+from djdevx.core.process import PixiRunner
 from ...utils.types.pixi_types import PixiPackageSpec
 from ..models import Variant
 

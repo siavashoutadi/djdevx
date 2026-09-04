@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import ClassVar
 
-from ..utils.console.print import print_console
+from djdevx.core.console import print_console
 from .base import BaseDevService
 
 

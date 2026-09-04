@@ -1,6 +1,6 @@
 """ddx dev down — stop installed database/cache services."""
 
-from ..utils.console.print import print_console
+from djdevx.core.console import print_console
 from ..services import resolve_dev_services
 
 

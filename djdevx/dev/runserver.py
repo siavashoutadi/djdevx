@@ -2,8 +2,8 @@
 
 import typer
 
-from ..utils.console.print import print_console
-from ..utils.project.pixi_runner import PixiRunner
+from djdevx.core.console import print_console
+from djdevx.core.process import PixiRunner
 from ..utils.tracking import ProjectTracking, Section
 
 

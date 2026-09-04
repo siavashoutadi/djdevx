@@ -10,7 +10,7 @@ from pathlib import Path
 
 from dotenv import dotenv_values
 
-from ..utils.project.secret_manager import SecretManager
+from djdevx.core.secrets import SecretManager
 
 DEV = "dev"
 PROD = "prod"

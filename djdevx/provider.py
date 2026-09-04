@@ -16,7 +16,7 @@ from typing import ClassVar
 
 from pydantic import model_validator
 
-from .utils.console.print import print_console
+from djdevx.core.console import print_console
 from .installable.lifecycle import Installable
 from .installable.models import InstallableKind
 from .utils.tracking import Section

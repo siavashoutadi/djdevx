@@ -11,8 +11,8 @@ from typing import Annotated
 import typer
 
 from ..utils.console import prompts
-from ..utils.console.print import print_console
-from ..installable.discovery import discover_and_register
+from djdevx.core.console import print_console
+from djdevx.core.discovery import discover_and_register
 from ..installable.list_table import build_list_table
 from ..installable.orchestrator import add_installable, remove_installable
 from ..installable.ops.tracking import (

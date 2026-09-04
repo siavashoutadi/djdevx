@@ -5,7 +5,7 @@ from typing import Any, Optional
 
 import tomlkit
 
-from ..project.project_structure import ProjectStructure
+from djdevx.core.paths import ProjectStructure
 from .sections import Section
 
 Table = dict[str, Any]

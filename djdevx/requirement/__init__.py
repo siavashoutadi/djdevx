@@ -7,7 +7,7 @@ from typing import Annotated, Optional
 import typer
 
 from ..utils.console import prompts
-from ..utils.console.print import print_console
+from djdevx.core.console import print_console
 from ..utils.system.tools import system_tools
 
 app = typer.Typer(no_args_is_help=True)

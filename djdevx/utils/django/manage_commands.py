@@ -2,7 +2,7 @@
 
 import subprocess
 
-from ..project.pixi_runner import PixiRunner
+from djdevx.core.process import PixiRunner
 
 
 class ManageCommands:

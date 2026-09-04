@@ -1,6 +1,6 @@
 """ddx dev credentials — print connection info for installed dev services."""
 
-from ..utils.console.print import print_console
+from djdevx.core.console import print_console
 from .context import collect_context
 from .render import render_credentials_table
 

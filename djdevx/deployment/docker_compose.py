@@ -12,9 +12,9 @@ import secrets
 
 from ..settings.source import setup_readline
 from ..utils.console import prompts
-from ..utils.console.print import print_console
+from djdevx.core.console import print_console
 from ..utils.project.setting_collector import CollectedSettings, SettingCollector
-from ..utils.project.project_structure import ProjectStructure
+from djdevx.core.paths import ProjectStructure
 from ..utils.tracking import ProjectTracking, Section
 
 from ._base import BaseDeployPlugin, DeployParam

@@ -5,7 +5,7 @@ from PIL import Image
 
 from .._base import BaseFeature
 from .._registry import register
-from ....utils.console.print import print_console
+from djdevx.core.console import print_console
 from ....installable.models import InstallParam
 
 

@@ -21,7 +21,7 @@ from typing import Optional
 
 import yaml
 
-from ..project.project_structure import ProjectStructure
+from djdevx.core.paths import ProjectStructure
 
 
 def in_devcontainer(project_root: Optional[Path] = None) -> bool:

@@ -1,4 +1,4 @@
-from ..utils.console.print import GREEN_CHECK_MARK, RED_CROSS_MARK, print_console
+from djdevx.core.console import GREEN_CHECK_MARK, RED_CROSS_MARK, print_console
 from .ops.tracking import get_available_names, get_display_name, get_installed_names
 
 

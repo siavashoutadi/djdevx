@@ -7,9 +7,9 @@ from typing import Any, Optional
 
 from pydantic import Field
 
-from ..utils.console.print import NestedStep, print_console
+from djdevx.core.console import NestedStep, print_console
 from .ops.format import format_files
-from ..utils.project.project_structure import ProjectStructure
+from djdevx.core.paths import ProjectStructure
 from .ops.pixi import PixiOps
 from .peers import sync_on_add, sync_on_remove
 from ..utils.tracking import ProjectTracking

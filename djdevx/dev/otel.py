@@ -2,7 +2,7 @@
 
 import typer
 
-from ..utils.console.print import print_console
+from djdevx.core.console import print_console
 from ..utils.devcontainer.detect import in_devcontainer
 from ..services import BaseDevService, resolve_otel_dev_services
 

@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from djdevx.utils.project.pixi_runner import PixiRunner
+from djdevx.core.process import PixiRunner
 
 
 # ---------------------------------------------------------------------------
@@ -72,7 +72,7 @@ class TestInit:
         mock_structure = MagicMock()
         mock_structure.root = Path("/auto")
         with patch(
-            "djdevx.utils.project.pixi_runner.ProjectStructure",
+            "djdevx.core.process.ProjectStructure",
             return_value=mock_structure,
         ):
             runner = PixiRunner()

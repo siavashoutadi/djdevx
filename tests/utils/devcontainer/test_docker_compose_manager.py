@@ -4,7 +4,7 @@ from io import StringIO
 
 from rich.console import Console
 
-from djdevx.utils.console.print import print_console
+from djdevx.core.console import print_console
 from djdevx.utils.devcontainer.docker_compose_manager import DockerComposeManager
 
 

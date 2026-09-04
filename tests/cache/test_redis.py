@@ -6,7 +6,7 @@ from unittest.mock import patch
 from typer.testing import CliRunner
 
 from djdevx.main import app
-from djdevx.utils.project.pixi_runner import PixiRunner
+from djdevx.core.process import PixiRunner
 from tests.test_helpers import create_test_django_project
 
 runner = CliRunner()

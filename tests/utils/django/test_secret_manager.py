@@ -3,7 +3,7 @@
 import stat
 from pathlib import Path
 
-from djdevx.utils.project.secret_manager import SecretManager
+from djdevx.core.secrets import SecretManager
 
 
 class TestSecretManager:

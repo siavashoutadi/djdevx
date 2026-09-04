@@ -20,8 +20,8 @@ import functools
 from pathlib import Path
 from typing import Any, Callable, Iterator, Optional
 
-from ..utils.console.print import print_console
-from ..utils.project.project_structure import ProjectStructure
+from djdevx.core.console import print_console
+from djdevx.core.paths import ProjectStructure
 from ..utils.tracking import ProjectTracking
 
 from .ops.pixi import PixiOps

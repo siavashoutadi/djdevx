@@ -19,11 +19,11 @@ import subprocess
 from pathlib import Path
 from typing import ClassVar
 
-from ..utils.console.print import print_console
+from djdevx.core.console import print_console
 from ..utils.tracking import ProjectTracking
 from . import binary
 from .base import BaseDevService
-from .wait import (
+from djdevx.core.process import (
     is_pid_alive,
     is_port_open,
     read_pid,

@@ -6,7 +6,7 @@ from typer.testing import CliRunner
 
 from djdevx.dev.pipeline import run_start
 from djdevx.main import app
-from djdevx.utils.console.print import print_console
+from djdevx.core.console import print_console
 from djdevx.utils.django.manage_commands import ManageCommands
 
 cli = CliRunner()

@@ -221,7 +221,7 @@ def test_up_emits_step_group_children(tmp_path):
 
     from rich.console import Console
 
-    from djdevx.utils.console.print import print_console
+    from djdevx.core.console import print_console
 
     ok = MagicMock(returncode=0, stdout=b"")
     not_ready = MagicMock(returncode=1, stdout=b"")

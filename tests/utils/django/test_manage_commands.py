@@ -4,7 +4,7 @@ import subprocess
 from unittest.mock import MagicMock, patch
 
 from djdevx.utils.django.manage_commands import ManageCommands
-from djdevx.utils.project.pixi_runner import PixiRunner
+from djdevx.core.process import PixiRunner
 
 
 class TestRun:

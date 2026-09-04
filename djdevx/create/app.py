@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-from ..utils.project.project_structure import ProjectStructure
-from ..utils.project.pixi_runner import PixiRunner
+from djdevx.core.paths import ProjectStructure
+from djdevx.core.process import PixiRunner
 from ..utils.templates.manager import TemplateManager
 
 

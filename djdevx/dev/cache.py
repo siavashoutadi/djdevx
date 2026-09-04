@@ -2,7 +2,7 @@
 
 import typer
 
-from ..utils.console.print import print_console
+from djdevx.core.console import print_console
 from ..services import BaseDevService, resolve_cache_dev_service
 
 app = typer.Typer(no_args_is_help=True)

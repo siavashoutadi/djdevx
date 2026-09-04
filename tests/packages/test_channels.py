@@ -2,7 +2,7 @@ from pathlib import Path
 import os
 from typer.testing import CliRunner
 from djdevx.main import app
-from djdevx.utils.project.pixi_runner import PixiRunner
+from djdevx.core.process import PixiRunner
 from djdevx.utils.tracking import ProjectTracking, Section
 from tests.test_helpers import create_test_django_project
 

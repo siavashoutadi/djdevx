@@ -7,10 +7,10 @@ from typing import Optional
 from typing_extensions import Annotated
 from pathlib import Path
 
-from ..utils.console.print import NestedStep, print_console
+from djdevx.core.console import NestedStep, print_console
 from ..utils.console import prompts
-from ..utils.project.secret_manager import SecretManager
-from ..utils.project.pixi_runner import PixiRunner
+from djdevx.core.secrets import SecretManager
+from djdevx.core.process import PixiRunner
 from ..utils.generators import generate_random_password
 from ..utils.templates.manager import TemplateManager
 from ..installable.ops.format import format_all_files_in_project

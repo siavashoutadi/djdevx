@@ -5,7 +5,7 @@ import shutil
 from .._base import BaseDatabase
 from .._registry import register
 from ....utils.devcontainer import ServiceConfig, VolumeConfig, DockerComposeManager
-from ....utils.console.print import NestedStep
+from djdevx.core.console import NestedStep
 from ....services import PostgresService
 from ....utils.types.pixi_types import PixiPackageSpec
 

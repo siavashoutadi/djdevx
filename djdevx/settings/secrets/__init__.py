@@ -4,14 +4,14 @@ from typing import Any, Literal
 
 import typer
 
-from ...utils.console.print import (
+from djdevx.core.console import (
     GREEN_CHECK_MARK,
     RED_CROSS_MARK,
     YELLOW_CHECKMARK,
     print_console,
 )
-from ...utils.project.project_structure import ProjectStructure
-from ...utils.project.secret_manager import SecretManager
+from djdevx.core.paths import ProjectStructure
+from djdevx.core.secrets import SecretManager
 from ...utils.project.setting_collector import SettingCollector
 from ..source import (
     DEV,

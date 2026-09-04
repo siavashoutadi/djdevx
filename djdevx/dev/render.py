@@ -1,6 +1,6 @@
 """Shared rendering for dev service tables (start, status, credentials)."""
 
-from ..utils.console.print import print_console
+from djdevx.core.console import print_console
 from ..utils.devcontainer.detect import DevelopmentContext
 
 

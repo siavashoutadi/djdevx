@@ -13,9 +13,9 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import ClassVar
 
-from ..utils.console.print import print_console
-from ..utils.project.pixi_runner import PixiRunner
-from ..utils.project.project_structure import ProjectStructure
+from djdevx.core.console import print_console
+from djdevx.core.process import PixiRunner
+from djdevx.core.paths import ProjectStructure
 
 
 class _StepGroupWrapper:

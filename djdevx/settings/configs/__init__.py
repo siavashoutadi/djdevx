@@ -8,7 +8,7 @@ import pydantic
 import typer
 from dotenv import set_key
 
-from ...utils.console.print import (
+from djdevx.core.console import (
     ELLIPSIS,
     GREEN_CHECK_MARK,
     Markup,
@@ -16,7 +16,7 @@ from ...utils.console.print import (
     YELLOW_CHECKMARK,
     print_console,
 )
-from ...utils.project.project_structure import ProjectStructure
+from djdevx.core.paths import ProjectStructure
 from ...utils.project.setting_collector import SettingCollector
 from ..source import (
     DEV,

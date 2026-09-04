@@ -7,7 +7,7 @@ from unittest import mock
 from rich.console import Console
 
 import djdevx.new.__init__ as new_mod
-from djdevx.utils.console.print import print_console
+from djdevx.core.console import print_console
 
 
 def _capture():

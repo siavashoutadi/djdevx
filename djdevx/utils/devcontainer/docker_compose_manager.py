@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 from typing import TypedDict, NotRequired
 
-from ..console.print import NestedStep, print_console
+from djdevx.core.console import NestedStep, print_console
 
 
 class ServiceConfig(TypedDict):

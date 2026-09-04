@@ -20,7 +20,7 @@ from ..utils.devcontainer.detect import (
     in_devcontainer,
     read_devcontainer_services,
 )
-from ..utils.project.project_structure import ProjectStructure
+from djdevx.core.paths import ProjectStructure
 from ..services import (
     BaseDevService,
     resolve_cache_dev_service,

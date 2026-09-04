@@ -3,7 +3,7 @@
 from unittest.mock import MagicMock, patch
 
 from djdevx.dev.render import render_credentials_table, render_services_table
-from djdevx.utils.console.print import print_console
+from djdevx.core.console import print_console
 from djdevx.utils.devcontainer.detect import DevelopmentContext, ServiceEndpoint
 
 

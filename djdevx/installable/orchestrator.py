@@ -4,7 +4,7 @@ import sys
 from typing import Any
 
 from ..utils.console import prompts
-from ..utils.console.print import print_console
+from djdevx.core.console import print_console
 from ..utils.tracking import ProjectTracking
 
 from .registry import REGISTRIES

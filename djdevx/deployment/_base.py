@@ -8,8 +8,8 @@ from typing import Any, Optional
 import typer
 from typing_extensions import Annotated
 
-from ..utils.console.print import print_console
-from ..utils.project.project_structure import ProjectStructure
+from djdevx.core.console import print_console
+from djdevx.core.paths import ProjectStructure
 
 
 @dataclass
