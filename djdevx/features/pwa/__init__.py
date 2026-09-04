@@ -5,6 +5,7 @@ from PIL import Image
 
 from .._base import BaseFeature
 from .._registry import register
+from ...utils.console.print import print_console
 from ...utils.installable.types import InstallParam
 
 
@@ -115,7 +116,10 @@ class PWAFeature(BaseFeature):
             base_icon = Image.open(icon_path)
             base_icon.verify()
             base_icon = Image.open(icon_path)
-        except Exception:
+        except (OSError, ValueError) as exc:
+            print_console.info(
+                f"Could not read icon {icon_path} ({exc}); skipping generated icons."
+            )
             return
         self._resize_android_icons(base_icon.copy())
         self._resize_ios_icons(base_icon.copy())

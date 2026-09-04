@@ -16,6 +16,7 @@ from typing import ClassVar
 
 from pydantic import model_validator
 
+from .utils.console.print import print_console
 from .utils.installable.installable import Installable
 from .utils.installable.types import InstallableKind
 from .utils.tracking import Section
@@ -97,7 +98,10 @@ class CSSFrameworkProviderMixin:
         dest.parent.mkdir(parents=True, exist_ok=True)
         try:
             urllib.request.urlretrieve(url, dest)
-        except Exception:  # noqa: BLE001 - best-effort placeholder on network failure
+        except (OSError, ValueError) as exc:
+            print_console.warning(
+                f"Could not download {url} ({exc}); wrote placeholder instead."
+            )
             dest.write_text("/* placeholder */\n")
 
     def after_copy_templates(self, step=None) -> None:

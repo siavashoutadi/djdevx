@@ -117,6 +117,11 @@ class BaseDevService(ABC):
     ) -> subprocess.CompletedProcess:
         return self.runner.run_pixi_command(*args, check=False, timeout=timeout)
 
+    def _log_debug(self, message: str) -> None:
+        """Surface a best-effort failure reason in verbose mode only."""
+        if self.verbose:
+            print_console.info(f"debug: {message}")
+
     def step_group(self, title: str, done: str, *, step=None):
         """Wrap the common "parent step or standalone step group" idiom.
 

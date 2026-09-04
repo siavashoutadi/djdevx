@@ -541,7 +541,10 @@ class DockerComposePlugin(BaseDeployPlugin):
     def _otel_tracked() -> bool:
         try:
             return ProjectTracking().is_installed(Section.FEATURES, "otel")
-        except Exception:
+        except (OSError, ValueError, RuntimeError) as exc:
+            print_console.info(
+                f"debug: tracking lookup failed, assuming no otel: {exc}"
+            )
             return False
 
     @staticmethod
@@ -576,7 +579,10 @@ class DockerComposePlugin(BaseDeployPlugin):
         try:
             tracking = ProjectTracking()
             project_name = tracking.get_config().get("project_name") or "your-app"
-        except Exception:
+        except (OSError, ValueError, RuntimeError) as exc:
+            print_console.info(
+                f"debug: project name lookup failed, using placeholder: {exc}"
+            )
             project_name = "your-app"
         return build_collector_config(
             project_name=project_name,

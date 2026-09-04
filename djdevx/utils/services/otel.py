@@ -92,20 +92,22 @@ class OtelCollectorService(BaseDevService):
             name = tracking.get_config().get("project_name")
             if name:
                 return name
-        except Exception:  # noqa: BLE001 - best-effort
-            pass
+        except (OSError, ValueError) as exc:
+            self._log_debug(f"project name lookup failed, using directory name: {exc}")
         return self.structure.root.name
 
     def _discover_openobserve_base(self) -> str:
         """Return the base URL of a running local OpenObserve (defaults to 5080)."""
         try:
-            from .resolver import resolve_openobserve_dev_service
+            from .registry import resolve_openobserve_dev_service
 
             observe = resolve_openobserve_dev_service(project_root=self.structure.root)
             if observe is not None and observe.is_up():
                 return f"http://localhost:{observe.port}"
-        except Exception:  # noqa: BLE001 - best-effort
-            pass
+        except (OSError, RuntimeError, ValueError) as exc:
+            self._log_debug(
+                f"OpenObserve discovery failed, using default base URL: {exc}"
+            )
         return "http://localhost:5080"
 
     def _ensure_config(self, step=None) -> None:

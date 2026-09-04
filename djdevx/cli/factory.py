@@ -271,9 +271,9 @@ def _add_multi(names, get, label, list_cmd, provider, verbose):
             result = add_installable(cls, pkg_name, provider, verbose, is_multi)
             if not result and not is_multi:
                 raise typer.Exit()
-        except Exception:
+        except Exception as exc:
             if is_multi:
-                print_console.fail(f"Failed to install {pkg_name}. Skipping.")
+                print_console.fail(f"Failed to install {pkg_name}: {exc}. Skipping.")
                 failed = True
             else:
                 raise
