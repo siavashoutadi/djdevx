@@ -1,16 +1,13 @@
-"""BaseCache — thin wrapper over InstallableBase for the cache domain."""
+"""BaseCache — thin alias over the single Provider for the cache domain.
 
-from ..utils.installable.installable import Installable
-from ..utils.tracking import Section
+Kept for backward compatibility so existing provider payloads and tests that
+``from .._base import BaseCache`` keep working; removed in a later phase.
+"""
+
+from ..provider import CACHE_KIND, Provider
 
 
-class BaseCache(Installable):
+class BaseCache(Provider):
     """Base class for cache backends."""
 
-    section: Section = Section.CACHE
-
-    @classmethod
-    def get_registry(cls):
-        from ._registry import CACHE_REGISTRY
-
-        return CACHE_REGISTRY
+    kind = CACHE_KIND

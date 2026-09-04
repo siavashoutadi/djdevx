@@ -1,16 +1,13 @@
-"""BaseDatabase — thin wrapper over InstallableBase for the database domain."""
+"""BaseDatabase — thin alias over the single Provider for the database domain.
 
-from ..utils.installable.installable import Installable
-from ..utils.tracking import Section
+Kept for backward compatibility so existing provider payloads and tests that
+``from .._base import BaseDatabase`` keep working; removed in a later phase.
+"""
+
+from ..provider import DATABASE_KIND, Provider
 
 
-class BaseDatabase(Installable):
+class BaseDatabase(Provider):
     """Base class for database providers."""
 
-    section: Section = Section.DATABASE
-
-    @classmethod
-    def get_registry(cls):
-        from ._registry import DATABASE_REGISTRY
-
-        return DATABASE_REGISTRY
+    kind = DATABASE_KIND

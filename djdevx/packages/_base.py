@@ -1,16 +1,13 @@
-"""BasePackage — thin wrapper over Installable for the packages domain."""
+"""BasePackage — thin alias over the single Provider for the packages domain.
 
-from ..utils.installable.installable import Installable
-from ..utils.tracking import Section
+Kept for backward compatibility so existing provider payloads and tests that
+``from .._base import BasePackage`` keep working; removed in a later phase.
+"""
+
+from ..provider import PACKAGE_KIND, Provider
 
 
-class BasePackage(Installable):
+class BasePackage(Provider):
     """Base class for Django packages."""
 
-    section: Section = Section.PACKAGES
-
-    @classmethod
-    def get_registry(cls):
-        from ._registry import PACKAGE_REGISTRY
-
-        return PACKAGE_REGISTRY
+    kind = PACKAGE_KIND

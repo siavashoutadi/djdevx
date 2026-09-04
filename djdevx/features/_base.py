@@ -1,16 +1,13 @@
-"""BaseFeature — thin wrapper over Installable for the features domain."""
+"""BaseFeature — thin alias over the single Provider for the features domain.
 
-from ..utils.installable.installable import Installable
-from ..utils.tracking import Section
+Kept for backward compatibility so existing provider payloads and tests that
+``from .._base import BaseFeature`` keep working; removed in a later phase.
+"""
+
+from ..provider import FEATURE_KIND, Provider
 
 
-class BaseFeature(Installable):
+class BaseFeature(Provider):
     """Base class for Django features."""
 
-    section: Section = Section.FEATURES
-
-    @classmethod
-    def get_registry(cls):
-        from ._registry import FEATURE_REGISTRY
-
-        return FEATURE_REGISTRY
+    kind = FEATURE_KIND
