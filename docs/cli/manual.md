@@ -127,13 +127,27 @@ $ djdevx packages [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `add`: Install a package.
-* `remove`: Remove a package or variant.
-* `list`: List all available packages with install...
+* `list`: List all available providers in a table.
+* `add`: Install a provider.
+* `remove`: Remove a provider.
+
+## djdevx packages list
+
+List all available providers in a table.
+
+**Usage**:
+
+```console
+$ djdevx packages list [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
 
 ## djdevx packages add
 
-Install a package.
+Install a provider.
 
 **Usage**:
 
@@ -153,7 +167,7 @@ $ djdevx packages add [OPTIONS] [NAME]
 
 ## djdevx packages remove
 
-Remove a package or variant.
+Remove a provider.
 
 **Usage**:
 
@@ -169,20 +183,6 @@ $ djdevx packages remove [OPTIONS] [NAME]
 
 * `-p, --provider TEXT`: Variant/provider to remove
 * `-v, --verbose`: Show full pixi output
-* `--help`: Show this message and exit.
-
-## djdevx packages list
-
-List all available packages with install status in a table.
-
-**Usage**:
-
-```console
-$ djdevx packages list [OPTIONS]
-```
-
-**Options**:
-
 * `--help`: Show this message and exit.
 
 ## djdevx frameworks
@@ -201,13 +201,27 @@ $ djdevx frameworks [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `add`: Add a CSS/JS framework.
-* `remove`: Remove a CSS/JS framework.
-* `list`: List all available frameworks with install...
+* `list`: List all available providers in a table.
+* `add`: Install a provider.
+* `remove`: Remove a provider.
+
+## djdevx frameworks list
+
+List all available providers in a table.
+
+**Usage**:
+
+```console
+$ djdevx frameworks list [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
 
 ## djdevx frameworks add
 
-Add a CSS/JS framework.
+Install a provider.
 
 **Usage**:
 
@@ -217,16 +231,17 @@ $ djdevx frameworks add [OPTIONS] [NAME]
 
 **Arguments**:
 
-* `[NAME]`: Framework name to add
+* `[NAME]`: Framework name to install
 
 **Options**:
 
+* `-p, --provider TEXT`: Variant/provider name
 * `-v, --verbose`: Show full pixi output
 * `--help`: Show this message and exit.
 
 ## djdevx frameworks remove
 
-Remove a CSS/JS framework.
+Remove a provider.
 
 **Usage**:
 
@@ -240,21 +255,8 @@ $ djdevx frameworks remove [OPTIONS] [NAME]
 
 **Options**:
 
+* `-p, --provider TEXT`: Variant/provider to remove
 * `-v, --verbose`: Show full pixi output
-* `--help`: Show this message and exit.
-
-## djdevx frameworks list
-
-List all available frameworks with install status in a table.
-
-**Usage**:
-
-```console
-$ djdevx frameworks list [OPTIONS]
-```
-
-**Options**:
-
 * `--help`: Show this message and exit.
 
 ## djdevx features
@@ -273,13 +275,27 @@ $ djdevx features [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `add`: Install a feature.
-* `remove`: Remove a feature or variant.
-* `list`: List all available features with install...
+* `list`: List all available providers in a table.
+* `add`: Install a provider.
+* `remove`: Remove a provider.
+
+## djdevx features list
+
+List all available providers in a table.
+
+**Usage**:
+
+```console
+$ djdevx features list [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
 
 ## djdevx features add
 
-Install a feature.
+Install a provider.
 
 **Usage**:
 
@@ -299,7 +315,7 @@ $ djdevx features add [OPTIONS] [NAME]
 
 ## djdevx features remove
 
-Remove a feature or variant.
+Remove a provider.
 
 **Usage**:
 
@@ -315,20 +331,6 @@ $ djdevx features remove [OPTIONS] [NAME]
 
 * `-p, --provider TEXT`: Variant/provider to remove
 * `-v, --verbose`: Show full pixi output
-* `--help`: Show this message and exit.
-
-## djdevx features list
-
-List all available features with install status in a table.
-
-**Usage**:
-
-```console
-$ djdevx features list [OPTIONS]
-```
-
-**Options**:
-
 * `--help`: Show this message and exit.
 
 ## djdevx create
@@ -380,51 +382,13 @@ $ djdevx database [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `add`: Add a database.
-* `remove`: Remove a database.
-* `list`: List all available databases with install...
-
-## djdevx database add
-
-Add a database.
-
-**Usage**:
-
-```console
-$ djdevx database add [OPTIONS] [NAME]
-```
-
-**Arguments**:
-
-* `[NAME]`: Database provider name to install
-
-**Options**:
-
-* `-v, --verbose`: Show full pixi output
-* `--help`: Show this message and exit.
-
-## djdevx database remove
-
-Remove a database.
-
-**Usage**:
-
-```console
-$ djdevx database remove [OPTIONS] [NAME]
-```
-
-**Arguments**:
-
-* `[NAME]`: Database provider name to remove
-
-**Options**:
-
-* `-v, --verbose`: Show full pixi output
-* `--help`: Show this message and exit.
+* `list`: List all available providers in a table.
+* `add`: Install a provider.
+* `remove`: Remove a provider.
 
 ## djdevx database list
 
-List all available databases with install status in a table.
+List all available providers in a table.
 
 **Usage**:
 
@@ -434,6 +398,46 @@ $ djdevx database list [OPTIONS]
 
 **Options**:
 
+* `--help`: Show this message and exit.
+
+## djdevx database add
+
+Install a provider.
+
+**Usage**:
+
+```console
+$ djdevx database add [OPTIONS] [NAME]
+```
+
+**Arguments**:
+
+* `[NAME]`: Database name to install
+
+**Options**:
+
+* `-p, --provider TEXT`: Variant/provider name
+* `-v, --verbose`: Show full pixi output
+* `--help`: Show this message and exit.
+
+## djdevx database remove
+
+Remove a provider.
+
+**Usage**:
+
+```console
+$ djdevx database remove [OPTIONS] [NAME]
+```
+
+**Arguments**:
+
+* `[NAME]`: Database name to remove
+
+**Options**:
+
+* `-p, --provider TEXT`: Variant/provider to remove
+* `-v, --verbose`: Show full pixi output
 * `--help`: Show this message and exit.
 
 ## djdevx cache
@@ -452,51 +456,13 @@ $ djdevx cache [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `add`: Add a cache.
-* `remove`: Remove a cache.
-* `list`: List all available caches with install...
-
-## djdevx cache add
-
-Add a cache.
-
-**Usage**:
-
-```console
-$ djdevx cache add [OPTIONS] [NAME]
-```
-
-**Arguments**:
-
-* `[NAME]`: Cache provider name to install
-
-**Options**:
-
-* `-v, --verbose`: Show full pixi output
-* `--help`: Show this message and exit.
-
-## djdevx cache remove
-
-Remove a cache.
-
-**Usage**:
-
-```console
-$ djdevx cache remove [OPTIONS] [NAME]
-```
-
-**Arguments**:
-
-* `[NAME]`: Cache provider name to remove
-
-**Options**:
-
-* `-v, --verbose`: Show full pixi output
-* `--help`: Show this message and exit.
+* `list`: List all available providers in a table.
+* `add`: Install a provider.
+* `remove`: Remove a provider.
 
 ## djdevx cache list
 
-List all available caches with install status in a table.
+List all available providers in a table.
 
 **Usage**:
 
@@ -506,6 +472,46 @@ $ djdevx cache list [OPTIONS]
 
 **Options**:
 
+* `--help`: Show this message and exit.
+
+## djdevx cache add
+
+Install a provider.
+
+**Usage**:
+
+```console
+$ djdevx cache add [OPTIONS] [NAME]
+```
+
+**Arguments**:
+
+* `[NAME]`: Cache name to install
+
+**Options**:
+
+* `-p, --provider TEXT`: Variant/provider name
+* `-v, --verbose`: Show full pixi output
+* `--help`: Show this message and exit.
+
+## djdevx cache remove
+
+Remove a provider.
+
+**Usage**:
+
+```console
+$ djdevx cache remove [OPTIONS] [NAME]
+```
+
+**Arguments**:
+
+* `[NAME]`: Cache name to remove
+
+**Options**:
+
+* `-p, --provider TEXT`: Variant/provider to remove
+* `-v, --verbose`: Show full pixi output
 * `--help`: Show this message and exit.
 
 ## djdevx settings

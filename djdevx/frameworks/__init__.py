@@ -1,16 +1,13 @@
 """Frameworks CLI — add/remove/list frameworks with auto-discovery."""
 
-import typer
+from ..cli.factory import domain_app
+from ._base import BaseFramework
+from ._registry import FRAMEWORK_REGISTRY
 
-from ..utils.installable.discovery import discover_and_register
-from .add import add as _add
-from .remove import remove as _remove
-from .list import list_frameworks_table as _list
-
-app = typer.Typer(no_args_is_help=True)
-
-discover_and_register(__path__, __name__)
-
-app.command(name="add")(_add)
-app.command(name="remove")(_remove)
-app.command(name="list")(_list)
+app = domain_app(
+    BaseFramework,
+    label="Framework",
+    registry=FRAMEWORK_REGISTRY,
+    discover_path=__path__,
+    discover_name=__name__,
+)
