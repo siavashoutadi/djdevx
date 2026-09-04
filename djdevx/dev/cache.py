@@ -1,7 +1,5 @@
 """ddx dev cache — manage the local pixi-native dev cache."""
 
-from typing import Optional
-
 import typer
 
 from ..utils.console.print import print_console
@@ -10,7 +8,7 @@ from ..utils.services import BaseDevService, resolve_cache_dev_service
 app = typer.Typer(no_args_is_help=True)
 
 
-def _get_service() -> Optional[BaseDevService]:
+def _get_service() -> BaseDevService | None:
     service = resolve_cache_dev_service()
     if service is None:
         print_console.warning("No cache installed. Run `ddx cache add <name>` first.")

@@ -705,6 +705,7 @@ $ djdevx dev [OPTIONS] COMMAND [ARGS]...
 * `credentials`: Show how to connect to each installed dev...
 * `database`: Manage the local dev database
 * `cache`: Manage the local dev cache
+* `otel`: Manage the local dev OTel stack
 
 ## djdevx dev start
 
@@ -916,6 +917,68 @@ Stop the service and delete its data under .pixi/devdata/.
 
 ```console
 $ djdevx dev cache purge [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx dev otel
+
+Manage the local dev OTel stack
+
+**Usage**:
+
+```console
+$ djdevx dev otel [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `init`: Start the otel collector and OpenObserve.
+* `reset`: Flush telemetry data, keeping the services...
+* `purge`: Stop the services and delete their data...
+
+## djdevx dev otel init
+
+Start the otel collector and OpenObserve.
+
+**Usage**:
+
+```console
+$ djdevx dev otel init [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx dev otel reset
+
+Flush telemetry data, keeping the services running.
+
+**Usage**:
+
+```console
+$ djdevx dev otel reset [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx dev otel purge
+
+Stop the services and delete their data under .pixi/devdata/.
+
+**Usage**:
+
+```console
+$ djdevx dev otel purge [OPTIONS]
 ```
 
 **Options**:

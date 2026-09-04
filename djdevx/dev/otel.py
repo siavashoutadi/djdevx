@@ -27,15 +27,22 @@ def init() -> None:
             "In a devcontainer: otel services are started by docker compose."
         )
         return
-    for service in _get_services():
-        service.up()
+    services = _get_services()
+    for service in services:
+        with print_console.step_group(
+            f"Starting {service.display_name}...",
+            done=f"{service.display_name} is ready",
+        ) as group:
+            if not service.is_up():
+                service.up(step=group)
     print_console.ok("OTel services are ready")
 
 
 @app.command()
 def reset() -> None:
     """Flush telemetry data, keeping the services running."""
-    for service in _get_services():
+    services = _get_services()
+    for service in services:
         service.reset()
     print_console.ok("OTel data flushed")
 
@@ -44,9 +51,6 @@ def reset() -> None:
 def purge() -> None:
     """Stop the services and delete their data under .pixi/devdata/."""
     services = _get_services()
-    group = print_console.step_group("Purging OTel", done="purge is done")
-    try:
+    with print_console.step_group("Purging OTel", done="purge is done") as group:
         for service in services:
             service.purge(step=group)
-    finally:
-        group.done()

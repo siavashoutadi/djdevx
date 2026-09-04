@@ -10,6 +10,7 @@ from .cache import app as cache_app
 from .credentials import credentials as _credentials
 from .database import app as database_app
 from .down import down as _down
+from .otel import app as otel_app
 from .runserver import runserver as _runserver
 from .start import start as _start
 from .status import status as _status
@@ -35,3 +36,4 @@ app.command(name="status")(_status)
 app.command(name="credentials")(_credentials)
 app.add_typer(database_app, name="database", help="Manage the local dev database")
 app.add_typer(cache_app, name="cache", help="Manage the local dev cache")
+app.add_typer(otel_app, name="otel", help="Manage the local dev OTel stack")
