@@ -105,7 +105,11 @@ def _print_configs_table(env: str, result, project_root, cfg: dict) -> None:
             source = cfg["resolve_source"](config_var, project_root)
             if source == ConfigSource.CLASS_DEFAULT:
                 status = YELLOW_CHECKMARK
-                value_str = "(class default)"
+                value_str = (
+                    Markup("[dim](none)[/dim]")
+                    if config_var.class_default is None
+                    else _format_value(config_var.class_default)
+                )
             elif source != ConfigSource.MISSING:
                 status = GREEN_CHECK_MARK
                 value_str = _format_value(
@@ -350,11 +354,9 @@ def verify(
             optional.append(config_var.name)
 
     if optional:
-        names = ", ".join(optional)
         print_console.info(
-            f"{len(optional)} optional config var(s) using class defaults:"
+            f"{len(optional)} optional config var(s) using class defaults."
         )
-        print_console.info(f"  {names}")
 
     if missing:
         msg = f"{len(missing)} config var(s) missing{cfg['error_suffix']}:"

@@ -237,9 +237,7 @@ def verify(
             optional.append(secret.name)
 
     if optional:
-        names = ", ".join(optional)
-        print_console.info(f"{len(optional)} optional secret(s) using class defaults:")
-        print_console.info(f"  {names}")
+        print_console.info(f"{len(optional)} optional secret(s) using class defaults.")
 
     if missing:
         print_console.error(f"{len(missing)} secret(s) missing {cfg['error_msg']}:")

@@ -54,6 +54,7 @@ class ConfigVarInfo:
     type_annotation: str = "str"
     dev_default: Any = None
     prod_default: Any = None
+    class_default: Any = None
     has_class_default: bool = False
 
 
@@ -293,6 +294,7 @@ class SettingCollector:
                         type_annotation=annotation_str,
                         dev_default=dev_default,
                         prod_default=prod_default or class_default,
+                        class_default=class_default,
                         has_class_default=has_class_default,
                     )
                 )
