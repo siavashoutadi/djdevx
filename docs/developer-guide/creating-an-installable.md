@@ -45,16 +45,16 @@ djdevx/<category>/<name>/
 
 | Installable type | Base class | `section` | Directory |
 |---|---|---|---|
-| Package | `BasePackage` | `"packages"` | `djdevx/packages/<name>/` |
-| Feature | `BaseFeature` | `"features"` | `djdevx/features/<name>/` |
-| Framework | `BaseFramework` | `"frameworks"` | `djdevx/frameworks/<name>/` |
-| Database | `BaseDatabase` | `"database"` | `djdevx/database/<name>/` |
-| Cache | `BaseCache` | `"cache"` | `djdevx/cache/<name>/` |
+| Package | `BasePackage` | `"packages"` | `djdevx/providers/packages/<name>/` |
+| Feature | `BaseFeature` | `"features"` | `djdevx/providers/features/<name>/` |
+| Framework | `BaseFramework` | `"frameworks"` | `djdevx/providers/frameworks/<name>/` |
+| Database | `BaseDatabase` | `"database"` | `djdevx/providers/database/<name>/` |
+| Cache | `BaseCache` | `"cache"` | `djdevx/providers/cache/<name>/` |
 
 ### Scaffold the module
 
 ```python
-# djdevx/packages/<name>/__init__.py
+# djdevx/providers/packages/<name>/__init__.py
 from __future__ import annotations
 
 from .._base import BasePackage
@@ -185,7 +185,7 @@ Variant templates go in subdirectories named after the variant's
 `template_path`:
 
 ```
-djdevx/packages/<name>/templates/
+djdevx/providers/packages/<name>/templates/
 ├── <variant1_template_path>/
 │   └── settings/packages/<name>_<variant1>.py
 └── <variant2_template_path>/
@@ -339,7 +339,7 @@ their name fields at construction time — any underscore is silently converted 
 a hyphen:
 
 ```python
-from djdevx.utils.installable.types import InstallableConfig, InstallableRef, FEATURE
+from djdevx.installable.models import InstallableConfig, InstallableRef, FEATURE
 
 InstallableConfig(name="open_telemetry").name   # → "open-telemetry"
 InstallableRef("open_telemetry", FEATURE).name  # → "open-telemetry"
@@ -361,8 +361,8 @@ while an installed dependent still needs it — the removal is refused with
 `Cannot remove <name> — required by: ...`.
 
 ```python
-from djdevx.utils.installable.types import InstallableRef
-from djdevx.utils.installable.types import PACKAGE, FEATURE
+from djdevx.installable.models import InstallableRef
+from djdevx.installable.models import PACKAGE, FEATURE
 
 class SSOFeature(BaseFeature):
     name: str = "sso"
@@ -405,7 +405,7 @@ but does not install or remove any pixi packages for that peer. Interest is
 determined by keys at both the base level and on any installed variant.
 
 ```python
-from djdevx.utils.installable.types import InstallableRef, FRAMEWORK
+from djdevx.installable.models import InstallableRef, FRAMEWORK
 
 class MyPackage(BasePackage):
     peer_pixi_packages: dict[InstallableRef, list[PixiPackageSpec]] = {
@@ -462,7 +462,7 @@ This is how `django-guardian`, `django-htmx`, `django-snakeoil`,
 ### Hook examples
 
 ```python
-from djdevx.utils.console.print import NestedStep
+from djdevx.core.console import NestedStep
 
 # after_pixi_install — add Docker services
 def after_pixi_install(self, step: NestedStep | None = None) -> None:
@@ -584,7 +584,7 @@ Test files mirror the source directory structure:
 
 | Source module | Test file |
 |---|---|
-| `djdevx/packages/<name>/` | `tests/packages/test_<name>.py` |
+| `djdevx/providers/packages/<name>/` | `tests/packages/test_<name>.py` |
 
 ### CLI Integration Test Pattern
 
@@ -627,7 +627,7 @@ generated structure:
 
 ```
 tests/packages/data/<name>/
-├── .djdevx/packages/<name>/config.toml
+├── .djdevx/providers/packages/<name>/config.toml
 └── settings/packages/<name>.py
 ```
 

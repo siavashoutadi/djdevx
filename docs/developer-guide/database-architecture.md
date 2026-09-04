@@ -6,9 +6,9 @@ enforces this automatically.
 
 ## BaseDatabase
 
-`BaseDatabase` (`djdevx/database/_base.py`) extends `Installable` with
-`section: str = "database"`. It adds no additional attributes — all behavior
-comes from `Installable`.
+`BaseDatabase` (`djdevx/providers/database/_base.py`) is a thin subclass of the
+shared `Provider` base pinned to `DATABASE_KIND`. It adds no additional
+attributes — all behavior comes from `Provider` / `Installable`.
 
 ### Single-Instance Constraint
 
@@ -71,7 +71,7 @@ Use `DockerComposeManager` to add/remove services in the appropriate hooks.
 
 ### Concrete Example
 
-The PostgreSQL provider (`djdevx/database/postgres/__init__.py`) demonstrates
+The PostgreSQL provider (`djdevx/providers/database/postgres/__init__.py`) demonstrates
 the full pattern:
 
 - Defines Docker service configs as module-level constants
@@ -93,12 +93,12 @@ database can be installed.
 ## Native Dev Services
 
 Databases can also run locally without Docker via `ddx dev`.
-`utils/services/` owns the pixi-native `BaseDevService` implementations.
-`utils/services/resolver.py` maps the installed provider (from tracking) to
+`services/` owns the pixi-native `BaseDevService` implementations.
+`services/registry.py` maps the installed provider (from tracking) to
 its dev service: `SectionTracking("database").installed()` returns the single
 installed name, which is looked up in the `name -> dev service` mapping.
 Providers that add native dev support must register their service class in
-`utils/services/resolver.py`.
+`services/registry.py`.
 
 ## Related
 

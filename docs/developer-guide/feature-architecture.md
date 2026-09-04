@@ -7,8 +7,8 @@ templates (e.g., PWA support). They use the same
 
 ## BaseFeature
 
-`BaseFeature` (`djdevx/features/_base.py`) extends `Installable` with
-`section: str = "features"`.
+`BaseFeature` (`djdevx/providers/features/_base.py`) is a thin subclass of the
+shared `Provider` base (`djdevx/provider.py`) pinned to `FEATURE_KIND`.
 
 ### Additional Class Attributes
 

@@ -5,9 +5,10 @@ are injected into the Django project's `_base.html` template.
 
 ## BaseFramework
 
-`BaseFramework` (`djdevx/frameworks/_base.py`) extends `Installable` with
-`section: str = "frameworks"` and CSS/JS-specific attributes and template
-injection logic.
+`BaseFramework` (`djdevx/providers/frameworks/_base.py`) is a thin subclass of
+the shared `Provider` base (`djdevx/provider.py`) pinned to `FRAMEWORK_KIND`;
+CSS/JS download and template injection live in the generic `CSSFramework` /
+`CSSFrameworkProviderMixin` scaffolding, not in the payload classes.
 
 ### Additional Class Attributes
 

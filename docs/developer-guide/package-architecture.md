@@ -5,8 +5,16 @@ install-time parameters, secret generation, and template overrides.
 
 ## BasePackage
 
-`BasePackage` (`djdevx/packages/_base.py`) extends `Installable` with
-`section: str = "packages"`.
+`BasePackage` (`djdevx/providers/packages/_base.py`) is a thin subclass of the
+single `Provider` base (`djdevx/provider.py`) pinned to the `packages` kind:
+
+```python
+class BasePackage(Provider):
+    kind = PACKAGE_KIND
+```
+
+Payload modules live in `djdevx/providers/packages/<name>/` and keep using
+`from .._base import BasePackage` / `from .._registry import register`.
 
 ### Additional Class Attributes
 

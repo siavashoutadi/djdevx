@@ -877,7 +877,7 @@ each parameter and passes the values as Jinja2 context when rendering templates.
 
 **Step 1: Create the package file**
 
-`djdevx/packages/my_package/__init__.py`:
+`djdevx/providers/packages/my_package/__init__.py`:
 
 ```python
 from ._base import BasePackage
@@ -921,7 +921,7 @@ INSTALLED_APPS += ["my_package"]
 
 **Step 3: Register in the package registry**
 
-`djdevx/packages/__init__.py`:
+`djdevx/providers/packages/__init__.py`:
 
 ```python
 from .my_package import app as my_package

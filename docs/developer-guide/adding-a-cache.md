@@ -25,7 +25,7 @@ The same hook-based approach as databases: `after_pixi_install()` /
 `after_pixi_remove()` manage the Docker Compose service:
 
 ```python
-# djdevx/cache/redis/__init__.py
+# djdevx/providers/cache/redis/__init__.py
 from .._base import BaseCache
 from .._registry import register
 from ...utils.devcontainer import ServiceConfig, VolumeConfig, DockerComposeManager
@@ -83,7 +83,7 @@ for the full explanation.
 ## Templates directory
 
 ```
-djdevx/cache/<name>/
+djdevx/providers/cache/<name>/
 ├── __init__.py
 └── templates/
     └── settings/

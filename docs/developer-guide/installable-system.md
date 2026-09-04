@@ -7,7 +7,7 @@ infrastructure that powers them all.
 ## Directory Structure
 
 ```
-utils/installable/
+installable/
 ├── __init__.py           # Re-exports Installable, Registry, InstallParam, Variant, discover_and_register, build_list_table
 ├── types.py              # InstallableConfig, InstallParam, Variant, InstallableKind, InstallableRef
 ├── installable.py        # Installable — pydantic BaseModel, add/remove lifecycle, hooks
@@ -27,12 +27,9 @@ Each category has its own directory following this pattern:
 
 ```
 <category>/
-├── __init__.py           # typer.Typer() + auto-discovery + command registration
-├── _base.py              # Base<Category>(Installable)
+├── __init__.py           # 3-line domain_app(...) declaration (cli/factory.py)
+├── _base.py              # Base<Category>(Provider) — thin kind pin
 ├── _registry.py          # Registry instance + convenience bindings
-├── add.py                # add() command (calls orchestrator)
-├── remove.py             # remove() command (calls orchestrator)
-├── list.py               # list table via build_list_table()
 └── <item>/               # Concrete installable modules (auto-discovered)
     ├── __init__.py       # @register decorated class
     └── templates/        # Jinja2 templates (optional)
@@ -220,7 +217,7 @@ All other discovery methods are provided by standalone functions in
 `InstallableConfig.get_installable_name()`.
 
 ```python
-from djdevx.utils.installable import Registry
+from djdevx.installable import Registry
 
 MY_REGISTRY: Registry[BaseThing] = Registry(KIND)
 register = MY_REGISTRY.register  # decorator
@@ -472,8 +469,8 @@ inter-installable**: every installable can declare peer pixi packages and react
 to peers arriving or leaving.
 
 ```python
-from djdevx.utils.installable.types import InstallableRef, FRAMEWORK
-from djdevx.utils.installable.pixi_package import PixiPackageSpec
+from djdevx.installable.models import InstallableRef, FRAMEWORK
+from djdevx.installable.pixi_package import PixiPackageSpec
 
 class MyPackage(BasePackage):
     peer_pixi_packages: dict[InstallableRef, list[PixiPackageSpec]] = {
@@ -505,12 +502,11 @@ installed". Peer pixi packages are added/removed by the engine and tracked as
 
 To add an entirely new type of installable (e.g., "monitoring"):
 
-1. Create the category directory with `__init__.py`, `_base.py`,
-   `_registry.py`, `add.py`, `remove.py`, `list.py`
-2. Define an `InstallableKind` singleton in your category (or use an existing
-   one from `types.py`)
-3. Implement `BaseMonitoring(Installable)` with `get_registry()` and
-   `section: str = "monitoring"`
+1. Create the category directory with `__init__.py` (a `domain_app(...)`
+   declaration from `cli/factory.py`), `_base.py`, and `_registry.py`
+2. Define an `InstallableKind` singleton in `provider.py` (or use an existing
+   one) mapping the category to its `Section`
+3. Implement `BaseMonitoring(Provider)` with `kind = MONITORING_KIND`
 4. In `_registry.py`, create the typed registry:
    ```python
    MONITORING_REGISTRY: Registry[BaseMonitoring] = Registry(MONITORING)

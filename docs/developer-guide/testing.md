@@ -119,43 +119,24 @@ tests/
 ├── test_helpers.py                  # Shared test utility functions
 ├── test_new.py                      # Full project scaffolding test
 │
-├── packages/
+├── packages/                        # Provider payload tests (mirror providers/packages)
 │   ├── test_basepackage.py          # BasePackage unit tests (path derivation, hooks, etc.)
-│   ├── test_channels.py             # ~35 package-specific tests
 │   ├── test_whitenoise.py           # Prototypical package test
 │   ├── test_django_allauth.py
 │   ├── test_tracking_configs.py     # Tracking config golden-file verification
-│   ├── test_storages_combined.py    # Multi-package combined install
-│   └── ...
-├── cache/
-│   └── test_redis.py                # Redis cache install/remove
-├── create/
-│   └── test_app.py                  # App creation command test
-├── database/
-│   └── test_postgres.py             # PostgreSQL install/remove
-├── features/
-│   └── test_pwa.py
-├── frameworks/
-│   ├── test_bootstrap.py
-│   ├── test_frankenui.py
-│   ├── test_semantic.py
-│   └── test_starting_point_ui.py
-├── settings/
-│   └── test_source.py
-├── list/
-│   ├── test_caches.py
-│   ├── test_databases.py
-│   ├── test_features.py
-│   └── test_packages.py
-│
+│   └── ...                          # (plus cache/, database/, features/, frameworks/)
+├── core/                            # core/ kernel (console, process, secrets)
+├── installable/                     # installable/ kernel (orchestrator, peers, models)
+├── services/                        # services/ (base, postgres, redis, otel, binary, registry)
+├── dev/                             # ddx dev command group (start pipeline, context, render…)
+├── settings/                        # settings source/configs/secrets commands
+├── tracking/                        # ProjectTracking (djdevx.toml)
+├── deployment/                      # docker-compose generator
+├── create/  cache/  database/  features/  frameworks/  new/  requirement/
 └── utils/
-    ├── test_cache_tracker.py
-    ├── test_database_tracker.py
-    ├── test_feature_tracker.py
-    └── django/
-        ├── test_project_manager.py
-        ├── test_secret_manager.py
-        └── test_setting_collector.py
+    ├── devcontainer/                # compose detection helpers
+    ├── django/                      # manage.py helpers
+    └── templates/                   # TemplateManager
 ```
 
 ## Data Fixtures (Golden Files)
@@ -169,7 +150,7 @@ tests/packages/
 ├── test_whitenoise.py
 └── data/
     └── whitenoise/
-        ├── .djdevx/packages/whitenoise/config.toml
+        ├── .djdevx/providers/packages/whitenoise/config.toml
         └── settings/packages/whitenoise.py
 ```
 
@@ -425,7 +406,7 @@ For testing logic in isolation, mock dependencies with `unittest.mock.patch`.
 
 ```python
 from unittest.mock import patch, MagicMock
-from djdevx.packages._base import BasePackage
+from djdevx.providers.packages._base import BasePackage
 
 
 def test_package_path_derivation():
@@ -498,7 +479,7 @@ class TestShowIfConditionalPrompt:
         pkg._copy_templates = lambda context=None: None
 
         with patch(
-            "djdevx.packages._base.typer.prompt",
+            "djdevx.providers.packages._base.typer.prompt",
             return_value="prompted-value",
         ) as mock_prompt:
             pkg.install(enable_feature=True, feature_key="")
@@ -512,7 +493,7 @@ class TestShowIfConditionalPrompt:
         pkg._uv_add_all = lambda: None
         pkg._copy_templates = lambda context=None: None
 
-        with patch("djdevx.packages._base.typer.prompt") as mock_prompt:
+        with patch("djdevx.providers.packages._base.typer.prompt") as mock_prompt:
             pkg.install(enable_feature=False, feature_key="")
 
         mock_prompt.assert_not_called()
@@ -550,7 +531,7 @@ Verifies that every package produces exactly the expected tracking
 import importlib
 from pathlib import Path
 from unittest.mock import patch
-from djdevx.packages._base import BasePackage
+from djdevx.providers.packages._base import BasePackage
 
 DATA_DIR = Path(__file__).parent / "data"
 
@@ -578,11 +559,11 @@ def _assert_tracking_config(pkg: BasePackage, data_slug: str, tmp_path: Path) ->
 
 class TestFlatPackageTracking:
     def test_whitenoise(self, tmp_path):
-        pkg = _get_pkg("djdevx.packages.whitenoise")
+        pkg = _get_pkg("djdevx.providers.packages.whitenoise")
         _assert_tracking_config(pkg, "whitenoise", tmp_path)
 
     def test_channels(self, tmp_path):
-        pkg = _get_pkg("djdevx.packages.channels")
+        pkg = _get_pkg("djdevx.providers.packages.channels")
         _assert_tracking_config(pkg, "channels", tmp_path)
 ```
 
@@ -633,7 +614,7 @@ Place test files in `tests/` mirroring the source module path:
 
 | Source module | Test file |
 |---|---|
-| `djdevx/packages/whitenoise.py` | `tests/packages/test_whitenoise.py` |
+| `djdevx/providers/packages/whitenoise.py` | `tests/packages/test_whitenoise.py` |
 | `djdevx/utils/django/setting_collector.py` | `tests/utils/django/test_setting_collector.py` |
 
 All test subdirectories must contain an `__init__.py`.

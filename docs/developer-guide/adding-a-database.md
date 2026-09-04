@@ -27,7 +27,7 @@ Docker Compose services, and `restore_on_remove` restores the default
 `database.py` settings file from `djdevx/new/templates/`:
 
 ```python
-# djdevx/database/postgres/__init__.py
+# djdevx/providers/database/postgres/__init__.py
 from .._base import BaseDatabase
 from .._registry import register
 from ...utils.devcontainer import ServiceConfig, VolumeConfig, DockerComposeManager
@@ -113,7 +113,7 @@ in hooks.
 ## Templates directory
 
 ```
-djdevx/database/<name>/
+djdevx/providers/database/<name>/
 ├── __init__.py
 └── templates/
     └── settings/

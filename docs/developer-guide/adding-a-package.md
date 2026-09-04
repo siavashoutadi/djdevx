@@ -29,7 +29,7 @@ install params, secrets, hooks, templates, testing) live in
 ## Minimal package
 
 ```python
-# djdevx/packages/whitenoise/__init__.py
+# djdevx/providers/packages/whitenoise/__init__.py
 from .._base import BasePackage
 from djdevx.utils.types.pixi_types import PixiPackageSpec
 from .._registry import register
@@ -43,7 +43,7 @@ class WhitenoisePackage(BasePackage):
 ```
 
 That's it. No `install()` override needed — the standard lifecycle handles
-template copying and tracking. Most packages in `djdevx/packages/` are this
+template copying and tracking. Most packages in `djdevx/providers/packages/` are this
 simple (`django-csp`, `django-filter`, `heroicons`, `django-simple-history`,
 `drf-spectacular`, ...).
 
@@ -92,9 +92,9 @@ The real-world example is the channels package, which needs the redis cache
 (a different installable kind, resolved via `InstallableRef(name, kind)`):
 
 ```python
-# djdevx/packages/channels/__init__.py
+# djdevx/providers/packages/channels/__init__.py
 from .._base import BasePackage
-from djdevx.utils.installable.types import CACHE, InstallableRef
+from djdevx.installable.models import CACHE, InstallableRef
 from djdevx.utils.types.pixi_types import PixiPackageSpec
 from .._registry import register
 
@@ -126,7 +126,7 @@ For packages that need user input at install time. The richest example is
 `message_before_prompt`:
 
 ```python
-# djdevx/packages/django_meta/__init__.py
+# djdevx/providers/packages/django_meta/__init__.py
 from .._base import BasePackage
 from djdevx.utils.types.pixi_types import PixiPackageSpec
 from ...utils.installable.types import InstallParam
@@ -175,7 +175,7 @@ Use `exclusive_variants=True` when variants are mutually exclusive backends.
 Each variant has its own `template_path`, so templates live in subdirectories.
 
 ```python
-# djdevx/packages/django_storages/__init__.py
+# djdevx/providers/packages/django_storages/__init__.py
 from .._base import BasePackage
 from djdevx.utils.types.pixi_types import PixiPackageSpec
 from ...utils.installable.types import Variant
@@ -210,7 +210,7 @@ class StoragesPackage(BasePackage):
 ```
 
 ```
-djdevx/packages/django_storages/templates/
+djdevx/providers/packages/django_storages/templates/
 ├── s3/
 │   └── settings/packages/django_storages_s3.py
 ├── azure/
@@ -231,7 +231,7 @@ once. `required=True` variants are auto-installed with the parent.
 oidc_provider variants.
 
 ```python
-# djdevx/packages/django_allauth/__init__.py
+# djdevx/providers/packages/django_allauth/__init__.py
 from .._base import BasePackage
 from djdevx.utils.types.pixi_types import PixiPackageSpec
 from ...utils.installable.types import InstallParam, Variant
@@ -313,7 +313,7 @@ a mutate / revert pair: mutate in `after_copy_templates()`, undo in
 ### Modify the user model (django-guardian)
 
 ```python
-# djdevx/packages/django_guardian/__init__.py
+# djdevx/providers/packages/django_guardian/__init__.py
 @register
 class DjangoGuardianPackage(BasePackage):
     name: str = "django-guardian"
@@ -373,7 +373,7 @@ Key points:
 and `Dockerfile` — and `before_pixi_remove()` reverses all three:
 
 ```python
-# djdevx/packages/django_tailwind_cli/__init__.py
+# djdevx/providers/packages/django_tailwind_cli/__init__.py
 @register
 class DjangoTailwindCliPackage(BasePackage):
     name: str = "django-tailwind-cli"
@@ -427,7 +427,7 @@ When a package **overwrites** a file that ships with the generated project
 template_rel`:
 
 ```python
-# djdevx/packages/channels/__init__.py
+# djdevx/providers/packages/channels/__init__.py
 @register
 class ChannelsPackage(BasePackage):
     name: str = "channels"
@@ -442,7 +442,7 @@ template over the modified file.
 ## Package templates directory
 
 ```
-djdevx/packages/<name>/
+djdevx/providers/packages/<name>/
 ├── __init__.py
 └── templates/
     ├── settings/
@@ -461,7 +461,7 @@ keep the styled overlays inside your own package — never write another
 installable's files:
 
 ```python
-# djdevx/packages/my_styled_pkg/__init__.py
+# djdevx/providers/packages/my_styled_pkg/__init__.py
 from .._base import BasePackage
 from ...utils.installable.types import InstallableRef, FRAMEWORK
 from ...utils.installable.pixi_package import PixiPackageSpec
@@ -488,7 +488,7 @@ class MyStyledPackage(BasePackage):
 ```
 
 ```
-djdevx/packages/my_styled_pkg/templates/
+djdevx/providers/packages/my_styled_pkg/templates/
 ├── settings/packages/my_styled_pkg.py      # base output
 └── peer_templates/
     └── bootstrap/                          # overlay applied when bootstrap is present

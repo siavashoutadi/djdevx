@@ -36,7 +36,7 @@ install params, secrets, hooks, templates, testing) live in
 ## Minimal feature
 
 ```python
-# djdevx/features/pwa/__init__.py
+# djdevx/providers/features/pwa/__init__.py
 from .._base import BaseFeature
 from .._registry import register
 
@@ -55,7 +55,7 @@ Features commonly need another installable present. `needs` accepts
 dependencies are auto-installed recursively before the feature:
 
 ```python
-# djdevx/features/sso/__init__.py
+# djdevx/providers/features/sso/__init__.py
 from ...utils.installable.types import InstallableRef, PACKAGE
 
 from .._base import BaseFeature
@@ -100,7 +100,7 @@ rendered. For example, resolving a user-supplied relative path into values
 templates can use directly:
 
 ```python
-# djdevx/features/sso/__init__.py
+# djdevx/providers/features/sso/__init__.py
 @register
 class SSOFeature(BaseFeature):
     name: str = "sso"
@@ -186,7 +186,7 @@ class SSOFeature(BaseFeature):
 ## Feature templates directory
 
 ```
-djdevx/features/<name>/
+djdevx/providers/features/<name>/
 ├── __init__.py
 └── templates/
     ├── settings/
@@ -206,7 +206,7 @@ specific peer is installed. The engine adds/removes them during `add`/`remove`.
 For more complex adaptation, override `on_peer_added` / `on_peer_removed`.
 
 ```python
-# djdevx/features/my_instrumentation/__init__.py
+# djdevx/providers/features/my_instrumentation/__init__.py
 from .._base import BaseFeature
 from ...utils.installable.types import InstallableRef, DATABASE
 from djdevx.utils.types.pixi_types import PixiPackageSpec

@@ -24,7 +24,7 @@ install params, secrets, hooks, templates, testing) live in
 ## Minimal framework
 
 ```python
-# djdevx/frameworks/bootstrap/__init__.py
+# djdevx/providers/frameworks/bootstrap/__init__.py
 from .._base import BaseFramework
 from .._registry import register
 
@@ -65,7 +65,7 @@ Set `js_module: bool = True` when the script needs the `type="module"`
 attribute:
 
 ```python
-# djdevx/frameworks/frankenui/__init__.py
+# djdevx/providers/frameworks/frankenui/__init__.py
 @register
 class FrankenUIFramework(BaseFramework):
     name: str = "frankenui"
@@ -106,7 +106,7 @@ placeholder CSS/JS, edits the Tailwind `input.css`, and injects its script tag
 into `_base.html`:
 
 ```python
-# djdevx/frameworks/starting_point_ui/__init__.py
+# djdevx/providers/frameworks/starting_point_ui/__init__.py
 @register
 class StartingPointUIFramework(BaseFramework):
     name: str = "starting_point_ui"
@@ -172,7 +172,7 @@ is the same convention used across installables — see
 If the framework needs configuration files (e.g., `tailwind.config.js`):
 
 ```
-djdevx/frameworks/<name>/
+djdevx/providers/frameworks/<name>/
 ├── __init__.py
 └── templates/
     └── <filename>.j2

@@ -5,9 +5,9 @@ Caches manage cache providers (Redis) with Docker Compose integration. Only
 
 ## BaseCache
 
-`BaseCache` (`djdevx/cache/_base.py`) extends `Installable` with
-`section: str = "cache"`. It adds no additional attributes — all behavior
-comes from `Installable`.
+`BaseCache` (`djdevx/providers/cache/_base.py`) is a thin subclass of the
+shared `Provider` base pinned to `CACHE_KIND`. It adds no additional
+attributes — all behavior comes from `Provider` / `Installable`.
 
 ### Single-Instance Constraint
 
@@ -66,7 +66,7 @@ Use `DockerComposeManager` to add/remove services in the appropriate hooks.
 
 ### Concrete Example
 
-The Redis provider (`djdevx/cache/redis/__init__.py`) demonstrates the
+The Redis provider (`djdevx/providers/cache/redis/__init__.py`) demonstrates the
 pattern:
 
 - Defines Docker service config with password authentication
@@ -87,12 +87,12 @@ The `add` command uses `prompts.select()` (single-choice).
 ## Native Dev Services
 
 Caches can also run locally without Docker via `ddx dev`.
-`utils/services/` owns the pixi-native `BaseDevService` implementations.
-`utils/services/resolver.py` maps the installed provider (from tracking) to
+`services/` owns the pixi-native `BaseDevService` implementations.
+`services/registry.py` maps the installed provider (from tracking) to
 its dev service: `SectionTracking("cache").installed()` returns the single
 installed name, which is looked up in the `name -> dev service` mapping.
 Providers that add native dev support must register their service class in
-`utils/services/resolver.py`.
+`services/registry.py`.
 
 ## Related
 

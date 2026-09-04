@@ -23,16 +23,16 @@ ddx
 │     [--project-directory] [--python-version]
 │     [--git-init / --no-git-init] [-v]
 ├── packages
-│   ├── add [NAME] [-p provider] [-v]           # Install a package
-│   ├── remove [NAME] [-p provider] [-v]        # Remove a package
+│   ├── add [NAME ...] [-p provider] [-v]        # Install packages (multi)
+│   ├── remove [NAME ...] [-p provider] [-v]     # Remove packages (multi)
 │   └── list                                     # List packages (check/cross table)
 ├── frameworks
-│   ├── add [NAME] [-v]                          # Add a CSS/JS framework
-│   ├── remove [NAME] [-v]                       # Remove a framework
+│   ├── add [NAME ...] [-v]                      # Add CSS/JS frameworks (multi)
+│   ├── remove [NAME ...] [-v]                   # Remove frameworks (multi)
 │   └── list                                     # List frameworks
 ├── features
-│   ├── add [NAME] [-p provider] [-v]           # Install a feature
-│   ├── remove [NAME] [-p provider] [-v]        # Remove a feature
+│   ├── add [NAME] [-p provider] [-v]            # Install a feature
+│   ├── remove [NAME] [-p provider] [-v]         # Remove a feature
 │   └── list                                     # List features
 ├── create app                                   # Scaffold new Django app
 ├── database
@@ -49,11 +49,13 @@ ddx
 ├── dev
 │   ├── start [args...] [--skip-settings] [--skip-migrate] [-v]
 │   ├── runserver [args...]                  # tailwind-aware; args forwarded
-│   ├── up                                   # start installed db/cache services
-│   ├── down                                 # stop installed db/cache services
+│   ├── up                                   # start installed dev services
+│   ├── down                                 # stop installed dev services
 │   ├── status                               # services up/down, migrations, settings
+│   ├── credentials                          # endpoints + credentials table
 │   ├── database {init,reset,purge}          # pixi-native postgres
-│   └── cache {init,reset,purge}             # pixi-native redis
+│   ├── cache {init,reset,purge}             # pixi-native redis
+│   └── otel {init,reset,purge}              # pixi-native otel collector + OpenObserve
 └── deployment
     └── docker-compose {generate,verify}
 ```
@@ -63,60 +65,59 @@ ddx
 - **`no_args_is_help=True`** — Every `typer.Typer()` instance uses this so
   running a command without arguments shows its help.
 
-- **Positional Arguments with Autocompletion** — Installable categories
-  (`packages`, `features`, `frameworks`, `database`, `cache`) use
-  `typer.Argument()` with `autocompletion=` for their `[NAME]` parameter.
-  This gives shell tab-completion for available/installed items.
-
-- **Interactive fallback** — If `[NAME]` is omitted, the command prompts
-  interactively using questionary checkboxes or selects.
-
-- **Autocomplete callbacks** — Each category's `add.py` and `remove.py` define
-  autocomplete functions that delegate to the `Installable` class methods:
+- **Generic domain factory** — The five installable categories
+  (`packages`, `features`, `frameworks`, `database`, `cache`) no longer hand-
+  write `add`/`remove`/`list` modules. Each category's `__init__.py` is a
+  three-line declaration built by `djdevx/cli/factory.py::domain_app()`:
 
   ```python
-  def _autocomplete_feature(incomplete: str) -> list[str]:
-      return BaseFeature.autocomplete_installable(incomplete)
+  # djdevx/providers/packages/__init__.py
+  from ..cli.factory import domain_app
+  from ._base import BasePackage
+  from ._registry import PACKAGE_REGISTRY
+
+  app = domain_app(
+      BasePackage,
+      label="Package",
+      registry=PACKAGE_REGISTRY,
+      discover_path=__path__,
+      discover_name=__name__,
+      supports_provider=True,   # expose -p/--provider variant selection
+      supports_multi=True,      # batch add/remove of multiple names
+  )
   ```
 
-- **Shared list command** — All five categories use the same
-  `build_list_table(cls, label)` function from
-  `utils/installable/list_table.py`. Each `list.py` is a one-liner:
+  `domain_app()` generates the `add`/`remove`/`list` commands, NAME
+  autocompletion (installed vs available), interactive fallback prompts, the
+  shared Rich check/cross list table, and per-category behaviors via flags:
+  `single=True` for database/cache, `supports_multi` for packages/features/
+  frameworks.
 
-  ```python
-  def list_features_table():
-      build_list_table(BaseFeature, "Feature")
-  ```
+- **Positional Arguments with Autocompletion** — The generated `[NAME]`
+  argument uses `typer.Argument(autocompletion=...)`; completions come from
+  `autocomplete_installable()` in `installable/ops/tracking.py`.
 
-- **Discovery via discover_and_register** — Each category's `__init__.py` uses
-  `discover_and_register()` to find all concrete installable modules and
-  register their CLI subcommands:
+- **Interactive fallback** — If `[NAME]` is omitted, the generated command
+  prompts interactively using questionary checkboxes or selects
+  (`orchestrator.select_installable` / `select_installed`).
 
-  ```python
-  app = typer.Typer(no_args_is_help=True)
+- **Discovery via discover_and_register** — `domain_app()` calls
+  `core/discovery.discover_and_register()` on the category's package path,
+  importing every payload module so its `@register` decorator runs before the
+  commands execute.
 
-  def _discover():
-      for installable in discover_and_register(BasePackage):
-          ...
-      app.command(name="add")(add)
-      app.command(name="remove")(remove)
-      app.command(name="list")(list_)
-
-  _discover()
-  ```
-
-- **Folder-per-command-group** — Each category lives in its own directory:
+- **Folder-per-category payloads** — Concrete providers live under
+  `djdevx/providers/<domain>/`:
 
   ```
-  features/
-  ├── __init__.py       # typer.Typer() + discovery + command registration
-  ├── _base.py           # BaseFeature(Installable)
+  providers/features/
+  ├── __init__.py        # 3-line domain_app declaration
+  ├── _base.py           # BaseFeature(Provider) — thin kind pin
   ├── _registry.py       # FEATURE_REGISTRY + @register
-  ├── add.py             # add() command
-  ├── remove.py          # remove() command
-  ├── list.py            # list table
-  ├── pwa/
-  │   └── __init__.py    # @register PWAFeature(BaseFeature)
+  ├── otel/
+  │   └── __init__.py    # @register OtelFeature(BaseFeature) + templates/
+  └── pwa/
+      └── __init__.py
   ```
 
 - **Validation via callbacks** — Input validation uses `callback=func` on
@@ -138,72 +139,51 @@ ddx
 ## Dev Command Group
 
 `ddx dev` is split into thin command modules under `djdevx/dev/` (`start.py`,
-`runserver.py`, `up.py`, `down.py`, `status.py`, `database.py`,
-`cache.py`). Shared behavior lives in:
+`runserver.py`, `up.py`, `down.py`, `status.py`, `credentials.py`,
+`database.py`, `cache.py`, `otel.py`). Shared behavior lives in:
 
-- **`utils/services/resolver.py`** — `resolve_database_dev_service()` and
-  `resolve_cache_dev_service()`. Each reads the project tracking
-  (`SectionTracking("database"/"cache").installed()`) to find the single
-  installed provider, maps its name to the native dev service, and returns an
-  instantiated `BaseDevService` or `None`. `utils/services` owns the
-  `name -> dev service` mapping and the concrete services.
+- **`djdevx/cli/dev.py`** — the declarative `ddx dev start` pipeline
+  (`run_start`): settings init → database up → migrate → cache up → render
+  endpoints → dev server. Each native service is started exactly once; in a
+  devcontainer the compose stack owns the services and only
+  settings/migrations/server run. `dev/start.py` is a thin CLI wrapper that
+  delegates here.
+- **`services/registry.py`** — the service registry (`SERVICE_REGISTRY`) with
+  category-filtered resolvers: `resolve_database_dev_service()`,
+  `resolve_cache_dev_service()`, `resolve_otel_dev_services()`,
+  `resolve_openobserve_dev_service()`, `resolve_dev_services()`. Each reads
+  `djdevx.toml` tracking to find the installed provider(s) and instantiate the
+  matching `BaseDevService`. Because only one database and one cache can be
+  installed at a time, `ddx dev` commands always act on those.
+- **`dev/context.py` + `dev/render.py`** — build the service endpoint snapshot
+  (native or devcontainer) and render the shared services/credentials tables.
 - **`utils/django/manage_commands.py`** — `ManageCommands` wraps Django
-  `manage.py` commands (e.g. `migrations_pending()`) over a `PixiRunner`, shared
-  by `start`, `status`, and `database`.
-- **`runserver.py`** — `server_command()` resolves the tailwind-aware dev
+  `manage.py` commands (e.g. `migrations_pending()`) over the `PixiRunner`
+  (`core/process.py`), shared by `start`, `status`, and `database`.
+- **`dev/runserver.py`** — `server_command()` resolves the tailwind-aware dev
   server command, shared by `runserver` and `start`.
-
-Because only one database and one cache can be installed at a time, the dev
-commands always act on that single installed provider.
 
 ## Installable Category Pattern
 
 All five installable categories follow the same architectural pattern.
-See [Installable System](installable-system.md) for the full reference.
-
-The pattern in each `__init__.py`:
-
-```python
-app = typer.Typer(no_args_is_help=True)
-
-from .add import add as _add
-from .remove import remove as _remove
-from .list import list_X_table as _list
-
-def _discover():
-    discover_and_register(BasePackage)
-
-_discover()
-
-app.command(name="add")(_add)
-app.command(name="remove")(_remove)
-app.command(name="list")(_list)
-```
+See [Installable System](installable-system.md) for the full reference. The
+entire category CLI is the `domain_app()` declaration shown above.
 
 ## Adding a New Category
 
 To add a new installable category (e.g., "monitoring"):
 
-1. Create the directory with the standard files:
+1. Create `djdevx/providers/monitoring/` with the standard scaffolding:
    ```
-   monitoring/
-   ├── __init__.py       # typer app + auto-discovery
-   ├── _base.py           # BaseMonitoring(Installable)
-   ├── _registry.py       # MONITORING_REGISTRY
-   ├── add.py             # add() command
-   ├── remove.py          # remove() command
-   └── list.py            # list table
+   providers/monitoring/
+   ├── __init__.py        # 3-line domain_app(...) declaration
+   ├── _base.py           # BaseMonitoring(Provider) with kind = MONITORING_KIND
+   ├── _registry.py       # MONITORING_REGISTRY + @register
+   └── <name>/            # payload modules, each with templates/
    ```
 
-2. Add a `Section` enum member and set it in the category base:
-   ```python
-   # djdevx/utils/tracking/sections.py
-   MONITORING = "monitoring"
-
-   # monitoring/_base.py
-   class BaseMonitoring(Installable):
-       section: Section = Section.MONITORING
-   ```
+2. Add a `Section` enum member (`utils/tracking/sections.py`) and a kind
+   constant in `djdevx/provider.py` mapping it.
 
 3. Track installs via `ProjectTracking` in `djdevx.toml`:
    ```python
@@ -212,11 +192,9 @@ To add a new installable category (e.g., "monitoring"):
    project.add(Section.MONITORING, "prometheus", "Prometheus")
    ```
 
-4. Implement `get_registry()` in `_base.py`.
-
-5. Register in `djdevx/main.py`:
+4. Register in `djdevx/main.py`:
    ```python
-   from .monitoring import app as monitoring_app
+   from .providers.monitoring import app as monitoring_app
    app.add_typer(monitoring_app, name="monitoring", help="Manage monitoring tools")
    ```
 

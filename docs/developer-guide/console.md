@@ -6,11 +6,11 @@ to maintain consistent styling.
 
 ## PrintConsole
 
-`PrintConsole` (`djdevx/utils/console/print.py`) wraps Rich's `Console` for
+`PrintConsole` (`djdevx/core/console.py`) wraps Rich's `Console` for
 styled terminal output. A singleton instance is available as `print_console`.
 
 ```python
-from djdevx.utils.console.print import print_console
+from djdevx.core.console import print_console
 ```
 
 ### Methods
@@ -32,7 +32,7 @@ from djdevx.utils.console.print import print_console
 ### Usage Patterns
 
 ```python
-from djdevx.utils.console.print import print_console
+from djdevx.core.console import print_console
 
 # Step-by-step progress
 print_console.step("Installing package...")
@@ -168,7 +168,7 @@ For intentional Rich markup strings (like styled checkmarks), use the `Markup`
 class to prevent auto-escaping by `TableBuilder.add_row`:
 
 ```python
-from djdevx.utils.console.print import Markup
+from djdevx.core.console import Markup
 
 styled = Markup("[bold green]✓[/bold green]")
 with print_console.table("Title", columns) as tbl:

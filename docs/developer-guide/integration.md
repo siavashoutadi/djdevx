@@ -3,7 +3,7 @@
 The Integration Protocol lets installables adapt to each other
 **order-independently**: no matter whether A or B was installed first, the same
 integration code runs exactly once per pair. It lives in
-`utils/installable/peers.py` and is completely generic — packages,
+`installable/peers.py` and is completely generic — packages,
 features, frameworks, databases, and caches can all integrate with each other.
 
 ## Core design principle
@@ -23,7 +23,7 @@ declaration — the engine fires `on_peer_added` / `on_peer_removed` but never
 touches pixi packages for that peer.
 
 ```python
-from djdevx.utils.installable.types import InstallableRef, FRAMEWORK
+from djdevx.installable.models import InstallableRef, FRAMEWORK
 
 class MyPackage(BasePackage):
     peer_pixi_packages: dict[InstallableRef, list[PixiPackageSpec]] = {
@@ -134,8 +134,8 @@ sync_on_remove(installable, variant, fully_removed)
 For explicit cross-calls beyond the hook protocol:
 
 ```python
-from djdevx.utils.installable import call_peer
-from djdevx.utils.installable.types import DATABASE, InstallableRef
+from djdevx.installable import call_peer
+from djdevx.installable.models import DATABASE, InstallableRef
 
 result = call_peer(InstallableRef("postgres", DATABASE), "collect_metrics", default=None)
 ```
