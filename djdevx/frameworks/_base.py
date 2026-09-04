@@ -13,3 +13,9 @@ class BaseFramework(CSSFrameworkProviderMixin, Provider):
     """Base class for CSS/JS frameworks."""
 
     kind = FRAMEWORK_KIND
+
+    css_url: str = ""
+    css_filename: str = ""
+    js_url: str = ""
+    js_filename: str = ""
+    js_module: bool = False
