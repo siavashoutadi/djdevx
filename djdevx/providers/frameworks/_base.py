@@ -14,7 +14,7 @@ Kept for backward compatibility so existing provider payloads and tests that
 ``from .._base import X`` keep working; removed in a later phase.
 """
 
-from ...provider import FRAMEWORK_KIND, CSSFrameworkProviderMixin, Provider
+from ...provider import FRAMEWORK_KIND, Asset, CSSFrameworkProviderMixin, Provider
 
 
 class BaseFramework(Provider):
@@ -31,8 +31,6 @@ class BaseFramework(Provider):
 class CSSFramework(CSSFrameworkProviderMixin, BaseFramework):
     """Base class for CSS/JS frameworks that download vendored assets."""
 
-    css_url: str = ""
-    css_filename: str = ""
-    js_url: str = ""
-    js_filename: str = ""
+    css_assets: list[Asset] = []
+    js_assets: list[Asset] = []
     js_module: bool = False

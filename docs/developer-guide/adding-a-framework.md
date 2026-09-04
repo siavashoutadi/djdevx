@@ -25,26 +25,35 @@ install params, secrets, hooks, templates, testing) live in
 
 ```python
 # djdevx/providers/frameworks/bootstrap/__init__.py
-from .._base import BaseFramework
+from .._base import Asset, CSSFramework
 from .._registry import register
 
 
 @register
-class BootstrapFramework(BaseFramework):
+class BootstrapFramework(CSSFramework):
     name: str = "bootstrap"
     display_name: str = "Bootstrap"
     description: str = "Bootstrap CSS/JS framework"
-    css_url: str = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    css_filename: str = "bootstrap.min.css"
-    js_url: str = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    js_filename: str = "bootstrap.bundle.min.js"
+    css_assets: list[Asset] = [
+        Asset(
+            url="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css",
+            filename="bootstrap.min.css",
+        ),
+    ]
+    js_assets: list[Asset] = [
+        Asset(
+            url="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js",
+            filename="bootstrap.bundle.min.js",
+        ),
+    ]
 ```
 
-That's it. Declaring the URLs and filenames is enough — `BaseFramework`
+That's it. Declaring the asset URLs and filenames is enough — `CSSFramework`
 downloads the files into `static/css/vendor` / `static/js/vendor` and injects
 the `<link>`/`<script>` tags into `_base.html`.
 
-If the framework only needs CSS (no JS), leave `js_url`/`js_filename` empty.
+If the framework only needs CSS (no JS), leave `js_assets` empty. A framework
+can also vendor multiple files per type (see Franken UI below).
 
 ## Framework attributes
 
@@ -53,27 +62,41 @@ If the framework only needs CSS (no JS), leave `js_url`/`js_filename` empty.
 | `name` | Yes | Unique identifier (used in CLI) |
 | `display_name` | Yes | Human-readable name for CLI output |
 | `description` | No | Longer description |
-| `css_url` | No | URL to download CSS from |
-| `css_filename` | No | Local filename for CSS |
-| `js_url` | No | URL to download JS from |
-| `js_filename` | No | Local filename for JS |
+| `css_assets` | No | `Asset(url=..., filename=...)` entries for CSS files to vendor |
+| `js_assets` | No | `Asset(url=..., filename=...)` entries for JS files to vendor |
 | `js_module` | No | Set `True` for ES module scripts |
 
 ## ES module scripts (js_module)
 
-Set `js_module: bool = True` when the script needs the `type="module"`
+Set `js_module: bool = True` when scripts need the `type="module"`
 attribute:
 
 ```python
 # djdevx/providers/frameworks/frankenui/__init__.py
 @register
-class FrankenUIFramework(BaseFramework):
+class FrankenUIFramework(CSSFramework):
     name: str = "frankenui"
     display_name: str = "Franken UI"
-    css_url = "https://cdn.jsdelivr.net/npm/franken-ui@1.0.3/dist/css/franken-ui.min.css"
-    css_filename = "franken.css"
-    js_url = "https://cdn.jsdelivr.net/npm/franken-ui@1.0.3/dist/js/franken-ui.min.js"
-    js_filename = "franken.js"
+    css_assets: list[Asset] = [
+        Asset(
+            url="https://cdn.jsdelivr.net/npm/franken-ui@2.1.2/dist/css/core.min.css",
+            filename="franken-core.css",
+        ),
+        Asset(
+            url="https://cdn.jsdelivr.net/npm/franken-ui@2.1.2/dist/css/utilities.min.css",
+            filename="franken-utilities.css",
+        ),
+    ]
+    js_assets: list[Asset] = [
+        Asset(
+            url="https://cdn.jsdelivr.net/npm/franken-ui@2.1.2/dist/js/core.iife.js",
+            filename="franken-core.js",
+        ),
+        Asset(
+            url="https://cdn.jsdelivr.net/npm/franken-ui@2.1.2/dist/js/icon.iife.js",
+            filename="franken-icon.js",
+        ),
+    ]
     js_module: bool = True
 ```
 

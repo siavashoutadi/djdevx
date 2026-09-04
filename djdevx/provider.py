@@ -14,7 +14,7 @@ so existing provider payloads and tests keep working unchanged.
 
 from typing import ClassVar
 
-from pydantic import model_validator
+from pydantic import BaseModel, model_validator
 
 from djdevx.core.console import print_console
 from .installable.lifecycle import Installable
@@ -65,29 +65,38 @@ class Provider(Installable):
         return REGISTRIES[cls.kind.name]
 
 
+class Asset(BaseModel):
+    """A single vendored static asset (one CDN file mapped to one local file)."""
+
+    url: str
+    filename: str
+
+
 class CSSFrameworkProviderMixin:
     """CSS/JS framework behavior: download vendor assets, edit the base template.
 
     Formerly woven into ``BaseFramework``. Only framework providers subclass
     this; other domains inherit plain :class:`Provider`.
 
-    The CSS/JS data fields (``css_url``, ``css_filename``, ``js_url``,
-    ``js_filename``, ``js_module``) live on the ``CSSFramework`` model in
-    ``frameworks/_base.py`` rather than here: declaring them as plain class
-    attributes on a non-pydantic mixin would make pydantic warn when a
-    framework subclass redeclares them as fields. ``_base_template_path`` also
-    lives on ``BaseFramework`` so every framework (CSS or not) can resolve the
-    base template.
+    The asset data fields (``css_assets``, ``js_assets``, ``js_module``) live
+    on the ``CSSFramework`` model in ``frameworks/_base.py`` rather than here:
+    declaring them as plain class attributes on a non-pydantic mixin would make
+    pydantic warn when a framework subclass redeclares them as fields.
+    ``_base_template_path`` also lives on ``BaseFramework`` so every framework
+    (CSS or not) can resolve the base template.
     """
 
-    @property
-    def _style_tag(self) -> str:
-        return f'<link rel="stylesheet" href="{{% static \'css/vendor/{self.css_filename}\' %}}">'
+    def _style_tag(self, asset: Asset) -> str:
+        return (
+            f'<link rel="stylesheet" href="{{% static \'css/vendor/'
+            f"{asset.filename}' %}}\">"
+        )
 
-    @property
-    def _script_tag(self) -> str:
+    def _script_tag(self, asset: Asset) -> str:
         tm = ' type="module"' if self.js_module else ""
-        return f"<script{tm} src=\"{{% static 'js/vendor/{self.js_filename}' %}}\"></script>"
+        return (
+            f"<script{tm} src=\"{{% static 'js/vendor/{asset.filename}' %}}\"></script>"
+        )
 
     def _download(self, url: str, dest) -> None:
         import urllib.request
@@ -112,27 +121,31 @@ class CSSFrameworkProviderMixin:
         self._uninstall_framework()
 
     def _install_framework(self) -> None:
-        if self.css_url and self.css_filename:
-            dest = self.structure.static_css_dir / "vendor" / self.css_filename
+        for asset in self.css_assets:
+            if not asset.url or not asset.filename:
+                continue
+            dest = self.structure.static_css_dir / "vendor" / asset.filename
             if not dest.exists():
-                self._download(self.css_url, dest)
+                self._download(asset.url, dest)
 
-        if self.js_url and self.js_filename:
-            dest = self.structure.static_js_dir / "vendor" / self.js_filename
+        for asset in self.js_assets:
+            if not asset.url or not asset.filename:
+                continue
+            dest = self.structure.static_js_dir / "vendor" / asset.filename
             if not dest.exists():
-                self._download(self.js_url, dest)
+                self._download(asset.url, dest)
 
         self._modify_base_template(install=True)
 
     def _uninstall_framework(self) -> None:
         self._modify_base_template(install=False)
 
-        if self.css_filename:
-            (self.structure.static_css_dir / "vendor" / self.css_filename).unlink(
+        for asset in self.css_assets:
+            (self.structure.static_css_dir / "vendor" / asset.filename).unlink(
                 missing_ok=True
             )
-        if self.js_filename:
-            (self.structure.static_js_dir / "vendor" / self.js_filename).unlink(
+        for asset in self.js_assets:
+            (self.structure.static_js_dir / "vendor" / asset.filename).unlink(
                 missing_ok=True
             )
 
@@ -145,24 +158,24 @@ class CSSFrameworkProviderMixin:
         content = path.read_text()
 
         if install:
-            if self.css_filename and self.css_filename not in content:
-                content = content.replace(
-                    "</head>", f"    {self._style_tag}\n  </head>"
-                )
-            if self.js_filename and self.js_filename not in content:
-                content = content.replace(
-                    "</body>", f"    {self._script_tag}\n  </body>"
-                )
+            for asset in self.css_assets:
+                tag = self._style_tag(asset)
+                if asset.filename and asset.filename not in content:
+                    content = content.replace("</head>", f"    {tag}\n  </head>")
+            for asset in self.js_assets:
+                tag = self._script_tag(asset)
+                if asset.filename and asset.filename not in content:
+                    content = content.replace("</body>", f"    {tag}\n  </body>")
         else:
-            if self.css_filename:
+            for asset in self.css_assets:
                 content = re.sub(
-                    r"\s*" + re.escape(self._style_tag) + r"\s*\n?",
+                    r"\s*" + re.escape(self._style_tag(asset)) + r"\s*\n?",
                     "",
                     content,
                 )
-            if self.js_filename:
+            for asset in self.js_assets:
                 content = re.sub(
-                    r"\s*" + re.escape(self._script_tag) + r"\s*\n?",
+                    r"\s*" + re.escape(self._script_tag(asset)) + r"\s*\n?",
                     "",
                     content,
                 )
