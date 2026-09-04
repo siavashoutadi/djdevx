@@ -50,7 +50,16 @@ def list_secrets(
         print_console.info("No secrets declared in this project.")
         return
 
-    cfg = ENV_CONFIG_LIST[env]
+    _print_secrets_table(
+        env,
+        result,
+        project_root,
+        ENV_CONFIG_LIST[env]["resolve_source"],
+    )
+
+
+def _print_secrets_table(env: str, result, project_root, resolve_source) -> None:
+    """Render the full secrets status table."""
     with print_console.table(
         f"Secrets ({env})",
         [
@@ -61,7 +70,7 @@ def list_secrets(
         show_lines=False,
     ) as tbl:
         for secret in result.secrets:
-            source = cfg["resolve_source"](secret, project_root)
+            source = resolve_source(secret, project_root)
             if source == SecretSource.CLASS_DEFAULT:
                 status = YELLOW_CHECKMARK
             elif source != SecretSource.MISSING:
@@ -230,13 +239,12 @@ def verify(
     if optional:
         names = ", ".join(optional)
         print_console.info(f"{len(optional)} optional secret(s) using class defaults:")
-        typer.echo(f"  {names}")
+        print_console.info(f"  {names}")
 
     if missing:
         print_console.error(f"{len(missing)} secret(s) missing {cfg['error_msg']}:")
-        for name in missing:
-            typer.echo(f"{RED_CROSS_MARK} {name}")
-        typer.echo(f"\nRun: ddx settings secrets {cfg['fix_cmd']}")
+        _print_secrets_table(env, result, project_root, cfg["resolve_source"])
+        print_console.info(f"\nRun: ddx settings secrets {cfg['fix_cmd']}")
         raise typer.Exit(code=1)
 
     print_console.ok(f"All {len(result.secrets)} secret(s) are present.")

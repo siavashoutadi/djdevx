@@ -77,6 +77,11 @@ def list_configs(
         return
 
     cfg = _ENV_CONFIG_LIST[env]
+    _print_configs_table(env, result, project_root, cfg)
+
+
+def _print_configs_table(env: str, result, project_root, cfg: dict) -> None:
+    """Render the full config vars status table."""
     with print_console.table(
         f"Config vars ({env})",
         [
@@ -308,10 +313,12 @@ def init(
 _ENV_CONFIG_VERIFY: dict[str, dict[str, Any]] = {
     DEV: {
         "resolve_source": resolve_config_source_dev,
-        "error_suffix": f"with no {DEV} default",
+        "resolve_value": resolve_config_value_dev,
+        "error_suffix": f" with no {DEV} default",
     },
     PROD: {
         "resolve_source": resolve_config_source_prod,
+        "resolve_value": resolve_config_value_prod,
         "error_suffix": "",
         "fix_cmd": f"ddx settings configs init {PROD}",
     },
@@ -347,16 +354,15 @@ def verify(
         print_console.info(
             f"{len(optional)} optional config var(s) using class defaults:"
         )
-        typer.echo(f"  {names}")
+        print_console.info(f"  {names}")
 
     if missing:
         msg = f"{len(missing)} config var(s) missing{cfg['error_suffix']}:"
         print_console.error(msg)
-        for name in missing:
-            typer.echo(f"{RED_CROSS_MARK} {name}")
+        _print_configs_table(env, result, project_root, cfg)
         fix_cmd = cfg.get("fix_cmd")
         if fix_cmd:
-            typer.echo(f"\nRun: {fix_cmd}")
+            print_console.info(f"\nRun: {fix_cmd}")
         raise typer.Exit(code=1)
 
     total = len(result.config_vars)
