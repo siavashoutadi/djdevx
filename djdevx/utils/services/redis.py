@@ -1,5 +1,8 @@
 """RedisService — pixi-native local Redis dev service."""
 
+import os
+from collections.abc import Iterator
+from contextlib import contextmanager
 from typing import ClassVar
 
 from ..console.print import print_console
@@ -18,6 +21,31 @@ class RedisService(BaseDevService):
     port_env_key: ClassVar[str] = "REDIS_PORT"
     category: ClassVar[str] = "cache"
 
+    @contextmanager
+    def _auth_env(self) -> Iterator[None]:
+        """Expose the password to ``redis-cli`` via ``REDISCLI_AUTH``.
+
+        Passing the password as an ``-a <pw>`` CLI argument leaks it into the
+        process list (``ps``) and shells history; ``REDISCLI_AUTH`` keeps it
+        out of argv.
+        """
+        previous = os.environ.get("REDISCLI_AUTH")
+        os.environ["REDISCLI_AUTH"] = self.password
+        try:
+            yield
+        finally:
+            if previous is None:
+                os.environ.pop("REDISCLI_AUTH", None)
+            else:
+                os.environ["REDISCLI_AUTH"] = previous
+
+    def _cli(self, command: str, timeout: int | None = None):
+        """Run ``redis-cli <command>`` against this service (auth via env)."""
+        with self._auth_env():
+            return self.run_pixi(
+                "run", "redis-cli", "-p", str(self.port), command, timeout=timeout
+            )
+
     def is_up(self, step=None) -> bool:
         group = (
             step
@@ -27,16 +55,7 @@ class RedisService(BaseDevService):
             )
         )
         try:
-            result = self.run_pixi(
-                "run",
-                "redis-cli",
-                "-p",
-                str(self.port),
-                "-a",
-                self.password,
-                "ping",
-                timeout=15,
-            )
+            result = self._cli("ping", timeout=15)
         except OSError:
             up = False
         else:
@@ -57,16 +76,7 @@ class RedisService(BaseDevService):
     def _is_ready(self) -> bool:
         """Cheap readiness probe (no CLI output) used by ``wait_until_ready``."""
         try:
-            result = self.run_pixi(
-                "run",
-                "redis-cli",
-                "-p",
-                str(self.port),
-                "-a",
-                self.password,
-                "ping",
-                timeout=15,
-            )
+            result = self._cli("ping", timeout=15)
         except OSError:
             return False
         stdout = (
@@ -132,15 +142,7 @@ class RedisService(BaseDevService):
             )
         )
         try:
-            self.run_pixi(
-                "run",
-                "redis-cli",
-                "-p",
-                str(self.port),
-                "-a",
-                self.password,
-                "shutdown",
-            )
+            self._cli("shutdown")
             group.ok(f"stopped {self.display_name.lower()} on port {self.port}")
         finally:
             if step is None:
@@ -159,15 +161,7 @@ class RedisService(BaseDevService):
             )
         )
         try:
-            self.run_pixi(
-                "run",
-                "redis-cli",
-                "-p",
-                str(self.port),
-                "-a",
-                self.password,
-                "FLUSHALL",
-            )
+            self._cli("FLUSHALL")
             group.ok(f"flushed {self.display_name.lower()} data")
         finally:
             if step is None:

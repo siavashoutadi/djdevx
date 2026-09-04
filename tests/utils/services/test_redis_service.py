@@ -16,8 +16,16 @@ def make_service(root, returncode=0, stdout="PONG"):
     return service, runner
 
 
-def _ping_args(port, password):
-    return ("run", "redis-cli", "-p", str(port), "-a", password, "ping")
+def _ping_args(port):
+    return ("run", "redis-cli", "-p", str(port), "ping")
+
+
+def _no_cli_password_args(runner, password="redis_password"):
+    """Assert no ``redis-cli`` invocation carries the password in argv."""
+    for call in runner.run_pixi_command.call_args_list:
+        if "redis-cli" in call.args:
+            assert "-a" not in call.args, f"password flag leaked: {call.args}"
+            assert password not in call.args, f"password leaked: {call.args}"
 
 
 def test_data_dir_under_devdata(tmp_path):
@@ -82,45 +90,46 @@ def test_up_skips_when_running(tmp_path):
     service, runner = make_service(tmp_path)
     service.up()
     assert runner.run_pixi_command.call_count == 1
-    assert runner.run_pixi_command.call_args[0] == _ping_args(
-        service.port, service.password
-    )
+    assert runner.run_pixi_command.call_args[0] == _ping_args(service.port)
+    _no_cli_password_args(runner)
 
 
 def test_down_shuts_down(tmp_path):
     service, runner = make_service(tmp_path)
     service.down()
     args = runner.run_pixi_command.call_args[0]
-    assert args == (
-        "run",
-        "redis-cli",
-        "-p",
-        str(service.port),
-        "-a",
-        "redis_password",
-        "shutdown",
-    )
+    assert args == ("run", "redis-cli", "-p", str(service.port), "shutdown")
+    _no_cli_password_args(runner)
 
 
 def test_down_skips_when_not_running(tmp_path):
     service, runner = make_service(tmp_path, returncode=1, stdout="")
     service.down()
     assert runner.run_pixi_command.call_count == 1
-    assert runner.run_pixi_command.call_args[0] == _ping_args(
-        service.port, service.password
-    )
+    assert runner.run_pixi_command.call_args[0] == _ping_args(service.port)
 
 
 def test_reset_flushall(tmp_path):
     service, runner = make_service(tmp_path)
     service.reset()
     args = runner.run_pixi_command.call_args[0]
-    assert args == (
-        "run",
-        "redis-cli",
-        "-p",
-        str(service.port),
-        "-a",
-        "redis_password",
-        "FLUSHALL",
-    )
+    assert args == ("run", "redis-cli", "-p", str(service.port), "FLUSHALL")
+    _no_cli_password_args(runner)
+
+
+def test_rediscli_auth_env_set_and_restored(tmp_path):
+    """REDISCLI_AUTH is present only while redis-cli runs, then cleaned up."""
+    import os
+
+    service, runner = make_service(tmp_path)
+    seen = {}
+
+    def _capture(*args, **kwargs):
+        seen["auth"] = os.environ.get("REDISCLI_AUTH")
+        return MagicMock(returncode=0, stdout="PONG")
+
+    runner.run_pixi_command.side_effect = _capture
+    os.environ.pop("REDISCLI_AUTH", None)
+    service.is_up()
+    assert seen["auth"] == service.password
+    assert "REDISCLI_AUTH" not in os.environ
