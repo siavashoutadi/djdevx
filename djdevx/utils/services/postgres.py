@@ -67,6 +67,22 @@ class PostgresService(BaseDevService):
             )
         return f"not responding on port {self.port}"
 
+    def _is_ready(self) -> bool:
+        """Cheap readiness probe (no CLI output) used by ``wait_until_ready``."""
+        try:
+            result = self.run_pixi(
+                "run",
+                "pg_isready",
+                "-h",
+                "localhost",
+                "-p",
+                str(self.port),
+                timeout=15,
+            )
+        except OSError:
+            return False
+        return result.returncode == 0
+
     def up(self, step=None) -> None:
         self.structure.dev_data_dir.mkdir(parents=True, exist_ok=True)
         if self.is_up(step=step):
@@ -83,6 +99,11 @@ class PostgresService(BaseDevService):
             if not self._initialized:
                 self._init_db(group)
             self._start(group)
+            if not self.wait_until_ready(lambda: self._is_ready(), what="postgres"):
+                raise RuntimeError(
+                    f"{self.display_name} did not become ready on port {self.port} — "
+                    f"check log: {self._log_file.relative_to(self.structure.root)}"
+                )
             self._set_port_env(quiet=True)
             group.ok(f"set {self.port_env_key}={self.port}")
         finally:

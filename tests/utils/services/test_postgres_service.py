@@ -147,8 +147,8 @@ def test_purge_skips_stop_when_not_running(tmp_path):
 def test_up_initializes_then_starts(tmp_path):
     ok = MagicMock(returncode=0, stdout=b"")
     not_ready = MagicMock(returncode=1, stdout=b"")
-    # order: pg_isready (down), initdb, pg_ctl start
-    side_effects = [not_ready, ok, ok]
+    # order: pg_isready (down), initdb, pg_ctl start, pg_isready (ready probe)
+    side_effects = [not_ready, ok, ok, ok]
     service, runner = make_service(tmp_path, side_effect=side_effects)
     service.up()
     calls = [c.args for c in runner.run_pixi_command.call_args_list]
@@ -156,6 +156,7 @@ def test_up_initializes_then_starts(tmp_path):
     assert calls[1][1] == "initdb"
     assert calls[2][1] == "pg_ctl"
     assert calls[2][-1] == "start"
+    assert calls[3] == _pg_isready_args(service.port)
 
 
 def test_up_skips_start_when_already_running(tmp_path):
@@ -170,7 +171,7 @@ def test_up_skips_start_when_already_running(tmp_path):
 def test_up_sets_port_env(tmp_path):
     ok = MagicMock(returncode=0, stdout=b"")
     not_ready = MagicMock(returncode=1, stdout=b"")
-    service, _ = make_service(tmp_path, side_effect=[not_ready, ok, ok])
+    service, _ = make_service(tmp_path, side_effect=[not_ready, ok, ok, ok])
     service.up()
     import os
 
@@ -196,6 +197,24 @@ def test_start_failure_raises(tmp_path):
         service._start()
 
 
+def test_up_raises_when_not_ready(tmp_path):
+    """Once started, a DB that never answers pg_isready raises on up()."""
+    import pytest
+
+    ok = MagicMock(returncode=0, stdout=b"")
+    not_ready = MagicMock(returncode=1, stdout=b"")
+
+    def side_effect(*args, **kwargs):
+        return not_ready if "pg_isready" in args else ok
+
+    service, _ = make_service(tmp_path, side_effect=side_effect)
+    with (
+        patch("djdevx.utils.services.base.time.sleep"),
+        pytest.raises(RuntimeError, match="did not become ready"),
+    ):
+        service.up()
+
+
 def test_up_emits_step_group_children(tmp_path):
     """Starting a DB renders a single nested step with ✓ children."""
     from io import StringIO
@@ -206,8 +225,8 @@ def test_up_emits_step_group_children(tmp_path):
 
     ok = MagicMock(returncode=0, stdout=b"")
     not_ready = MagicMock(returncode=1, stdout=b"")
-    # order: pg_isready (down), initdb, pg_ctl start
-    service, _ = make_service(tmp_path, side_effect=[not_ready, ok, ok])
+    # order: pg_isready (down), initdb, pg_ctl start, pg_isready (ready probe)
+    service, _ = make_service(tmp_path, side_effect=[not_ready, ok, ok, ok])
 
     buf = StringIO()
     console = Console(file=buf, width=120, force_terminal=False)
