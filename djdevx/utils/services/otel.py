@@ -14,86 +14,35 @@ settings (``OTEL_COLLECTOR_PORT``, ``OPENOBSERVE_PORT``) resolve correctly,
 mirroring how Postgres/Redis inject ``POSTGRES_PORT``/``REDIS_PORT``.
 """
 
-import os
-import signal
-import socket
+import shutil
 import subprocess
-import time
 from pathlib import Path
-from typing import ClassVar, Optional
+from typing import ClassVar
 
 from ..console.print import print_console
 from ..tracking import ProjectTracking
 from . import binary
 from .base import BaseDevService
+from .wait import (
+    is_pid_alive,
+    is_port_open,
+    read_pid,
+    stop_process,
+    wait_for_port,
+    write_pid,
+)
 
 # Default OpenObserve bootstrap credentials (match the devcontainer image).
 OPENOBSERVE_DEFAULT_EMAIL = "admin@example.com"
 OPENOBSERVE_DEFAULT_PASSWORD = "ZoAdmin123!"
 
 
-def _pid_file(service_dir: Path) -> Path:
-    return service_dir / "pid"
-
-
-def _is_port_open(host: str, port: int, timeout: float = 1.0) -> bool:
-    try:
-        with socket.create_connection((host, port), timeout=timeout):
-            return True
-    except OSError:
-        return False
-
-
-def _is_pid_alive(pid: int) -> bool:
-    """Return True if *pid* refers to a running process."""
-    try:
-        os.kill(pid, 0)
-        return True
-    except (ProcessLookupError, PermissionError):
-        return False
-
-
-def _wait_for_port(
-    host: str,
-    port: int,
-    service_dir: Path,
-    *,
-    retries: int = 5,
-    delay: float = 1.0,
-) -> bool:
-    """Poll until *port* is open or *retries* probes are exhausted.
-
-    Used after ``Popen`` to give a socket-based service time to bind its port.
-    If the port is closed **and** the stored PID is dead the service has
-    crashed — no retry will help, so False is returned immediately.
-    """
-    for attempt in range(retries):
-        if _is_port_open(host, port):
-            return True
-        if attempt < retries - 1:
-            pid = _read_pid(service_dir)
-            if pid is not None and not _is_pid_alive(pid):
-                return False
-            time.sleep(delay)
-    return False
-
-
-def _read_pid(service_dir: Path) -> Optional[int]:
-    path = _pid_file(service_dir)
-    if not path.exists():
-        return None
-    try:
-        return int(path.read_text().strip())
-    except ValueError:
-        return None
-
-
 def _describe_down_port(service: "BaseDevService") -> str:
     """Explain why a socket-based service is not up, from its port + pid state."""
-    pid = _read_pid(service.service_dir)
+    pid = read_pid(service.service_dir)
     if pid is None:
         reason = "no pid file — the service was never started"
-    elif not _is_pid_alive(pid):
+    elif not is_pid_alive(pid):
         reason = f"process exited (pid {pid} no longer running)"
     else:
         reason = f"process running but not listening on port {service.port}"
@@ -112,19 +61,6 @@ def _report_launch_warning(service: "BaseDevService", *, port: int) -> None:
     )
 
 
-def _stop_process(service_dir: Path) -> None:
-    pid = _read_pid(service_dir)
-    if pid is None:
-        return
-    try:
-        os.kill(pid, signal.SIGTERM)
-    except ProcessLookupError:
-        pass
-    except PermissionError:  # pragma: no cover - unprivileged
-        pass
-    _pid_file(service_dir).unlink(missing_ok=True)
-
-
 class OtelCollectorService(BaseDevService):
     """Run the OpenTelemetry collector natively via a downloaded ``otelcol-contrib`` binary."""
 
@@ -136,12 +72,10 @@ class OtelCollectorService(BaseDevService):
     dev_default_password: ClassVar[str] = ""
     port_env_key: ClassVar[str] = "OTEL_COLLECTOR_PORT"
 
-    def __init__(
-        self, project_root: Optional[Path] = None, verbose: bool = False
-    ) -> None:
+    def __init__(self, project_root: Path | None = None, verbose: bool = False) -> None:
         super().__init__(project_root, verbose)
         self.bin_dir = self.structure.root / ".pixi" / "devdata" / "bin"
-        self.binary_path: Optional[Path] = None
+        self.binary_path: Path | None = None
 
     @property
     def config_path(self) -> Path:
@@ -192,7 +126,7 @@ class OtelCollectorService(BaseDevService):
         return [str(self.binary_path), "--config", str(self.config_path)]
 
     def is_up(self) -> bool:
-        return _is_port_open("localhost", self.port)
+        return is_port_open("localhost", self.port)
 
     def describe_down(self) -> str:
         return _describe_down_port(self)
@@ -216,7 +150,7 @@ class OtelCollectorService(BaseDevService):
                 return
             self.binary_path = binary_path
             self._launch_background(self._binary_command(), self._log_file)
-            if _wait_for_port("localhost", self.port, self.service_dir):
+            if wait_for_port("localhost", self.port, self.service_dir):
                 group.ok(f"started {self.display_name.lower()} on port {self.port}")
             else:
                 _report_launch_warning(self, port=self.port)
@@ -226,7 +160,7 @@ class OtelCollectorService(BaseDevService):
             if step is None:
                 group.done()
 
-    def _ensure_binary(self, step=None) -> Optional[Path]:
+    def _ensure_binary(self, step=None) -> Path | None:
         if self.binary_path is not None and self.binary_path.exists():
             return self.binary_path
         # Prefer an existing downloaded binary, then an on-PATH otelcol.
@@ -260,7 +194,6 @@ class OtelCollectorService(BaseDevService):
 
     @staticmethod
     def _command_on_path(name: str) -> str | None:
-        import shutil
 
         return shutil.which(name)
 
@@ -273,7 +206,7 @@ class OtelCollectorService(BaseDevService):
                 stderr=subprocess.STDOUT,
                 cwd=self.structure.root,
             )
-        _pid_file(self.service_dir).write_text(str(proc.pid))
+        write_pid(self.service_dir, proc.pid)
 
     def down(self, step=None) -> None:
         if not self.is_up():
@@ -289,7 +222,7 @@ class OtelCollectorService(BaseDevService):
             )
         )
         try:
-            _stop_process(self.service_dir)
+            stop_process(self.service_dir)
             group.ok(f"stopped {self.display_name.lower()} on port {self.port}")
         finally:
             if step is None:
@@ -310,12 +243,10 @@ class OpenObserveService(BaseDevService):
     dev_default_password: ClassVar[str] = OPENOBSERVE_DEFAULT_PASSWORD
     port_env_key: ClassVar[str] = "OPENOBSERVE_PORT"
 
-    def __init__(
-        self, project_root: Optional[Path] = None, verbose: bool = False
-    ) -> None:
+    def __init__(self, project_root: Path | None = None, verbose: bool = False) -> None:
         super().__init__(project_root, verbose)
         self.bin_dir = self.structure.root / ".pixi" / "devdata" / "bin"
-        self.binary_path: Optional[Path] = None
+        self.binary_path: Path | None = None
 
     @property
     def data_dir(self) -> Path:
@@ -331,7 +262,7 @@ class OpenObserveService(BaseDevService):
             return secret_path.read_text().strip()
         return OPENOBSERVE_DEFAULT_EMAIL
 
-    def _ensure_binary(self, step=None) -> Optional[Path]:
+    def _ensure_binary(self, step=None) -> Path | None:
         if self.binary_path is not None and self.binary_path.exists():
             return self.binary_path
         existing = list(self.bin_dir.glob("openobserve*"))
@@ -359,7 +290,7 @@ class OpenObserveService(BaseDevService):
         return binary._os_name()
 
     def is_up(self) -> bool:
-        return _is_port_open("localhost", self.port)
+        return is_port_open("localhost", self.port)
 
     def describe_down(self) -> str:
         return _describe_down_port(self)
@@ -395,7 +326,7 @@ class OpenObserveService(BaseDevService):
                 self.password,
             ]
             self._launch_background(command, self._log_file)
-            if _wait_for_port("localhost", self.port, self.service_dir):
+            if wait_for_port("localhost", self.port, self.service_dir):
                 group.ok(f"started {self.display_name.lower()} on port {self.port}")
             else:
                 _report_launch_warning(self, port=self.port)
@@ -417,7 +348,7 @@ class OpenObserveService(BaseDevService):
                 stderr=subprocess.STDOUT,
                 cwd=self.data_dir,
             )
-        _pid_file(self.service_dir).write_text(str(proc.pid))
+        write_pid(self.service_dir, proc.pid)
 
     def down(self, step=None) -> None:
         if not self.is_up():
@@ -433,7 +364,7 @@ class OpenObserveService(BaseDevService):
             )
         )
         try:
-            _stop_process(self.service_dir)
+            stop_process(self.service_dir)
             group.ok(f"stopped {self.display_name.lower()} on port {self.port}")
         finally:
             if step is None:

@@ -55,9 +55,10 @@ def test_is_up_false_without_pong(tmp_path):
 def test_up_starts_redis_server(tmp_path):
     not_running = MagicMock(returncode=1, stdout="")
     ok = MagicMock(returncode=0, stdout="")
+    pong = MagicMock(returncode=0, stdout="PONG")
     with patch("djdevx.utils.services.base.PixiRunner") as mock_cls:
         runner = mock_cls.return_value
-        runner.run_pixi_command.side_effect = [not_running, ok]
+        runner.run_pixi_command.side_effect = [not_running, ok, pong]
         service = RedisService(project_root=tmp_path)
     service.up()
     args = runner.run_pixi_command.call_args_list[1].args
