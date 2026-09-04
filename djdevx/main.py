@@ -6,12 +6,12 @@ from .deployment import app as deploy_app
 from .version import app as version_app
 from .requirement import app as requirement_app
 from .new import app as new_app
-from .packages import app as packages_app
-from .frameworks import app as frameworks_app
-from .features import app as features_app
+from .providers.packages import app as packages_app
+from .providers.frameworks import app as frameworks_app
+from .providers.features import app as features_app
 from .create import app as create_app
-from .database import app as database_app
-from .cache import app as cache_app
+from .providers.database import app as database_app
+from .providers.cache import app as cache_app
 from .settings import app as settings_app
 from .dev import app as dev_app
 

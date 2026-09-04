@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 
 import tomlkit
 
-from djdevx.packages._base import BasePackage
+from djdevx.providers.packages._base import BasePackage
 from djdevx.utils.installable.tracking import TrackingOps
 from djdevx.utils.installable.types import Variant
 from djdevx.utils.tracking import ProjectTracking, Section

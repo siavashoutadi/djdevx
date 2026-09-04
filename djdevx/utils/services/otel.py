@@ -111,7 +111,7 @@ class OtelCollectorService(BaseDevService):
         return "http://localhost:5080"
 
     def _ensure_config(self, step=None) -> None:
-        from ...features.otel.collector_config import build_collector_config
+        from ...providers.features.otel.collector_config import build_collector_config
 
         self.service_dir.mkdir(parents=True, exist_ok=True)
         rendered = build_collector_config(

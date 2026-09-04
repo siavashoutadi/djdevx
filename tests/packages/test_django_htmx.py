@@ -81,7 +81,7 @@ def test_django_htmx_import_from_new_path():
     """
     Test that DjangoHtmxPackage can be imported from the new package path.
     """
-    from djdevx.packages.django_htmx import DjangoHtmxPackage
+    from djdevx.providers.packages.django_htmx import DjangoHtmxPackage
 
     assert DjangoHtmxPackage is not None
 
@@ -90,7 +90,7 @@ def test_django_htmx_with_body_class(temp_dir):
     """
     Test django-htmx installation with existing body class attribute.
     """
-    from djdevx.packages.django_htmx import DjangoHtmxPackage
+    from djdevx.providers.packages.django_htmx import DjangoHtmxPackage
 
     create_test_django_project(temp_dir, runner)
 
@@ -127,7 +127,7 @@ def test_django_htmx_with_body_attributes(temp_dir):
     """
     Test django-htmx installation with existing body attributes (id, data-*, etc).
     """
-    from djdevx.packages.django_htmx import DjangoHtmxPackage
+    from djdevx.providers.packages.django_htmx import DjangoHtmxPackage
 
     create_test_django_project(temp_dir, runner)
 
@@ -172,7 +172,7 @@ def test_django_htmx_with_complex_body(temp_dir):
     """
     Test django-htmx installation with complex body tag (multiple spaces, newlines, etc).
     """
-    from djdevx.packages.django_htmx import DjangoHtmxPackage
+    from djdevx.providers.packages.django_htmx import DjangoHtmxPackage
 
     create_test_django_project(temp_dir, runner)
 

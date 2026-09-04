@@ -573,7 +573,7 @@ class DockerComposePlugin(BaseDeployPlugin):
 
     @staticmethod
     def _build_otel_collector_config(output_dir: Path, token: str) -> str:
-        from ...features.otel.collector_config import build_collector_config
+        from ..providers.features.otel.collector_config import build_collector_config
 
         # Derive project name from tracking or fallback
         try:

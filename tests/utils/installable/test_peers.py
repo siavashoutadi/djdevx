@@ -4,7 +4,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from djdevx.packages._base import BasePackage
+from djdevx.providers.packages._base import BasePackage
 from djdevx.utils.installable.pixi_ops import PixiOps
 from djdevx.utils.installable.secrets import SecretsOps
 from djdevx.utils.installable.types import DATABASE, FRAMEWORK, InstallableRef, Variant

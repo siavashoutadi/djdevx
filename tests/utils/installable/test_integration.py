@@ -10,8 +10,8 @@ import pytest
 from typer.testing import CliRunner
 
 from djdevx.main import app
-from djdevx.packages._registry import PACKAGE_REGISTRY
-from djdevx.packages.whitenoise import WhitenoisePackage
+from djdevx.providers.packages._registry import PACKAGE_REGISTRY
+from djdevx.providers.packages.whitenoise import WhitenoisePackage
 from djdevx.utils.installable.peers import (
     call_peer,
     sync_on_add,
