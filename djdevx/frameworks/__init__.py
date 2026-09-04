@@ -10,4 +10,5 @@ app = domain_app(
     registry=FRAMEWORK_REGISTRY,
     discover_path=__path__,
     discover_name=__name__,
+    supports_multi=True,
 )

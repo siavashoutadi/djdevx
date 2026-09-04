@@ -1,9 +1,9 @@
-from .._base import BaseFramework
+from .._base import CSSFramework
 from .._registry import register
 
 
 @register
-class FrankenUIFramework(BaseFramework):
+class FrankenUIFramework(CSSFramework):
     name: str = "frankenui"
     display_name: str = "Franken UI"
     description: str = "Franken UI CSS/JS framework"

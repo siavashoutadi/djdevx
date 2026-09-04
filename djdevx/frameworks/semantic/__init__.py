@@ -1,9 +1,9 @@
-from .._base import BaseFramework
+from .._base import CSSFramework
 from .._registry import register
 
 
 @register
-class SemanticFramework(BaseFramework):
+class SemanticFramework(CSSFramework):
     name: str = "semantic"
     display_name: str = "Semantic UI"
     description: str = "Semantic UI CSS/JS framework"

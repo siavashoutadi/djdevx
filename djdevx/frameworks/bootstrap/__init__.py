@@ -1,9 +1,9 @@
-from .._base import BaseFramework
+from .._base import CSSFramework
 from .._registry import register
 
 
 @register
-class BootstrapFramework(BaseFramework):
+class BootstrapFramework(CSSFramework):
     name: str = "bootstrap"
     display_name: str = "Bootstrap"
     description: str = "Bootstrap CSS/JS framework"
