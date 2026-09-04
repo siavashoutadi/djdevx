@@ -43,11 +43,11 @@ def test_up_starts_all_down_services(tmp_path, monkeypatch):
     _project(tmp_path, monkeypatch)
     with (
         patch(
-            "djdevx.utils.services.registry.resolve_database_dev_service",
+            "djdevx.services.registry.resolve_database_dev_service",
             return_value=db,
         ),
         patch(
-            "djdevx.utils.services.registry.resolve_cache_dev_service",
+            "djdevx.services.registry.resolve_cache_dev_service",
             return_value=cache,
         ),
     ):
@@ -63,11 +63,11 @@ def test_up_skips_running_services(tmp_path, monkeypatch):
     _project(tmp_path, monkeypatch)
     with (
         patch(
-            "djdevx.utils.services.registry.resolve_database_dev_service",
+            "djdevx.services.registry.resolve_database_dev_service",
             return_value=db,
         ),
         patch(
-            "djdevx.utils.services.registry.resolve_cache_dev_service",
+            "djdevx.services.registry.resolve_cache_dev_service",
             return_value=cache,
         ),
     ):
@@ -88,11 +88,11 @@ def test_down_stops_running_services(tmp_path, monkeypatch):
     _project(tmp_path, monkeypatch)
     with (
         patch(
-            "djdevx.utils.services.registry.resolve_database_dev_service",
+            "djdevx.services.registry.resolve_database_dev_service",
             return_value=db,
         ),
         patch(
-            "djdevx.utils.services.registry.resolve_cache_dev_service",
+            "djdevx.services.registry.resolve_cache_dev_service",
             return_value=cache,
         ),
     ):
@@ -115,11 +115,11 @@ def test_status_reports_issues_for_down_services(tmp_path, monkeypatch):
     _project(tmp_path, monkeypatch)
     with (
         patch(
-            "djdevx.utils.services.registry.resolve_database_dev_service",
+            "djdevx.services.registry.resolve_database_dev_service",
             return_value=db,
         ),
         patch(
-            "djdevx.utils.services.registry.resolve_cache_dev_service",
+            "djdevx.services.registry.resolve_cache_dev_service",
             return_value=cache,
         ),
         patch("djdevx.dev.status.PixiRunner") as pixi_cls,
@@ -141,11 +141,11 @@ def test_status_shows_state_and_settings(tmp_path, monkeypatch):
     _project(tmp_path, monkeypatch)
     with (
         patch(
-            "djdevx.utils.services.registry.resolve_database_dev_service",
+            "djdevx.services.registry.resolve_database_dev_service",
             return_value=db,
         ),
         patch(
-            "djdevx.utils.services.registry.resolve_cache_dev_service",
+            "djdevx.services.registry.resolve_cache_dev_service",
             return_value=cache,
         ),
         patch("djdevx.dev.status.PixiRunner") as pixi_cls,

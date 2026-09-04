@@ -6,7 +6,7 @@ from .._base import BaseDatabase
 from .._registry import register
 from ....utils.devcontainer import ServiceConfig, VolumeConfig, DockerComposeManager
 from ....utils.console.print import NestedStep
-from ....utils.services import PostgresService
+from ....services import PostgresService
 from ....utils.types.pixi_types import PixiPackageSpec
 
 POSTGRES_ENV_VARIABLES = {

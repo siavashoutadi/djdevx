@@ -14,7 +14,7 @@ pre-refactor behaviour: database (postgres), then cache (redis), then otel
 
 from pathlib import Path
 
-from ..tracking import ProjectTracking, Section
+from ..utils.tracking import ProjectTracking, Section
 from .base import BaseDevService
 from .otel import OpenObserveService, OtelCollectorService
 from .postgres import PostgresService

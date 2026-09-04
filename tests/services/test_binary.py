@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from djdevx.utils.services import binary
+from djdevx.services import binary
 
 
 def _tarball_bytes(payload_name: str = "otelcol-contrib") -> bytes:

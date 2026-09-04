@@ -2,12 +2,12 @@
 
 from unittest.mock import MagicMock, patch
 
-from djdevx.utils.services.redis import RedisService
+from djdevx.services.redis import RedisService
 
 
 def make_service(root, returncode=0, stdout="PONG"):
     """Build a RedisService backed by a mocked PixiRunner."""
-    with patch("djdevx.utils.services.base.PixiRunner") as mock_cls:
+    with patch("djdevx.services.base.PixiRunner") as mock_cls:
         runner = mock_cls.return_value
         runner.run_pixi_command.return_value = MagicMock(
             returncode=returncode, stdout=stdout
@@ -64,7 +64,7 @@ def test_up_starts_redis_server(tmp_path):
     not_running = MagicMock(returncode=1, stdout="")
     ok = MagicMock(returncode=0, stdout="")
     pong = MagicMock(returncode=0, stdout="PONG")
-    with patch("djdevx.utils.services.base.PixiRunner") as mock_cls:
+    with patch("djdevx.services.base.PixiRunner") as mock_cls:
         runner = mock_cls.return_value
         runner.run_pixi_command.side_effect = [not_running, ok, pong]
         service = RedisService(project_root=tmp_path)

@@ -1,7 +1,7 @@
 """ddx dev down — stop installed database/cache services."""
 
 from ..utils.console.print import print_console
-from ..utils.services import resolve_dev_services
+from ..services import resolve_dev_services
 
 
 def down() -> None:

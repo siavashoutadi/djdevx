@@ -5,7 +5,7 @@ from ..settings.secrets import list_secrets
 from ..utils.console.print import GREEN_CHECK_MARK, RED_CROSS_MARK, print_console
 from ..utils.django.manage_commands import ManageCommands
 from ..utils.project.pixi_runner import PixiRunner
-from ..utils.services import resolve_dev_services
+from ..services import resolve_dev_services
 from ..settings.source import DEV
 
 

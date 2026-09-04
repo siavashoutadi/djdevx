@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import ClassVar
 
-from ..console.print import print_console
+from ..utils.console.print import print_console
 from .base import BaseDevService
 
 

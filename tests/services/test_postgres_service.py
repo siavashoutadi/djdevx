@@ -2,12 +2,12 @@
 
 from unittest.mock import MagicMock, patch
 
-from djdevx.utils.services.postgres import PostgresService
+from djdevx.services.postgres import PostgresService
 
 
 def make_service(root, returncode=0, stdout="", side_effect=None):
     """Build a PostgresService backed by a mocked PixiRunner."""
-    with patch("djdevx.utils.services.base.PixiRunner") as mock_cls:
+    with patch("djdevx.services.base.PixiRunner") as mock_cls:
         runner = mock_cls.return_value
         if side_effect is not None:
             runner.run_pixi_command.side_effect = side_effect
@@ -209,7 +209,7 @@ def test_up_raises_when_not_ready(tmp_path):
 
     service, _ = make_service(tmp_path, side_effect=side_effect)
     with (
-        patch("djdevx.utils.services.base.time.sleep"),
+        patch("djdevx.services.base.time.sleep"),
         pytest.raises(RuntimeError, match="did not become ready"),
     ):
         service.up()

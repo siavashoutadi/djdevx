@@ -1,6 +1,6 @@
 """Tests for resolve_database_dev_service / resolve_cache_dev_service."""
 
-from djdevx.utils.services import (
+from djdevx.services import (
     PostgresService,
     RedisService,
     resolve_cache_dev_service,

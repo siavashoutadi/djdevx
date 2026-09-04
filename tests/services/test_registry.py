@@ -2,7 +2,7 @@
 
 import pytest
 
-from djdevx.utils.services import (
+from djdevx.services import (
     OpenObserveService,
     OtelCollectorService,
     PostgresService,
@@ -14,7 +14,7 @@ from djdevx.utils.services import (
     resolve_openobserve_dev_service,
     resolve_otel_dev_services,
 )
-from djdevx.utils.services.registry import SERVICE_REGISTRY
+from djdevx.services.registry import SERVICE_REGISTRY
 from djdevx.utils.tracking import ProjectTracking, Section
 
 

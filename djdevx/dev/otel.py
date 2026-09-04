@@ -4,7 +4,7 @@ import typer
 
 from ..utils.console.print import print_console
 from ..utils.devcontainer.detect import in_devcontainer
-from ..utils.services import BaseDevService, resolve_otel_dev_services
+from ..services import BaseDevService, resolve_otel_dev_services
 
 app = typer.Typer(no_args_is_help=True)
 

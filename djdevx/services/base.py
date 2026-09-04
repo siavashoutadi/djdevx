@@ -13,9 +13,9 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import ClassVar
 
-from ..console.print import print_console
-from ..project.pixi_runner import PixiRunner
-from ..project.project_structure import ProjectStructure
+from ..utils.console.print import print_console
+from ..utils.project.pixi_runner import PixiRunner
+from ..utils.project.project_structure import ProjectStructure
 
 
 class _StepGroupWrapper:

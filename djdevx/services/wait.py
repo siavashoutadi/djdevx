@@ -1,7 +1,7 @@
 """Shared process / port health-check helpers for pixi-native dev services.
 
 These helpers originally lived (in private-copy form) inside
-``djdevx.utils.services.otel``. They are extracted here so any socket-based
+``djdevx.services.otel``. They are extracted here so any socket-based
 service (Postgres, Redis, OTel collector, OpenObserve) can reuse the same
 "wait until the service is actually listening" logic instead of duplicating
 probe/retry code.

@@ -25,7 +25,7 @@ def runserver(ctx: typer.Context) -> None:
     Any additional arguments (including ``--help``) are forwarded to the
     underlying Django ``runserver`` command.
     """
-    from ..utils.services import resolve_dev_services
+    from ..services import resolve_dev_services
 
     services = resolve_dev_services()
     if services:

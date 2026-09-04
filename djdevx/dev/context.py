@@ -21,7 +21,7 @@ from ..utils.devcontainer.detect import (
     read_devcontainer_services,
 )
 from ..utils.project.project_structure import ProjectStructure
-from ..utils.services import (
+from ..services import (
     BaseDevService,
     resolve_cache_dev_service,
     resolve_database_dev_service,

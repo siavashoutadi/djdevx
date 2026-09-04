@@ -2,7 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 
-from djdevx.utils.services.base import BaseDevService, _StepGroupWrapper
+from djdevx.services.base import BaseDevService, _StepGroupWrapper
 
 
 class _ConcreteService(BaseDevService):
@@ -35,13 +35,13 @@ def test_wait_until_ready_returns_true_when_probe_becomes_true(tmp_path):
     def _probe():
         return next(probe)
 
-    with patch("djdevx.utils.services.base.time.sleep"):
+    with patch("djdevx.services.base.time.sleep"):
         assert service.wait_until_ready(_probe, retries=5) is True
 
 
 def test_wait_until_ready_returns_false_when_probe_never_true(tmp_path):
     service = _make_service(tmp_path)
-    with patch("djdevx.utils.services.base.time.sleep"):
+    with patch("djdevx.services.base.time.sleep"):
         assert service.wait_until_ready(lambda: False, retries=3) is False
 
 
@@ -51,7 +51,7 @@ def test_wait_until_ready_ignores_oserror_from_probe(tmp_path):
     def _probe():
         raise OSError("conn refused")
 
-    with patch("djdevx.utils.services.base.time.sleep"):
+    with patch("djdevx.services.base.time.sleep"):
         assert service.wait_until_ready(_probe, retries=3) is False
 
 
@@ -64,7 +64,7 @@ def test_step_group_returns_wrapped_parent_step(tmp_path):
 
 def test_step_group_wraps_standalone_group(tmp_path):
     service = _make_service(tmp_path)
-    with patch("djdevx.utils.services.base.print_console.step_group") as mk:
+    with patch("djdevx.services.base.print_console.step_group") as mk:
         group = mk.return_value
         wrapped = service.step_group("title", "done")
     assert isinstance(wrapped, _StepGroupWrapper)

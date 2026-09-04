@@ -5,7 +5,7 @@ import typer
 from ..utils.console.print import print_console
 from ..utils.django.manage_commands import ManageCommands
 from ..utils.project.pixi_runner import PixiRunner
-from ..utils.services import BaseDevService, resolve_database_dev_service
+from ..services import BaseDevService, resolve_database_dev_service
 
 app = typer.Typer(no_args_is_help=True)
 

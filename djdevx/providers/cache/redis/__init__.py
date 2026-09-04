@@ -6,7 +6,7 @@ from .._base import BaseCache
 from .._registry import register
 from ....utils.devcontainer import ServiceConfig, VolumeConfig, DockerComposeManager
 from ....utils.console.print import NestedStep
-from ....utils.services import RedisService
+from ....services import RedisService
 from ....utils.types.pixi_types import PixiPackageSpec
 
 REDIS_DOCKER_SERVICE: ServiceConfig = {
