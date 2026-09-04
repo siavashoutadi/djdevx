@@ -710,11 +710,6 @@ $ djdevx dev [OPTIONS] COMMAND [ARGS]...
 
 Start the local dev environment (idempotent) and run the dev server.
 
-Inside a devcontainer the database/redis services are started by the
-devcontainer compose, so only settings/migrations/server run here. On a
-plain machine the pixi-native services are started. In both cases the
-resolved service endpoints are printed.
-
 Any additional arguments are forwarded to the dev server command.
 
 **Usage**:

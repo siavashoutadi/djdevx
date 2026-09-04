@@ -40,14 +40,18 @@ class _Invocation:
         monkeypatch.chdir(tmp_path)
         (tmp_path / "djdevx.toml").write_text("")
         with (
-            patch("djdevx.dev.start.PixiRunner") as self.pixi_cls,
-            patch("djdevx.dev.start._init_settings") as self.init_settings,
-            patch("djdevx.dev.start.resolve_database_dev_service") as self.resolve_db,
-            patch("djdevx.dev.start.resolve_cache_dev_service") as self.resolve_cache,
+            patch("djdevx.dev.pipeline.PixiRunner") as self.pixi_cls,
+            patch("djdevx.dev.pipeline._init_settings") as self.init_settings,
+            patch(
+                "djdevx.dev.pipeline.resolve_database_dev_service"
+            ) as self.resolve_db,
+            patch(
+                "djdevx.dev.pipeline.resolve_cache_dev_service"
+            ) as self.resolve_cache,
             patch.object(
                 ManageCommands, "migrations_pending", return_value=True
             ) as self.migrations_pending,
-            patch("djdevx.dev.start.server_command") as self.server_command,
+            patch("djdevx.dev.pipeline.server_command") as self.server_command,
         ):
             self.pixi_cls.return_value = self.pixi
             self.resolve_db.return_value = self.db

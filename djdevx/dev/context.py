@@ -61,7 +61,7 @@ def _native_endpoints(
     for service in services:
         creds = None
         if hasattr(service, "password") and getattr(service, "password", ""):
-            creds = f"{service.dev_default_password or 'password'}"
+            creds = f"{service.password}"
         endpoints.append(
             ServiceEndpoint(
                 name=service.name,
