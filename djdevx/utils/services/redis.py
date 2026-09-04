@@ -53,6 +53,28 @@ class RedisService(BaseDevService):
             group.done()
         return up
 
+    def _is_ready(self) -> bool:
+        """Cheap readiness probe (no CLI output) used by ``wait_until_ready``."""
+        try:
+            result = self.run_pixi(
+                "run",
+                "redis-cli",
+                "-p",
+                str(self.port),
+                "-a",
+                self.password,
+                "ping",
+                timeout=15,
+            )
+        except OSError:
+            return False
+        stdout = (
+            result.stdout.decode()
+            if isinstance(result.stdout, bytes)
+            else (result.stdout or "")
+        )
+        return result.returncode == 0 and "PONG" in stdout
+
     def up(self, step=None) -> None:
         self.data_dir.mkdir(parents=True, exist_ok=True)
         if self.is_up(step=step):
@@ -84,6 +106,11 @@ class RedisService(BaseDevService):
                 raise RuntimeError(
                     f"redis-server failed (exit {result.returncode}): "
                     f"{result.stderr.decode().strip()}"
+                )
+            if not self.wait_until_ready(lambda: self._is_ready(), what="redis"):
+                raise RuntimeError(
+                    f"{self.display_name} did not become ready on port {self.port} "
+                    f"after `redis-server --daemonize yes`"
                 )
             group.ok(f"started {self.display_name.lower()} on port {self.port}")
             self._set_port_env(quiet=True)
