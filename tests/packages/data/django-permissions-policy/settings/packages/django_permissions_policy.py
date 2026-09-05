@@ -1,5 +1,4 @@
 from settings.django.base import MIDDLEWARE
-from typing import Dict, List
 
 permission_policy_middleware = "django_permissions_policy.PermissionsPolicyMiddleware"
 
@@ -8,7 +7,7 @@ if permission_policy_middleware not in MIDDLEWARE:
     MIDDLEWARE.insert(security_index + 1, permission_policy_middleware)
 
 
-PERMISSIONS_POLICY: Dict[str, List[str]] = {
+PERMISSIONS_POLICY: dict[str, list[str]] = {
     "accelerometer": [],
     "ambient-light-sensor": [],
     "autoplay": [],
