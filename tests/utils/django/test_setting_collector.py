@@ -8,6 +8,7 @@ from djdevx.utils.project.setting_collector import (
     _extract_defaults,
     _is_secret_str,
     _parse_settings_file,
+    DYNAMIC,
     SecretInfo,
     ConfigVarInfo,
     SettingCollector,
@@ -189,6 +190,118 @@ class MySettings(AppBaseSettings):
         assert isinstance(class_node, ast.ClassDef)
         result = _extract_defaults(class_node, "get_prod_defaults")
         assert result == {"key": "prod_value"}
+
+    def test_extract_dynamic_value_keeps_other_keys(self) -> None:
+        """A non-literal default shouldn't discard the whole dict."""
+        code = """
+def _endpoint() -> str:
+    return "http://localhost:4318"
+
+class MySettings(AppBaseSettings):
+    @classmethod
+    def get_dev_defaults(cls) -> dict:
+        return {"endpoint": _endpoint(), "amount": 42}
+"""
+        tree = ast.parse(code)
+        class_node = tree.body[1]
+        assert isinstance(class_node, ast.ClassDef)
+        result = _extract_defaults(class_node, "get_dev_defaults")
+        assert result == {"endpoint": DYNAMIC, "amount": 42}
+
+    def test_extract_all_dynamic(self) -> None:
+        code = """
+def _endpoint() -> str:
+    return "http://localhost:4318"
+
+class MySettings(AppBaseSettings):
+    @classmethod
+    def get_dev_defaults(cls) -> dict:
+        return {"endpoint": _endpoint()}
+"""
+        tree = ast.parse(code)
+        class_node = tree.body[1]
+        assert isinstance(class_node, ast.ClassDef)
+        result = _extract_defaults(class_node, "get_dev_defaults")
+        assert result == {"endpoint": DYNAMIC}
+
+
+# ── _parse_settings_file (dev-guard awareness) ─────────────────────────────────
+
+
+class TestParseSettingsFileDevGuards:
+    def test_if_not_is_dev_fields_not_dev_relevant(self, tmp_path: Path) -> None:
+        file = tmp_path / "settings.py"
+        file.write_text("""
+from pydantic import SecretStr
+from settings.utils.base_settings import AppBaseSettings, IS_DEV
+
+if not IS_DEV:
+    class ProdOnly(AppBaseSettings):
+        api_key: SecretStr
+        bucket_name: str
+""")
+        secrets, configs = _parse_settings_file(file)
+        assert len(secrets) == 1
+        assert secrets[0][0] == "api_key"
+        assert secrets[0][5] is False  # dev_relevant
+        assert len(configs) == 1
+        assert configs[0][0] == "bucket_name"
+        assert configs[0][6] is False  # dev_relevant
+
+    def test_if_is_dev_else_fields_honor_guard(self, tmp_path: Path) -> None:
+        file = tmp_path / "settings.py"
+        file.write_text("""
+from settings.utils.base_settings import AppBaseSettings, IS_DEV
+
+if IS_DEV:
+    pass
+else:
+    class CorsSettings(AppBaseSettings):
+        cors_allowed_origins: list[str]
+""")
+        secrets, configs = _parse_settings_file(file)
+        assert len(secrets) == 0
+        assert len(configs) == 1
+        assert configs[0][0] == "cors_allowed_origins"
+        assert configs[0][6] is False  # dev_relevant
+
+    def test_top_level_fields_are_dev_relevant(self, tmp_path: Path) -> None:
+        file = tmp_path / "settings.py"
+        file.write_text("""
+from settings.utils.base_settings import AppBaseSettings
+
+class DevSettings(AppBaseSettings):
+    debug: bool = True
+""")
+        secrets, configs = _parse_settings_file(file)
+        assert len(configs) == 1
+        assert configs[0][6] is True  # dev_relevant
+
+    def test_dev_only_guard_body_is_dev_relevant(self, tmp_path: Path) -> None:
+        file = tmp_path / "settings.py"
+        file.write_text("""
+from settings.utils.base_settings import AppBaseSettings, IS_DEV
+
+if IS_DEV:
+    class DevOnly(AppBaseSettings):
+        dev_flag: bool = True
+""")
+        secrets, configs = _parse_settings_file(file)
+        assert len(configs) == 1
+        assert configs[0][6] is True  # dev_relevant
+
+    def test_unrelated_if_condition_inherits_context(self, tmp_path: Path) -> None:
+        file = tmp_path / "settings.py"
+        file.write_text("""
+from settings.utils.base_settings import AppBaseSettings
+
+if __import__('os').environ.get('FLAG'):
+    class Wrapped(AppBaseSettings):
+        inner: str = "x"
+""")
+        secrets, configs = _parse_settings_file(file)
+        assert len(configs) == 1
+        assert configs[0][6] is True  # dev_relevant
 
 
 # ── _parse_settings_file ───────────────────────────────────────────────────────
@@ -430,6 +543,58 @@ class MySettings(AppBaseSettings):
         collector = SettingCollector(tmp_path)
         result = collector.collect()
         assert result.config_vars[0].dev_default is True
+
+    def test_prod_guarded_fields_marked_not_dev_relevant(self, tmp_path: Path) -> None:
+        self._make_settings_file(
+            tmp_path,
+            "packages",
+            "storages",
+            content="""
+from pydantic import SecretStr
+from settings.utils.base_settings import AppBaseSettings, IS_DEV
+
+if not IS_DEV:
+    class S3Settings(AppBaseSettings):
+        storages_s3_access_key: SecretStr
+        storages_s3_region_name: str
+""",
+        )
+        collector = SettingCollector(tmp_path)
+        result = collector.collect()
+        secret = result.secrets[0]
+        assert secret.name == "storages_s3_access_key"
+        assert secret.dev_relevant is False
+        config = result.config_vars[0]
+        assert config.name == "storages_s3_region_name"
+        assert config.dev_relevant is False
+
+    def test_dynamic_dev_default_kept(self, tmp_path: Path) -> None:
+        self._make_settings_file(
+            tmp_path,
+            "apps",
+            "otel",
+            content="""
+from typing import Any
+from settings.utils.base_settings import AppBaseSettings
+
+def _endpoint() -> str:
+    return "http://localhost:4318"
+
+class OtelSettings(AppBaseSettings):
+    otel_exporter_otlp_endpoint: str
+
+    @classmethod
+    def get_dev_defaults(cls) -> dict[str, Any]:
+        return {"otel_exporter_otlp_endpoint": _endpoint()}
+""",
+        )
+        collector = SettingCollector(tmp_path)
+        result = collector.collect()
+        assert len(result.config_vars) == 1
+        cfg = result.config_vars[0]
+        assert cfg.name == "otel_exporter_otlp_endpoint"
+        assert cfg.dev_default is DYNAMIC
+        assert cfg.dev_relevant is True
 
     def test_missing_settings_dir_returns_empty(self, tmp_path: Path) -> None:
         """No settings/ directory at all."""

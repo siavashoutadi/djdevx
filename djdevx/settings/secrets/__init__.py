@@ -29,6 +29,13 @@ ENV_CONFIG_LIST = {
 }
 
 
+def _env_relevant_secrets(secrets, env: str) -> list:
+    """Secrets active in the given environment (dev skips prod-guarded fields)."""
+    if env == DEV:
+        return [s for s in secrets if s.dev_relevant]
+    return list(secrets)
+
+
 # ------ secrets list ------
 
 
@@ -46,19 +53,21 @@ def list_secrets(
     collector = SettingCollector(project_root)
     result = collector.collect()
 
-    if not result.secrets:
+    secrets = _env_relevant_secrets(result.secrets, env)
+
+    if not secrets:
         print_console.info("No secrets declared in this project.")
         return
 
     _print_secrets_table(
         env,
-        result,
+        secrets,
         project_root,
         ENV_CONFIG_LIST[env]["resolve_source"],
     )
 
 
-def _print_secrets_table(env: str, result, project_root, resolve_source) -> None:
+def _print_secrets_table(env: str, secrets: list, project_root, resolve_source) -> None:
     """Render the full secrets status table."""
     with print_console.table(
         f"Secrets ({env})",
@@ -69,7 +78,7 @@ def _print_secrets_table(env: str, result, project_root, resolve_source) -> None
         ],
         show_lines=False,
     ) as tbl:
-        for secret in result.secrets:
+        for secret in secrets:
             source = resolve_source(secret, project_root)
             if source == SecretSource.CLASS_DEFAULT:
                 status = YELLOW_CHECKMARK
@@ -114,7 +123,7 @@ def _init_dev(result, project_root) -> None:
     skipped = 0
     dev_default_skipped = 0
 
-    for secret in result.secrets:
+    for secret in _env_relevant_secrets(result.secrets, DEV):
         source = resolve_secret_source_dev(secret, project_root)
         if source != SecretSource.MISSING and source != SecretSource.DEV_DEFAULT:
             skipped += 1
@@ -227,9 +236,10 @@ def verify(
     result = collector.collect()
 
     cfg = ENV_CONFIG_VERIFY[env]
+    secrets = _env_relevant_secrets(result.secrets, env)
     missing: list[str] = []
     optional: list[str] = []
-    for secret in result.secrets:
+    for secret in secrets:
         source = cfg["resolve_source"](secret, project_root)
         if source == SecretSource.MISSING:
             missing.append(secret.name)
@@ -241,8 +251,8 @@ def verify(
 
     if missing:
         print_console.error(f"{len(missing)} secret(s) missing {cfg['error_msg']}:")
-        _print_secrets_table(env, result, project_root, cfg["resolve_source"])
+        _print_secrets_table(env, secrets, project_root, cfg["resolve_source"])
         print_console.info(f"\nRun: ddx settings secrets {cfg['fix_cmd']}")
         raise typer.Exit(code=1)
 
-    print_console.ok(f"All {len(result.secrets)} secret(s) are present.")
+    print_console.ok(f"All {len(secrets)} secret(s) are present.")

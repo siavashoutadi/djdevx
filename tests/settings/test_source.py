@@ -20,7 +20,7 @@ from djdevx.settings.source import (
     resolve_secret_source_dev,
     resolve_secret_source_prod,
 )
-from djdevx.utils.project.setting_collector import ConfigVarInfo, SecretInfo
+from djdevx.utils.project.setting_collector import DYNAMIC, ConfigVarInfo, SecretInfo
 
 
 # ── Fixtures ───────────────────────────────────────────────────────────────────
@@ -142,6 +142,21 @@ class TestResolveConfigSourceDev:
         )
         src = resolve_config_source_dev(config_var, backend_root)
         assert src == ConfigSource.MISSING
+
+    def test_dynamic_dev_default_not_missing(self, backend_root: Path) -> None:
+        """A non-literal dev default (DYNAMIC) counts as a dev default."""
+        config_var = ConfigVarInfo(
+            name="endpoint", source_file=Path("x.py"), dev_default=DYNAMIC
+        )
+        src = resolve_config_source_dev(config_var, backend_root)
+        assert src == ConfigSource.DEV_DEFAULT
+
+    def test_dynamic_dev_default_value(self, backend_root: Path) -> None:
+        config_var = ConfigVarInfo(
+            name="endpoint", source_file=Path("x.py"), dev_default=DYNAMIC
+        )
+        val = resolve_config_value_dev(config_var, backend_root)
+        assert val is DYNAMIC
 
     def test_os_environ_overrides_dot_env(
         self, backend_root: Path, config_var: ConfigVarInfo

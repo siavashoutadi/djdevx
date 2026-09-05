@@ -72,15 +72,24 @@ def list_configs(
     collector = SettingCollector(project_root)
     result = collector.collect()
 
-    if not result.config_vars:
+    config_vars = _env_relevant_config_vars(result.config_vars, env)
+
+    if not config_vars:
         print_console.info("No config vars declared in this project.")
         return
 
     cfg = _ENV_CONFIG_LIST[env]
-    _print_configs_table(env, result, project_root, cfg)
+    _print_configs_table(env, config_vars, project_root, cfg)
 
 
-def _print_configs_table(env: str, result, project_root, cfg: dict) -> None:
+def _env_relevant_config_vars(config_vars, env: str) -> list:
+    """Config vars active in the given environment (dev skips prod-guarded fields)."""
+    if env == DEV:
+        return [c for c in config_vars if c.dev_relevant]
+    return list(config_vars)
+
+
+def _print_configs_table(env: str, config_vars: list, project_root, cfg: dict) -> None:
     """Render the full config vars status table."""
     with print_console.table(
         f"Config vars ({env})",
@@ -101,7 +110,7 @@ def _print_configs_table(env: str, result, project_root, cfg: dict) -> None:
         ],
         show_lines=False,
     ) as tbl:
-        for config_var in result.config_vars:
+        for config_var in config_vars:
             source = cfg["resolve_source"](config_var, project_root)
             if source == ConfigSource.CLASS_DEFAULT:
                 status = YELLOW_CHECKMARK
@@ -268,6 +277,22 @@ def init(
         return
 
     if env == DEV:
+        config_vars = _env_relevant_config_vars(result.config_vars, env)
+        missing = [
+            c.name
+            for c in config_vars
+            if resolve_config_source_dev(c, project_root) == ConfigSource.MISSING
+        ]
+        if missing:
+            msg = f"{len(missing)} config var(s) missing with no {DEV} default:"
+            print_console.error(msg)
+            _print_configs_table(
+                env, config_vars, project_root, _ENV_CONFIG_VERIFY[DEV]
+            )
+            print_console.info(
+                "\nAdd the missing values to .env or provide a dev default in the settings class."
+            )
+            raise typer.Exit(code=1)
         print_console.ok(
             "Configs ready: using built-in defaults. Create or edit .env to override defaults for local development."
         )
@@ -344,9 +369,10 @@ def verify(
     result = collector.collect()
 
     cfg = _ENV_CONFIG_VERIFY[env]
+    config_vars = _env_relevant_config_vars(result.config_vars, env)
     missing: list[str] = []
     optional: list[str] = []
-    for config_var in result.config_vars:
+    for config_var in config_vars:
         source = cfg["resolve_source"](config_var, project_root)
         if source == ConfigSource.MISSING:
             missing.append(config_var.name)
@@ -361,11 +387,11 @@ def verify(
     if missing:
         msg = f"{len(missing)} config var(s) missing{cfg['error_suffix']}:"
         print_console.error(msg)
-        _print_configs_table(env, result, project_root, cfg)
+        _print_configs_table(env, config_vars, project_root, cfg)
         fix_cmd = cfg.get("fix_cmd")
         if fix_cmd:
             print_console.info(f"\nRun: {fix_cmd}")
         raise typer.Exit(code=1)
 
-    total = len(result.config_vars)
+    total = len(config_vars)
     print_console.ok(f"All {total} config var(s) are present.")

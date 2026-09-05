@@ -12,9 +12,12 @@ subclasses without importing or executing the project's code.
 Secrets   = fields annotated as SecretStr (or Optional[SecretStr])
 Config vars = all other annotated fields (str, int, bool, list, …)
 
-Dev defaults are extracted from the get_dev_defaults() method body, which is
-always a plain dict literal in this codebase and is therefore safe to evaluate
-with ast.literal_eval without executing any code.
+Dev defaults are extracted from the get_dev_defaults() method body without
+executing any code. Static literals are evaluated with ast.literal_eval;
+non-literal expressions (e.g. function calls the project runs at import time)
+are kept as a DYNAMIC sentinel so the field is still treated as having a dev
+default. Fields declared only inside ``if not IS_DEV:`` / ``else:`` guards are
+tagged dev_relevant=False.
 """
 
 import ast
@@ -35,6 +38,7 @@ class SecretInfo:
     dev_default: Any = None
     prod_default: Any = None
     has_class_default: bool = False
+    dev_relevant: bool = True
 
     @property
     def auto_generatable(self) -> bool:
@@ -56,6 +60,7 @@ class ConfigVarInfo:
     prod_default: Any = None
     class_default: Any = None
     has_class_default: bool = False
+    dev_relevant: bool = True
 
 
 @dataclass
@@ -64,6 +69,24 @@ class CollectedSettings:
 
     secrets: list[SecretInfo] = field(default_factory=list)
     config_vars: list[ConfigVarInfo] = field(default_factory=list)
+
+
+class _Dynamic:
+    """Sentinel for a dev/prod default that isn't a static literal.
+
+    The project runs the real default at import time (e.g. a function call in
+    get_dev_defaults()), but it can't be evaluated without executing the module.
+    We still treat the field as having a default so it isn't reported missing.
+    """
+
+    def __repr__(self) -> str:
+        return "(dynamic)"
+
+    def __bool__(self) -> bool:
+        return True
+
+
+DYNAMIC = _Dynamic()
 
 
 def _is_secret_str(annotation: ast.expr) -> bool:
@@ -94,8 +117,24 @@ def _is_secret_str(annotation: ast.expr) -> bool:
     return False
 
 
+def _eval_literal(value: ast.expr) -> Any:
+    """Best-effort literal evaluation of a default expression.
+
+    Returns the evaluated value, or the DYNAMIC sentinel when the expression is
+    not a static literal (e.g. a function call that the project executes at
+    import time)."""
+    try:
+        return ast.literal_eval(value)
+    except (ValueError, TypeError, SyntaxError):
+        return DYNAMIC
+
+
 def _extract_defaults(class_node: ast.ClassDef, method_name: str) -> dict[str, Any]:
-    """Extract the return value of a defaults classmethod from the class AST."""
+    """Extract the return value of a defaults classmethod from the class AST.
+
+    Each dict value is evaluated independently so a single non-literal
+    expression (e.g. a function call) doesn't discard the whole dict.
+    """
     for node in class_node.body:
         if not isinstance(node, ast.FunctionDef):
             continue
@@ -103,10 +142,22 @@ def _extract_defaults(class_node: ast.ClassDef, method_name: str) -> dict[str, A
             continue
         for stmt in ast.walk(node):
             if isinstance(stmt, ast.Return) and stmt.value is not None:
-                try:
-                    return ast.literal_eval(stmt.value)
-                except (ValueError, TypeError):
-                    pass
+                value = stmt.value
+                if isinstance(value, ast.Dict):
+                    result: dict[str, Any] = {}
+                    for key_node, val_node in zip(value.keys, value.values):
+                        if key_node is None:
+                            continue
+                        try:
+                            key = ast.literal_eval(key_node)
+                        except (ValueError, TypeError, SyntaxError):
+                            continue
+                        result[key] = _eval_literal(val_node)
+                    return result
+                result = _eval_literal(value)
+                if isinstance(result, dict):
+                    return result
+                return {}
     return {}
 
 
@@ -160,10 +211,42 @@ def _extract_class_default(annotation_node: ast.AnnAssign) -> Any:
         return None
 
 
+def _walk_classes(node: ast.AST, dev_relevant: bool = True):
+    """Yield (ClassDef, dev_relevant) walking a module while tracking guards.
+
+    Class bodies nested under ``if IS_DEV:`` / ``if not IS_DEV:`` are tagged
+    with whether they execute during local development. Other conditionals
+    inherit the surrounding context.
+    """
+    if isinstance(node, ast.If):
+        test = ast.unparse(node.test)
+        if test == "IS_DEV":
+            body_dev, orelse_dev = True, False
+        elif test == "not IS_DEV":
+            body_dev, orelse_dev = False, True
+        else:
+            body_dev = orelse_dev = dev_relevant
+        for stmt in node.body:
+            yield from _walk_classes(stmt, body_dev)
+        for stmt in node.orelse:
+            yield from _walk_classes(stmt, orelse_dev)
+        return
+    if isinstance(node, ast.ClassDef):
+        yield node, dev_relevant
+        return
+    if isinstance(node, ast.Module):
+        for stmt in node.body:
+            yield from _walk_classes(stmt, dev_relevant)
+        return
+    for child in ast.iter_child_nodes(node):
+        yield from _walk_classes(child, dev_relevant)
+
+
 def _parse_settings_file(
     filepath: Path,
 ) -> tuple[
-    list[tuple[str, Any, Any, Any, bool]], list[tuple[str, str, Any, Any, Any, bool]]
+    list[tuple[str, Any, Any, Any, bool, bool]],
+    list[tuple[str, str, Any, Any, Any, bool, bool]],
 ]:
     """Parse a single settings file via AST."""
     try:
@@ -172,13 +255,10 @@ def _parse_settings_file(
     except (OSError, SyntaxError):
         return [], []
 
-    secret_fields: list[tuple[str, Any, Any, Any, bool]] = []
-    config_vars: list[tuple[str, str, Any, Any, Any, bool]] = []
+    secret_fields: list[tuple[str, Any, Any, Any, bool, bool]] = []
+    config_vars: list[tuple[str, str, Any, Any, Any, bool, bool]] = []
 
-    for node in ast.walk(tree):
-        if not isinstance(node, ast.ClassDef):
-            continue
-
+    for node, dev_relevant in _walk_classes(tree):
         base_names = set()
         for base in node.bases:
             if isinstance(base, ast.Name):
@@ -213,6 +293,7 @@ def _parse_settings_file(
                         prod_defaults.get(fname),
                         class_default,
                         has_class_default,
+                        dev_relevant,
                     )
                 )
             else:
@@ -225,6 +306,7 @@ def _parse_settings_file(
                         prod_defaults.get(fname),
                         class_default,
                         has_class_default,
+                        dev_relevant,
                     )
                 )
 
@@ -261,6 +343,7 @@ class SettingCollector:
                 prod_default,
                 class_default,
                 has_class_default,
+                dev_relevant,
             ) in secret_fields:
                 if name in seen_secrets:
                     continue
@@ -273,6 +356,7 @@ class SettingCollector:
                         dev_default=dev_default,
                         prod_default=prod_default or class_default,
                         has_class_default=has_class_default,
+                        dev_relevant=dev_relevant,
                     )
                 )
 
@@ -283,6 +367,7 @@ class SettingCollector:
                 prod_default,
                 class_default,
                 has_class_default,
+                dev_relevant,
             ) in config_vars_raw:
                 if name in seen_configs:
                     continue
@@ -296,6 +381,7 @@ class SettingCollector:
                         prod_default=prod_default or class_default,
                         class_default=class_default,
                         has_class_default=has_class_default,
+                        dev_relevant=dev_relevant,
                     )
                 )
 
