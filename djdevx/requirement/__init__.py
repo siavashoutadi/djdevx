@@ -116,7 +116,6 @@ def verify():
                 "Some requirements are missing. Please follow the links above to install them."
             )
             raise typer.Exit(code=1)
-        step.done()
 
 
 @app.command()
