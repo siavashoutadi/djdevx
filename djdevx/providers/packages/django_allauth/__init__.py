@@ -23,7 +23,7 @@ class AllauthPackage(BasePackage):
                 InstallParam(
                     name="email_subject_prefix",
                     help="Subject-line prefix for emails (e.g. '[example.com] - ')",
-                    prompt="Subject prefix for email messages",
+                    prompt="Subject prefix for email messages:",
                 ),
                 InstallParam(
                     name="enable_login_by_code",
@@ -36,7 +36,7 @@ class AllauthPackage(BasePackage):
                     name="account_url_prefix",
                     default="auth",
                     help="URL prefix for account URLs",
-                    prompt="URL prefix for account related URLs",
+                    prompt="URL prefix for account related URLs:",
                 ),
             ],
         ),

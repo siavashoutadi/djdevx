@@ -1,14 +1,12 @@
 {% extends "../allauth_base.html" %}
-{% load i18n %}
-{% load static %}
-{% load allauth account %}
-{% block title %}{% trans "Enter Sign-In Code" %}{% endblock title %}
+{% load account allauth i18n static %}
+{% block title %}{% translate "Enter Sign-In Code" %}{% endblock %}
 {% url 'account_confirm_login_code' as action_url %}
 {% block content %}
   <main class="mx-auto container">
     <div class="flex flex-1 flex-col justify-center px-6 py-4 lg:px-8">
       <div class="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 class="text-center text-2xl font-bold leading-9 tracking-tight">{% trans "Enter Sign-In Code" %}</h2>
+        <h2 class="text-center text-2xl font-bold leading-9 tracking-tight">{% translate "Enter Sign-In Code" %}</h2>
       </div>
       <div class="mt-4 sm:mx-auto sm:w-full sm:max-w-md">
         <p class="text-center text-sm text-gray-600 dark:text-gray-400 mb-2">
@@ -24,7 +22,7 @@
           <div class="my-2">
             <button type="submit"
                     class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm bg-black text-white hover:bg-slate-900 dark:bg-transparent dark:outline dark:outline-white dark:text-white dark:hover:text-gray-400 dark:hover:outline-gray-400">
-              {% trans "Confirm" %}
+              {% translate "Confirm" %}
             </button>
           </div>
           {% if redirect_field_value %}
@@ -46,14 +44,14 @@
               {% endif %}
               <button type="submit"
                       class="px-3 py-1.5 text-sm font-semibold text-black dark:text-white border border-black dark:border-white rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-                {% trans "Request new code" %}
+                {% translate "Request new code" %}
               </button>
             </form>
           {% endif %}
           {% if cancel_url %}
             <a href="{{ cancel_url }}"
                class="px-3 py-1.5 text-sm font-semibold text-black dark:text-white border border-black dark:border-white rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-              {% trans "Cancel" %}
+              {% translate "Cancel" %}
             </a>
           {% endif %}
         </div>

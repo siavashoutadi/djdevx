@@ -17,62 +17,62 @@ class PWAFeature(BaseFeature):
     install_params: list[InstallParam] = [
         InstallParam(
             name="app_name",
-            prompt="Please enter the display name for the application",
+            prompt="Please enter the display name for the application:",
         ),
         InstallParam(
             name="short_name",
-            prompt="Please enter the short name for the application",
+            prompt="Please enter the short name for the application:",
         ),
         InstallParam(
             name="description",
-            prompt="Please enter the description of the application",
+            prompt="Please enter the description of the application:",
         ),
         InstallParam(
             name="icon_path",
             prompt=(
                 "Path to the icon file to be used for generating the PWA icons "
-                "(PNG/JPEG)"
+                "(PNG/JPEG):"
             ),
             default="static/images/logo.png",
         ),
         InstallParam(
             name="background_color",
-            prompt="Please enter the background color of the application",
+            prompt="Please enter the background color of the application:",
             default="#ffffff",
         ),
         InstallParam(
             name="theme_color",
-            prompt="Please enter the theme color of the application",
+            prompt="Please enter the theme color of the application:",
             default="#000000",
         ),
         InstallParam(
             name="start_url",
-            prompt="Please enter the start URL of the application",
+            prompt="Please enter the start URL of the application:",
             default="/",
         ),
         InstallParam(
             name="dir",
-            prompt="Please enter the base direction of the application",
+            prompt="Please enter the base direction of the application:",
             default="ltr",
         ),
         InstallParam(
             name="scope",
-            prompt="Please enter the scope of the application (leave empty to skip)",
+            prompt="Please enter the scope of the application (leave empty to skip):",
             default="",
         ),
         InstallParam(
             name="orientation",
-            prompt="Please enter the default orientation of the application",
+            prompt="Please enter the default orientation of the application:",
             default="portrait",
         ),
         InstallParam(
             name="display",
-            prompt="Please enter the display mode of the application",
+            prompt="Please enter the display mode of the application:",
             default="standalone",
         ),
         InstallParam(
             name="language",
-            prompt="Please enter the primary language of the application",
+            prompt="Please enter the primary language of the application:",
             default="en",
         ),
     ]

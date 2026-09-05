@@ -1,7 +1,7 @@
 {% extends "./login_base.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Sign In One Time Code" %}{% endblock title %}
+{% block title %}{% translate "Sign In One Time Code" %}{% endblock %}
 
 {% block login_content %}
   <div id="code-tab" class="tab-pane active">
@@ -11,7 +11,7 @@
       <div class="my-2">
         <button type="submit"
                 class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm bg-black text-white hover:bg-slate-900 dark:bg-transparent dark:outline dark:outline-white dark:text-white dark:hover:text-gray-400 dark:hover:outline-gray-400">
-          {% trans "Request Code" %}
+          {% translate "Request Code" %}
         </button>
       </div>
       {% if redirect_field_value %}

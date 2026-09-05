@@ -1,13 +1,13 @@
 {% extends "../../allauth_base.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Device Authorized" %}{% endblock %}
+{% block title %}{% translate "Device Authorized" %}{% endblock %}
 
 {% block content %}
   <main class="mx-auto container">
     <div class="flex flex-1 flex-col justify-center px-6 py-4 lg:px-8">
       <div class="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 class="text-center text-2xl font-bold leading-9 tracking-tight">{% trans "Device Authorized" %}</h2>
+        <h2 class="text-center text-2xl font-bold leading-9 tracking-tight">{% translate "Device Authorized" %}</h2>
       </div>
       <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div class="p-4 bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-md">
@@ -20,4 +20,4 @@
       </div>
     </div>
   </main>
-{% endblock %}
+{% endblock content %}

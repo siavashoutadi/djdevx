@@ -1,8 +1,7 @@
 {% extends "account/signup_base.html" %}
-{% load i18n %}
-{% load allauth account %}
+{% load account allauth i18n %}
 
-{% block title %}{% trans "Passkey Sign Up" %}{% endblock title %}
+{% block title %}{% translate "Passkey Sign Up" %}{% endblock %}
 
 {% block signup_content %}
   <div id="passkey-tab" class="tab-pane active">
@@ -13,7 +12,7 @@
       <div class="my-2">
         <button type="submit"
                 class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm bg-black text-white hover:bg-slate-900 dark:bg-transparent dark:outline dark:outline-white dark:text-white dark:hover:text-gray-400 dark:hover:outline-gray-400">
-          {% trans "Sign Up" %}
+          {% translate "Sign Up" %}
         </button>
       </div>
       {% if redirect_field_value %}
