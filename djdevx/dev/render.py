@@ -43,7 +43,10 @@ def render_credentials_table(context: DevelopmentContext) -> None:
         if svc.port:
             print_console.info(f"  Port: {svc.port}")
         if svc.credentials:
-            print_console.info(f"  Credentials: {svc.credentials}")
+            if svc.username:
+                print_console.info(f"  Credentials: {svc.username} / {svc.credentials}")
+            else:
+                print_console.info(f"  Credentials: {svc.credentials}")
         if svc.url:
             print_console.link(f"  URL: {svc.url}", svc.url)
         print_console.rule()

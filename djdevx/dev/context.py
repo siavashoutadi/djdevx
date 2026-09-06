@@ -64,6 +64,9 @@ def _native_endpoints(
         creds = None
         if hasattr(service, "password") and getattr(service, "password", ""):
             creds = f"{service.password}"
+        username = None
+        if hasattr(service, "username") and getattr(service, "username", ""):
+            username = f"{service.username}"
         url = (
             f"http://localhost:{service.port}"
             if service.name == "openobserve"
@@ -75,6 +78,7 @@ def _native_endpoints(
                 display_name=service.display_name,
                 host="localhost",
                 port=service.port,
+                username=username,
                 credentials=creds,
                 url=url,
             )

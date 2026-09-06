@@ -61,6 +61,21 @@ def test_openobserve_up_launches_binary_with_env_not_flags(tmp_path):
     assert env["ZO_LOCAL_MODE"] == "true"
 
 
+def test_openobserve_username_uses_default_email(tmp_path):
+    service = OpenObserveService(project_root=tmp_path)
+    assert service.username == "admin@example.com"
+    assert service._root_user_email() == "admin@example.com"
+
+
+def test_openobserve_username_respects_secret(tmp_path):
+    secrets = tmp_path / ".secrets"
+    secrets.mkdir()
+    (secrets / "openobserve_email").write_text("dev@example.com")
+    service = OpenObserveService(project_root=tmp_path)
+    assert service.username == "dev@example.com"
+    assert service._root_user_email() == "dev@example.com"
+
+
 def test_collector_disables_builtin_prometheus_reader_for_dev():
     rendered = build_collector_config(
         project_name="demo",

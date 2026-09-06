@@ -15,6 +15,7 @@ class PostgresService(BaseDevService):
     data_subdir: ClassVar[str] = "postgres"
     secret_file_name: ClassVar[str] = "postgres_password"
     dev_default_password: ClassVar[str] = "password"
+    dev_default_username: ClassVar[str] = "postgres"
     port_env_key: ClassVar[str] = "POSTGRES_PORT"
     category: ClassVar[str] = "database"
 

@@ -43,6 +43,7 @@ class ServiceEndpoint:
     display_name: str
     host: str
     port: int
+    username: Optional[str] = None
     credentials: Optional[str] = None
     url: Optional[str] = None
 

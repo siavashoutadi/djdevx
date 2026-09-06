@@ -33,7 +33,8 @@ def test_credentials_prints_connect_ui(tmp_path, monkeypatch):
                 display_name="PostgreSQL",
                 host="localhost",
                 port=5432,
-                credentials="postgres",
+                username="postgres",
+                credentials="s3cr3t",
                 url=None,
             ),
             ServiceEndpoint(
@@ -51,7 +52,7 @@ def test_credentials_prints_connect_ui(tmp_path, monkeypatch):
     assert "PostgreSQL" in result.output
     assert "Host: localhost" in result.output
     assert "Port: 5432" in result.output
-    assert "Credentials: postgres" in result.output
+    assert "Credentials: postgres / s3cr3t" in result.output
     assert "OpenObserve" in result.output
     assert "Port: 5080" in result.output
     assert "http://localhost:5080" in result.output

@@ -53,6 +53,8 @@ class BaseDevService(ABC):
     data_subdir: ClassVar[str] = ""
     secret_file_name: ClassVar[str] = ""
     dev_default_password: ClassVar[str] = ""
+    username_secret_file_name: ClassVar[str] = ""
+    dev_default_username: ClassVar[str] = ""
     port_env_key: ClassVar[str] = ""
     category: ClassVar[str] = ""
 
@@ -97,6 +99,16 @@ class BaseDevService(ABC):
         if secret_path.exists():
             return secret_path.read_text().strip()
         return self.dev_default_password
+
+    @property
+    def username(self) -> str:
+        """Resolve the dev username from ``.secrets/<username_secret_file_name>`` or the dev default."""
+        if not self.username_secret_file_name:
+            return self.dev_default_username
+        secret_path = self.structure.root / ".secrets" / self.username_secret_file_name
+        if secret_path.exists():
+            return secret_path.read_text().strip()
+        return self.dev_default_username
 
     def _set_port_env(self, quiet: bool = False, step=None) -> None:
         """Set the service port as an environment variable for subprocesses.

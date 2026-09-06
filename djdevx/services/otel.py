@@ -247,6 +247,8 @@ class OpenObserveService(BaseDevService):
     data_subdir: ClassVar[str] = "data"
     secret_file_name: ClassVar[str] = "openobserve_password"
     dev_default_password: ClassVar[str] = OPENOBSERVE_DEFAULT_PASSWORD
+    username_secret_file_name: ClassVar[str] = "openobserve_email"
+    dev_default_username: ClassVar[str] = OPENOBSERVE_DEFAULT_EMAIL
     port_env_key: ClassVar[str] = "OPENOBSERVE_PORT"
     category: ClassVar[str] = "otel"
 
@@ -264,10 +266,7 @@ class OpenObserveService(BaseDevService):
         return self.service_dir / "openobserve.log"
 
     def _root_user_email(self) -> str:
-        secret_path = self.structure.root / ".secrets" / "openobserve_email"
-        if secret_path.exists():
-            return secret_path.read_text().strip()
-        return OPENOBSERVE_DEFAULT_EMAIL
+        return self.username
 
     def _ensure_binary(self, step=None) -> Path | None:
         if self.binary_path is not None and self.binary_path.exists():

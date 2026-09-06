@@ -7,12 +7,20 @@ from djdevx.core.console import print_console
 from djdevx.utils.devcontainer.detect import DevelopmentContext, ServiceEndpoint
 
 
-def _endpoint(name="postgres", display="PostgreSQL", port=5432, creds=None, url=None):
+def _endpoint(
+    name="postgres",
+    display="PostgreSQL",
+    port=5432,
+    creds=None,
+    url=None,
+    username=None,
+):
     return ServiceEndpoint(
         name=name,
         display_name=display,
         host="localhost",
         port=port,
+        username=username,
         credentials=creds,
         url=url,
     )
@@ -64,7 +72,7 @@ def test_services_table_devcontainer_title():
 
 def test_credentials_table_lists_connect_blocks():
     ctx = _native_ctx(
-        _endpoint(creds="s3cr3t", url="http://localhost:5432"),
+        _endpoint(creds="s3cr3t", url="http://localhost:5432", username="postgres"),
         _endpoint("redis", "Redis", 0),
     )
     with (
@@ -75,7 +83,7 @@ def test_credentials_table_lists_connect_blocks():
     ):
         render_credentials_table(ctx)
     lines = [call.args[0] for call in info.call_args_list]
-    assert "  Credentials: s3cr3t" in lines
+    assert "  Credentials: postgres / s3cr3t" in lines
     assert "  Port: 5432" in lines
     assert "  Host: localhost" in lines
     # Zero port is omitted, missing credentials omitted for redis.
