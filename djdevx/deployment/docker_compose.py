@@ -1,6 +1,7 @@
 """Docker Compose deployment plugin with Traefik ingress."""
 
 import re
+import secrets
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Self
@@ -8,17 +9,14 @@ from typing import Any, Self
 import yaml
 from dotenv import dotenv_values
 
-import secrets
+from djdevx.core.console import print_console
+from djdevx.core.paths import ProjectStructure
 
 from ..settings.source import setup_readline
 from ..utils.console import prompts
-from djdevx.core.console import print_console
 from ..utils.project.setting_collector import CollectedSettings, SettingCollector
-from djdevx.core.paths import ProjectStructure
 from ..utils.tracking import ProjectTracking, Section
-
 from ._base import BaseDeployPlugin, DeployParam
-
 
 # ---------------------------------------------------------------------------
 # Helper dataclass for Traefik deployment inputs
@@ -587,7 +585,7 @@ class DockerComposePlugin(BaseDeployPlugin):
         return build_collector_config(
             project_name=project_name,
             otlp_endpoint="0.0.0.0:4318",
-            openobserve_base_url="http://openobserve:5080",
+            openobserve_base_url="http://openobserve:5080/api/default",
             openobserve_authorization=f"Bearer {token}",
             stream_name=f"{project_name}-web",
         )

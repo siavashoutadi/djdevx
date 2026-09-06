@@ -1,11 +1,10 @@
 """Tests for OtelCollectorService and OpenObserveService — pixi-native OTel stack."""
 
 from pathlib import Path
-
 from unittest.mock import patch
 
 from djdevx.providers.features.otel.collector_config import build_collector_config
-from djdevx.services.otel import OpenObserveService
+from djdevx.services.otel import OpenObserveService, OtelCollectorService
 
 EXAMPLE_PASSWORD = "ZoAdmin123!"
 
@@ -80,8 +79,45 @@ def test_collector_disables_builtin_prometheus_reader_for_dev():
     rendered = build_collector_config(
         project_name="demo",
         otlp_endpoint="0.0.0.0:54199",
-        openobserve_base_url="http://localhost:5080",
+        openobserve_base_url="http://localhost:5080/api/default",
     )
     assert "endpoint: 0.0.0.0:54199" in rendered
     assert "level: none" in rendered
     assert "readers: []" in rendered
+
+
+def test_collector_config_uses_persisted_openobserve_port_when_not_up(tmp_path):
+    """Collector must target the persisted OpenObserve port + /api/default.
+
+    Regression: ``ddx dev up`` starts the collector before OpenObserve, so
+    ``is_up()`` is False at config-write time and the config fell back to the
+    hardcoded default ``http://localhost:5080``, sending telemetry to a dead
+    port. The persisted port must be used regardless of readiness.
+    """
+    collector = OtelCollectorService(project_root=tmp_path)
+    observe = OpenObserveService(project_root=tmp_path)
+    observe_port = observe.port
+
+    with patch(
+        "djdevx.services.registry.resolve_openobserve_dev_service",
+        return_value=observe,
+    ):
+        collector._ensure_config()
+
+    config = collector.config_path.read_text()
+    assert f"endpoint: http://localhost:{observe_port}/api/default" in config
+
+
+def test_discover_openobserve_base_includes_api_default(tmp_path):
+    collector = OtelCollectorService(project_root=tmp_path)
+    observe = OpenObserveService(project_root=tmp_path)
+    observe_port = observe.port
+
+    with patch(
+        "djdevx.services.registry.resolve_openobserve_dev_service",
+        return_value=observe,
+    ):
+        assert (
+            collector._discover_openobserve_base()
+            == f"http://localhost:{observe_port}/api/default"
+        )

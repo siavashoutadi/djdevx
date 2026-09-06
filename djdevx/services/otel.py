@@ -21,9 +21,6 @@ from pathlib import Path
 from typing import ClassVar
 
 from djdevx.core.console import print_console
-from ..utils.tracking import ProjectTracking
-from . import binary
-from .base import BaseDevService
 from djdevx.core.process import (
     is_pid_alive,
     is_port_open,
@@ -32,6 +29,10 @@ from djdevx.core.process import (
     wait_for_port,
     write_pid,
 )
+
+from ..utils.tracking import ProjectTracking
+from . import binary
+from .base import BaseDevService
 
 # Default OpenObserve bootstrap credentials (match the devcontainer image).
 OPENOBSERVE_DEFAULT_EMAIL = "admin@example.com"
@@ -98,18 +99,24 @@ class OtelCollectorService(BaseDevService):
         return self.structure.root.name
 
     def _discover_openobserve_base(self) -> str:
-        """Return the base URL of a running local OpenObserve (defaults to 5080)."""
+        """Return the OTLP ingest base URL of the local OpenObserve.
+
+        Uses the OpenObserve service's persisted port — available even before
+        OpenObserve has been started, because ``ddx dev up`` brings the
+        collector up first. Appends ``/api/default`` so the collector's
+        ``/v1/*`` suffix lands on OpenObserve's OTLP receiver.
+        """
         try:
             from .registry import resolve_openobserve_dev_service
 
             observe = resolve_openobserve_dev_service(project_root=self.structure.root)
-            if observe is not None and observe.is_up():
-                return f"http://localhost:{observe.port}"
+            if observe is not None:
+                return f"http://localhost:{observe.port}/api/default"
         except (OSError, RuntimeError, ValueError) as exc:
             self._log_debug(
                 f"OpenObserve discovery failed, using default base URL: {exc}"
             )
-        return "http://localhost:5080"
+        return "http://localhost:5080/api/default"
 
     def _ensure_config(self, step=None) -> None:
         from ..providers.features.otel.collector_config import build_collector_config

@@ -20,7 +20,7 @@ def build_collector_config(
     *,
     project_name: str,
     otlp_endpoint: str = "0.0.0.0:4318",
-    openobserve_base_url: str = "http://openobserve:5080",
+    openobserve_base_url: str = "http://openobserve:5080/api/default",
     openobserve_authorization: str = "Basic YWRtaW5AZXhhbXBsZS5jb206Wm9BZG1pbjEyMyE=",
     stream_name: str | None = None,
     include_shapes: tuple[str, ...] = ("traces", "metrics", "logs"),
@@ -30,7 +30,10 @@ def build_collector_config(
     Args:
         project_name: Project name used to build the default stream name.
         otlp_endpoint: Host:port the collector receives OTLP/HTTP on.
-        openobserve_base_url: Base URL of the OpenObserve instance to export to.
+        openobserve_base_url: Base URL of the OpenObserve OTLP ingest API.
+            Must include the ``/api/<org>`` prefix (e.g.
+            ``http://openobserve:5080/api/default``); the collector appends
+            ``/v1/{traces,metrics,logs}`` itself.
         openobserve_authorization: Value for the collector's ``Authorization``
             header (used for OTLP auth).
         stream_name: Stream name override; defaults to ``<project>-web``.

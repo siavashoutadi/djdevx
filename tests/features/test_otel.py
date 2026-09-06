@@ -6,10 +6,10 @@ from unittest.mock import patch
 
 from typer.testing import CliRunner
 
-from djdevx.main import app
 from djdevx.core.process import PixiRunner
-from djdevx.utils.tracking import ProjectTracking, Section
+from djdevx.main import app
 from djdevx.utils.templates.manager import TemplateManager
+from djdevx.utils.tracking import ProjectTracking, Section
 from tests.test_helpers import create_test_django_project
 
 runner = CliRunner()
@@ -226,6 +226,9 @@ def _assert_collector_config(root: Path) -> None:
         assert f"    {signal}:" in content, f"{signal} pipeline missing"
     assert 'stream-name: "test_django_project-web"' in content, (
         "stream-name must be the project name with -web suffix"
+    )
+    assert "endpoint: http://openobserve:5080/api/default" in content, (
+        "collector must export to OpenObserve's /api/<org> OTLP ingest path"
     )
     assert "stream-name: django" not in content, "hardcoded stream-name must not remain"
     assert (
