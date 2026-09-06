@@ -9,6 +9,7 @@ from typer.testing import CliRunner
 from djdevx.main import app
 from djdevx.core.process import PixiRunner
 from djdevx.utils.tracking import ProjectTracking, Section
+from djdevx.utils.templates.manager import TemplateManager
 from tests.test_helpers import create_test_django_project
 
 runner = CliRunner()
@@ -80,6 +81,12 @@ def _assert_otel_settings_exists(root: Path) -> None:
     assert "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT" in content, (
         "otel settings missing traces endpoint"
     )
+    assert "PROJECT_NAME" not in content, (
+        "otel settings must not depend on settings.PROJECT_NAME"
+    )
+    assert "test_django_project-web" in content, (
+        "otel settings must render the project name into the service name"
+    )
 
 
 def _assert_peer_settings_exist(root: Path, peer: str) -> None:
@@ -103,6 +110,60 @@ def _assert_peer_settings_exist(root: Path, peer: str) -> None:
 def _assert_peer_settings_absent(root: Path, peer: str) -> None:
     settings_file = root / "settings" / "apps" / f"otel_{peer}.py"
     assert not settings_file.exists(), f"settings/apps/otel_{peer}.py should not exist"
+
+
+def _template_path(rel: str) -> Path:
+    import djdevx
+
+    return Path(djdevx.__file__).resolve().parent / rel
+
+
+def test_otel_settings_template_renders_project_name(temp_dir):
+    """The otel settings template must render the project name, not PROJECT_NAME.
+
+    Regression: the template used to reference ``settings.PROJECT_NAME``, which
+    nothing defines in a generated project, so importing settings (e.g. during
+    ``manage.py migrate``) crashed with ImportError.
+    """
+    source = _template_path(
+        "providers/features/otel/templates/settings/apps/otel.py.j2"
+    )
+    assert source.exists(), "otel settings template must be a .j2 file"
+    manager = TemplateManager()
+    dest = manager.copy_template(
+        source_file=source,
+        dest_dir=temp_dir,
+        template_context={"project_name": "rendered_project"},
+    )
+    content = dest.read_text()
+    assert "PROJECT_NAME" not in content
+    assert 'otel_service_name: str = f"rendered_project-web"' in content
+
+
+def test_djangorestframework_settings_template_guards_append(temp_dir):
+    """djangorestframework settings must not append rest_framework twice.
+
+    Regression: settings files run in the shared exec-loop namespace, but
+    drf_spectacular imports ``settings.packages.djangorestframework`` as a real
+    module, re-running the file. An unconditional ``INSTALLED_APPS += [...]``
+    appended ``rest_framework`` twice and Django aborted with "Application
+    labels aren't unique, duplicates: rest_framework".
+    """
+    sources = [
+        _template_path(
+            "providers/packages/djangorestframework/templates/settings/packages/djangorestframework.py"
+        ),
+        Path(__file__).resolve().parents[1]
+        / "packages"
+        / "data"
+        / "djangorestframework"
+        / "settings"
+        / "packages"
+        / "djangorestframework.py",
+    ]
+    for source in sources:
+        content = source.read_text()
+        assert 'if "rest_framework" not in INSTALLED_APPS:' in content
 
 
 def _assert_otel_packages_installed() -> None:

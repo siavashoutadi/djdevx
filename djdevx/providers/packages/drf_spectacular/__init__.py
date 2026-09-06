@@ -7,4 +7,6 @@ from .._registry import register
 class DRFSpectacularPackage(BasePackage):
     name: str = "drf-spectacular"
     display_name: str = "DRF Spectacular"
-    pixi_packages: list[PixiPackageSpec] = [PixiPackageSpec("drf-spectacular")]
+    pixi_packages: list[PixiPackageSpec] = [
+        PixiPackageSpec("drf-spectacular[sidecar]", kind="pypi")
+    ]

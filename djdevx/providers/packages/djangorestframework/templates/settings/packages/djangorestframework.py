@@ -1,9 +1,8 @@
 from settings.django.base import INSTALLED_APPS, DEBUG
 
 
-INSTALLED_APPS += [
-    "rest_framework",
-]
+if "rest_framework" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("rest_framework")
 
 renderer_classes = [
     "rest_framework.renderers.JSONRenderer",
