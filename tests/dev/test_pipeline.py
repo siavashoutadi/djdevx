@@ -14,7 +14,9 @@ cli = CliRunner()
 
 def _service(calls, tag, is_up=False):
     service = MagicMock()
-    service.display_name = "PostgreSQL" if tag == "db" else "Redis"
+    service.display_name = {"db": "PostgreSQL", "cache": "Redis"}.get(
+        tag, "OTel Collector" if tag == "otel" else "OpenObserve"
+    )
     service.is_up.return_value = is_up
     service.up.side_effect = lambda step=None: calls.append(f"{tag}_up")
     return service
@@ -31,6 +33,7 @@ def _run(
     cache_is_up=False,
     no_db=False,
     no_cache=False,
+    otel=(),
     pending=True,
 ):
     """Invoke run_start with all external effects mocked, recording order."""
@@ -46,6 +49,7 @@ def _run(
         patch("djdevx.cli.dev.PixiRunner") as pixi_cls,
         patch("djdevx.cli.dev.resolve_database_dev_service", return_value=db),
         patch("djdevx.cli.dev.resolve_cache_dev_service", return_value=cache),
+        patch("djdevx.cli.dev.resolve_otel_dev_services", return_value=list(otel)),
         patch("djdevx.cli.dev.in_devcontainer", return_value=devcontainer),
         patch.object(
             ManageCommands, "migrations_pending", return_value=pending
@@ -54,11 +58,11 @@ def _run(
             ManageCommands, "run", side_effect=lambda *a, **k: calls.append("migrate")
         ),
         patch(
-            "djdevx.cli.dev.render_services_table",
+            "djdevx.dev.render.render_services_table",
             side_effect=lambda *a: calls.append("render"),
         ),
-        patch("djdevx.cli.dev.collect_context", return_value=MagicMock()),
-        patch("djdevx.cli.dev.server_command", return_value=("cmd",)),
+        patch("djdevx.dev.context.collect_context", return_value=MagicMock()),
+        patch("djdevx.dev.runserver.server_command", return_value=("cmd",)),
     ):
         pixi_cls.return_value.run_interactive.side_effect = lambda *a: calls.append(
             "server"
@@ -73,6 +77,22 @@ def test_step_order_native():
     calls: list[str] = []
     _run(calls)
     assert calls == ["settings", "db_up", "migrate", "cache_up", "render", "server"]
+
+
+def test_step_order_with_otel_starts_services_before_migrate():
+    calls: list[str] = []
+    otel_services = [_service(calls, "otel"), _service(calls, "openobserve")]
+    _run(calls, otel=otel_services)
+    assert calls == [
+        "settings",
+        "db_up",
+        "otel_up",
+        "openobserve_up",
+        "migrate",
+        "cache_up",
+        "render",
+        "server",
+    ]
 
 
 def test_each_service_started_exactly_once():

@@ -79,6 +79,11 @@ def build_collector_config(
         "receivers": receivers,
         "processors": processors,
         "exporters": exporters,
-        "service": {"pipelines": pipelines},
+        "service": {
+            "telemetry": {
+                "metrics": {"level": "none", "readers": []},
+            },
+            "pipelines": pipelines,
+        },
     }
     return yaml.dump(config, default_flow_style=False, sort_keys=False)

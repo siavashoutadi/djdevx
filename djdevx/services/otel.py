@@ -14,6 +14,7 @@ settings (``OTEL_COLLECTOR_PORT``, ``OPENOBSERVE_PORT``) resolve correctly,
 mirroring how Postgres/Redis inject ``POSTGRES_PORT``/``REDIS_PORT``.
 """
 
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -201,7 +202,7 @@ class OtelCollectorService(BaseDevService):
 
         return shutil.which(name)
 
-    def _launch_background(self, command: list[str], log: Path) -> None:
+    def _launch_background(self, command: list[str], log: Path, env=None) -> None:
         log.parent.mkdir(parents=True, exist_ok=True)
         with log.open("ab") as f:
             proc = subprocess.Popen(
@@ -209,6 +210,7 @@ class OtelCollectorService(BaseDevService):
                 stdout=f,
                 stderr=subprocess.STDOUT,
                 cwd=self.structure.root,
+                env=env,
             )
         write_pid(self.service_dir, proc.pid)
 
@@ -319,19 +321,16 @@ class OpenObserveService(BaseDevService):
                 return
             self.service_dir.mkdir(parents=True, exist_ok=True)
             self.data_dir.mkdir(parents=True, exist_ok=True)
-            command = [
-                str(binary_path),
-                "--local-mode",
-                "--data",
-                str(self.data_dir),
-                "--http-port",
-                str(self.port),
-                "--username",
-                self._root_user_email(),
-                "--password",
-                self.password,
-            ]
-            self._launch_background(command, self._log_file)
+            env = {
+                **os.environ,
+                "ZO_ROOT_USER_EMAIL": self._root_user_email(),
+                "ZO_ROOT_USER_PASSWORD": self.password,
+                "ZO_DATA_DIR": str(self.data_dir),
+                "ZO_HTTP_PORT": str(self.port),
+                "ZO_GRPC_PORT": str(self.port + 1),
+                "ZO_LOCAL_MODE": "true",
+            }
+            self._launch_background([str(binary_path)], self._log_file, env=env)
             if wait_for_port("localhost", self.port, self.service_dir):
                 group.ok(f"started {self.display_name.lower()} on port {self.port}")
             else:
@@ -345,7 +344,7 @@ class OpenObserveService(BaseDevService):
             if step is None:
                 group.done()
 
-    def _launch_background(self, command: list[str], log: Path) -> None:
+    def _launch_background(self, command: list[str], log: Path, env=None) -> None:
         log.parent.mkdir(parents=True, exist_ok=True)
         with log.open("ab") as f:
             proc = subprocess.Popen(
@@ -353,6 +352,7 @@ class OpenObserveService(BaseDevService):
                 stdout=f,
                 stderr=subprocess.STDOUT,
                 cwd=self.data_dir,
+                env=env,
             )
         write_pid(self.service_dir, proc.pid)
 

@@ -23,6 +23,7 @@ def test_native_endpoints_use_resolved_passwords(tmp_path, monkeypatch):
         patch("djdevx.dev.context.in_devcontainer", return_value=False),
         patch("djdevx.dev.context.resolve_database_dev_service", return_value=db),
         patch("djdevx.dev.context.resolve_cache_dev_service", return_value=cache),
+        patch("djdevx.dev.context.resolve_otel_dev_services", return_value=[]),
     ):
         ctx = collect_context(project_root=tmp_path)
     assert ctx.in_devcontainer is False
@@ -33,6 +34,29 @@ def test_native_endpoints_use_resolved_passwords(tmp_path, monkeypatch):
     assert by_name["redis"].credentials == "r3dis"
 
 
+def test_native_endpoints_include_otel_services(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "djdevx.toml").write_text("")
+    collector = _mock_service("otel", "OTel Collector", 54199, "")
+    openobserve = _mock_service("openobserve", "OpenObserve", 37885, "ZoAdmin123!")
+    with (
+        patch("djdevx.dev.context.in_devcontainer", return_value=False),
+        patch("djdevx.dev.context.resolve_database_dev_service", return_value=None),
+        patch("djdevx.dev.context.resolve_cache_dev_service", return_value=None),
+        patch(
+            "djdevx.dev.context.resolve_otel_dev_services",
+            return_value=[collector, openobserve],
+        ),
+    ):
+        ctx = collect_context(project_root=tmp_path)
+    by_name = ctx.by_name
+    assert by_name["otel"].port == 54199
+    assert by_name["otel"].url is None
+    assert by_name["openobserve"].port == 37885
+    assert by_name["openobserve"].credentials == "ZoAdmin123!"
+    assert by_name["openobserve"].url == "http://localhost:37885"
+
+
 def test_native_credentials_none_without_password(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     (tmp_path / "djdevx.toml").write_text("")
@@ -41,6 +65,7 @@ def test_native_credentials_none_without_password(tmp_path, monkeypatch):
         patch("djdevx.dev.context.in_devcontainer", return_value=False),
         patch("djdevx.dev.context.resolve_database_dev_service", return_value=db),
         patch("djdevx.dev.context.resolve_cache_dev_service", return_value=None),
+        patch("djdevx.dev.context.resolve_otel_dev_services", return_value=[]),
     ):
         ctx = collect_context(project_root=tmp_path)
     assert ctx.services[0].credentials is None

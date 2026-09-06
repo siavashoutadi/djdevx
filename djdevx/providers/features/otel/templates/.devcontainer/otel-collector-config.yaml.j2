@@ -19,6 +19,10 @@ exporters:
       stream-name: "{{ project_name }}-web"
 
 service:
+  telemetry:
+    metrics:
+      level: none
+      readers: []
   pipelines:
     traces:
       receivers: [otlp]

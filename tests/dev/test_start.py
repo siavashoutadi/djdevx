@@ -44,14 +44,16 @@ class _Invocation:
             patch("djdevx.cli.dev._init_settings") as self.init_settings,
             patch("djdevx.cli.dev.resolve_database_dev_service") as self.resolve_db,
             patch("djdevx.cli.dev.resolve_cache_dev_service") as self.resolve_cache,
+            patch("djdevx.cli.dev.resolve_otel_dev_services") as self.resolve_otel,
             patch.object(
                 ManageCommands, "migrations_pending", return_value=True
             ) as self.migrations_pending,
-            patch("djdevx.cli.dev.server_command") as self.server_command,
+            patch("djdevx.dev.runserver.server_command") as self.server_command,
         ):
             self.pixi_cls.return_value = self.pixi
             self.resolve_db.return_value = self.db
             self.resolve_cache.return_value = self.cache
+            self.resolve_otel.return_value = []
             self.migrations_pending.return_value = True
             self.server_command.return_value = SERVER_ARGS
             if configure is not None:

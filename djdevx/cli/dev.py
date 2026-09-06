@@ -5,12 +5,13 @@ ordered, named list of steps. The steps mirror the previous behaviour exactly:
 
     1. settings init   — dev configs + secrets (skip with ``--skip-settings``)
     2. database        — start the installed database service (if any)
-    3. migrate         — apply pending migrations (skip with ``--skip-migrate``)
-    4. cache           — start the installed cache service (if any)
-    5. render          — print the resolved service endpoints table
-    6. server          — run the dev server (forwards extra args)
+    3. otel            — start the collector + OpenObserve (if installed)
+    4. migrate         — apply pending migrations (skip with ``--skip-migrate``)
+    5. cache           — start the installed cache service (if any)
+    6. render          — print the resolved service endpoints table
+    7. server          — run the dev server (forwards extra args)
 
-Steps 2-4 are folded into :func:`_services_step`, which also handles the
+Steps 2-5 are folded into :func:`_services_step`, which also handles the
 devcontainer case (services are managed by docker compose, so only migrate runs).
 
 The redundant double-start loop that previously restarted postgres/redis a
@@ -28,10 +29,8 @@ from ..services import (
     BaseDevService,
     resolve_cache_dev_service,
     resolve_database_dev_service,
+    resolve_otel_dev_services,
 )
-from ..dev.context import collect_context
-from ..dev.render import render_services_table
-from ..dev.runserver import server_command
 
 
 def _init_settings() -> None:
@@ -80,7 +79,7 @@ def _migrate_if_pending(commands: ManageCommands, skip_migrate: bool) -> None:
 
 
 def _services_step(commands: ManageCommands, skip_migrate: bool, verbose: bool) -> None:
-    """Start db, migrate, then start cache (or only migrate in a devcontainer)."""
+    """Start db, otel, migrate, then cache (or only migrate in a devcontainer)."""
     if in_devcontainer():
         print_console.step_done(
             "Running inside a devcontainer — services are managed by docker compose"
@@ -94,6 +93,13 @@ def _services_step(commands: ManageCommands, skip_migrate: bool, verbose: bool) 
     else:
         print_console.step_done("No database configured")
 
+    otel_services = resolve_otel_dev_services(verbose=verbose)
+    if otel_services:
+        for service in otel_services:
+            _start_native_service(service)
+    else:
+        print_console.step_done("No OpenTelemetry configured")
+
     _migrate_if_pending(commands, skip_migrate)
 
     cache_service = resolve_cache_dev_service(verbose=verbose)
@@ -104,6 +110,8 @@ def _services_step(commands: ManageCommands, skip_migrate: bool, verbose: bool) 
 
 
 def _server_step(ctx: typer.Context, runner: PixiRunner, verbose: bool) -> None:
+    from ..dev.runserver import server_command
+
     with print_console.step_group(
         "Starting the dev server ...", done="Dev server started"
     ):
@@ -126,6 +134,9 @@ def run_start(
     """
     runner = PixiRunner(verbose=verbose)
     commands = ManageCommands(runner)
+
+    from ..dev.context import collect_context
+    from ..dev.render import render_services_table
 
     _settings_step(skip_settings)
     _services_step(commands, skip_migrate, verbose)

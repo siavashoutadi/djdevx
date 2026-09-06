@@ -25,6 +25,7 @@ from ..services import (
     BaseDevService,
     resolve_cache_dev_service,
     resolve_database_dev_service,
+    resolve_otel_dev_services,
 )
 
 # Display name → compose service name for known devcontainer services.
@@ -55,6 +56,7 @@ def _native_endpoints(
         for s in (
             resolve_database_dev_service(project_root, verbose),
             resolve_cache_dev_service(project_root, verbose),
+            *resolve_otel_dev_services(project_root, verbose),
         )
         if s is not None
     ]
@@ -62,6 +64,11 @@ def _native_endpoints(
         creds = None
         if hasattr(service, "password") and getattr(service, "password", ""):
             creds = f"{service.password}"
+        url = (
+            f"http://localhost:{service.port}"
+            if service.name == "openobserve"
+            else None
+        )
         endpoints.append(
             ServiceEndpoint(
                 name=service.name,
@@ -69,7 +76,7 @@ def _native_endpoints(
                 host="localhost",
                 port=service.port,
                 credentials=creds,
-                url=None,
+                url=url,
             )
         )
     return endpoints
