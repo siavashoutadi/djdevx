@@ -15,4 +15,3 @@ class ChannelsPackage(BasePackage):
         PixiPackageSpec("types-channels", kind="pypi", pixi_feature="dev"),
     ]
     needs: list[InstallableRef] = [InstallableRef(name="redis", kind=CACHE)]
-    restore_on_remove: dict[str, str] = {"applications/asgi.py": "applications/asgi.py"}

@@ -421,23 +421,31 @@ def after_copy_templates(self) -> None:
 
 ## Reverting from the new template (restore_on_remove)
 
-When a package **overwrites** a file that ships with the generated project
-(e.g. `applications/asgi.py`), uninstalling must restore the original from
-`djdevx/new/templates/`. Use `restore_on_remove` mapping `project_rel →
-template_rel`:
+When a package **overwrites** a settings file that ships with the generated
+project (e.g. `settings/django/database.py`), uninstalling must restore the
+original from `djdevx/new/templates/`. Use `restore_on_remove` mapping
+`project_rel → template_rel`:
 
 ```python
-# djdevx/providers/packages/channels/__init__.py
+# djdevx/providers/database/postgres/__init__.py
 @register
-class ChannelsPackage(BasePackage):
-    name: str = "channels"
-    display_name: str = "Channels"
-    pixi_packages: list[PixiPackageSpec] = [PixiPackageSpec("channels")]
-    restore_on_remove: dict[str, str] = {"applications/asgi.py": "applications/asgi.py"}
+class PostgresDatabase(BaseDatabase):
+    name: str = "postgres"
+    display_name: str = "PostgreSQL"
+    pixi_packages: list[PixiPackageSpec] = [PixiPackageSpec("psycopg2-binary")]
+    restore_on_remove: dict[str, str] = {
+        "settings/django/database.py": "settings/django/database.py"
+    }
 ```
 
 On full remove, `restore_original_templates()` re-copies the original
 template over the modified file.
+
+Prefer not to use this field at all when the behavior can be expressed as an
+*additive* file: settings includes (`settings/apps/`), URL includes
+(`urls/apps/`), or server extensions (`applications/extensions/`) are dropped
+in beside the scaffold and simply deleted on removal. See
+[Extensions Architecture](extensions-architecture.md).
 
 ## Package templates directory
 

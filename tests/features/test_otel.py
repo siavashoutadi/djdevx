@@ -61,9 +61,54 @@ def _assert_otel_app_exists(root: Path) -> None:
     assert "from otel.setup import setup_otel" not in init_content, (
         "otel/__init__.py must not import setup"
     )
+    apps_content = (root / "otel" / "apps.py").read_text()
+    assert "setup_otel" not in apps_content, (
+        "otel/apps.py must not run setup (management commands load apps too)"
+    )
     setup_content = (root / "otel" / "setup.py").read_text()
     assert "pkgutil.iter_modules" in setup_content, (
         "otel/setup.py must discover plugins"
+    )
+    core_content = (root / "otel" / "core.py").read_text()
+    assert "force_flush" not in core_content, (
+        "otel/core.py must not force_flush logs: the SDK's flush timeout is a "
+        "no-op and an unreachable collector hangs process exit forever"
+    )
+    assert 'not record.name.startswith("opentelemetry")' in core_content, (
+        "otel/core.py must keep exporter warnings out of the telemetry pipeline"
+    )
+    assert "timeout=2" in core_content, (
+        "otel/core.py must bound OTLP exporter retries with a short timeout"
+    )
+
+
+def _assert_otel_extension_exists(root: Path) -> None:
+    extension_file = root / "applications" / "extensions" / "otel.py"
+    assert extension_file.exists(), "applications/extensions/otel.py missing"
+    content = extension_file.read_text()
+    assert "def load(application" in content, (
+        "otel extension must expose a load(application) hook"
+    )
+    assert "setup_otel()" in content, "otel extension must call setup_otel"
+    assert "load_middleware(" in content, (
+        "otel extension must rebuild the middleware chain: DjangoInstrumentor "
+        "only appends its middleware to settings.MIDDLEWARE, which is inert "
+        "unless the already-built handler chain is reloaded"
+    )
+    for entry in ("asgi.py", "wsgi.py"):
+        entry_file = root / "applications" / entry
+        base_file = _template_path(f"new/templates/applications/{entry}")
+        assert entry_file.read_text() == base_file.read_text(), (
+            f"applications/{entry} must stay the base template"
+        )
+        assert "extensions.load(application)" in base_file.read_text(), (
+            f"applications/{entry} must pass the application to the loader"
+        )
+
+
+def _assert_otel_extension_absent(root: Path) -> None:
+    assert not (root / "applications" / "extensions" / "otel.py").exists(), (
+        "applications/extensions/otel.py should be removed"
     )
 
 
@@ -260,6 +305,7 @@ def test_otel_after_peers(temp_dir):
     _install_feature("otel")
 
     _assert_otel_app_exists(temp_dir)
+    _assert_otel_extension_exists(temp_dir)
     _assert_otel_settings_exists(temp_dir)
     _assert_peer_settings_exist(temp_dir, "postgres")
     _assert_peer_settings_exist(temp_dir, "redis")
@@ -278,6 +324,7 @@ def test_otel_after_peers(temp_dir):
     assert not (temp_dir / "settings" / "apps" / "otel.py").exists(), (
         "otel settings not removed"
     )
+    _assert_otel_extension_absent(temp_dir)
     _assert_peer_packages_removed()
     _assert_docker_services_absent(temp_dir)
     _assert_collector_config_absent(temp_dir)
@@ -313,6 +360,7 @@ def test_otel_before_peers(temp_dir):
     _install_cache("redis")
 
     _assert_otel_app_exists(temp_dir)
+    _assert_otel_extension_exists(temp_dir)
     _assert_otel_settings_exists(temp_dir)
     _assert_peer_settings_exist(temp_dir, "postgres")
     _assert_peer_settings_exist(temp_dir, "redis")
@@ -336,6 +384,7 @@ def test_otel_remove(temp_dir):
     assert not (temp_dir / "settings" / "apps" / "otel.py").exists(), (
         "otel settings not removed"
     )
+    _assert_otel_extension_absent(temp_dir)
     assert not PixiRunner().has_dependency("opentelemetry-sdk"), (
         "opentelemetry-sdk not removed"
     )

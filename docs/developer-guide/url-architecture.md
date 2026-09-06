@@ -40,7 +40,7 @@ urls/
 ws_urls/                         ← WebSocket URL auto-discovery
   ├── __init__.py                  ← Same rglob + importlib pattern
   └── ...                          (package websocket_urlpatterns files)
-asgi.py                          → URLRouter(websocket_urlpatterns)
+applications/extensions/channels.py → wraps asgi application with URLRouter
 ```
 
 | Directory | Purpose | Managed by |
@@ -125,12 +125,16 @@ for file_path in ws_url_files:
 __all__ = ["websocket_urlpatterns"]
 ```
 
-The ASGI config (`asgi.py`) then wraps these in a `URLRouter`:
+The channels server extension
+(`applications/extensions/channels.py`, see
+[Extensions Architecture](extensions-architecture.md)) then wraps the ASGI
+application in a `URLRouter`:
 
 ```python
+import applications.asgi as asgi_module
 from ws_urls import websocket_urlpatterns
 
-application = ProtocolTypeRouter({
+asgi_module.application = ProtocolTypeRouter({
     "websocket": URLRouter(websocket_urlpatterns),
 })
 ```
@@ -407,14 +411,17 @@ are expected to export `websocket_urlpatterns` instead of `urlpatterns`.
 ### Example: channels package
 
 The `channels` package template provides a `ws_urls/__init__.py` that
-auto-discovers all WebSocket patterns, and an `asgi.py` that wires them
-into the ASGI application:
+auto-discovers all WebSocket patterns, and a server extension
+(`applications/extensions/channels.py`) that wraps the ASGI application:
 
 ```python
-# asgi.py
+# applications/extensions/channels.py (runs after django.setup() in server
+# processes only; see developer-guide/extensions-architecture.md)
+import applications.asgi as asgi_module
 from ws_urls import websocket_urlpatterns
 
-application = ProtocolTypeRouter({
+asgi_module.application = ProtocolTypeRouter({
+    "http": asgi_module.application,
     "websocket": URLRouter(websocket_urlpatterns),
 })
 ```

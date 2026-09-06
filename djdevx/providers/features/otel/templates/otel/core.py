@@ -44,7 +44,9 @@ def build_providers() -> Providers:
     tracer_provider = TracerProvider(resource=resource)
     tracer_provider.add_span_processor(
         BatchSpanProcessor(
-            OTLPSpanExporter(endpoint=settings.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT)
+            OTLPSpanExporter(
+                endpoint=settings.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT, timeout=2
+            )
         )
     )
     trace.set_tracer_provider(tracer_provider)
@@ -54,7 +56,7 @@ def build_providers() -> Providers:
         metric_readers=[
             PeriodicExportingMetricReader(
                 OTLPMetricExporter(
-                    endpoint=settings.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+                    endpoint=settings.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT, timeout=2
                 )
             )
         ],
@@ -64,7 +66,9 @@ def build_providers() -> Providers:
     logger_provider = LoggerProvider(resource=resource)
     logger_provider.add_log_record_processor(
         BatchLogRecordProcessor(
-            OTLPLogExporter(endpoint=settings.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT)
+            OTLPLogExporter(
+                endpoint=settings.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT, timeout=2
+            )
         )
     )
     set_logger_provider(logger_provider)
@@ -74,10 +78,21 @@ def build_providers() -> Providers:
         h for h in logging.getLogger().handlers if isinstance(h, LoggingHandler)
     )
 
+    # Warnings logged by opentelemetry itself (e.g. failed exports) must not
+    # re-enter the telemetry pipeline: with an unreachable collector they would
+    # self-feed the batch queue and prevent shutdown from ever draining it.
+    logging_handler.addFilter(
+        lambda record: not record.name.startswith("opentelemetry")
+    )
+
     def _shutdown() -> None:
         tracer_provider.shutdown()
         meter_provider.shutdown()
-        logger_provider.force_flush()
+        # NOTE: deliberately no flushing call here. The SDK's log-queue flush
+        # ignores its timeout argument (open-telemetry/opentelemetry-python
+        # #4568) and blocks until the queue drains, which never happens with a
+        # dead collector. shutdown() rejects new records and drains on a bounded
+        # join, so it flushes what is left without risking a hang.
         logger_provider.shutdown()
 
     atexit.register(_shutdown)

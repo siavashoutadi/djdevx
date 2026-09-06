@@ -10,6 +10,12 @@ runner = CliRunner()
 DATA_DIR = Path(__file__).parent / "data" / "channels"
 
 
+def _template_path(rel: str) -> Path:
+    import djdevx
+
+    return Path(djdevx.__file__).resolve().parent / rel
+
+
 def test_channels_install_and_remove(temp_dir):
     """
     Test channels package installation and removal.
@@ -41,13 +47,19 @@ def test_channels_install_and_remove(temp_dir):
     ws_urls_init = temp_dir / "ws_urls" / "__init__.py"
     assert ws_urls_init.exists(), "ws_urls/__init__.py not created"
 
-    asgi_file = temp_dir / "applications" / "asgi.py"
-    assert asgi_file.exists(), "applications/asgi.py not created"
+    extension_file = temp_dir / "applications" / "extensions" / "channels.py"
+    assert extension_file.exists(), "applications/extensions/channels.py not created"
+    expected_extension = _template_path(
+        "providers/packages/channels/templates/applications/extensions/channels.py"
+    )
+    assert extension_file.read_text() == expected_extension.read_text(), (
+        "applications/extensions/channels.py content mismatch"
+    )
 
-    expected_asgi = DATA_DIR / "applications" / "asgi.py"
-    expected_asgi_content = expected_asgi.read_text()
-    assert asgi_file.read_text() == expected_asgi_content, (
-        "applications/asgi.py content mismatch"
+    asgi_file = temp_dir / "applications" / "asgi.py"
+    expected_asgi = _template_path("new/templates/applications/asgi.py")
+    assert asgi_file.read_text() == expected_asgi.read_text(), (
+        "channels must not overwrite the base applications/asgi.py"
     )
 
     assert PixiRunner().has_dependency("channels"), (
@@ -94,6 +106,13 @@ def test_channels_install_and_remove(temp_dir):
     assert result.exit_code == 0, f"Remove failed: {result.output}"
 
     assert not settings_file.exists(), "Settings file not removed"
+
+    assert not extension_file.exists(), (
+        "applications/extensions/channels.py not removed"
+    )
+    assert asgi_file.read_text() == expected_asgi.read_text(), (
+        "applications/asgi.py must remain the base template after removal"
+    )
 
     assert not PixiRunner().has_dependency("channels"), (
         "channels dependency found after removal"

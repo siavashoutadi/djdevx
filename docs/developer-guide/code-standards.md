@@ -121,6 +121,17 @@ if commands.migrations_pending():
   `templates/` directory to the project
 - Template dirs live under each installable's `templates/` folder, not in a
   central location
+- Server-only behavior (instrumentation, ASGI app wrapping) goes in an
+  `applications/extensions/<name>.py` module shipped from the installable's
+  `templates/applications/extensions/` — never overwrite `applications/asgi.py`
+  / `wsgi.py` and never run server-only setup from `AppConfig.ready()` (it
+  would also run in management commands and tests)
+- Extension hooks take the application: `def load(application) -> None`.
+  A hook that changes `settings.MIDDLEWARE` must rebuild the frozen chain
+  (`application.load_middleware(is_async=...)`) or its middleware never runs
+
+> Read the [Extensions Architecture](extensions-architecture.md) for the
+> loader contract and the channels/otel examples.
 
 > Read the [Template System](template-system.md) for detailed rendering and template discovery documentation.
 

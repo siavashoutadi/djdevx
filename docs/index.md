@@ -68,6 +68,7 @@ ddx packages add whitenoise
 | [Template System](developer-guide/template-system.md) | Jinja2 rendering |
 | [Pydantic Settings](developer-guide/pydantic-settings.md) | Settings architecture and SettingCollector |
 | [URL Architecture](developer-guide/url-architecture.md) | URL auto-registration |
+| [Extensions Architecture](developer-guide/extensions-architecture.md) | Server-only extension modules under `applications/extensions/` |
 | [Testing](developer-guide/testing.md) | Test patterns and conventions |
 | [Code Standards](developer-guide/code-standards.md) | Coding conventions and style |
 
