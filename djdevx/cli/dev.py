@@ -70,7 +70,10 @@ def _migrate_if_pending(commands: ManageCommands, skip_migrate: bool) -> None:
     with print_console.step_group(
         "Checking for pending migrations...", done="Migration check complete"
     ) as group:
-        if commands.migrations_pending():
+        pending = commands.migrations_pending()
+        if pending is None:
+            group.warning("Could not check migrations (timed out) — skipping migrate")
+        elif pending:
             group.ok("Migrations pending, applying...")
             commands.run("migrate")
             group.info("Migrations applied")

@@ -13,7 +13,7 @@ class TestRun:
         commands = ManageCommands(runner)
         commands.run("startapp", "myapp", check=False)
         runner.run_manage_command.assert_called_once_with(
-            "startapp", "myapp", check=False
+            "startapp", "myapp", check=False, timeout=None
         )
 
     def test_returns_completed_process(self):
@@ -33,7 +33,7 @@ class TestMigrationsPending:
         commands = ManageCommands(runner)
         assert commands.migrations_pending() is True
         runner.run_manage_command.assert_called_once_with(
-            "migrate", "--check", check=False
+            "migrate", "--check", check=False, timeout=15
         )
 
     def test_false_when_up_to_date(self):
@@ -43,6 +43,17 @@ class TestMigrationsPending:
         )
         commands = ManageCommands(runner)
         assert commands.migrations_pending() is False
+
+    def test_none_when_check_times_out(self):
+        runner = MagicMock()
+        runner.run_manage_command.side_effect = subprocess.TimeoutExpired(
+            ["pixi"], timeout=15
+        )
+        commands = ManageCommands(runner)
+        assert commands.migrations_pending() is None
+        runner.run_manage_command.assert_called_once_with(
+            "migrate", "--check", check=False, timeout=15
+        )
 
 
 class TestDefaultRunner:

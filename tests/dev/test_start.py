@@ -97,6 +97,18 @@ def test_start_skips_migrate_when_none_pending(tmp_path, monkeypatch):
     inv.db.up.assert_called_once()
 
 
+def test_start_skips_migrate_when_check_times_out(tmp_path, monkeypatch):
+    inv = _Invocation()
+    result = inv.invoke(
+        tmp_path,
+        monkeypatch,
+        configure=lambda inv: setattr(inv.migrations_pending, "return_value", None),
+    )
+    assert result.exit_code == 0
+    inv.pixi.run_manage_command.assert_not_called()
+    assert "Could not check migrations (timed out)" in result.output
+
+
 def test_start_does_not_start_running_db(tmp_path, monkeypatch):
     inv = _Invocation()
     inv.db.is_up.return_value = True

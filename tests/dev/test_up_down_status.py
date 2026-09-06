@@ -123,7 +123,9 @@ def test_status_reports_issues_for_down_services(tmp_path, monkeypatch):
             return_value=cache,
         ),
         patch("djdevx.dev.status.PixiRunner") as pixi_cls,
-        patch.object(ManageCommands, "migrations_pending", return_value=False),
+        patch.object(
+            ManageCommands, "migrations_pending", return_value=False
+        ) as migrations_pending,
         patch("djdevx.dev.status.list_secrets"),
         patch("djdevx.dev.status.list_configs"),
     ):
@@ -133,6 +135,7 @@ def test_status_reports_issues_for_down_services(tmp_path, monkeypatch):
     assert "2 of 2 service(s) are down:" in result.output
     assert "PostgreSQL: not responding on port 5432" in result.output
     assert "Redis: not responding on port 6379" in result.output
+    migrations_pending.assert_not_called()
 
 
 def test_status_shows_state_and_settings(tmp_path, monkeypatch):
@@ -158,5 +161,12 @@ def test_status_shows_state_and_settings(tmp_path, monkeypatch):
     assert result.exit_code == 0
     assert "PostgreSQL" in result.output
     assert "Redis" in result.output
+    assert "Type" not in result.output
+    assert "│  postgres" not in result.output
+    assert "Checking for pending migrations..." in result.output
+    assert "Migration check complete" in result.output
+    assert "Migrations: up to date" in result.output
+    db._set_port_env.assert_called_once_with(quiet=True)
+    cache._set_port_env.assert_called_once_with(quiet=True)
     list_secrets.assert_called_once_with(DEV)
     list_configs.assert_called_once_with(DEV)

@@ -32,17 +32,27 @@ class PixiRunner:
         return name
 
     def run_manage_command(
-        self, command: str, *args: str, check: bool = True
+        self,
+        command: str,
+        *args: str,
+        check: bool = True,
+        timeout: Optional[float] = None,
     ) -> subprocess.CompletedProcess:
         return self.run_pixi_command(
-            "run", "python", "manage.py", command, *args, check=check
+            "run", "python", "manage.py", command, *args, check=check, timeout=timeout
         )
 
     def run_pixi_command(
-        self, *args: str, check: bool = True, **kwargs
+        self,
+        *args: str,
+        check: bool = True,
+        timeout: Optional[float] = None,
+        **kwargs,
     ) -> subprocess.CompletedProcess:
         cmd = ["pixi"] + list(args)
         run_kwargs = {"cwd": self.project_root, "check": check}
+        if timeout is not None:
+            run_kwargs["timeout"] = timeout
         if not self._verbose and "capture_output" not in kwargs:
             run_kwargs["capture_output"] = True
         run_kwargs.update(kwargs)

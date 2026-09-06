@@ -44,7 +44,7 @@ def test_init_starts_and_migrates_when_pending(tmp_path, monkeypatch):
     result, _, pixi, _ = _invoke(tmp_path, monkeypatch, ["init"], service)
     assert result.exit_code == 0
     service.up.assert_called_once()
-    pixi.run_manage_command.assert_called_once_with("migrate", check=True)
+    pixi.run_manage_command.assert_called_once_with("migrate", check=True, timeout=None)
 
 
 def test_init_skips_migrate_when_up_to_date(tmp_path, monkeypatch):

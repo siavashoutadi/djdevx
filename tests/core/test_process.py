@@ -90,7 +90,13 @@ class TestRunManageCommand:
         with patch.object(runner, "run_pixi_command") as mock_run:
             runner.run_manage_command("startapp", "myapp")
             mock_run.assert_called_once_with(
-                "run", "python", "manage.py", "startapp", "myapp", check=True
+                "run",
+                "python",
+                "manage.py",
+                "startapp",
+                "myapp",
+                check=True,
+                timeout=None,
             )
 
 

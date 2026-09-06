@@ -15,25 +15,41 @@ def status() -> None:
     runner = PixiRunner()
     commands = ManageCommands(runner)
 
-    states: list[tuple] = []
+    states: list[tuple] = [(service, service.is_up()) for service in services]
+
+    for service in services:
+        service._set_port_env(quiet=True)
+
+    postgres_installed = any(service.name == "postgres" for service, _ in states)
+    postgres_up = any(service.name == "postgres" and is_up for service, is_up in states)
+    with print_console.step_group(
+        "Checking for pending migrations...", done="Migration check complete"
+    ) as group:
+        if not postgres_installed:
+            group.info("No PostgreSQL configured — skipped")
+        elif not postgres_up:
+            group.warning("PostgreSQL is down — skipped")
+        else:
+            pending = commands.migrations_pending()
+            if pending is None:
+                group.warning("Migrations: could not check (timed out)")
+            elif pending:
+                group.warning("Migrations: pending")
+            else:
+                group.ok("Migrations: up to date")
+
     with print_console.table(
         "Dev services",
         [
             ("Status", {"width": 8, "justify": "center", "no_wrap": True}),
             ("Service", {"style": "bold", "min_width": 12, "no_wrap": True}),
-            ("Type", {"style": "dim", "min_width": 10, "no_wrap": True}),
         ],
     ) as tbl:
-        for service in services:
-            is_up = service.is_up()
-            states.append((service, is_up))
+        for service, is_up in states:
             status_mark = GREEN_CHECK_MARK if is_up else RED_CROSS_MARK
-            tbl.add_row(status_mark, service.display_name, service.name)
+            tbl.add_row(status_mark, service.display_name)
 
     _report_issues(states)
-
-    migrate_ok = not commands.migrations_pending()
-    print_console.info(f"Migrations: {'up to date' if migrate_ok else 'pending'}")
 
     list_secrets(DEV)
     list_configs(DEV)
