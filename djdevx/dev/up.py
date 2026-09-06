@@ -17,5 +17,6 @@ def up() -> None:
         ) as group:
             if service.is_up():
                 group.info(f"{service.display_name} is already running")
+                service._set_port_env(step=group)
             else:
                 service.up(step=group)

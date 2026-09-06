@@ -19,6 +19,7 @@ PROD = "prod"
 class ConfigSource(StrEnum):
     OS_ENVIRON = "os.environ"
     DOT_ENV = ".env"
+    ENV_DDX = ".env.ddx"
     RUN_CONFIGS = "/run/configs/app-config"
     ENV_PROD = ".env.prod"
     DEV_DEFAULT = "dev default"
@@ -47,6 +48,11 @@ def read_env_prod(project_path: Path) -> dict[str, str | None]:
     return read_env_file(project_path / ".env.prod")
 
 
+def read_env_ddx(project_path: Path) -> dict[str, str | None]:
+    """Read the ddx-generated ``.env.ddx`` (dev service ports) file."""
+    return read_env_file(project_path / ".env.ddx")
+
+
 def resolve_config_source_dev(config_var, backend_root: Path) -> str:
     key = config_var.name.upper()
     if key in os.environ:
@@ -54,6 +60,9 @@ def resolve_config_source_dev(config_var, backend_root: Path) -> str:
     dot_env = read_dot_env(backend_root)
     if key in dot_env:
         return ConfigSource.DOT_ENV
+    env_ddx = read_env_ddx(backend_root)
+    if key in env_ddx:
+        return ConfigSource.ENV_DDX
     if config_var.dev_default is not None:
         return ConfigSource.DEV_DEFAULT
     if config_var.has_class_default:
@@ -87,6 +96,9 @@ def resolve_config_value_dev(config_var, backend_root: Path):
     dot_env = read_dot_env(backend_root)
     if key in dot_env:
         return dot_env[key]
+    env_ddx = read_env_ddx(backend_root)
+    if key in env_ddx:
+        return env_ddx[key]
     return config_var.dev_default
 
 

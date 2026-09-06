@@ -143,6 +143,14 @@ declarative pipeline in `cli/dev.py` drive these services. Readiness uses the
 shared pid/port helpers in `core/process.py`, and binaries downloaded as
 release artifacts are SHA256-verified in `services/binary.py`.
 
+Ports are randomly assigned and persisted under `.pixi/devdata/<service>/port`.
+`_set_port_env()` publishes each port twice: into `os.environ` (for subprocesses
+ddx launches) and into the generated `.env.ddx` file at the project root, which
+the settings' `env_file` chain reads — so bare `pixi run python manage.py ...`
+resolves the same ports. `.env.ddx` lines are upserted per service and removed
+on `purge()` or provider removal; precedence is os.environ > `.env` >
+`.env.ddx` > class dev defaults.
+
 ## Component Architecture
 
 - [Installable System](installable-system.md) — Installable, Registry, models, orchestrator, scaffold, auto-discovery

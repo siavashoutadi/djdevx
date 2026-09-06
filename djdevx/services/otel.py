@@ -9,9 +9,10 @@ background and ``ddx dev down`` can stop them:
 * **OpenObserveService** downloads the OpenObserve static binary into
   ``.pixi/devdata/bin/`` and runs it as a local telemetry backend.
 
-Ports are pushed into ``os.environ`` via ``port_env_key`` so generated
-settings (``OTEL_COLLECTOR_PORT``, ``OPENOBSERVE_PORT``) resolve correctly,
-mirroring how Postgres/Redis inject ``POSTGRES_PORT``/``REDIS_PORT``.
+Ports are pushed into ``os.environ`` and the generated ``.env.ddx`` file via
+``port_env_key`` so generated settings (``OTEL_COLLECTOR_PORT``,
+``OPENOBSERVE_PORT``) resolve correctly, mirroring how Postgres/Redis inject
+``POSTGRES_PORT``/``REDIS_PORT``.
 """
 
 import os
@@ -415,6 +416,7 @@ class OpenObserveService(BaseDevService):
             if self.is_up():
                 self.down(step=group)
             _shutil.rmtree(self.service_dir, ignore_errors=True)
+            self._remove_from_env_ddx()
             group.ok(f"removed {self.display_name.lower()} data")
             for b in self.bin_dir.glob("openobserve*"):
                 b.unlink(missing_ok=True)

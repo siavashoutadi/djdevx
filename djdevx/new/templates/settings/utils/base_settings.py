@@ -75,21 +75,27 @@ class AppBaseSettings(BaseSettings):
     Source priority (highest → lowest):
       1. os.environ
       2. backend/.env                    gitignored; personal/CI override
-      3. /run/configs/app-config         Swarm Config / K8s ConfigMap (lower prio than .env)
-      4. /run/secrets/                   Swarm Secret / K8s Secret volume
-      5. backend/.secrets/               local secrets directory (gitignored)
-      6. _EnvDefaultsSource              get_dev/devcontainer/prod_defaults()
-      7. field-level Python defaults
+      3. backend/.env.ddx                ddx-generated dev service ports
+      4. /run/configs/app-config         Swarm Config / K8s ConfigMap
+      5. /run/secrets/                   Swarm Secret / K8s Secret volume
+      6. backend/.secrets/               local secrets directory (gitignored)
+      7. _EnvDefaultsSource              get_dev/devcontainer/prod_defaults()
+      8. field-level Python defaults
 
     List-typed fields (e.g. allowed_hosts) must be set as JSON arrays when
     supplied via environment variables: ALLOWED_HOSTS=["127.0.0.1","example.com"]
     """
 
     model_config = SettingsConfigDict(
-        # Multi-file dotenv: /run/configs/app-config is loaded first (lower priority),
-        # backend/.env is loaded second and takes priority (personal/CI override).
+        # Multi-file dotenv: /run/configs/app-config is loaded first (lowest
+        # priority), then ddx-generated .env.ddx (dev service ports), then
+        # backend/.env which takes priority (personal/CI override).
         # Missing files are silently skipped by pydantic-settings.
-        env_file=(Path("/run/configs/app-config"), _BASE_DIR / ".env"),
+        env_file=(
+            Path("/run/configs/app-config"),
+            _BASE_DIR / ".env.ddx",
+            _BASE_DIR / ".env",
+        ),
         env_file_encoding="utf-8",
         case_sensitive=False,
         # Each subclass reads only its own declared fields.  Unrecognised

@@ -130,6 +130,21 @@ class TestResolveConfigSourceDev:
         src = resolve_config_source_dev(config_var, backend_root)
         assert src == ConfigSource.DOT_ENV
 
+    def test_env_ddx_fallback(
+        self, backend_root: Path, config_var: ConfigVarInfo
+    ) -> None:
+        set_key(backend_root / ".env.ddx", "TEST_VAR", "from_env_ddx")
+        src = resolve_config_source_dev(config_var, backend_root)
+        assert src == ConfigSource.ENV_DDX
+
+    def test_dot_env_beats_env_ddx(
+        self, backend_root: Path, config_var: ConfigVarInfo
+    ) -> None:
+        set_key(backend_root / ".env.ddx", "TEST_VAR", "from_env_ddx")
+        set_key(backend_root / ".env", "TEST_VAR", "from_dotenv")
+        src = resolve_config_source_dev(config_var, backend_root)
+        assert src == ConfigSource.DOT_ENV
+
     def test_dev_default_fallback(
         self, backend_root: Path, config_var: ConfigVarInfo
     ) -> None:
@@ -233,6 +248,21 @@ class TestResolveConfigValueDev:
     def test_returns_dot_env_value(
         self, backend_root: Path, config_var: ConfigVarInfo
     ) -> None:
+        set_key(backend_root / ".env", "TEST_VAR", "dotenv_value")
+        val = resolve_config_value_dev(config_var, backend_root)
+        assert val == "dotenv_value"
+
+    def test_returns_env_ddx_value(
+        self, backend_root: Path, config_var: ConfigVarInfo
+    ) -> None:
+        set_key(backend_root / ".env.ddx", "TEST_VAR", "54321")
+        val = resolve_config_value_dev(config_var, backend_root)
+        assert val == "54321"
+
+    def test_dot_env_beats_env_ddx_value(
+        self, backend_root: Path, config_var: ConfigVarInfo
+    ) -> None:
+        set_key(backend_root / ".env.ddx", "TEST_VAR", "54321")
         set_key(backend_root / ".env", "TEST_VAR", "dotenv_value")
         val = resolve_config_value_dev(config_var, backend_root)
         assert val == "dotenv_value"

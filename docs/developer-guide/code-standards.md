@@ -166,6 +166,19 @@ if commands.migrations_pending():
 
 > Read the [Installable System](installable-system.md#tracking-system) for details on the tracking and registry system.
 
+### Dev Service Ports (`.env.ddx`)
+
+- Every `BaseDevService` with a `port_env_key` publishes its port through
+  `_set_port_env()`: into `os.environ` **and** the generated `.env.ddx` file at
+  the project root (`ProjectStructure.env_ddx_path`)
+- `.env.ddx` is a plain `KEY=VALUE` dotenv file with a do-not-edit header;
+  lines are upserted per service and removed by `purge()` / provider removal
+  (`_remove_from_env_ddx()`) — never write it ad hoc elsewhere
+- Generated settings read `.env.ddx` via the `env_file` chain (below `.env`,
+  below `os.environ`), so `pixi run python manage.py ...` resolves service
+  ports without ddx being involved; do not read service ports from
+  `os.environ` directly in settings templates
+
 ### Binary Downloads
 
 - Use `djdevx.services.binary` for services shipped as release

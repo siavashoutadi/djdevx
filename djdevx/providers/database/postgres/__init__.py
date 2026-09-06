@@ -87,3 +87,4 @@ class PostgresDatabase(BaseDatabase):
         except OSError:
             pass
         shutil.rmtree(service.data_dir, ignore_errors=True)
+        service._remove_from_env_ddx()

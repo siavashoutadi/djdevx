@@ -43,6 +43,11 @@ class ProjectStructure:
         return self._root / ".gitignore"
 
     @property
+    def env_ddx_path(self) -> Path:
+        """Generated env file publishing dev-service ports to settings."""
+        return self._root / ".env.ddx"
+
+    @property
     def dockerfile_path(self) -> Path:
         return self._root / "Dockerfile"
 
