@@ -25,7 +25,6 @@ from djdevx.core.console import print_console
 | `warning(line)` | Bold yellow | Warning message |
 | `ok(message)` | Green ✓ | Green checkmark with message |
 | `fail(message)` | Red ✗ | Red cross with message |
-| `list(items)` | Bullet points | Print a list with 🔹 bullets |
 | `table(title, columns, ...)` | TableBuilder | Create a styled table. Returns a `TableBuilder` with `.add_row()` and `.render()`, or use as a context manager for auto-rendering |
 | `diff(old, new)` | Side-by-side | Print a diff comparison |
 
@@ -46,7 +45,6 @@ print_console.warning("This is deprecated")
 
 # Information
 print_console.info("No packages selected.")
-print_console.list(["item1", "item2", "item3"])
 
 # Tables (context manager auto-renders on exit)
 columns = [

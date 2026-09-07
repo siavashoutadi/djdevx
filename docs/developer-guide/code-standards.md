@@ -2,7 +2,7 @@
 
 ## Technology Stack
 
-- **Python >= 3.13** — Core language
+- **Python >= 3.14** — Core language
 - **Typer** — CLI framework for command-line interfaces
 - **Jinja2** — Template engine for code generation
 - **pytest** (with pytest-xdist) — Testing framework

@@ -141,11 +141,6 @@ class PrintConsole:
         """Print a red cross followed by an unstyled message on the same line."""
         self._console.print(f"[bold red]{CROSS_MARK}[/bold red] {escape(message)}")
 
-    def list(self, items: list):
-        """Print a list of items with bullet points."""
-        for item in items:
-            self._console.print(f"🔹[bold]{escape(item)}[/bold]")
-
     def section(self, title: str) -> None:
         """Print a bold cyan section header."""
         self._console.print(f"[bold cyan]{escape(title)}[/bold cyan]")
