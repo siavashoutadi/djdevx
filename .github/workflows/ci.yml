@@ -17,6 +17,10 @@ jobs:
           python-version: "3.14"
       - name: Install uv
         uses: astral-sh/setup-uv@v6
+      - name: Install pixi
+        uses: prefix-dev/setup-pixi@v0
+        with:
+          pixi-version: "v0.73.0"
       - name: Sync dependencies
         run: uv sync --group dev
       - name: Run tests

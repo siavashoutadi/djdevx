@@ -10,8 +10,10 @@ projects at runtime.
 ### `ci.yml` — continuous testing
 
 - Triggered on every `push` to any branch and on every `pull_request`.
-- Runs on `ubuntu-latest` with Python 3.14.
-- Steps: `uv sync --group dev` then `uv run pytest`.
+- Runs on `ubuntu-latest` with Python 3.14 and installs both **uv** and
+  **pixi** (pixi is required at runtime by the tests that scaffold target
+  Django projects).
+- Steps: install uv + pixi, `uv sync --group dev` then `uv run pytest`.
 - This is the safety net that ensures nothing is broken before a merge or
   tag.
 
