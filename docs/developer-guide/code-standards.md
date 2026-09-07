@@ -7,7 +7,8 @@
 - **Jinja2** — Template engine for code generation
 - **pytest** (with pytest-xdist) — Testing framework
 - **Rich** — Console output with styling (`PrintConsole` wrapper)
-- **pixi** — Python package manager and runner
+- **uv** — Package manager and runner for the djdevx repository itself
+- **hatch-vcs** — Build-time versioning derived from git tags (see [CI/CD](ci-cd.md))
 - **tomlkit** — TOML read/write for config tracking
 - **requests** — HTTP client
 - **Ruff** — Linter and formatter (via prek)
@@ -139,7 +140,7 @@ if commands.migrations_pending():
 
 - Use `pytest` (markers available: `@pytest.mark.unit`,
   `@pytest.mark.integration`, `@pytest.mark.slow`)
-- Default run: `pixi run pytest` (auto-parallel via `-n auto`, short tracebacks)
+- Default run: `uv run pytest` (auto-parallel via `-n auto`, short tracebacks)
 - Use `temp_dir` fixture (wraps `tmp_path`) for isolated filesystem tests
 - Use `Typer CliRunner` for CLI integration tests
 - Package integration tests follow the source directory structure under

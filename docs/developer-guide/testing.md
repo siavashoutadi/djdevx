@@ -4,52 +4,57 @@
 [pytest-xdist](https://github.com/pytest-dev/pytest-xdist) for parallel test
 execution.
 
+> **uv vs pixi** — the `djdevx` repository itself is managed with **uv**
+> (`uv.lock`, `[dependency-groups]` in `pyproject.toml`), so tests run via
+> `uv run pytest`. **pixi** is only used at runtime inside the generated target
+> Django projects, not for developing djdevx itself.
+
 ## Running Tests
 
 ```bash
 # Run all tests (parallel, auto-detected CPU count)
-pixi run pytest
+uv run pytest
 
 # Run with verbose output
-pixi run pytest -v
+uv run pytest -v
 
 # Stop on first failure
-pixi run pytest -x
+uv run pytest -x
 
 # Run a specific test file
-pixi run pytest tests/packages/test_whitenoise.py
+uv run pytest tests/packages/test_whitenoise.py
 
 # Run a specific test class
-pixi run pytest tests/packages/test_tracking_configs.py::TestFlatPackageTracking
+uv run pytest tests/packages/test_tracking_configs.py::TestFlatPackageTracking
 
 # Run a specific test function
-pixi run pytest tests/packages/test_whitenoise.py::test_whitenoise_install_and_remove
+uv run pytest tests/packages/test_whitenoise.py::test_whitenoise_install_and_remove
 
 # Run tests matching a keyword expression
-pixi run pytest -k "database"
+uv run pytest -k "database"
 
 # Run tests matching a keyword class/function name
-pixi run pytest -k "TestIsSecretStr"
-pixi run pytest -k "test_creates_config"
+uv run pytest -k "TestIsSecretStr"
+uv run pytest -k "test_creates_config"
 
 # List all collected tests without running
-pixi run pytest --collect-only
+uv run pytest --collect-only
 
 # Enter debugger on first failure
-pixi run pytest --pdb -x
+uv run pytest --pdb -x
 
 # Run only unit tests (marker-based filtering)
-pixi run pytest -m unit
+uv run pytest -m unit
 
 # Run only integration tests (slower)
-pixi run pytest -m integration
+uv run pytest -m integration
 
 # Skip slow tests
-pixi run pytest -m "not slow"
+uv run pytest -m "not slow"
 
 # Control parallelism (e.g., disable parallel execution)
-pixi run pytest -n 0
-pixi run pytest -p no:xdist
+uv run pytest -n 0
+uv run pytest -p no:xdist
 ```
 
 ## Test Configuration
@@ -87,7 +92,7 @@ Use marker expressions to filter:
 
 ```bash
 # Skip slow tests
-pixi run pytest -m "not slow"
+uv run pytest -m "not slow"
 ```
 
 To add a marker to a test:
@@ -105,7 +110,7 @@ def test_something_fast():
 Before running tests, install dev dependencies:
 
 ```bash
-pixi install --feature dev
+uv sync --group dev
 ```
 
 ## Test Structure
@@ -657,7 +662,7 @@ All test subdirectories must contain an `__init__.py`.
 Before pushing, run the prek hooks:
 
 ```bash
-pixi run prek run --all-files
+uv run prek run --all-files
 ```
 
 The repository uses ruff for linting and formatting. Test files should follow

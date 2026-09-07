@@ -168,6 +168,7 @@ on `purge()` or provider removal; precedence is os.environ > `.env` >
 - [Deployment Architecture](deployment-architecture.md) — BaseDeployPlugin, auto-generated CLI
 - [Console Utilities](console.md) — PrintConsole, prompt wrappers, style guidelines
 - [Testing](testing.md) — Test patterns and conventions
+- [CI/CD & Releases](ci-cd.md) — Test/build workflows and git-tag versioning
 - [Code Standards](code-standards.md) — Coding conventions and style
 - [CLI Full Manual](../cli/manual.md) — Auto-generated command reference
 

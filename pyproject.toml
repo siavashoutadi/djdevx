@@ -1,7 +1,7 @@
 [project]
 name = "djdevx"
-version = "0.1.0"
 description = "A cli to improve the development experience for Django projects"
+dynamic = ["version"]
 authors = [
     {name = "Siavash Outadi", email = "siavash.outadi@gmail.com"}
 ]
@@ -30,8 +30,15 @@ ddx = "djdevx.main:app"
 dev = []
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+raw-options = { local_scheme = "no-local-version" }
+
+[tool.hatch.build.hooks.vcs]
+version-file = "djdevx/_version.py"
 
 [dependency-groups]
 dev = [
