@@ -119,7 +119,7 @@ class PWAFeature(BaseFeature):
         try:
             with Image.open(path) as probe:
                 probe.verify()
-        except (OSError, ValueError):
+        except OSError, ValueError:
             hint = (
                 " SVG icons are not supported — provide a PNG or JPEG image."
                 if path.suffix.lower() in (".svg", ".svgz")

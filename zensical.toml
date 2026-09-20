@@ -8,6 +8,7 @@ nav = [
   { "Home" = "index.md" },
   { "User Guide" = [
     { "Getting Started" = "user-guide/getting-started.md" },
+    { "Project Profiles" = "user-guide/profiles.md" },
     { "Managing Packages" = "user-guide/managing-packages.md" },
     { "Managing Features" = "user-guide/managing-features.md" },
     { "Database" = "user-guide/databases.md" },

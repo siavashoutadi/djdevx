@@ -260,6 +260,28 @@ if in_devcontainer():
   [NestedStep Best Practices](console.md#nestedstep-best-practices))
 - See [Console Utilities](console.md) for the full API and style guidelines
 
+### Profiles
+
+- Profiles live under `djdevx/profiles/`: `models.py` (pydantic TOML schema),
+  `loader.py` (source resolution), `installer.py` (batch dispatch),
+  `writer.py` (generation), `cli.py` (`ddx profiles *`), and `builtin/`
+  (shipped profile TOML files)
+- Profile TOML is the **source of truth** for what gets installed; CLI flags
+  only override `[new]` scaffolding options
+- `--profile` / `--answers` accept a local path, an `http(s)://` URL, a
+  built-in name, or a git repo path (`repo.git@path/to/file.toml`)
+- Answer values are injected into the orchestrator through `add_installable(
+  ..., answers=dict)` → `_collect_params_interactive(params, answers)`; when
+  answers are present, prompts are skipped and param defaults still apply
+- Built-in profile TOML files are added under `builtin/` as simple, readable
+  configurations; keep them minimal and dependency-free
+- The `new` command is a group callback (`invoke_without_command=True`) that
+  installs a profile via its `--profile` / `--answers` options; profile
+  management itself lives under the top-level `ddx profiles` command
+
+> Read the [Project Profiles](../user-guide/profiles.md) user guide for the
+> file formats and CLI reference.
+
 ### Code Quality
 
 - All code formatted and linted with Ruff (via prek)

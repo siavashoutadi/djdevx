@@ -146,7 +146,7 @@ def domain_app(
 
         try:
             add_installable(cls, name, verbose=verbose)
-        except (typer.Exit, typer.Abort):
+        except typer.Exit, typer.Abort:
             raise
         except Exception as exc:
             print_console.fail(str(exc))
@@ -277,7 +277,7 @@ def _add_multi(names, get, label, list_cmd, provider, verbose):
             result = add_installable(cls, pkg_name, provider, verbose, is_multi)
             if not result and not is_multi:
                 raise typer.Exit()
-        except (typer.Exit, typer.Abort):
+        except typer.Exit, typer.Abort:
             raise
         except Exception as exc:
             if is_multi:

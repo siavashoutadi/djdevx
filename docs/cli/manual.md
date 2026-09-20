@@ -17,6 +17,7 @@ $ djdevx [OPTIONS] COMMAND [ARGS]...
 * `version`: Show the application version
 * `requirement`: Check and install system requirements
 * `new`: Create a new project
+* `profiles`: Create and manage project profiles
 * `packages`: Manage Django packages
 * `frameworks`: Manage CSS/JS frameworks
 * `features`: Manage features
@@ -108,7 +109,59 @@ $ djdevx new [OPTIONS] COMMAND [ARGS]...
 * `--project-directory PATH`: The directory to initialize the project in
 * `--python-version TEXT`: The minimum python version for the project
 * `--git-init / --no-git-init`: whether to initialize a git repository in the project directory  [default: git-init]
+* `--profile TEXT`: Path, URL, or name of a profile to install
+* `--answers TEXT`: Path or URL to an answers file for install parameters
 * `-v, --verbose`: Show full output of all commands
+* `--help`: Show this message and exit.
+
+## djdevx profiles
+
+Create and manage project profiles
+
+**Usage**:
+
+```console
+$ djdevx profiles [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `create`: Create a project profile interactively or...
+* `list`: List available built-in profiles.
+
+## djdevx profiles create
+
+Create a project profile interactively or from the current project.
+
+**Usage**:
+
+```console
+$ djdevx profiles create [OPTIONS]
+```
+
+**Options**:
+
+* `-o, --output PATH`: Output file path for the profile (default: ddx-profile.toml)
+* `--from-project`: Generate the profile from the current project instead of prompting
+* `--interactive`: Build the profile interactively instead of prompting
+* `--help`: Show this message and exit.
+
+## djdevx profiles list
+
+List available built-in profiles.
+
+**Usage**:
+
+```console
+$ djdevx profiles list [OPTIONS]
+```
+
+**Options**:
+
 * `--help`: Show this message and exit.
 
 ## djdevx packages

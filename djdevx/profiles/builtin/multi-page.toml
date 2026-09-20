@@ -1,0 +1,26 @@
+# Multi-page project profile — a normal server-rendered Django app (no SPA/API).
+
+[new]
+python_version = "3.14"
+git_init = true
+
+[packages]
+whitenoise = {}
+django-browser-reload = {}
+django-debug-toolbar = {}
+django-extensions = {}
+django-htmx = {}
+django-tailwind-cli = {}
+
+[features]
+pwa = {}
+otel = {}
+
+[frameworks]
+starting-point-ui = {}
+
+[database]
+postgres = {}
+
+[cache]
+redis = {}

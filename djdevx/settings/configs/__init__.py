@@ -254,7 +254,7 @@ def _validate_value(raw: str, annotation: str) -> tuple[bool, str | None, str | 
         return True, raw, None
     except pydantic.ValidationError as e:
         return False, None, _pydantic_error_message(e)
-    except (ValueError, SyntaxError):
+    except ValueError, SyntaxError:
         return False, None, _expected_format(annotation)
 
 

@@ -6,6 +6,7 @@ from .deployment import app as deploy_app
 from .version import app as version_app
 from .requirement import app as requirement_app
 from .new import app as new_app
+from .profiles.cli import app as profiles_app
 from .providers.packages import app as packages_app
 from .providers.frameworks import app as frameworks_app
 from .providers.features import app as features_app
@@ -22,6 +23,7 @@ app.add_typer(
     requirement_app, name="requirement", help="Check and install system requirements"
 )
 app.add_typer(new_app, name="new", help="Create a new project")
+app.add_typer(profiles_app, name="profiles", help="Create and manage project profiles")
 app.add_typer(packages_app, name="packages", help="Manage Django packages")
 app.add_typer(frameworks_app, name="frameworks", help="Manage CSS/JS frameworks")
 app.add_typer(features_app, name="features", help="Manage features")

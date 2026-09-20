@@ -99,11 +99,23 @@ def _prompt_text(param: InstallParam) -> str:
     return prompts.text(param.prompt or param.name, default=default) or default
 
 
-def _collect_params_interactive(params: list[InstallParam]) -> dict[str, Any]:
-    """Collect InstallParam values interactively or use defaults."""
+def _collect_params_interactive(
+    params: list[InstallParam], answers: dict[str, Any] | None = None
+) -> dict[str, Any]:
+    """Collect InstallParam values interactively or use defaults.
+
+    If ``answers`` is provided, its values are used for matching params and
+    no interactive prompts are shown (non-interactive/eager mode).  Any
+    params not present in ``answers`` fall back to their declared default.
+    """
     result: dict[str, Any] = {p.name: p.default for p in params}
 
-    if not sys.stdin.isatty():
+    if answers:
+        for key, value in answers.items():
+            if key in result:
+                result[key] = value
+
+    if not sys.stdin.isatty() or answers:
         return result
 
     for param in params:
@@ -133,11 +145,13 @@ def _collect_params_interactive(params: list[InstallParam]) -> dict[str, Any]:
     return result
 
 
-def _collect_install_kwargs(installable_or_variant) -> dict[str, Any]:
-    """Collect interactive install parameters for an installable or variant."""
+def _collect_install_kwargs(
+    installable_or_variant, answers: dict[str, Any] | None = None
+) -> dict[str, Any]:
+    """Collect install parameters for an installable or variant."""
     if not installable_or_variant.install_params:
         return {}
-    return _collect_params_interactive(installable_or_variant.install_params)
+    return _collect_params_interactive(installable_or_variant.install_params, answers)
 
 
 def _select_provider(variants: dict) -> str | None:
@@ -171,11 +185,19 @@ def add_installable(
     provider: str | None = None,
     verbose: bool = False,
     is_multi: bool = False,
+    answers: dict[str, Any] | None = None,
+    variants: list[str] | None = None,
 ) -> bool:
     """Install an installable.
 
     Returns True if installed, False if skipped.
     Handles dependencies, variants, and interactive prompts.
+
+    ``answers`` pre-fills install parameter values (and can be used to
+    suppress interactive prompts entirely, e.g. from a profile/answers file).
+
+    ``variants`` selects the optional additive variants to install without
+    prompting (used by profiles). Required variants are always installed.
     """
     name = InstallableConfig.normalize_name(name)
     installable = cls(verbose=verbose)
@@ -183,15 +205,21 @@ def add_installable(
     _auto_install_needs(installable.needs, verbose)
 
     if installable.exclusive_variants and installable.variants:
-        return _add_exclusive_variant(installable, name, provider, verbose, is_multi)
+        return _add_exclusive_variant(
+            installable, name, provider, verbose, is_multi, answers
+        )
 
     if installable.variants:
-        return _add_additive_variants(installable, name, provider, verbose, is_multi)
+        return _add_additive_variants(
+            installable, name, provider, verbose, is_multi, answers, variants
+        )
 
-    return _add_simple(installable, name, is_multi)
+    return _add_simple(installable, name, is_multi, answers)
 
 
-def _add_exclusive_variant(installable, name, provider, verbose, is_multi) -> bool:
+def _add_exclusive_variant(
+    installable, name, provider, verbose, is_multi, answers=None
+) -> bool:
     """Install an installable that requires exactly one variant."""
     if name in get_installed_names(type(installable)):
         print_console.ok(f"{installable.display_name} is already installed.")
@@ -219,14 +247,22 @@ def _add_exclusive_variant(installable, name, provider, verbose, is_multi) -> bo
         f"Installing {installable.display_name}...",
         done=f"{installable.display_name} ({variant.display_name}) installed.",
     ) as group:
-        install_kwargs = _collect_install_kwargs(variant)
+        install_kwargs = _collect_install_kwargs(variant, answers)
         installable.add(
             variant_name=provider, install_kwargs=install_kwargs, step=group
         )
     return True
 
 
-def _add_additive_variants(installable, name, provider, verbose, is_multi) -> bool:
+def _add_additive_variants(
+    installable,
+    name,
+    provider,
+    verbose,
+    is_multi,
+    answers=None,
+    variants=None,
+) -> bool:
     """Install an installable with additive (non-exclusive) variants."""
     installed = get_installed_variants(type(installable), name)
 
@@ -238,11 +274,41 @@ def _add_additive_variants(installable, name, provider, verbose, is_multi) -> bo
                 f"Installing {installable.display_name} ({rv.display_name})...",
                 done=f"{installable.display_name} ({rv.display_name}) installed.",
             ) as group:
-                install_kwargs = _collect_install_kwargs(rv)
+                install_kwargs = _collect_install_kwargs(rv, answers)
                 installable.add(
                     variant_name=rv_name, install_kwargs=install_kwargs, step=group
                 )
             installed.append(rv_name)
+
+    if variants:
+        for var_name in variants:
+            if var_name not in installable.variants:
+                if is_multi:
+                    print_console.warning(
+                        f"Unknown variant '{var_name}' "
+                        f"for {installable.display_name}. Skipping."
+                    )
+                    continue
+                print_console.fail(f"Unknown variant: {var_name}")
+                return False
+            if var_name in installed:
+                print_console.info(
+                    f"{installable.variants[var_name].display_name} already installed."
+                )
+                continue
+            variant = installable.variants[var_name]
+            _auto_install_needs(variant.needs, verbose)
+            installable.reset_state()
+            with print_console.step_group(
+                f"Installing {installable.display_name} ({variant.display_name})...",
+                done=f"{installable.display_name} ({variant.display_name}) installed.",
+            ) as group:
+                install_kwargs = _collect_install_kwargs(variant, answers)
+                installable.add(
+                    variant_name=var_name, install_kwargs=install_kwargs, step=group
+                )
+            installed.append(var_name)
+        return True
 
     if provider:
         if provider not in installable.variants:
@@ -266,7 +332,7 @@ def _add_additive_variants(installable, name, provider, verbose, is_multi) -> bo
             f"Installing {installable.display_name} ({variant.display_name})...",
             done=f"{installable.display_name} ({variant.display_name}) installed.",
         ) as group:
-            install_kwargs = _collect_install_kwargs(variant)
+            install_kwargs = _collect_install_kwargs(variant, answers)
             installable.add(
                 variant_name=provider, install_kwargs=install_kwargs, step=group
             )
@@ -281,7 +347,7 @@ def _add_additive_variants(installable, name, provider, verbose, is_multi) -> bo
                     f"Installing {installable.display_name} ({variant.display_name})...",
                     done=f"{installable.display_name} ({variant.display_name}) installed.",
                 ) as group:
-                    install_kwargs = _collect_install_kwargs(variant)
+                    install_kwargs = _collect_install_kwargs(variant, answers)
                     installable.add(
                         variant_name=var_name, install_kwargs=install_kwargs, step=group
                     )
@@ -289,7 +355,7 @@ def _add_additive_variants(installable, name, provider, verbose, is_multi) -> bo
     return True
 
 
-def _add_simple(installable, name, is_multi) -> bool:
+def _add_simple(installable, name, is_multi, answers=None) -> bool:
     """Install an installable with no variants."""
     if name in get_installed_names(type(installable)):
         print_console.ok(f"{installable.display_name} is already installed.")
@@ -299,7 +365,7 @@ def _add_simple(installable, name, is_multi) -> bool:
         f"Installing {installable.display_name or name}...",
         done=f"{installable.display_name or name} installed.",
     ) as group:
-        install_kwargs = _collect_install_kwargs(installable)
+        install_kwargs = _collect_install_kwargs(installable, answers)
         installable.add(install_kwargs=install_kwargs, step=group)
     return True
 

@@ -21,7 +21,12 @@ ddx
 ├── new                                          # Create new Django project
 │     [--project-name] [--project-description]
 │     [--project-directory] [--python-version]
-│     [--git-init / --no-git-init] [-v]
+│     [--git-init / --no-git-init] [--profile]
+│     [--answers] [-v]
+├── profiles                                     # Manage project profiles
+│   ├── create [--output] [--from-project] [--interactive]
+│   │                                             # Create a profile (from project or interactive)
+│   └── list                                     # List built-in profiles
 ├── packages
 │   ├── add [NAME ...] [-p provider] [-v]        # Install packages (multi)
 │   ├── remove [NAME ...] [-p provider] [-v]     # Remove packages (multi)

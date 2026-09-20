@@ -29,6 +29,23 @@ This scaffolds a complete Django project with:
 - `.env` template -- Environment variable management
 - Pydantic-settings based configuration classes
 
+### Use a Profile
+
+Instead of installing packages one-by-one afterwards, use a **profile** to
+define everything a new project should include up front:
+
+```bash
+ddx new --project-name myproject --project-directory ./myproject --profile multi-page
+```
+
+The `multi-page` built-in profile sets up a normal server-rendered Django app:
+HTMX with a Tailwind CSS pipeline, browser auto-reload, the debug toolbar and
+extensions, whitenoise static serving, a PWA manifest, OpenTelemetry
+monitoring, the Starting Point UI framework, Postgres, and Redis during
+project creation. See
+[Project Profiles](profiles.md) for details on creating and sharing profiles,
+and using answer files for non-interactive installs.
+
 ## First Steps After Scaffolding
 
 After the project is created, start the local development environment with a
@@ -106,6 +123,8 @@ ddx --help                 # Top-level help
 | Task | Command |
 |------|---------|
 | New project | `ddx new --project-name <name>` |
+| New project from profile | `ddx new --profile <name>` |
+| Create a profile | `ddx profiles create` |
 | Start dev environment | `ddx dev start` |
 | Run dev server only | `ddx dev runserver` |
 | Dev service status | `ddx dev status` |

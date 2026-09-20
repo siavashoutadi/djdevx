@@ -125,7 +125,7 @@ def _eval_literal(value: ast.expr) -> Any:
     import time)."""
     try:
         return ast.literal_eval(value)
-    except (ValueError, TypeError, SyntaxError):
+    except ValueError, TypeError, SyntaxError:
         return DYNAMIC
 
 
@@ -150,7 +150,7 @@ def _extract_defaults(class_node: ast.ClassDef, method_name: str) -> dict[str, A
                             continue
                         try:
                             key = ast.literal_eval(key_node)
-                        except (ValueError, TypeError, SyntaxError):
+                        except ValueError, TypeError, SyntaxError:
                             continue
                         result[key] = _eval_literal(val_node)
                     return result
@@ -196,18 +196,18 @@ def _extract_class_default(annotation_node: ast.AnnAssign) -> Any:
             if annotation_node.value.args:
                 try:
                     return ast.literal_eval(annotation_node.value.args[0])
-                except (ValueError, TypeError, SyntaxError):
+                except ValueError, TypeError, SyntaxError:
                     pass
             for kw in annotation_node.value.keywords:
                 if kw.arg == "default" and kw.value is not None:
                     try:
                         return ast.literal_eval(kw.value)
-                    except (ValueError, TypeError, SyntaxError):
+                    except ValueError, TypeError, SyntaxError:
                         pass
             return ""
     try:
         return ast.literal_eval(annotation_node.value)
-    except (ValueError, TypeError, SyntaxError):
+    except ValueError, TypeError, SyntaxError:
         return None
 
 
@@ -252,7 +252,7 @@ def _parse_settings_file(
     try:
         source = filepath.read_text(encoding="utf-8")
         tree = ast.parse(source, filename=str(filepath))
-    except (OSError, SyntaxError):
+    except OSError, SyntaxError:
         return [], []
 
     secret_fields: list[tuple[str, Any, Any, Any, bool, bool]] = []

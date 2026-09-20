@@ -1,5 +1,6 @@
 """ddx new — create a new Django project (flat structure, no backend_root)."""
 
+import os
 import subprocess
 import typer
 
@@ -15,6 +16,13 @@ from ..utils.generators import generate_random_password
 from ..utils.templates.manager import TemplateManager
 from ..installable.ops.format import format_all_files_in_project
 from ..requirement import verify as requirement_check
+from ..profiles.loader import (
+    autocomplete_profile,
+    load_answers,
+    load_profile,
+    resolve_builtin,
+    resolve_source,
+)
 
 app = typer.Typer()
 
@@ -48,12 +56,34 @@ def new(
             help="whether to initialize a git repository in the project directory"
         ),
     ] = True,
+    profile: Annotated[
+        Optional[str],
+        typer.Option(
+            "--profile",
+            help="Path, URL, or name of a profile to install",
+            autocompletion=autocomplete_profile,
+        ),
+    ] = None,
+    answers: Annotated[
+        Optional[str],
+        typer.Option(
+            "--answers",
+            help="Path or URL to an answers file for install parameters",
+        ),
+    ] = None,
     verbose: Annotated[
         bool,
         typer.Option("--verbose", "-v", help="Show full output of all commands"),
     ] = False,
 ):
     """Create a new Django project."""
+    try:
+        profile_model = _load_profile(profile) if profile else None
+        answers_model = _load_answers(answers) if answers else None
+    except FileNotFoundError as exc:
+        print_console.fail(str(exc))
+        raise typer.Exit(code=1)
+
     requirement_check()
 
     if project_name is None:
@@ -62,7 +92,10 @@ def new(
             raise typer.Abort()
 
     if project_description is None:
-        project_description = prompts.text(
+        profile_description = (
+            profile_model.new.project_description if profile_model else None
+        )
+        project_description = profile_description or prompts.text(
             "Project description:", default="My project is awesome"
         )
         if project_description is None:
@@ -75,12 +108,26 @@ def new(
         project_directory = Path(raw)
 
     if python_version is None:
-        python_version = prompts.select(
-            "Select the minimum Python version",
-            choices=DJANGO_PYTHON_VERSIONS[DJANGO_VERSION],
-        )
-        if python_version is None:
-            raise typer.Abort()
+        profile_version = profile_model.new.python_version if profile_model else None
+        if (
+            profile_version
+            and profile_version in DJANGO_PYTHON_VERSIONS[DJANGO_VERSION]
+        ):
+            python_version = profile_version
+        else:
+            python_version = prompts.select(
+                "Select the minimum Python version",
+                choices=DJANGO_PYTHON_VERSIONS[DJANGO_VERSION],
+            )
+            if python_version is None:
+                raise typer.Abort()
+
+    if (
+        git_init
+        and profile_model is not None
+        and profile_model.new.git_init is not None
+    ):
+        git_init = profile_model.new.git_init
 
     current_dir = Path(__file__).resolve().parent
     source_dir = current_dir / "templates"
@@ -108,6 +155,11 @@ def new(
         step.ok("Secrets initialized.")
 
         install_dependencies(dest_dir, step=step)
+
+        if profile_model is not None:
+            _install_profile_items(
+                dest_dir, profile_model, answers_model, verbose=verbose, step=step
+            )
 
         if git_init and not _is_git_repository(dest_dir):
             _init_git(dest_dir, verbose=verbose, step=step)
@@ -180,6 +232,63 @@ def _init_git(project_dir: Path, verbose: bool = False, step: NestedStep | None 
                     print_console.error(result.stderr)
                     result.check_returncode()
             group.ok(label)
+    finally:
+        if step is None:
+            group.done()
+
+
+def _load_profile(profile: str):
+    """Load a Profile from a built-in name, local path, URL, or git source.
+
+    Raises a user-facing FileNotFoundError on failure, distinguishing an
+    unknown built-in name from a missing file.
+    """
+    if _looks_like_file(profile):
+        return load_profile(resolve_source(profile))
+
+    source = resolve_builtin(profile)
+    return load_profile(source)
+
+
+def _load_answers(source: str):
+    """Load an AnswersFile from a local path, URL, or git source."""
+    return load_answers(resolve_source(source))
+
+
+def _looks_like_file(source: str) -> bool:
+    """Whether a profile source looks like a path rather than a built-in name."""
+    return (
+        source.startswith(("http://", "https://"))
+        or "/" in source
+        or source.endswith(".toml")
+    )
+
+
+def _install_profile_items(
+    dest_dir: Path,
+    profile_model,
+    answers_model,
+    verbose: bool = False,
+    step: NestedStep | None = None,
+):
+    """Install all packages/features/etc. defined in a profile."""
+    from ..profiles.installer import install_profile
+
+    if step is None:
+        group = print_console.step_group(
+            "Installing profile items ...",
+            done="Profile items are installed successfully.",
+        )
+    else:
+        group = step
+
+    try:
+        old_cwd = os.getcwd()
+        os.chdir(dest_dir)
+        try:
+            install_profile(profile_model, answers=answers_model, verbose=verbose)
+        finally:
+            os.chdir(old_cwd)
     finally:
         if step is None:
             group.done()

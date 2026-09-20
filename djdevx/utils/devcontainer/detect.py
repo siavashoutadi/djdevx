@@ -100,5 +100,5 @@ def exported_http_port(service: dict, default: int | None = None) -> int | None:
             return default
     try:
         return int(parts[-2])
-    except (ValueError, IndexError):
+    except ValueError, IndexError:
         return default
