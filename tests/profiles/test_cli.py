@@ -1,5 +1,6 @@
 """CLI integration tests for `ddx profiles` and profile management."""
 
+import re
 from unittest.mock import patch
 
 from typer.testing import CliRunner
@@ -8,6 +9,8 @@ from djdevx.main import app
 from typer.main import get_command
 
 runner = CliRunner()
+
+ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
 
 
 class TestProfileAutocompletion:
@@ -60,9 +63,10 @@ class TestProfilesSubcommand:
     def test_create_help(self):
         result = runner.invoke(app, ["profiles", "create", "--help"])
         assert result.exit_code == 0
-        assert "--from-project" in result.stdout
-        assert "--interactive" in result.stdout
-        assert "--output" in result.stdout
+        stdout = ANSI_RE.sub("", result.stdout)
+        assert "--from-project" in stdout
+        assert "--interactive" in stdout
+        assert "--output" in stdout
 
     def test_cancel_confirm_aborts_without_file(self, temp_dir, monkeypatch):
         (temp_dir / "djdevx.toml").write_text(
