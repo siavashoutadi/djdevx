@@ -52,7 +52,7 @@ def _assert_otel_app_exists(root: Path) -> None:
     assert (root / "otel" / "apps.py").exists(), "otel/apps.py missing"
     assert (root / "otel" / "core.py").exists(), "otel/core.py missing"
     assert (root / "otel" / "setup.py").exists(), "otel/setup.py missing"
-    for plugin in ("postgres.py", "redis.py"):
+    for plugin in ("postgres.py", "redis.py", "werkzeug.py"):
         assert (root / "otel" / "plugins" / plugin).exists(), (
             f"otel/plugins/{plugin} missing"
         )

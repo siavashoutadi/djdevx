@@ -83,6 +83,13 @@ ddx dev runserver --help    # forwarded to Django's runserver --help
 `--help` on `runserver` is forwarded to the underlying Django command instead
 of showing the CLI help.
 
+When `django-extensions` is installed, `tailwind runserver` delegates to
+`runserver_plus`, which serves the app through the Werkzeug debugger. Its
+access and error logs are emitted on the `werkzeug` logger with propagation
+disabled, so the OTel feature captures them with a dedicated plugin — with
+observability installed, requests show up in OpenObserve without any extra
+configuration.
+
 ## Service Lifecycle
 
 `ddx dev up` starts installed database/cache services (idempotent) and
