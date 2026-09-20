@@ -154,6 +154,11 @@ def new(
         secret_manager.write_secret("secret_key", generate_random_password(length=64))
         step.ok("Secrets initialized.")
 
+        repo_initialized = False
+        if git_init and not _is_git_repository(dest_dir):
+            _init_git_repository(dest_dir, verbose=verbose, step=step)
+            repo_initialized = True
+
         install_dependencies(dest_dir, step=step)
 
         if profile_model is not None:
@@ -161,10 +166,10 @@ def new(
                 dest_dir, profile_model, answers_model, verbose=verbose, step=step
             )
 
-        if git_init and not _is_git_repository(dest_dir):
-            _init_git(dest_dir, verbose=verbose, step=step)
-
         format_all_files_in_project(dest_dir, step=step)
+
+        if repo_initialized:
+            _commit_initial_git(dest_dir, verbose=verbose, step=step)
 
 
 def install_dependencies(project_root: Path, step: NestedStep | None = None):
@@ -210,13 +215,48 @@ def _is_git_repository(project_dir: Path) -> bool:
     return git_repository_dir.exists() and git_repository_dir.is_dir()
 
 
-def _init_git(project_dir: Path, verbose: bool = False, step: NestedStep | None = None):
+def _init_git_repository(
+    project_dir: Path, verbose: bool = False, step: NestedStep | None = None
+):
+    """Create the git repository before dependency/profile installs.
+
+    Initializing the repository early means ``prek`` (via ``format_files``)
+    can run during profile installs; the initial commit happens later, after
+    all formatting has been applied.
+    """
     group = step or print_console.step_group(
         "Initializing the git repository ...",
         done="Git repository is initialized successfully.",
     )
     git_commands: list[tuple[list[str], str]] = [
         (["git", "init", "--initial-branch=main"], "git init"),
+    ]
+    try:
+        for cmd, label in git_commands:
+            if verbose:
+                subprocess.check_call(cmd, cwd=project_dir)
+            else:
+                result = subprocess.run(
+                    cmd, cwd=project_dir, capture_output=True, text=True
+                )
+                if result.returncode != 0:
+                    print_console.error(result.stderr)
+                    result.check_returncode()
+            group.ok(label)
+    finally:
+        if step is None:
+            group.done()
+
+
+def _commit_initial_git(
+    project_dir: Path, verbose: bool = False, step: NestedStep | None = None
+):
+    """Stage and commit the initial project state (post-formatting)."""
+    group = step or print_console.step_group(
+        "Committing the initial state ...",
+        done="Initial state is committed successfully.",
+    )
+    git_commands: list[tuple[list[str], str]] = [
         (["git", "add", "."], "git add"),
         (["git", "commit", "-m", "Initial commit"], "git commit"),
     ]

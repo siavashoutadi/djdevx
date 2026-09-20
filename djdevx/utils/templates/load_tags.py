@@ -9,7 +9,8 @@ class LoadTagManager:
         """Add a tag to an existing {% load %} statement.
 
         Uses regex to check if the tag already exists (load.*TAG).
-        If not found, inserts the tag inline into the first {% load %} statement.
+        If not found, inserts the tag into the first {% load %} statement
+        keeping tags alphabetically sorted (matching djade's canonical order).
         If no {% load %} statement exists, prepends {% load TAG %} at the top.
         """
         if re.search(rf"\{{%\s*load\s+[^%]*\b{re.escape(tag)}\b[^%]*%\}}", content):
@@ -19,7 +20,8 @@ class LoadTagManager:
         m = load_re.search(content)
         if m:
             existing = m.group(1).strip()
-            replacement = f"{{% load {existing} {tag} %}}"
+            tags = sorted(set(existing.split() + [tag]))
+            replacement = f"{{% load {' '.join(tags)} %}}"
             return content[: m.start()] + replacement + content[m.end() :]
 
         return f"{{% load {tag} %}}\n{content}"

@@ -85,7 +85,8 @@ class TestNewWithProfile:
         with (
             patch("djdevx.new.requirement_check"),
             patch("djdevx.new._install_profile_items") as install_mock,
-            patch("djdevx.new._init_git"),
+            patch("djdevx.new._init_git_repository"),
+            patch("djdevx.new._commit_initial_git"),
             patch("djdevx.new._is_git_repository", return_value=True),
         ):
             result = runner.invoke(
@@ -116,7 +117,8 @@ class TestNewWithProfile:
         with (
             patch("djdevx.new.requirement_check"),
             patch("djdevx.new._install_profile_items") as install_mock,
-            patch("djdevx.new._init_git"),
+            patch("djdevx.new._init_git_repository"),
+            patch("djdevx.new._commit_initial_git"),
             patch("djdevx.new._is_git_repository", return_value=True),
         ):
             result = runner.invoke(
@@ -191,7 +193,8 @@ class TestNewWithProfile:
         with (
             patch("djdevx.new.requirement_check"),
             patch("djdevx.new._install_profile_items") as install_mock,
-            patch("djdevx.new._init_git"),
+            patch("djdevx.new._init_git_repository"),
+            patch("djdevx.new._commit_initial_git"),
             patch("djdevx.new._is_git_repository", return_value=True),
         ):
             result = runner.invoke(

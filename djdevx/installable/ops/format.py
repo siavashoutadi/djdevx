@@ -25,18 +25,11 @@ def format_files(
     result = runner.run_pixi_command(
         "run", "prek", "run", "--files", *str_files, check=False
     )
-    if result.returncode != 0:
-        message = (
-            "Some files were not formatted successfully.\n"
-            f"Run `pixi run prek run --files {' '.join(str_files)}` in the project root to see the details."
+    if not _is_stable(result, runner, "run", "prek", "run", "--files", *str_files):
+        _report_failure(
+            f"Run `pixi run prek run --files {' '.join(str_files)}` in the project root to see the details.",
+            step=step,
         )
-        if step is not None:
-            step.info(
-                "Run `pixi run prek run --files "
-                f"{' '.join(str_files)}` in the project root to see the details."
-            )
-        else:
-            print_console.fail(message)
         return
 
     if step is not None:
@@ -59,19 +52,37 @@ def format_all_files_in_project(
         print_console.step("Formatting files ...")
     result = runner.run_pixi_command("run", "prek", "run", "--all-files", check=False)
 
-    if result.returncode != 0:
-        if step is not None:
-            step.info(
-                "Run `pixi run prek run --all-files` in the project root to see the details."
-            )
-        else:
-            print_console.fail(
-                "Some files were not formatted successfully.\n"
-                "Run `pixi run prek run --all-files` in the project root to see the details."
-            )
+    if not _is_stable(result, runner, "run", "prek", "run", "--all-files"):
+        _report_failure(
+            "Run `pixi run prek run --all-files` in the project root to see the details.",
+            step=step,
+        )
         return
 
     if step is not None:
         step.ok("Files formatted.")
     else:
         print_console.step_done("Files formatted.")
+
+
+def _is_stable(first_result, runner: PixiRunner, *args) -> bool:
+    """Whether a prek run leaves the tree formatted.
+
+    prek returns non-zero when a hook modifies files (fixers like ruff
+    format or end-of-file-fixer). A non-zero first run is therefore
+    expected the first time formatting is applied; a second run confirms
+    whether the working tree is now stable.
+    """
+    if first_result.returncode == 0:
+        return True
+    rerun = runner.run_pixi_command(*args, check=False)
+    return rerun.returncode == 0
+
+
+def _report_failure(message: str, step: NestedStep | None = None) -> None:
+    """Surface a remaining formatting failure to the user."""
+    full = f"Some files were not formatted successfully.\n{message}"
+    if step is not None:
+        step.info(message)
+    else:
+        print_console.fail(full)

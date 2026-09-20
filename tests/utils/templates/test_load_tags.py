@@ -7,13 +7,31 @@ class TestAddLoadTag:
     def test_add_to_combined_load(self):
         content = "{% load i18n static %}\n<html>"
         result = LoadTagManager.add_load_tag(content, "django_htmx")
-        assert "{% load i18n static django_htmx %}" in result
+        assert "{% load django_htmx i18n static %}" in result
         assert result.count("{% load") == 1
 
     def test_add_to_standalone_load(self):
         content = "{% load i18n %}\n<html>"
         result = LoadTagManager.add_load_tag(content, "django_htmx")
-        assert "{% load i18n django_htmx %}" in result
+        assert "{% load django_htmx i18n %}" in result
+
+    def test_add_preserves_rest_of_template(self):
+        content = "{% load i18n static %}\n<html>\n  <body></body>\n</html>"
+        result = LoadTagManager.add_load_tag(content, "snakeoil")
+        assert "{% load i18n snakeoil static %}" in result
+        assert "<html>" in result
+        assert "<body></body>" in result
+
+    def test_add_sorts_tags_alphabetically(self):
+        content = "{% load i18n static %}\n<html>"
+        result = LoadTagManager.add_load_tag(content, "auth")
+        assert "{% load auth i18n static %}" in result
+
+    def test_add_is_idempotent(self):
+        content = "{% load i18n static %}\n<html>"
+        first = LoadTagManager.add_load_tag(content, "django_htmx")
+        second = LoadTagManager.add_load_tag(first, "django_htmx")
+        assert second == first
 
     def test_add_when_tag_already_exists(self):
         content = "{% load i18n django_htmx %}\n<html>"
@@ -25,13 +43,6 @@ class TestAddLoadTag:
         result = LoadTagManager.add_load_tag(content, "snakeoil")
         assert result.startswith("{% load snakeoil %}\n")
         assert "<html>" in result
-
-    def test_add_preserves_rest_of_template(self):
-        content = "{% load i18n static %}\n<html>\n  <body></body>\n</html>"
-        result = LoadTagManager.add_load_tag(content, "snakeoil")
-        assert "{% load i18n static snakeoil %}" in result
-        assert "<html>" in result
-        assert "<body></body>" in result
 
 
 class TestRemoveLoadTag:

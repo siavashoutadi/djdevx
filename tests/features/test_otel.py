@@ -182,7 +182,10 @@ def test_otel_settings_template_renders_project_name(temp_dir):
     )
     content = dest.read_text()
     assert "PROJECT_NAME" not in content
-    assert 'otel_service_name: str = f"rendered_project-web"' in content
+    assert 'otel_service_name: str = "rendered_project-web"' in content
+    assert 'f"rendered_project-web"' not in content, (
+        "otel settings must not use an f-string without placeholders (ruff F541)"
+    )
 
 
 def test_djangorestframework_settings_template_guards_append(temp_dir):

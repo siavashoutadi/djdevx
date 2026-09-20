@@ -602,7 +602,7 @@ class PWAFeature(BaseFeature):
             manifest["scope"] = scope
 
         manifest_text = json.dumps(manifest, indent=4)
-        content = "{%% load static %%}\n%s" % manifest_text
+        content = "{%% load static %%}\n%s\n" % manifest_text
 
         manifest_path = self.structure.root / "pwa" / "templates" / "manifest.json"
         manifest_path.parent.mkdir(parents=True, exist_ok=True)

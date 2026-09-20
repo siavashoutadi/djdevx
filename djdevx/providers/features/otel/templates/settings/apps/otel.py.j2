@@ -5,7 +5,7 @@ from settings.utils.base_settings import AppBaseSettings
 
 
 class OtelSettings(AppBaseSettings):
-    otel_service_name: str = f"{{ project_name }}-web"
+    otel_service_name: str = "{{ project_name }}-web"
     otel_collector_port: int = 4318
     otel_exporter_otlp_endpoint: str | None = None
     otel_exporter_otlp_traces_endpoint: str | None = None

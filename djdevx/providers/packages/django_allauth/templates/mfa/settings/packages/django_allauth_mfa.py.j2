@@ -6,7 +6,9 @@ from settings.django.base import DEBUG
 
 INSTALLED_APPS += [
     "allauth.mfa",
-    {%- if enable_webauthn %}"django.contrib.humanize",{%- endif %}
+{%- if enable_webauthn %}
+    "django.contrib.humanize",
+{%- endif %}
 ]
 
 MIDDLEWARE.insert(

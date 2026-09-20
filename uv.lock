@@ -180,6 +180,18 @@ wheels = [
 ]
 
 [[package]]
+name = "django-upgrade"
+version = "1.30.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "tokenize-rt" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a3/a5/c59b2123ad588fd52ce69e043e47185a54d1d9966f29ecb50d1cf65861ca/django_upgrade-1.30.0.tar.gz", hash = "sha256:c2c9a02773708c5b4fc24ebf29f2c532082885170d1ab17a2ef33f396893dd8a", size = 39652, upload-time = "2026-02-24T23:19:45.091Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/aa/1f/58c990ab604a5b39b6d1c83f18aa074bfb10eef201c833697d44176d78cd/django_upgrade-1.30.0-py3-none-any.whl", hash = "sha256:3cf6eb4a46918df3f0b863bd96df8a36a8fed90d0e17c6a7c4af5442e489bc46", size = 68910, upload-time = "2026-02-24T23:19:43.65Z" },
+]
+
+[[package]]
 name = "djdevx"
 source = { editable = "." }
 dependencies = [
@@ -200,6 +212,7 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "djade" },
+    { name = "django-upgrade" },
     { name = "prek" },
     { name = "pytest" },
     { name = "pytest-xdist" },
@@ -227,6 +240,7 @@ provides-extras = ["dev"]
 [package.metadata.requires-dev]
 dev = [
     { name = "djade", specifier = "==1.9.0" },
+    { name = "django-upgrade", specifier = "==1.30.0" },
     { name = "prek", specifier = ">=0.4.10" },
     { name = "pytest", specifier = "==9.1.1" },
     { name = "pytest-xdist", specifier = "==3.8.0" },

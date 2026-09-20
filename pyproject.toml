@@ -50,6 +50,7 @@ dev = [
     # template-formatting guard tests exercise the real formatters.
     "djade==1.9.0",
     "pyupgrade==3.21.2",
+    "django-upgrade==1.30.0",
 ]
 
 [tool.pytest.ini_options]

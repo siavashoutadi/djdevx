@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 from typer.testing import CliRunner
@@ -59,7 +60,11 @@ def test_pwa_comprehensive(temp_dir):
     assert android_192.exists(), "PWA icons should be generated from logo.png"
     assert (temp_dir / "static" / "images" / "icons" / "ios" / "512.png").exists()
     manifest = temp_dir / "pwa" / "templates" / "manifest.json"
-    assert "android-launchericon-192x192.png" in manifest.read_text()
+    manifest_text = manifest.read_text()
+    assert "android-launchericon-192x192.png" in manifest_text
+    assert manifest_text.endswith("\n"), (
+        "manifest.json must end with a newline (end-of-file-fixer hook)"
+    )
 
     result = runner.invoke(main_app, ["features", "remove", "pwa"])
     assert result.exit_code == 0, f"PWA remove failed: {result.output}"
@@ -117,3 +122,32 @@ def test_pwa_svg_icon_rejected(temp_dir):
 
     with pytest.raises(ValueError, match="SVG icons are not supported"):
         feature.before_pixi_install()
+
+
+def test_pwa_manifest_ends_with_newline(tmp_path):
+    """manifest.json must keep a trailing newline (end-of-file-fixer hook)."""
+    feature = PWAFeature()
+    feature._install_context = {
+        "app_name": "App",
+        "short_name": "App",
+        "description": "desc",
+    }
+    feature._manifest_icons = [
+        {
+            "src": "/static/images/icons/android-launchericon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+        }
+    ]
+    fake = SimpleNamespace(root=tmp_path)
+    feature._structure = fake
+    feature._write_manifest()
+
+    manifest_path = tmp_path / "pwa" / "templates" / "manifest.json"
+    content = manifest_path.read_text()
+    assert content.startswith("{% load static %}\n")
+    assert "android-launchericon-192x192.png" in content
+    assert content.endswith("\n"), (
+        "manifest.json must end with a newline (end-of-file-fixer hook)"
+    )
+    assert not content.endswith("\n\n")

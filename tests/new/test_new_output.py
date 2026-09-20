@@ -64,11 +64,11 @@ def test_install_dependencies_ok_children_are_indented(tmp_path):
         assert "is installed" in line
 
 
-def test_init_git_ok_children_are_indented(tmp_path):
+def test_init_git_repository_ok_children_are_indented(tmp_path):
     buf, old = _capture()
     try:
         with mock.patch.object(new_mod.subprocess, "run", _SuccessfulRun()):
-            new_mod._init_git(Path(tmp_path), verbose=False)
+            new_mod._init_git_repository(Path(tmp_path), verbose=False)
     finally:
         _restore(old)
     out = buf.getvalue()
@@ -76,4 +76,17 @@ def test_init_git_ok_children_are_indented(tmp_path):
     assert lines[0].startswith("\u2610 Initializing the git repository")  # ☐
     assert lines[-1].startswith("\u2611 Git repository is initialized")  # ☑
     for line in lines[1:-1]:
-        assert line.startswith("  \u2713"), line  # "  ✓ git init / add / commit"
+        assert line.startswith("  \u2713"), line  # "  ✓ git init"
+
+    buf, old = _capture()
+    try:
+        with mock.patch.object(new_mod.subprocess, "run", _SuccessfulRun()):
+            new_mod._commit_initial_git(Path(tmp_path), verbose=False)
+    finally:
+        _restore(old)
+    out = buf.getvalue()
+    lines = [line for line in out.splitlines() if line.strip()]
+    assert lines[0].startswith("\u2610 Committing the initial state")  # ☐
+    assert lines[-1].startswith("\u2611 Initial state is committed")  # ☑
+    for line in lines[1:-1]:
+        assert line.startswith("  \u2713"), line  # "  ✓ git add / commit"
