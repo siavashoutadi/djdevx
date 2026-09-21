@@ -403,6 +403,7 @@ $ djdevx create [OPTIONS] COMMAND [ARGS]...
 **Commands**:
 
 * `app`: Create a new Django application.
+* `base-model`: Create a timestamped abstract base model.
 
 ## djdevx create app
 
@@ -417,6 +418,22 @@ $ djdevx create app [OPTIONS]
 **Options**:
 
 * `--name TEXT`: Application name
+* `--help`: Show this message and exit.
+
+## djdevx create base-model
+
+Create a timestamped abstract base model.
+
+**Usage**:
+
+```console
+$ djdevx create base-model [OPTIONS]
+```
+
+**Options**:
+
+* `--app TEXT`: Target Django app name  [default: core]
+* `--class-name TEXT`: Abstract base model class name  [default: TimeStampedModel]
 * `--help`: Show this message and exit.
 
 ## djdevx database

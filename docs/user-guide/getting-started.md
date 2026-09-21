@@ -136,6 +136,7 @@ ddx --help                 # Top-level help
 | Add database | `ddx database add <name>` |
 | Add cache | `ddx cache add <name>` |
 | Create app | `ddx create app --name <name>` |
+| Create timestamped base model | `ddx create base-model [--app core] [--class-name TimeStampedModel]` |
 | Manage secrets | `ddx settings secrets {init,list,verify}` |
 | Deploy | `ddx deployment docker-compose generate` |
 

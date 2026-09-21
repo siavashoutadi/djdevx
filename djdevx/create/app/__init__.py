@@ -7,7 +7,7 @@ import typer
 from djdevx.core.console import print_console
 from djdevx.core.paths import ProjectStructure
 from djdevx.core.process import PixiRunner
-from ..utils.templates.manager import TemplateManager
+from ...utils.templates.manager import TemplateManager
 
 
 def startapp(application_name: str) -> None:

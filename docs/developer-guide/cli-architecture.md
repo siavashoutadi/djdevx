@@ -40,6 +40,7 @@ ddx
 │   ├── remove [NAME] [-p provider] [-v]         # Remove a feature
 │   └── list                                     # List features
 ├── create app                                   # Scaffold new Django app
+├── create base-model                            # App with a timestamped abstract base model
 ├── database
 │   ├── add [NAME] [-v]                          # Add a database (single only)
 │   ├── remove [NAME] [-v]                       # Remove a database

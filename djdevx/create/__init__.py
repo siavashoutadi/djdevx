@@ -5,6 +5,9 @@ from typing_extensions import Annotated
 
 from ..utils.console import prompts
 from .app import startapp as _startapp_cmd
+from .base_model import base_model as _base_model_cmd
+from .base_model import validate_app_name as _validate_app_name
+from .base_model import validate_class_name as _validate_class_name
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -24,3 +27,26 @@ def create_app(
     if not name.strip():
         raise typer.BadParameter("An application name is required.")
     _startapp_cmd(name)
+
+
+@app.command("base-model")
+def create_base_model(
+    app_name: Annotated[
+        str,
+        typer.Option(
+            "--app",
+            help="Target Django app name",
+            callback=_validate_app_name,
+        ),
+    ] = "core",
+    class_name: Annotated[
+        str,
+        typer.Option(
+            "--class-name",
+            help="Abstract base model class name",
+            callback=_validate_class_name,
+        ),
+    ] = "TimeStampedModel",
+) -> None:
+    """Create a timestamped abstract base model."""
+    _base_model_cmd(app_name=app_name, class_name=class_name)
