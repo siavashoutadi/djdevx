@@ -41,6 +41,7 @@ ddx
 │   └── list                                     # List features
 ├── create app                                   # Scaffold new Django app
 ├── create base-model                            # App with a timestamped abstract base model
+├── create factory-boy [--model app.Model]       # Generate factory-boy factories (uses manage.py shell)
 ├── database
 │   ├── add [NAME] [-v]                          # Add a database (single only)
 │   ├── remove [NAME] [-v]                       # Remove a database

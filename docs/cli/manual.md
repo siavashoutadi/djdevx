@@ -404,6 +404,7 @@ $ djdevx create [OPTIONS] COMMAND [ARGS]...
 
 * `app`: Create a new Django application.
 * `base-model`: Create a timestamped abstract base model.
+* `factory-boy`: Generate a factory-boy factory for one or...
 
 ## djdevx create app
 
@@ -434,6 +435,21 @@ $ djdevx create base-model [OPTIONS]
 
 * `--app TEXT`: Target Django app name  [default: core]
 * `--class-name TEXT`: Abstract base model class name  [default: TimeStampedModel]
+* `--help`: Show this message and exit.
+
+## djdevx create factory-boy
+
+Generate a factory-boy factory for one or more project models.
+
+**Usage**:
+
+```console
+$ djdevx create factory-boy [OPTIONS]
+```
+
+**Options**:
+
+* `--model TEXT`: Model (app_label.ModelName) to generate a factory boy factory for
 * `--help`: Show this message and exit.
 
 ## djdevx database

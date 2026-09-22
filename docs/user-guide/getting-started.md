@@ -137,8 +137,26 @@ ddx --help                 # Top-level help
 | Add cache | `ddx cache add <name>` |
 | Create app | `ddx create app --name <name>` |
 | Create timestamped base model | `ddx create base-model [--app core] [--class-name TimeStampedModel]` |
+| Create test factory | `ddx create factory-boy [--model app.Model]` |
 | Manage secrets | `ddx settings secrets {init,list,verify}` |
 | Deploy | `ddx deployment docker-compose generate` |
+
+## Create a Test Factory
+
+Generate [factory-boy](https://factoryboy.readthedocs.io/) factories for your
+models to produce fake data for tests and seed data in management commands:
+
+```bash
+ddx create factory-boy --model home.Post --model home.Comment
+```
+
+The command introspects your models through Django and writes factory classes
+into `<app>/factories.py` (e.g. `home/factories.py`). Each factory fills the
+model's fields with matching `factory.Faker` providers — foreign keys become
+`factory.SubFactory`, many-to-many fields get a `@factory.post_generation`
+hook, and unique fields are listed in `django_get_or_create`. Without
+`--model` you can pick models interactively. Existing factories in the same
+file are preserved and new ones appended.
 
 ## Next Steps
 
