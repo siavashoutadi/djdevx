@@ -156,7 +156,9 @@ model's fields with matching `factory.Faker` providers — foreign keys become
 `factory.SubFactory`, many-to-many fields get a `@factory.post_generation`
 hook, and unique fields are listed in `django_get_or_create`. Without
 `--model` you can pick models interactively. Existing factories in the same
-file are preserved and new ones appended.
+file are preserved and new ones appended. Re-running the command refreshes a
+factory with any fields the model gained since the last run, while keeping
+existing declarations — including manual edits — untouched.
 
 ## Next Steps
 

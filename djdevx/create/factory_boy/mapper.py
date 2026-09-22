@@ -168,12 +168,22 @@ def _superuser_method() -> str:
     )
 
 
+def _render_get_or_create(names: list[str]) -> str:
+    """Render the ``Meta.django_get_or_create`` tuple from ordered names."""
+    rendered = ", ".join(_s(name) for name in names)
+    if len(names) == 1:
+        rendered = f"{rendered},"
+    return f"({rendered})"
+
+
 def build_factory(model_info: dict) -> dict:
     """Build the source body for one factory class.
 
     Returns a dict with ``class_name``, ``class_body`` (the full indented
-    class definition, without trailing newline) and ``imports`` (extra module
-    imports the class needs).
+    class definition, without trailing newline), ``imports`` (extra module
+    imports the class needs) plus the structured declarations required for
+    additive merges: ``fields`` (``name -> RHS``), ``m2m`` (``name -> method
+    source``) and ``get_or_create`` (ordered unique-attribute names).
     """
     app_label = model_info["app_label"]
     model_name = model_info["name"]
@@ -184,6 +194,8 @@ def build_factory(model_info: dict) -> dict:
 
     assignments: list[str] = []
     post_generations: list[str] = []
+    fields: dict[str, str] = {}
+    m2m: dict[str, str] = {}
     get_or_create: list[str] = []
 
     for field in model_info["fields"]:
@@ -191,12 +203,14 @@ def build_factory(model_info: dict) -> dict:
         if rhs is None:
             continue
         if rhs == "many_to_many":
-            post_generations.append(_m2m_method(field["name"]))
-        elif field.get("unique") and not field.get("related"):
-            assignments.append(f"    {field['name']} = {rhs}")
+            method = _m2m_method(field["name"])
+            post_generations.append(method)
+            m2m[field["name"]] = method
+            continue
+        if field.get("unique") and not field.get("related"):
             get_or_create.append(field["name"])
-        else:
-            assignments.append(f"    {field['name']} = {rhs}")
+        assignments.append(f"    {field['name']} = {rhs}")
+        fields[field["name"]] = rhs
 
     if is_user:
         get_or_create.append("username")
@@ -207,10 +221,9 @@ def build_factory(model_info: dict) -> dict:
     ]
     if get_or_create:
         get_or_create = list(dict.fromkeys(get_or_create))
-        rendered = ", ".join(_s(name) for name in get_or_create)
-        if len(get_or_create) == 1:
-            rendered = f"{rendered},"
-        body_lines.append(f"        django_get_or_create = ({rendered})")
+        body_lines.append(
+            f"        django_get_or_create = {_render_get_or_create(get_or_create)}"
+        )
     body_lines.append("")
     body_lines.extend(assignments)
     if is_user:
@@ -226,6 +239,9 @@ def build_factory(model_info: dict) -> dict:
         "class_name": class_name,
         "class_body": class_body,
         "imports": [USER_IMPORT] if is_user else [],
+        "fields": fields,
+        "m2m": m2m,
+        "get_or_create": get_or_create,
     }
 
 
@@ -267,15 +283,172 @@ def _insert_missing_imports(source: str, imports: list[str]) -> str:
     return "\n".join(lines).rstrip("\n") + "\n"
 
 
+def _class_declared_names(node: ast.ClassDef) -> set[str]:
+    """Return names of top-level assignments and methods declared in a class."""
+    declared: set[str] = set()
+    for stmt in node.body:
+        if isinstance(stmt, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
+            declared.add(stmt.name)
+        elif isinstance(stmt, ast.Assign):
+            for target in stmt.targets:
+                if isinstance(target, ast.Name):
+                    declared.add(target.id)
+        elif isinstance(stmt, ast.AnnAssign) and isinstance(stmt.target, ast.Name):
+            declared.add(stmt.target.id)
+    return declared
+
+
+def _meta_get_or_create(
+    meta: ast.ClassDef, base: int
+) -> tuple[int, list[str] | None] | None:
+    """Locate the ``Meta.django_get_or_create`` assignment of a factory class.
+
+    Returns ``(slice-relative index, ordered names)`` for a parseable
+    tuple/list assignment, ``(index, None)`` when the value is dynamic, or
+    None when there is no such assignment. *base* is the class's first line
+    number (1-based) used to compute the index within the class slice.
+    """
+    for stmt in meta.body:
+        if not (
+            isinstance(stmt, ast.Assign)
+            and isinstance(stmt.targets[0], ast.Name)
+            and stmt.targets[0].id == "django_get_or_create"
+        ):
+            continue
+        try:
+            value = ast.literal_eval(stmt.value)
+        except ValueError, TypeError:
+            return stmt.lineno - base, None
+        names = value if isinstance(value, (tuple, list)) else [value]
+        return stmt.lineno - base, [str(name) for name in names]
+    return None
+
+
+def _merge_class_source(source: str, node: ast.ClassDef, factory_: dict) -> str | None:
+    """Merge declarations missing from an existing factory class.
+
+    Appends any model fields, many-to-many post-generation hooks and
+    ``django_get_or_create`` names not yet present, preserving existing lines
+    (including manual edits). Returns the updated module source, or None when
+    the class is already complete or cannot be merged safely.
+    """
+    declared = _class_declared_names(node)
+    meta = next(
+        (
+            stmt
+            for stmt in node.body
+            if isinstance(stmt, ast.ClassDef) and stmt.name == "Meta"
+        ),
+        None,
+    )
+    if meta is None:
+        return None
+
+    missing_fields = [
+        (name, rhs) for name, rhs in factory_["fields"].items() if name not in declared
+    ]
+    missing_m2m = [name for name in factory_["m2m"] if name not in declared]
+
+    base = node.lineno
+    goc = _meta_get_or_create(meta, base)
+    if goc is None:
+        missing_unique = list(factory_["get_or_create"])
+    else:
+        index, names = goc
+        if names is None:
+            missing_unique = []  # dynamic value: leave it untouched
+        else:
+            missing_unique = [n for n in factory_["get_or_create"] if n not in names]
+
+    if not missing_fields and not missing_m2m and not missing_unique:
+        return None
+
+    lines = source.splitlines()
+    class_start = base - 1
+    class_end = node.end_lineno
+    slice_ = lines[class_start:class_end]
+    meta_end = meta.end_lineno - base
+
+    if missing_fields:
+        insert_at = meta_end + 1
+        while insert_at < len(slice_) and not slice_[insert_at].strip():
+            insert_at += 1
+        new_lines = [f"    {name} = {rhs}" for name, rhs in missing_fields]
+        if insert_at == meta_end + 1:
+            new_lines = ["", *new_lines]
+        slice_[insert_at:insert_at] = new_lines
+
+    if missing_unique:
+        if goc is None:
+            model_idx = next(
+                (
+                    i
+                    for i, stmt in enumerate(meta.body)
+                    if isinstance(stmt, ast.Assign)
+                    and isinstance(stmt.targets[0], ast.Name)
+                    and stmt.targets[0].id == "model"
+                ),
+                None,
+            )
+            if model_idx is None:
+                return None
+            model_line = meta.body[model_idx].lineno
+            insert_at = model_line - base + 1
+            slice_[insert_at:insert_at] = [
+                f"        django_get_or_create = {_render_get_or_create(missing_unique)}"
+            ]
+        else:
+            index, names = goc
+            line = slice_[index]
+            indent = line[: len(line) - len(line.lstrip())]
+            slice_[index] = (
+                f"{indent}django_get_or_create = "
+                f"{_render_get_or_create([*names, *missing_unique])}"
+            )
+
+    if missing_m2m:
+        while slice_ and not slice_[-1].strip():
+            slice_.pop()
+        for name in missing_m2m:
+            slice_.extend(["", factory_["m2m"][name]])
+
+    if slice_ == lines[class_start:class_end]:
+        return None
+    lines[class_start:class_end] = slice_
+    return "\n".join(lines).rstrip("\n") + "\n"
+
+
+def _merge_factory(source: str, class_name: str, factory_: dict) -> str | None:
+    """Merge declarations missing from the existing factory *class_name*."""
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:  # pragma: no cover - file may be partially written
+        return None
+    node = next(
+        (
+            stmt
+            for stmt in tree.body
+            if isinstance(stmt, ast.ClassDef) and stmt.name == class_name
+        ),
+        None,
+    )
+    if node is None:
+        return None
+    return _merge_class_source(source, node, factory_)
+
+
 def assemble_module(
     model_infos: list[dict], existing: str | None = None
-) -> tuple[str, list[str], list[str]]:
+) -> tuple[str, list[str], list[str], list[str]]:
     """Build the content of an app's ``factories.py`` module.
 
     When *existing* is None a fresh module (imports + factories) is built;
-    otherwise new factory classes (and any missing imports) are merged into
-    the existing source. Returns ``(content, added, skipped)`` where
-    ``added``/``skipped`` are the class names created or left untouched.
+    otherwise new factory classes are appended and existing classes are
+    refreshed in place with any declarations the model gained since the last
+    run (new fields, many-to-many hooks, unique attributes). Returns
+    ``(content, added, skipped, updated)`` where ``added``/``skipped`` are the
+    class names created or left untouched and ``updated`` the existing classes
+    that gained declarations.
     """
     factories = [build_factory(model_info) for model_info in model_infos]
 
@@ -287,35 +460,39 @@ def assemble_module(
                     ordered.append(line)
         header = "\n".join(ordered)
         blocks = "\n\n\n".join(factory_["class_body"] for factory_ in factories)
-        return f"{header}\n\n\n{blocks}\n", [f["class_name"] for f in factories], []
+        content = f"{header}\n\n\n{blocks}\n"
+        return content, [f["class_name"] for f in factories], [], []
 
     existing_names = _existing_class_names(existing)
     added: list[str] = []
     skipped: list[str] = []
+    updated: list[str] = []
     to_add = []
     for factory_ in factories:
-        if factory_["class_name"] in existing_names:
-            skipped.append(factory_["class_name"])
-        else:
-            added.append(factory_["class_name"])
+        name = factory_["class_name"]
+        if name not in existing_names:
+            added.append(name)
             to_add.append(factory_)
+            continue
+        merged = _merge_factory(existing, name, factory_)
+        if merged is None:
+            skipped.append(name)
+        else:
+            existing = merged
+            updated.append(name)
 
     if not to_add:
-        return existing, added, skipped
+        return existing, added, skipped, updated
 
-    source = _insert_missing_imports(existing, list(BASE_IMPORTS))
-    extra_imports = [
-        line
-        for factory_ in to_add
-        for line in factory_["imports"]
-        if line not in source
-    ]
-    if extra_imports:
-        source = _insert_missing_imports(source, extra_imports)
-
+    missing_imports = list(BASE_IMPORTS)
+    for factory_ in to_add:
+        for line in factory_["imports"]:
+            if line not in missing_imports:
+                missing_imports.append(line)
+    source = _insert_missing_imports(existing, missing_imports)
     for factory_ in to_add:
         source = source.rstrip("\n") + "\n\n\n" + factory_["class_body"] + "\n"
-    return source, added, skipped
+    return source, added, skipped, updated
 
 
 def module_path(project_root: Path, app_label: str) -> Path:

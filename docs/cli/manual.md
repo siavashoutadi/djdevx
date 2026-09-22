@@ -441,6 +441,10 @@ $ djdevx create base-model [OPTIONS]
 
 Generate a factory-boy factory for one or more project models.
 
+Re-running the command refreshes existing factories with any fields the
+models gained since the last run (new fields, many-to-many hooks, unique
+attributes), preserving manual edits.
+
 **Usage**:
 
 ```console

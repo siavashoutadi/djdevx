@@ -26,9 +26,9 @@ def factory(models: list[str] | None = None) -> None:
     available = _introspect_models(commands)
     chosen = _choose_models_for_factories(models, available)
     by_app = _group_models_by_app(chosen, available)
-    written, added, skipped = _write_factory_files(by_app, structure)
+    written, added, skipped, updated = _write_factory_files(by_app, structure)
     format_files(written, structure.root)
-    _print_summary(written, added, skipped, structure)
+    _print_summary(written, added, skipped, updated, structure)
 
 
 def _introspect_models(commands: ManageCommands) -> list[dict]:
@@ -77,19 +77,21 @@ def _group_models_by_app(
 
 def _write_factory_files(
     grouped: Mapping[str, list[dict]], structure: ProjectStructure
-) -> tuple[list[Path], list[str], list[str]]:
+) -> tuple[list[Path], list[str], list[str], list[str]]:
     """Assemble and write ``factories.py`` for every app, one module per app.
 
-    Returns ``(written, added, skipped)`` where ``added`` lists the factory
-    classes created and ``skipped`` those already present.
+    Returns ``(written, added, skipped, updated)`` where ``added`` lists the
+    factory classes created, ``skipped`` those already complete and ``updated``
+    existing classes that gained declarations from new model fields.
     """
     written: list[Path] = []
     added: list[str] = []
     skipped: list[str] = []
+    updated: list[str] = []
     for app_label, model_infos in grouped.items():
         target = mapper.module_path(structure.root, app_label)
         existing = target.read_text() if target.exists() else None
-        content, new_factories, already = mapper.assemble_module(
+        content, new_factories, already, refreshed = mapper.assemble_module(
             model_infos, existing=existing
         )
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -97,19 +99,23 @@ def _write_factory_files(
         written.append(target)
         added.extend(new_factories)
         skipped.extend(already)
-    return written, added, skipped
+        updated.extend(refreshed)
+    return written, added, skipped, updated
 
 
 def _print_summary(
     written: list[Path],
     added: list[str],
     skipped: list[str],
+    updated: list[str],
     structure: ProjectStructure,
 ) -> None:
-    """Summarize which modules were updated and factories added or skipped."""
+    """Summarize which modules were updated and factories added/skipped/refreshed."""
     for target in written:
         print_console.step_done(f"{target.relative_to(structure.root)} updated")
     for name in added:
         print_console.ok(f"Factory {name} added")
+    for name in updated:
+        print_console.ok(f"Factory {name} updated with new model fields")
     for name in skipped:
-        print_console.info(f"Factory {name} already exists, skipped")
+        print_console.info(f"Factory {name} already up to date, skipped")

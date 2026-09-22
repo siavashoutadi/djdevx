@@ -58,16 +58,17 @@ class TestBuildFactory:
 
 class TestAssembleModule:
     def test_fresh_module(self):
-        content, added, skipped = mapper.assemble_module([home_post()])
+        content, added, skipped, updated = mapper.assemble_module([home_post()])
         assert added == ["PostFactory"]
         assert skipped == []
+        assert updated == []
         assert content.startswith(
             "import factory\nfrom factory.django import DjangoModelFactory\n"
         )
         assert content.rstrip().endswith("self.tags.add(item)")
 
     def test_factories_separated_by_two_blank_lines(self):
-        content, _, _ = mapper.assemble_module([home_post(), home_comment()])
+        content, _, _, _ = mapper.assemble_module([home_post(), home_comment()])
         assert "class PostFactory" in content
         assert "class CommentFactory" in content
         # top-level classes must be separated by exactly two blank lines
@@ -85,17 +86,19 @@ class TestAssembleModule:
             "\n"
             '    title = factory.Faker("sentence")\n'
         )
-        content, added, skipped = mapper.assemble_module(
+        content, added, skipped, updated = mapper.assemble_module(
             [users_user()], existing=existing
         )
         assert added == ["UserFactory"]
         assert skipped == []
+        assert updated == []
         assert "class PostFactory" in content
         assert "class UserFactory" in content
         assert "from django.contrib.auth import get_user_model" in content
         assert "import factory" in content.split("class PostFactory")[0]
 
-    def test_append_skips_existing_factory(self):
+    def test_append_refreshes_stub_class(self):
+        """An existing factory missing model fields gets them merged in."""
         existing = (
             "import factory\n"
             "from factory.django import DjangoModelFactory\n"
@@ -104,13 +107,112 @@ class TestAssembleModule:
             "class PostFactory(DjangoModelFactory):\n"
             "    class Meta:\n"
             '        model = "home.Post"\n'
+            "\n"
         )
-        content, added, skipped = mapper.assemble_module(
+        content, added, skipped, updated = mapper.assemble_module(
             [home_post()], existing=existing
         )
         assert added == []
-        assert skipped == ["PostFactory"]
-        assert content == existing
+        assert skipped == []
+        assert updated == ["PostFactory"]
+        assert 'title = factory.Faker("sentence")' in content
+        assert "def tags(self, create, extracted, **kwargs):" in content
+        assert "class PostFactory" in content
+
+    def test_merge_is_additive_keeps_customizations(self):
+        """Existing declarations (including manual edits) are preserved."""
+        existing = (
+            "import factory\n"
+            "from factory.django import DjangoModelFactory\n"
+            "\n"
+            "\n"
+            "class PostFactory(DjangoModelFactory):\n"
+            "    class Meta:\n"
+            '        model = "home.Post"\n'
+            "\n"
+            '    title = factory.Faker("custom_title")\n'
+            '    body = "fixed body"\n'
+        )
+        content, added, skipped, updated = mapper.assemble_module(
+            [home_post()], existing=existing
+        )
+        assert updated == ["PostFactory"]
+        assert 'title = factory.Faker("custom_title")' in content
+        assert 'body = "fixed body"' in content
+        assert 'slug = factory.Faker("slug")' in content
+        assert 'author = factory.SubFactory("users.UserFactory")' in content
+
+    def test_merge_updates_get_or_create(self):
+        """A newly unique field joins django_get_or_create."""
+        existing = (
+            "import factory\n"
+            "from factory.django import DjangoModelFactory\n"
+            "\n"
+            "\n"
+            "class PostFactory(DjangoModelFactory):\n"
+            "    class Meta:\n"
+            '        model = "home.Post"\n'
+            '        django_get_or_create = ("title",)\n'
+            "\n"
+            '    title = factory.Faker("sentence")\n'
+        )
+        content, added, skipped, updated = mapper.assemble_module(
+            [home_post()], existing=existing
+        )
+        assert updated == ["PostFactory"]
+        assert 'django_get_or_create = ("title", "slug")' in content
+
+    def test_merge_creates_get_or_create_when_absent(self):
+        existing = (
+            "import factory\n"
+            "from factory.django import DjangoModelFactory\n"
+            "\n"
+            "\n"
+            "class PostFactory(DjangoModelFactory):\n"
+            "    class Meta:\n"
+            '        model = "home.Post"\n'
+            "\n"
+            '    title = factory.Faker("sentence")\n'
+            '    slug = factory.Faker("slug")\n'
+        )
+        content, added, skipped, updated = mapper.assemble_module(
+            [home_post()], existing=existing
+        )
+        assert updated == ["PostFactory"]
+        assert '        django_get_or_create = ("slug",)' in content
+
+    def test_merge_adds_m2m_post_generation(self):
+        existing = (
+            "import factory\n"
+            "from factory.django import DjangoModelFactory\n"
+            "\n"
+            "\n"
+            "class PostFactory(DjangoModelFactory):\n"
+            "    class Meta:\n"
+            '        model = "home.Post"\n'
+            "\n"
+            '    title = factory.Faker("sentence")\n'
+        )
+        content, added, skipped, updated = mapper.assemble_module(
+            [home_post()], existing=existing
+        )
+        assert updated == ["PostFactory"]
+        assert "def tags(self, create, extracted, **kwargs):" in content
+        assert "self.tags.add(item)" in content
+        # no second method when the field is already declared
+        assert content.count("def tags") == 1
+
+    def test_merge_complete_class_is_skipped(self):
+        """A factory that already covers all fields stays untouched."""
+        content, added, skipped, updated = mapper.assemble_module(
+            [home_post()], existing=None
+        )
+        complete, _, skipped_second, updated_second = mapper.assemble_module(
+            [home_post()], existing=content
+        )
+        assert skipped_second == ["PostFactory"]
+        assert updated_second == []
+        assert complete == content
 
     def test_module_path(self, temp_dir):
         assert (

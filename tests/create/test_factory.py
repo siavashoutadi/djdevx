@@ -77,6 +77,41 @@ def test_create_factory_multi_model_appends(temp_dir, monkeypatch):
     assert target.read_text() == (DATA_DIR / "append" / "factories.py").read_text()
 
 
+def test_create_factory_updates_existing_with_new_fields(temp_dir, monkeypatch):
+    """Re-running on a model that gained fields merges them into the factory."""
+    _scaffold_project(temp_dir)
+    target = temp_dir / "home" / "factories.py"
+    target.write_text(
+        "import factory\n"
+        "from factory.django import DjangoModelFactory\n"
+        "\n"
+        "\n"
+        "class PostFactory(DjangoModelFactory):\n"
+        "    class Meta:\n"
+        '        model = "home.Post"\n'
+        '        django_get_or_create = ("slug",)\n'
+        "\n"
+        '    title = factory.Faker("sentence")\n'
+        "\n"
+    )
+    monkeypatch.chdir(temp_dir)
+
+    with (
+        patch(
+            "djdevx.create.factory_boy.introspect.list_models",
+            return_value=[home_post()],
+        ),
+        patch("djdevx.create.factory_boy.format_files", side_effect=_noop_format),
+    ):
+        result = runner.invoke(app, ["create", "factory-boy", "--model", "home.Post"])
+
+    assert result.exit_code == 0, f"Create factory failed: {result.output}"
+    content = target.read_text()
+    assert 'title = factory.Faker("sentence")' in content
+    assert 'slug = factory.Faker("slug")' in content
+    assert "def tags(self, create, extracted, **kwargs):" in content
+
+
 def test_create_factory_interactive_prompt(temp_dir, monkeypatch):
     """Without --model the styled checkbox prompt collects the selection."""
     _scaffold_project(temp_dir)
