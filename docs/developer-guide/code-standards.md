@@ -112,6 +112,28 @@ if commands.migrations_pending():
     commands.run("migrate")
 ```
 
+### Django Model Helpers
+
+- Model discovery, selection, and grouping shared by model-based generators
+  (`create factory-boy`, `create seed-command`) live in
+  `djdevx/utils/django/models.py` — never re-implement introspect->prompt->
+  group logic in individual command modules
+- `utils/django/models.py` provides `introspect_models(commands)` (error-safe
+  discovery), `choose_models(models, available, prompt=...)` (CLI-arg or
+  checkbox selection with label validation), `group_models_by_app(...)`, and
+  the `model_label`/`models_by_label` index helpers
+- Raw Django model introspection (the `manage.py shell -c` snippet that emits
+  model/field metadata as JSON) lives in `djdevx/utils/django/introspect.py`
+  (`list_models()` + `IntrospectionError`)
+
+```python
+from djdevx.utils.django.models import choose_models, group_models_by_app, introspect_models
+
+available = introspect_models(commands)
+chosen = choose_models(models, available, prompt="Select the models to generate factories for")
+by_app = group_models_by_app(chosen, available)
+```
+
 ### Template Conventions
 
 - Templates use `.jinja2` extension (stripped on render)

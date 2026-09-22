@@ -405,6 +405,7 @@ $ djdevx create [OPTIONS] COMMAND [ARGS]...
 * `app`: Create a new Django application.
 * `base-model`: Create a timestamped abstract base model.
 * `factory-boy`: Generate a factory-boy factory for one or...
+* `seed-command`: Generate a management command that seeds...
 
 ## djdevx create app
 
@@ -454,6 +455,26 @@ $ djdevx create factory-boy [OPTIONS]
 **Options**:
 
 * `--model TEXT`: Model (app_label.ModelName) to generate a factory boy factory for
+* `--help`: Show this message and exit.
+
+## djdevx create seed-command
+
+Generate a management command that seeds project models via factory-boy.
+
+Writes a ``management/commands/app.py`` module per app for the chosen
+models, each exposing seed and clean subcommands per model (one pair per
+model, suffixed with the lowercased model name) backed by the app factories. Factory-boy factories are generated first when
+missing, so the seed command and the factories stay connected.
+
+**Usage**:
+
+```console
+$ djdevx create seed-command [OPTIONS]
+```
+
+**Options**:
+
+* `--model TEXT`: Model (app_label.ModelName) to generate a seed management command for
 * `--help`: Show this message and exit.
 
 ## djdevx database

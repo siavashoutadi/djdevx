@@ -30,7 +30,7 @@ def test_create_factory_noninteractive(temp_dir, monkeypatch):
 
     with (
         patch(
-            "djdevx.create.factory_boy.introspect.list_models",
+            "djdevx.utils.django.introspect.list_models",
             return_value=[home_post()],
         ),
         patch("djdevx.create.factory_boy.format_files", side_effect=_noop_format),
@@ -64,7 +64,7 @@ def test_create_factory_multi_model_appends(temp_dir, monkeypatch):
 
     with (
         patch(
-            "djdevx.create.factory_boy.introspect.list_models",
+            "djdevx.utils.django.introspect.list_models",
             return_value=[home_post(), home_comment(), users_user()],
         ),
         patch("djdevx.create.factory_boy.format_files", side_effect=_noop_format),
@@ -98,7 +98,7 @@ def test_create_factory_updates_existing_with_new_fields(temp_dir, monkeypatch):
 
     with (
         patch(
-            "djdevx.create.factory_boy.introspect.list_models",
+            "djdevx.utils.django.introspect.list_models",
             return_value=[home_post()],
         ),
         patch("djdevx.create.factory_boy.format_files", side_effect=_noop_format),
@@ -119,10 +119,12 @@ def test_create_factory_interactive_prompt(temp_dir, monkeypatch):
 
     with (
         patch(
-            "djdevx.create.factory_boy.introspect.list_models",
+            "djdevx.utils.django.introspect.list_models",
             return_value=[home_post()],
         ),
-        patch("djdevx.create.factory_boy.prompts.checkbox", return_value=["home.Post"]),
+        patch(
+            "djdevx.utils.django.models.prompts.checkbox", return_value=["home.Post"]
+        ),
         patch("djdevx.create.factory_boy.format_files", side_effect=_noop_format),
     ):
         result = runner.invoke(app, ["create", "factory-boy"])
@@ -138,7 +140,7 @@ def test_create_factory_unknown_model(temp_dir, monkeypatch):
 
     with (
         patch(
-            "djdevx.create.factory_boy.introspect.list_models",
+            "djdevx.utils.django.introspect.list_models",
             return_value=[home_post()],
         ),
         patch("djdevx.create.factory_boy.format_files", side_effect=_noop_format),
@@ -154,10 +156,10 @@ def test_create_factory_introspection_error(temp_dir, monkeypatch):
     _scaffold_project(temp_dir)
     monkeypatch.chdir(temp_dir)
 
-    from djdevx.create.factory_boy import introspect
+    from djdevx.utils.django import introspect
 
     with patch(
-        "djdevx.create.factory_boy.introspect.list_models",
+        "djdevx.utils.django.introspect.list_models",
         side_effect=introspect.IntrospectionError("Could not introspect"),
     ):
         result = runner.invoke(app, ["create", "factory-boy", "--model", "home.Post"])

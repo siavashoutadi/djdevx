@@ -138,6 +138,7 @@ ddx --help                 # Top-level help
 | Create app | `ddx create app --name <name>` |
 | Create timestamped base model | `ddx create base-model [--app core] [--class-name TimeStampedModel]` |
 | Create test factory | `ddx create factory-boy [--model app.Model]` |
+| Create seed command | `ddx create seed-command [--model app.Model]` |
 | Manage secrets | `ddx settings secrets {init,list,verify}` |
 | Deploy | `ddx deployment docker-compose generate` |
 
