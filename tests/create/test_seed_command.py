@@ -98,6 +98,8 @@ def test_create_seed_command_appends_missing_models(temp_dir, monkeypatch):
 
     assert result.exit_code == 0, f"Create seed command failed: {result.output}"
     content = target.read_text()
+    assert "def seed_all" in content
+    assert "def clean_all" in content
     assert "def seed_post" in content
     assert "def clean_post" in content
     assert "def seed_comment" in content

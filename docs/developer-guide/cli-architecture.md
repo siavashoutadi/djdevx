@@ -42,7 +42,7 @@ ddx
 ├── create app                                   # Scaffold new Django app
 ├── create base-model                            # App with a timestamped abstract base model
 ├── create factory-boy [--model app.Model]       # Generate factory-boy factories
-├── create seed-command [--model app.Model]       # Generate seeding management commands (seed + clean per model)
+├── create seed-command [--model app.Model]       # Generate seeding management commands (seed_all/clean_all + per model)
 │                                                  # Both introspect + group models via djdevx/utils/django/models.py
 ├── database
 │   ├── add [NAME] [-v]                          # Add a database (single only)

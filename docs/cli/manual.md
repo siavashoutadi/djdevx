@@ -462,8 +462,10 @@ $ djdevx create factory-boy [OPTIONS]
 Generate a management command that seeds project models via factory-boy.
 
 Writes a ``management/commands/app.py`` module per app for the chosen
-models, each exposing seed and clean subcommands per model (one pair per
-model, suffixed with the lowercased model name) backed by the app factories. Factory-boy factories are generated first when
+models, each exposing a ``seed_all`` subcommand that runs every per-model
+seed, a ``clean_all`` subcommand that runs every per-model clean, plus one
+seed and clean subcommand per model (suffixed with the lowercased model
+name) backed by the app factories. Factory-boy factories are generated first when
 missing, so the seed command and the factories stay connected.
 
 **Usage**:
