@@ -3,15 +3,18 @@
 Replaces the manual if/else chain that used to live in ``dev/start.py`` with an
 ordered, named list of steps. The steps mirror the previous behaviour exactly:
 
-    1. settings init   — dev configs + secrets (skip with ``--skip-settings``)
-    2. database        — start the installed database service (if any)
-    3. otel            — start the collector + OpenObserve (if installed)
-    4. migrate         — apply pending migrations (skip with ``--skip-migrate``)
-    5. cache           — start the installed cache service (if any)
-    6. render          — print the resolved service endpoints table
-    7. server          — run the dev server (forwards extra args)
+1. settings init   — dev configs + secrets (skip with ``--skip-settings``)
+     2. database        — start the installed database service (if any)
+     3. otel            — start the collector + OpenObserve (if installed)
+     4. migrate         — apply pending migrations (skip with ``--skip-migrate``)
+     5. cache           — start the installed cache service (if any)
+     6. task-queue      — start the Celery worker (if installed)
+     7. scheduler       — start the Celery Beat scheduler (if installed)
+     8. render          — print the resolved service endpoints table
+     9. server          — run the dev server (forwards extra args)
 
-Steps 2-5 are folded into :func:`_services_step`, which also handles the
+Steps 2-9 (with the exception of render/server) are folded into
+:func:`_services_step`, which also handles the
 devcontainer case (services are managed by docker compose, so only migrate runs).
 
 The redundant double-start loop that previously restarted postgres/redis a
@@ -30,6 +33,8 @@ from ..services import (
     resolve_cache_dev_service,
     resolve_database_dev_service,
     resolve_otel_dev_services,
+    resolve_scheduler_dev_service,
+    resolve_task_queue_dev_service,
 )
 
 
@@ -82,7 +87,8 @@ def _migrate_if_pending(commands: ManageCommands, skip_migrate: bool) -> None:
 
 
 def _services_step(commands: ManageCommands, skip_migrate: bool, verbose: bool) -> None:
-    """Start db, otel, migrate, then cache (or only migrate in a devcontainer)."""
+    """Start db, otel, migrate, cache, then task-queue and scheduler (or only
+    migrate in a devcontainer)."""
     if in_devcontainer():
         print_console.step_done(
             "Running inside a devcontainer — services are managed by docker compose"
@@ -110,6 +116,18 @@ def _services_step(commands: ManageCommands, skip_migrate: bool, verbose: bool) 
         _start_native_service(cache_service)
     else:
         print_console.step_done("No cache configured")
+
+    task_queue_service = resolve_task_queue_dev_service(verbose=verbose)
+    if task_queue_service is not None:
+        _start_native_service(task_queue_service)
+    else:
+        print_console.step_done("No task queue configured")
+
+    scheduler_service = resolve_scheduler_dev_service(verbose=verbose)
+    if scheduler_service is not None:
+        _start_native_service(scheduler_service)
+    else:
+        print_console.step_done("No scheduler configured")
 
 
 def _server_step(ctx: typer.Context, runner: PixiRunner, verbose: bool) -> None:

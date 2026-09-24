@@ -24,6 +24,8 @@ $ djdevx [OPTIONS] COMMAND [ARGS]...
 * `create`: Create new Django applications
 * `database`: Manage database infrastructure
 * `cache`: Manage cache infrastructure
+* `task-queue`: Manage task queue infrastructure
+* `scheduler`: Manage schedulers
 * `settings`: Manage project secrets and configs
 * `dev`: Manage the local development environment
 * `deployment`: Generate deployment manifests
@@ -627,6 +629,154 @@ $ djdevx cache remove [OPTIONS] [NAME]
 * `-v, --verbose`: Show full pixi output
 * `--help`: Show this message and exit.
 
+## djdevx task-queue
+
+Manage task queue infrastructure
+
+**Usage**:
+
+```console
+$ djdevx task-queue [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `list`: List all available providers in a table.
+* `add`: Install a provider.
+* `remove`: Remove a provider.
+
+## djdevx task-queue list
+
+List all available providers in a table.
+
+**Usage**:
+
+```console
+$ djdevx task-queue list [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx task-queue add
+
+Install a provider.
+
+**Usage**:
+
+```console
+$ djdevx task-queue add [OPTIONS] [NAME]
+```
+
+**Arguments**:
+
+* `[NAME]`: Task queue name to install
+
+**Options**:
+
+* `-p, --provider TEXT`: Variant/provider name
+* `-v, --verbose`: Show full pixi output
+* `--help`: Show this message and exit.
+
+## djdevx task-queue remove
+
+Remove a provider.
+
+**Usage**:
+
+```console
+$ djdevx task-queue remove [OPTIONS] [NAME]
+```
+
+**Arguments**:
+
+* `[NAME]`: Task queue name to remove
+
+**Options**:
+
+* `-p, --provider TEXT`: Variant/provider to remove
+* `-v, --verbose`: Show full pixi output
+* `--help`: Show this message and exit.
+
+## djdevx scheduler
+
+Manage schedulers
+
+**Usage**:
+
+```console
+$ djdevx scheduler [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `list`: List all available providers in a table.
+* `add`: Install a provider.
+* `remove`: Remove a provider.
+
+## djdevx scheduler list
+
+List all available providers in a table.
+
+**Usage**:
+
+```console
+$ djdevx scheduler list [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx scheduler add
+
+Install a provider.
+
+**Usage**:
+
+```console
+$ djdevx scheduler add [OPTIONS] [NAME]
+```
+
+**Arguments**:
+
+* `[NAME]`: Scheduler name to install
+
+**Options**:
+
+* `-p, --provider TEXT`: Variant/provider name
+* `-v, --verbose`: Show full pixi output
+* `--help`: Show this message and exit.
+
+## djdevx scheduler remove
+
+Remove a provider.
+
+**Usage**:
+
+```console
+$ djdevx scheduler remove [OPTIONS] [NAME]
+```
+
+**Arguments**:
+
+* `[NAME]`: Scheduler name to remove
+
+**Options**:
+
+* `-p, --provider TEXT`: Variant/provider to remove
+* `-v, --verbose`: Show full pixi output
+* `--help`: Show this message and exit.
+
 ## djdevx settings
 
 Manage project secrets and configs
@@ -812,13 +962,15 @@ $ djdevx dev [OPTIONS] COMMAND [ARGS]...
 
 * `start`: Start the local dev environment...
 * `runserver`: Run the dev server (tailwind-aware).
-* `up`: Start installed database/cache services...
-* `down`: Stop installed database/cache services.
+* `up`: Start installed...
+* `down`: Stop installed...
 * `status`: Show service up/down, migrate state, and...
 * `credentials`: Show how to connect to each installed dev...
 * `database`: Manage the local dev database
 * `cache`: Manage the local dev cache
 * `otel`: Manage the local dev OTel stack
+* `task-queue`: Manage the local dev task queue
+* `scheduler`: Manage the local dev scheduler
 
 ## djdevx dev start
 
@@ -858,7 +1010,7 @@ $ djdevx dev runserver [OPTIONS]
 
 ## djdevx dev up
 
-Start installed database/cache services (pixi-native, idempotent).
+Start installed database/cache/otel/task-queue/scheduler services (pixi-native, idempotent).
 
 **Usage**:
 
@@ -872,7 +1024,7 @@ $ djdevx dev up [OPTIONS]
 
 ## djdevx dev down
 
-Stop installed database/cache services.
+Stop installed database/cache/otel/task-queue/scheduler services.
 
 **Usage**:
 
@@ -1092,6 +1244,130 @@ Stop the services and delete their data under .pixi/devdata/.
 
 ```console
 $ djdevx dev otel purge [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx dev task-queue
+
+Manage the local dev task queue
+
+**Usage**:
+
+```console
+$ djdevx dev task-queue [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `init`: Start the Celery worker daemon.
+* `reset`: Restart the Celery worker (tasks have no...
+* `purge`: Stop the worker and remove its state under...
+
+## djdevx dev task-queue init
+
+Start the Celery worker daemon.
+
+**Usage**:
+
+```console
+$ djdevx dev task-queue init [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx dev task-queue reset
+
+Restart the Celery worker (tasks have no queue-backed data to flush).
+
+**Usage**:
+
+```console
+$ djdevx dev task-queue reset [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx dev task-queue purge
+
+Stop the worker and remove its state under .pixi/devdata/.
+
+**Usage**:
+
+```console
+$ djdevx dev task-queue purge [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx dev scheduler
+
+Manage the local dev scheduler
+
+**Usage**:
+
+```console
+$ djdevx dev scheduler [OPTIONS] COMMAND [ARGS]...
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+**Commands**:
+
+* `init`: Start the Celery Beat daemon.
+* `reset`: Restart Celery Beat (periodic task...
+* `purge`: Stop Beat and remove its state under...
+
+## djdevx dev scheduler init
+
+Start the Celery Beat daemon.
+
+**Usage**:
+
+```console
+$ djdevx dev scheduler init [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx dev scheduler reset
+
+Restart Celery Beat (periodic task definitions live in the database).
+
+**Usage**:
+
+```console
+$ djdevx dev scheduler reset [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
+
+## djdevx dev scheduler purge
+
+Stop Beat and remove its state under .pixi/devdata/.
+
+**Usage**:
+
+```console
+$ djdevx dev scheduler purge [OPTIONS]
 ```
 
 **Options**:

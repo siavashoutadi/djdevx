@@ -37,9 +37,12 @@ FEATURE = InstallableKind("feature", Section.FEATURES)
 FRAMEWORK = InstallableKind("framework", Section.FRAMEWORKS)
 DATABASE = InstallableKind("database", Section.DATABASE)
 CACHE = InstallableKind("cache", Section.CACHE)
+TASK_QUEUE = InstallableKind("task-queue", Section.TASK_QUEUE)
+SCHEDULER = InstallableKind("scheduler", Section.SCHEDULER)
 
 KIND_BY_SECTION: dict[Section, InstallableKind] = {
-    kind.section: kind for kind in (PACKAGE, FEATURE, FRAMEWORK, DATABASE, CACHE)
+    kind.section: kind
+    for kind in (PACKAGE, FEATURE, FRAMEWORK, DATABASE, CACHE, TASK_QUEUE, SCHEDULER)
 }
 
 

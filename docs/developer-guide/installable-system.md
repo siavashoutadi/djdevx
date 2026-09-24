@@ -1,6 +1,6 @@
 # Installable System
 
-All five installable categories (packages, frameworks, features, databases,
+All installable categories (packages, frameworks, features, databases,
 caches) share a common architecture. This document explains the shared
 infrastructure that powers them all.
 
@@ -39,7 +39,7 @@ Each category has its own directory following this pattern:
 
 ### InstallableKind
 
-A frozen dataclass identifying which category an installable belongs to. Five
+A frozen dataclass identifying which category an installable belongs to. Seven
 singletons:
 
 ```python
@@ -48,6 +48,8 @@ FEATURE = InstallableKind("feature", "features")
 FRAMEWORK = InstallableKind("framework", "frameworks")
 DATABASE = InstallableKind("database", "database")
 CACHE = InstallableKind("cache", "cache")
+TASK_QUEUE = InstallableKind("task-queue", "task-queue")
+SCHEDULER = InstallableKind("scheduler", "scheduler")
 ```
 
 ### InstallableRef
@@ -296,7 +298,7 @@ The orchestrator provides the centralized `add_installable()` and
 - **Variant selection** — three modes:
   - **Simple** — no variants, just install
   - **Exclusive variants** — choose exactly one (database provider, cache
-    backend, storage backend)
+    backend, task-queue provider, scheduler, storage backend)
   - **Additive variants** — pick multiple optional sub-features (allauth's
     account + mfa + oidc)
 - **Interactive parameter collection** — prompts for `InstallParam` values
@@ -419,7 +421,7 @@ ddx <category> list
 ### Add Command Pattern
 
 When `name` is `None`, the add command presents interactive selection:
-- **Single-choice** (databases, caches): `prompts.select()`
+- **Single-choice** (databases, caches, task queues, schedulers): `prompts.select()`
 - **Multi-select** (packages, features, frameworks): `prompts.checkbox()`
 
 When `name` is provided, it installs directly. The command checks if the item
@@ -522,7 +524,9 @@ To add an entirely new type of installable (e.g., "monitoring"):
 ## Creating a New Installable in an Existing Category
 
 See [Creating an Installable](creating-an-installable.md) — the shared pattern
-and concepts common to all five categories. Then follow the type-specific
-guide: [Add a Package](adding-a-package.md), [Add a Feature](adding-a-feature.md),
-[Add a Framework](adding-a-framework.md), [Add a Database](adding-a-database.md),
-or [Add a Cache](adding-a-cache.md).
+and concepts common to all installable categories. Then follow the
+type-specific guide: [Add a Package](adding-a-package.md),
+[Add a Feature](adding-a-feature.md), [Add a Framework](adding-a-framework.md),
+[Add a Database](adding-a-database.md), [Add a Cache](adding-a-cache.md),
+[Add a Task Queue](adding-a-task-queue.md), or
+[Add a Scheduler](adding-a-scheduler.md).

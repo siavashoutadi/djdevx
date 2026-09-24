@@ -21,13 +21,15 @@ from .installable.lifecycle import Installable
 from .installable.models import InstallableKind
 from .utils.tracking import Section
 
-# Re-export the five canonical kinds so callers don't need a separate import.
+# Re-export the canonical kinds so callers don't need a separate import.
 # (Mirrors the InstallableKind constants in utils/installable/types.py.)
 PACKAGE_KIND = InstallableKind("package", Section.PACKAGES)
 FEATURE_KIND = InstallableKind("feature", Section.FEATURES)
 FRAMEWORK_KIND = InstallableKind("framework", Section.FRAMEWORKS)
 DATABASE_KIND = InstallableKind("database", Section.DATABASE)
 CACHE_KIND = InstallableKind("cache", Section.CACHE)
+TASK_QUEUE_KIND = InstallableKind("task-queue", Section.TASK_QUEUE)
+SCHEDULER_KIND = InstallableKind("scheduler", Section.SCHEDULER)
 
 
 class Provider(Installable):

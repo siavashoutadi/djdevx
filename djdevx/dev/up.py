@@ -1,14 +1,14 @@
-"""ddx dev up — start installed database/cache services."""
+"""ddx dev up — start installed dev services (db, cache, otel, worker, beat)."""
 
 from djdevx.core.console import print_console
 from ..services import resolve_dev_services
 
 
 def up() -> None:
-    """Start installed database/cache services (pixi-native, idempotent)."""
+    """Start installed database/cache/otel/task-queue/scheduler services (pixi-native, idempotent)."""
     services = resolve_dev_services()
     if not services:
-        print_console.info("No database or cache installed.")
+        print_console.info("No dev services installed.")
         return
     for service in services:
         with print_console.step_group(

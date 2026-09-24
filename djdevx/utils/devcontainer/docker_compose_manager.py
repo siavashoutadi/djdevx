@@ -10,7 +10,8 @@ from djdevx.core.console import NestedStep, print_console
 
 class ServiceConfig(TypedDict):
     name: str
-    image: str
+    image: NotRequired[str]
+    build: NotRequired[dict[str, str]]
     environment: NotRequired[dict[str, str]]
     env_file: NotRequired[list[str]]
     volumes: NotRequired[list[str]]

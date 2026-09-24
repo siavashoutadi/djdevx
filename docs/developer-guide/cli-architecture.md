@@ -52,6 +52,14 @@ ddx
 │   ├── add [NAME] [-v]                          # Add a cache (single only)
 │   ├── remove [NAME] [-v]                       # Remove a cache
 │   └── list                                     # List caches
+├── task-queue
+│   ├── add [NAME] [-v]                          # Add a task queue (single only; auto-installs its broker)
+│   ├── remove [NAME] [-v]                       # Remove a task queue
+│   └── list                                     # List task queues
+├── scheduler
+│   ├── add [NAME] [-v]                          # Add a scheduler (single only)
+│   ├── remove [NAME] [-v]                       # Remove a scheduler
+│   └── list                                     # List schedulers
 ├── settings
 │   ├── secrets {init,list,verify} [ENV]
 │   └── configs {init,list,verify} [ENV]
@@ -64,6 +72,8 @@ ddx
 │   ├── credentials                          # endpoints + credentials table
 │   ├── database {init,reset,purge}          # pixi-native postgres
 │   ├── cache {init,reset,purge}             # pixi-native redis
+│   ├── task-queue {init,reset,purge}        # pixi-native celery worker daemon
+│   ├── scheduler {init,reset,purge}         # pixi-native celery beat daemon
 │   └── otel {init,reset,purge}              # pixi-native otel collector + OpenObserve
 └── deployment
     └── docker-compose {generate,verify}
@@ -74,10 +84,11 @@ ddx
 - **`no_args_is_help=True`** — Every `typer.Typer()` instance uses this so
   running a command without arguments shows its help.
 
-- **Generic domain factory** — The five installable categories
-  (`packages`, `features`, `frameworks`, `database`, `cache`) no longer hand-
-  write `add`/`remove`/`list` modules. Each category's `__init__.py` is a
-  three-line declaration built by `djdevx/cli/factory.py::domain_app()`:
+- **Generic domain factory** — The installable categories
+  (`packages`, `features`, `frameworks`, `database`, `cache`, `task-queue`,
+  `scheduler`) no longer hand-write `add`/`remove`/`list` modules. Each
+  category's `__init__.py` is a three-line declaration built by
+  `djdevx/cli/factory.py::domain_app()`:
 
   ```python
   # djdevx/providers/packages/__init__.py
@@ -99,8 +110,8 @@ ddx
   `domain_app()` generates the `add`/`remove`/`list` commands, NAME
   autocompletion (installed vs available), interactive fallback prompts, the
   shared Rich check/cross list table, and per-category behaviors via flags:
-  `single=True` for database/cache, `supports_multi` for packages/features/
-  frameworks.
+  `single=True` for database/cache/task-queue/scheduler,
+  `supports_multi` for packages/features/frameworks.
 
 - **Positional Arguments with Autocompletion** — The generated `[NAME]`
   argument uses `typer.Argument(autocompletion=...)`; completions come from
@@ -149,21 +160,24 @@ ddx
 
 `ddx dev` is split into thin command modules under `djdevx/dev/` (`start.py`,
 `runserver.py`, `up.py`, `down.py`, `status.py`, `credentials.py`,
-`database.py`, `cache.py`, `otel.py`). Shared behavior lives in:
+`database.py`, `cache.py`, `task_queue.py`, `scheduler.py`, `otel.py`).
+Shared behavior lives in:
 
 - **`djdevx/cli/dev.py`** — the declarative `ddx dev start` pipeline
-  (`run_start`): settings init → database up → migrate → cache up → render
-  endpoints → dev server. Each native service is started exactly once; in a
-  devcontainer the compose stack owns the services and only
+  (`run_start`): settings init → database up → migrate → cache up → worker →
+  beat → render endpoints → dev server. Each native service is started exactly
+  once; in a devcontainer the compose stack owns the services and only
   settings/migrations/server run. `dev/start.py` is a thin CLI wrapper that
   delegates here.
 - **`services/registry.py`** — the service registry (`SERVICE_REGISTRY`) with
   category-filtered resolvers: `resolve_database_dev_service()`,
-  `resolve_cache_dev_service()`, `resolve_otel_dev_services()`,
+  `resolve_cache_dev_service()`, `resolve_task_queue_dev_service()`,
+  `resolve_scheduler_dev_service()`, `resolve_otel_dev_services()`,
   `resolve_openobserve_dev_service()`, `resolve_dev_services()`. Each reads
   `djdevx.toml` tracking to find the installed provider(s) and instantiate the
-  matching `BaseDevService`. Because only one database and one cache can be
-  installed at a time, `ddx dev` commands always act on those.
+  matching `BaseDevService`. Because only one database, cache, task queue, and
+  scheduler can be installed at a time, `ddx dev` commands always act on that
+  single installed provider.
 - **`dev/context.py` + `dev/render.py`** — build the service endpoint snapshot
   (native or devcontainer) and render the shared services/credentials tables.
 - **`utils/django/manage_commands.py`** — `ManageCommands` wraps Django
@@ -174,7 +188,7 @@ ddx
 
 ## Installable Category Pattern
 
-All five installable categories follow the same architectural pattern.
+All installable categories follow the same architectural pattern.
 See [Installable System](installable-system.md) for the full reference. The
 entire category CLI is the `domain_app()` declaration shown above.
 

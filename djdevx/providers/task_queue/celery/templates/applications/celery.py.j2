@@ -1,0 +1,30 @@
+"""Celery application instance.
+
+Importing this module registers the app with Celery; worker and Beat
+processes reference it via ``-A applications.celery``. The module deliberately
+lives inside the ``applications`` package rather than at the project root so
+the ``celery`` module name stays free for the installed ``celery`` package
+(a root ``celery.py`` would shadow it and break any ``import celery``, e.g.
+the opentelemetry celery instrumentation). Task modules are discovered from
+Django apps automatically (``app.autodiscover_tasks()``).
+
+When the ``otel`` feature is installed, ``setup_otel`` runs here so
+worker/Beat processes are instrumented too (spans, metrics, logs).
+"""
+
+import os
+
+from celery import Celery
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
+
+app = Celery("{{ project_name }}")
+app.config_from_object("django.conf:settings", namespace="CELERY")
+app.autodiscover_tasks()
+
+try:
+    from otel.setup import setup_otel
+
+    setup_otel()
+except ImportError:
+    pass

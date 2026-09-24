@@ -14,9 +14,12 @@ cli = CliRunner()
 
 def _service(calls, tag, is_up=False):
     service = MagicMock()
-    service.display_name = {"db": "PostgreSQL", "cache": "Redis"}.get(
-        tag, "OTel Collector" if tag == "otel" else "OpenObserve"
-    )
+    service.display_name = {
+        "db": "PostgreSQL",
+        "cache": "Redis",
+        "worker": "Celery Worker",
+        "beat": "Celery Beat",
+    }.get(tag, "OTel Collector" if tag == "otel" else "OpenObserve")
     service.is_up.return_value = is_up
     service.up.side_effect = lambda step=None: calls.append(f"{tag}_up")
     return service
@@ -31,8 +34,12 @@ def _run(
     skip_migrate=False,
     db_is_up=False,
     cache_is_up=False,
+    worker_is_up=False,
+    beat_is_up=False,
     no_db=False,
     no_cache=False,
+    no_task_queue=False,
+    no_scheduler=False,
     otel=(),
     pending=True,
 ):
@@ -41,6 +48,8 @@ def _run(
     ctx.args = list(args)
     db = None if no_db else _service(calls, "db", db_is_up)
     cache = None if no_cache else _service(calls, "cache", cache_is_up)
+    worker = None if no_task_queue else _service(calls, "worker", worker_is_up)
+    beat = None if no_scheduler else _service(calls, "beat", beat_is_up)
     with (
         patch(
             "djdevx.cli.dev._init_settings",
@@ -49,6 +58,8 @@ def _run(
         patch("djdevx.cli.dev.PixiRunner") as pixi_cls,
         patch("djdevx.cli.dev.resolve_database_dev_service", return_value=db),
         patch("djdevx.cli.dev.resolve_cache_dev_service", return_value=cache),
+        patch("djdevx.cli.dev.resolve_task_queue_dev_service", return_value=worker),
+        patch("djdevx.cli.dev.resolve_scheduler_dev_service", return_value=beat),
         patch("djdevx.cli.dev.resolve_otel_dev_services", return_value=list(otel)),
         patch("djdevx.cli.dev.in_devcontainer", return_value=devcontainer),
         patch.object(
@@ -70,13 +81,28 @@ def _run(
         run_start(
             ctx, skip_settings=skip_settings, skip_migrate=skip_migrate, verbose=False
         )
-    return {"db": db, "cache": cache, "pending": pend}
+    return {
+        "db": db,
+        "cache": cache,
+        "worker": worker,
+        "beat": beat,
+        "pending": pend,
+    }
 
 
 def test_step_order_native():
     calls: list[str] = []
     _run(calls)
-    assert calls == ["settings", "db_up", "migrate", "cache_up", "render", "server"]
+    assert calls == [
+        "settings",
+        "db_up",
+        "migrate",
+        "cache_up",
+        "worker_up",
+        "beat_up",
+        "render",
+        "server",
+    ]
 
 
 def test_step_order_with_otel_starts_services_before_migrate():
@@ -90,6 +116,8 @@ def test_step_order_with_otel_starts_services_before_migrate():
         "openobserve_up",
         "migrate",
         "cache_up",
+        "worker_up",
+        "beat_up",
         "render",
         "server",
     ]
@@ -100,19 +128,25 @@ def test_each_service_started_exactly_once():
     result = _run(calls)
     assert result["db"].up.call_count == 1
     assert result["cache"].up.call_count == 1
+    assert result["worker"].up.call_count == 1
+    assert result["beat"].up.call_count == 1
 
 
 def test_running_services_are_not_restarted():
     calls: list[str] = []
-    result = _run(calls, db_is_up=True, cache_is_up=True)
+    result = _run(
+        calls, db_is_up=True, cache_is_up=True, worker_is_up=True, beat_is_up=True
+    )
     assert calls == ["settings", "migrate", "render", "server"]
     result["db"].up.assert_not_called()
     result["cache"].up.assert_not_called()
+    result["worker"].up.assert_not_called()
+    result["beat"].up.assert_not_called()
 
 
 def test_no_services_configured():
     calls: list[str] = []
-    _run(calls, no_db=True, no_cache=True)
+    _run(calls, no_db=True, no_cache=True, no_task_queue=True, no_scheduler=True)
     assert calls == ["settings", "migrate", "render", "server"]
 
 
@@ -120,7 +154,15 @@ def test_no_migrate_when_up_to_date():
     calls: list[str] = []
     _run(calls, pending=False)
     assert "migrate" not in calls
-    assert calls == ["settings", "db_up", "cache_up", "render", "server"]
+    assert calls == [
+        "settings",
+        "db_up",
+        "cache_up",
+        "worker_up",
+        "beat_up",
+        "render",
+        "server",
+    ]
 
 
 def test_skip_settings_and_migrate():
@@ -129,7 +171,7 @@ def test_skip_settings_and_migrate():
     assert "settings" not in calls
     assert "migrate" not in calls
     result["pending"].assert_not_called()
-    assert calls == ["db_up", "cache_up", "render", "server"]
+    assert calls == ["db_up", "cache_up", "worker_up", "beat_up", "render", "server"]
 
 
 def test_devcontainer_only_migrates():

@@ -9,13 +9,15 @@ tracked in ``djdevx.toml`` and filter by
 
 Ordering of :func:`resolve_dev_services` is deterministic and matches the
 pre-refactor behaviour: database (postgres), then cache (redis), then otel
-(collector, openobserve).
+(collector, openobserve), then task-queue (celery worker) and scheduler
+(celery beat).
 """
 
 from pathlib import Path
 
 from ..utils.tracking import ProjectTracking, Section
 from .base import BaseDevService
+from .celery import CeleryBeatService, CeleryWorkerService
 from .otel import OpenObserveService, OtelCollectorService
 from .postgres import PostgresService
 from .redis import RedisService
@@ -35,6 +37,8 @@ def register_service[S: BaseDevService](cls: type[S]) -> type[S]:
 # them even if a call site never imports a specific service module).
 register_service(PostgresService)
 register_service(RedisService)
+register_service(CeleryWorkerService)
+register_service(CeleryBeatService)
 register_service(OtelCollectorService)
 register_service(OpenObserveService)
 
@@ -72,6 +76,22 @@ def resolve_cache_dev_service(
     return _resolve_service("cache", name, project_root, verbose)
 
 
+def resolve_task_queue_dev_service(
+    project_root: Path | None = None, verbose: bool = False
+) -> BaseDevService | None:
+    """Return the dev service for the single installed task-queue, or None."""
+    name = ProjectTracking(project_root).installed(Section.TASK_QUEUE)
+    return _resolve_service("task-queue", name, project_root, verbose)
+
+
+def resolve_scheduler_dev_service(
+    project_root: Path | None = None, verbose: bool = False
+) -> BaseDevService | None:
+    """Return the dev service for the single installed scheduler, or None."""
+    name = ProjectTracking(project_root).installed(Section.SCHEDULER)
+    return _resolve_service("scheduler", name, project_root, verbose)
+
+
 def resolve_otel_dev_services(
     project_root: Path | None = None, verbose: bool = False
 ) -> list[BaseDevService]:
@@ -101,13 +121,17 @@ def resolve_openobserve_dev_service(
 def resolve_dev_services(
     project_root: Path | None = None, verbose: bool = False
 ) -> list[BaseDevService]:
-    """Return the installed database and cache dev services (None-filtered)."""
+    """Return the installed database, cache, otel, task-queue and scheduler
+    dev services (None-filtered). Ordering: database, cache, otel, then
+    task-queue (worker) and scheduler (beat) so brokers are up first."""
     return [
         s
         for s in (
             resolve_database_dev_service(project_root, verbose),
             resolve_cache_dev_service(project_root, verbose),
             *resolve_otel_dev_services(project_root, verbose),
+            resolve_task_queue_dev_service(project_root, verbose),
+            resolve_scheduler_dev_service(project_root, verbose),
         )
         if s is not None
     ]

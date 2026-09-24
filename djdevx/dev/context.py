@@ -26,23 +26,31 @@ from ..services import (
     resolve_cache_dev_service,
     resolve_database_dev_service,
     resolve_otel_dev_services,
+    resolve_scheduler_dev_service,
+    resolve_task_queue_dev_service,
 )
 
 # Display name → compose service name for known devcontainer services.
 _DEVCONTAINER_NAMES: dict[str, str] = {
     "PostgreSQL": "db",
     "Redis": "cache",
+    "Celery Worker": "celery-worker",
+    "Celery Beat": "celery-beat",
 }
 
 # Default ports when a devcontainer service defines no host export.
 _DEVCONTAINER_DEFAULT_PORT: dict[str, int] = {
     "PostgreSQL": 5432,
     "Redis": 6379,
+    "Celery Worker": 0,
+    "Celery Beat": 0,
 }
 
 _DEVCONTAINER_HOST: dict[str, str] = {
     "PostgreSQL": "localhost",
     "Redis": "localhost",
+    "Celery Worker": "localhost",
+    "Celery Beat": "localhost",
 }
 
 
@@ -57,6 +65,8 @@ def _native_endpoints(
             resolve_database_dev_service(project_root, verbose),
             resolve_cache_dev_service(project_root, verbose),
             *resolve_otel_dev_services(project_root, verbose),
+            resolve_task_queue_dev_service(project_root, verbose),
+            resolve_scheduler_dev_service(project_root, verbose),
         )
         if s is not None
     ]
@@ -72,12 +82,13 @@ def _native_endpoints(
             if service.name == "openobserve"
             else None
         )
+        port = service.port if service.port_env_key else 0
         endpoints.append(
             ServiceEndpoint(
                 name=service.name,
                 display_name=service.display_name,
-                host="localhost",
-                port=service.port,
+                host="localhost" if service.port_env_key else "",
+                port=port,
                 username=username,
                 credentials=creds,
                 url=url,

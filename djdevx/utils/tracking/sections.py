@@ -11,3 +11,5 @@ class Section(StrEnum):
     FRAMEWORKS = "frameworks"
     DATABASE = "database"
     CACHE = "cache"
+    TASK_QUEUE = "task-queue"
+    SCHEDULER = "scheduler"

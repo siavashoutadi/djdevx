@@ -97,6 +97,8 @@ class BaseDevService(ABC):
     @property
     def password(self) -> str:
         """Resolve the dev password from ``.secrets/<secret_file_name>`` or the dev default."""
+        if not self.secret_file_name:
+            return self.dev_default_password
         secret_path = self.structure.root / ".secrets" / self.secret_file_name
         if secret_path.exists():
             return secret_path.read_text().strip()

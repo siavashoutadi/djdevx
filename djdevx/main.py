@@ -13,6 +13,8 @@ from .providers.features import app as features_app
 from .create import app as create_app
 from .providers.database import app as database_app
 from .providers.cache import app as cache_app
+from .providers.task_queue import app as task_queue_app
+from .providers.scheduler import app as scheduler_app
 from .settings import app as settings_app
 from .dev import app as dev_app
 
@@ -30,6 +32,10 @@ app.add_typer(features_app, name="features", help="Manage features")
 app.add_typer(create_app, name="create", help="Create new Django applications")
 app.add_typer(database_app, name="database", help="Manage database infrastructure")
 app.add_typer(cache_app, name="cache", help="Manage cache infrastructure")
+app.add_typer(
+    task_queue_app, name="task-queue", help="Manage task queue infrastructure"
+)
+app.add_typer(scheduler_app, name="scheduler", help="Manage schedulers")
 app.add_typer(settings_app, name="settings", help="Manage project secrets and configs")
 app.add_typer(dev_app, name="dev", help="Manage the local development environment")
 app.add_typer(deploy_app, name="deployment", help="Generate deployment manifests")

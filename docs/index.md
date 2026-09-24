@@ -20,6 +20,10 @@ streamline your workflow and make development enjoyable.
   multiple providers, devcontainer integration, and single-instance enforcement.
 - **Cache Management** — Create and manage cache backends with support for
   multiple providers and devcontainer integration.
+- **Task Queues** — Add Celery with an auto-installed Redis broker, worker
+  daemons, and devcontainer worker services.
+- **Scheduling** — Add Celery Beat with database-backed periodic tasks and a
+  Beat daemon.
 - **Secrets & Configuration** — Manage environment variables, secrets, and
   settings across dev and production environments using pydantic-settings.
 - **Customizable Templates** — Leverage pre-configured Jinja2 templates for
@@ -45,6 +49,8 @@ ddx packages add whitenoise
 | [Managing Features](user-guide/managing-features.md) | Add PWA support and CSS frameworks |
 | [Database](user-guide/databases.md) | Create and manage databases |
 | [Cache](user-guide/caching.md) | Create and manage caches |
+| [Task Queues](user-guide/task-queues.md) | Add and manage Celery task queues |
+| [Scheduling](user-guide/scheduling.md) | Add and manage periodic task schedulers |
 | [Local Development](user-guide/dev.md) | Run the dev environment natively with pixi |
 | [Managing Settings](user-guide/managing-settings.md) | Configure secrets, config vars, and environment |
 | [Content Security Policy](user-guide/content-security-policy.md) | Configure strict CSP defaults, directives, and nonces |
@@ -65,6 +71,8 @@ ddx packages add whitenoise
 | [Add a Framework](developer-guide/adding-a-framework.md) | How-to: CSS/JS frameworks |
 | [Add a Database](developer-guide/adding-a-database.md) | How-to: database providers |
 | [Add a Cache](developer-guide/adding-a-cache.md) | How-to: cache providers |
+| [Add a Task Queue](developer-guide/adding-a-task-queue.md) | How-to: task-queue providers |
+| [Add a Scheduler](developer-guide/adding-a-scheduler.md) | How-to: scheduler providers |
 | [Template System](developer-guide/template-system.md) | Jinja2 rendering |
 | [Pydantic Settings](developer-guide/pydantic-settings.md) | Settings architecture and SettingCollector |
 | [URL Architecture](developer-guide/url-architecture.md) | URL auto-registration |

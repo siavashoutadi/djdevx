@@ -21,8 +21,9 @@ dependencies, collects interactive parameters, and calls `Installable.add()`.
 The provider delegates to `PixiOps` (dependency installation), `Scaffold`
 (Jinja2 template rendering), `SecretsOps` (secret file generation), and
 `TrackingOps` (state persistence in `djdevx.toml`). Concrete providers
-(packages, features, frameworks, databases, caches) are auto-discovered via
-`pkgutil.iter_modules` and registered into typed registries at startup.
+(packages, features, frameworks, databases, caches, task queues, schedulers)
+are auto-discovered via `pkgutil.iter_modules` and registered into typed
+registries at startup.
 
 ## Package Layout
 
@@ -50,14 +51,14 @@ djdevx/
       format.py    #   prek-based file formatting for generated output
   provider.py      # single Provider base + PACKAGE/FEATURE/... kind constants
   providers/       # concrete provider payloads (moved from the five domain dirs)
-    packages/  features/  frameworks/  database/  cache/
+    packages/  features/  frameworks/  database/  cache/  task_queue/  scheduler/
       _base.py     # thin per-domain base (e.g. BasePackage(Provider)) — payload-facing
       _registry.py # per-domain Registry instance + @register decorator
       <name>/      # one package per provider, with its templates/ payload
-  services/        # pixi-native local dev services (postgres, redis, otel...)
+  services/        # pixi-native local dev services (postgres, redis, celery, otel...)
     base.py        # BaseDevService ABC (wait_until_ready, step_group, _log_debug)
     registry.py    # SERVICE_REGISTRY, register_service, category resolvers
-    postgres.py redis.py otel.py binary.py
+    postgres.py redis.py celery.py otel.py binary.py
   cli/             # CLI glue
     factory.py     # generic domain_app() typer group factory (add/remove/list)
     dev.py         # declarative `ddx dev start` pipeline
@@ -77,7 +78,9 @@ InstallableConfig (pydantic BaseModel)    ← installable/models.py
                     ├── BaseFeature        ← providers/features/_base.py
                     ├── BaseFramework      ← providers/frameworks/_base.py
                     ├── BaseDatabase       ← providers/database/_base.py
-                    └── BaseCache          ← providers/cache/_base.py
+                    ├── BaseCache          ← providers/cache/_base.py
+                    ├── BaseTaskQueue      ← providers/task_queue/_base.py
+                    └── BaseScheduler      ← providers/scheduler/_base.py
 ```
 
 Each domain's `_base.py` is a three-line subclass pinning the provider `kind`;
@@ -133,15 +136,18 @@ The hook order is an invariant and must not change.
 
 ## Dev Services (pixi-native)
 
-`services/` hosts long-running local dev services (Postgres, Redis, OTel
-collector, OpenObserve). Each `BaseDevService` subclass declares a `category`
-(`database` / `cache` / `otel`) and registers into `SERVICE_REGISTRY`;
+`services/` hosts long-running local dev services (Postgres, Redis, Celery
+worker, Celery Beat, OTel collector, OpenObserve). Each `BaseDevService`
+subclass declares a `category` (`database` / `cache` / `task-queue` /
+`scheduler` / `otel`) and registers into `SERVICE_REGISTRY`;
 resolvers in `services/registry.py` read `djdevx.toml` tracking and return the
 installed services in deterministic order (postgres → redis → otel →
-openobserve). `ddx dev` commands (`up`, `down`, `status`, `start`) and the
-declarative pipeline in `cli/dev.py` drive these services. Readiness uses the
-shared pid/port helpers in `core/process.py`, and binaries downloaded as
-release artifacts are SHA256-verified in `services/binary.py`.
+openobserve → celery worker → celery beat). `ddx dev` commands (`up`, `down`,
+`status`, `start`) and the declarative pipeline in `cli/dev.py` drive these
+services. Readiness uses the shared pid/port helpers in `core/process.py`, and
+binaries downloaded as release artifacts are SHA256-verified in
+`services/binary.py`. Portless services (Celery worker/Beat) advertise no TCP
+port: liveness is the recorded pid still running.
 
 Ports are randomly assigned and persisted under `.pixi/devdata/<service>/port`.
 `_set_port_env()` publishes each port twice: into `os.environ` (for subprocesses
@@ -160,6 +166,8 @@ on `purge()` or provider removal; precedence is os.environ > `.env` >
 - [Framework Architecture](framework-architecture.md) — BaseFramework, CSS/JS injection
 - [Database Architecture](database-architecture.md) — BaseDatabase, Docker Compose via hooks
 - [Cache Architecture](cache-architecture.md) — BaseCache, Docker Compose via hooks
+- [Task-Queue Architecture](task-queue-architecture.md) — BaseTaskQueue, worker daemons, otel instrumentation
+- [Scheduler Architecture](scheduler-architecture.md) — BaseScheduler, Celery Beat, DB-backed storage
 - [Creating an Installable](creating-an-installable.md) — Shared pattern, concepts, and how-to guides for all installable types
 - [CLI Architecture](cli-architecture.md) — Command tree, entry points, conventions
 - [Template System](template-system.md) — Jinja2 setup, rendering, template discovery
@@ -179,5 +187,7 @@ on `purge()` or provider removal; precedence is os.environ > `.env` >
 - [Managing Features](../user-guide/managing-features.md)
 - [Database Management](../user-guide/databases.md)
 - [Cache Management](../user-guide/caching.md)
+- [Task Queues](../user-guide/task-queues.md)
+- [Scheduling](../user-guide/scheduling.md)
 - [Managing Settings](../user-guide/managing-settings.md)
 - [Deployment](../user-guide/deployment.md)

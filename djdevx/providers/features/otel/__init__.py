@@ -1,6 +1,7 @@
 from ....installable.models import (
     CACHE,
     DATABASE,
+    TASK_QUEUE,
     InstallableRef,
 )
 from ....utils.tracking import ProjectTracking
@@ -54,6 +55,9 @@ class OtelFeature(BaseFeature):
         ],
         InstallableRef("redis", CACHE): [
             PixiPackageSpec("opentelemetry-instrumentation-redis==0.65b0", kind="pypi")
+        ],
+        InstallableRef("celery", TASK_QUEUE): [
+            PixiPackageSpec("opentelemetry-instrumentation-celery==0.65b0", kind="pypi")
         ],
     }
 
