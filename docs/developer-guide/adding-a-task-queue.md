@@ -86,9 +86,15 @@ djdevx/providers/task_queue/celery/
 
 `settings/django/celery.py` defines a `CelerySettings(AppBaseSettings)` class.
 It reads `redis_port` (populated from `REDIS_PORT` in `.env.ddx` by the cache
-dev service) so the broker/result backends point at the running native Redis
-cache, and overrides them to `redis://cache:6379/{0,1}` via
-`get_devcontainer_overrides()` in a devcontainer.
+dev service) and `redis_password` (dev default `redis_password`, matching the
+running Redis dev service) so the broker/result backends point at — and
+authenticate against — the running native Redis cache. In a devcontainer it
+overrides them to `redis://:redis_password@cache:6379/{0,1}` via
+`get_devcontainer_overrides()`; the `cache` compose service is configured with
+the same `REDIS_PASSWORD=redis_password`, so those URLs authenticate too. The
+password is URL-encoded with `urllib.parse.quote` when embedded in the derived
+URLs, and overrides for both the cache and task-queue features read the same
+`.env` / `REDIS_PASSWORD` / `.secrets/redis_password` sources.
 
 The `applications/celery.py` template ends with a guarded otel hook so
 worker/Beat processes are instrumented when the `otel` feature is installed:

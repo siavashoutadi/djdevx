@@ -177,8 +177,9 @@ OTEL_COLLECTOR_PORT=49871
 The settings package reads `.env.ddx` as part of its dotenv chain, so plain
 `pixi run python manage.py migrate` (or `createsuperuser`, shell_plus, …)
 connects to the right port with no manual env setup. The Celery broker/result
-backends read `REDIS_PORT` the same way, so `pixi run celery -A applications.celery worker`
-uses the running native Redis cache.
+backends read `REDIS_PORT` the same way and embed the redis password (dev
+default `redis_password`), so `pixi run celery -A applications.celery worker`
+authenticates against the running native Redis cache.
 
 Precedence (highest wins):
 
@@ -202,7 +203,9 @@ Local services use the generated settings' dev defaults:
 Ports are random per project and published in `.env.ddx` (see
 [Service Ports](#serviceportsenvddx)).
 The passwords fall back to `.secrets/postgres_password` /
-`.secrets/redis_password` if those files exist.
+`.secrets/redis_password` if those files exist. `redis_password` is shared by
+the cache, channels, and the Celery broker/result backends, so all of them
+authenticate against the same password-protected Redis service.
 
 Celery worker/Beat daemons are **portless** — they expose no TCP endpoint, so
 liveness is tracked via their pid file under

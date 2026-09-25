@@ -54,10 +54,15 @@ Remove the existing task queue first, then install the new one.
 - Auto-installs the Redis cache as the broker (if not already installed).
 - Generates the Celery app (`applications/celery.py`), a sample `tasks.py`, and
   `settings/django/celery.py` (`CELERY_BROKER_URL`, `CELERY_RESULT_BACKEND` —
-  dev defaults point at the local Redis cache on `REDIS_PORT`; in a
-  devcontainer they point at the `cache` compose service).
+  dev defaults point at the local Redis cache on `REDIS_PORT` and embed the
+  `redis_password` (matching the running Redis dev service); in a devcontainer
+  they point at the password-protected `cache` compose service).
 - Wires a `celery-worker` docker-compose service for the devcontainer path
   (builds the same image, runs `pixi run celery -A applications.celery worker`).
+
+Settings load the redis password from the same sources as the cache
+(`REDIS_PASSWORD` env, `.env`, or `.secrets/redis_password`), so the broker and
+result backend authenticate against the cache exactly like `CACHES` does.
 
 The app lives in the `applications` package — not as a root-level `celery.py` —
 so the `celery` module name stays free for the installed `celery` package; a

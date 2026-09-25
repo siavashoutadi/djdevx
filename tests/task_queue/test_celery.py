@@ -46,9 +46,15 @@ def _assert_celery_app_exists(root: Path) -> None:
     assert "redis_port: int = 6379" in content
     assert "CELERY_BROKER_URL" in content
     assert "CELERY_RESULT_BACKEND" in content
-    assert "redis://cache:6379/0" in content, (
-        "devcontainer override must point at the cache compose service"
+    # Broker/result URLs must embed the redis password: the dev Redis service
+    # and the ``cache`` compose service both require ``redis_password``, and a
+    # passwordless URL fails every connection with an auth error.
+    assert "redis_password" in content
+    assert "redis://:redis_password@cache:6379/0" in content, (
+        "devcontainer override must point at the password-protected cache compose service"
     )
+    assert "redis://:redis_password@cache:6379/1" in content
+    assert "quote(" in content, "broker URL must URL-encode the embedded password"
 
 
 def _assert_celery_app_absent(root: Path) -> None:
