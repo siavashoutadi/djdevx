@@ -186,12 +186,22 @@ def is_port_open(host: str, port: int, timeout: float = 1.0) -> bool:
 
 
 def is_pid_alive(pid: int) -> bool:
-    """Return True if *pid* refers to a running process."""
+    """Return True if *pid* refers to a running, non-zombie process."""
     try:
         os.kill(pid, 0)
-        return True
     except ProcessLookupError, PermissionError:
         return False
+    # A zombie (defunct) process passes the ``kill(0)`` probe but is not
+    # running — treat it as dead so a crashed daemon is never reported as up
+    # (its recorded pid would otherwise keep ``ddx`` from restarting it).
+    # /proc is Linux-specific; fall back to the ``kill(0)`` probe elsewhere.
+    try:
+        stat = open(f"/proc/{pid}/stat").read()
+    except OSError:
+        return True
+    # Format: "{pid} ({comm}) {state} ..."; comm may contain spaces/parens,
+    # so split on the last ')' and read the field that follows it.
+    return stat.rsplit(")", 1)[1].split()[0] != "Z"
 
 
 def read_pid(service_dir: Path) -> int | None:

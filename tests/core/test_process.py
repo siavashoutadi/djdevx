@@ -1,10 +1,13 @@
+import os
 import subprocess
+import sys
+import time
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from djdevx.core.process import PixiRunner
+from djdevx.core.process import PixiRunner, is_pid_alive
 
 
 # ---------------------------------------------------------------------------
@@ -314,3 +317,59 @@ class TestListDependencies:
             runner.list_dependencies()
             args = mock_run.call_args[0]
             assert "--explicit" in args
+
+
+# ---------------------------------------------------------------------------
+# is_pid_alive
+# ---------------------------------------------------------------------------
+
+
+def _proc_state(pid: int) -> str | None:
+    try:
+        stat = Path(f"/proc/{pid}/stat").read_text()
+    except OSError:
+        return None
+    return stat.rsplit(")", 1)[1].split()[0]
+
+
+def _spawn_zombie() -> tuple[subprocess.Popen, int]:
+    """Start a child that exits immediately and leave it unreaped (zombie)."""
+    proc = subprocess.Popen([sys.executable, "-c", "import os; os._exit(0)"])
+    deadline = time.monotonic() + 5.0
+    while time.monotonic() < deadline:
+        if _proc_state(proc.pid) == "Z":
+            return proc, proc.pid
+        time.sleep(0.01)
+    proc.kill()
+    proc.wait()
+    raise AssertionError("child never became a zombie")
+
+
+@pytest.mark.skipif(not os.path.isdir("/proc"), reason="requires /proc")
+class TestIsPidAlive:
+    def test_live_process(self):
+        proc = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)"])
+        try:
+            assert is_pid_alive(proc.pid) is True
+        finally:
+            proc.kill()
+            proc.wait()
+
+    def test_missing_process(self):
+        # A non-existent pid: the kill(0) probe raises ProcessLookupError.
+        assert is_pid_alive(28394718) is False
+
+    def test_zombie_is_not_alive(self):
+        """Regression: a defunct (zombie) process must not count as running.
+
+        A crashed ``pixi`` daemon leaves a zombie behind; counting it as alive
+        made ``ddx dev task-queue init`` report the worker as "ready" without
+        ever relaunching it.
+        """
+        proc, pid = _spawn_zombie()
+        try:
+            # Keep ``proc`` alive so Popen.__del__ does not reap the child
+            # before we probe it — the zombie must persist for the assertion.
+            assert is_pid_alive(pid) is False
+        finally:
+            proc.wait()  # reap so the test run does not leak zombies
