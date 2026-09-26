@@ -19,7 +19,8 @@ install params, secrets, hooks, templates, testing) live in
 7. [Variants](#variants)
 8. [Feature templates directory](#feature-templates-directory)
 9. [Peer integration](#peer-integration)
-10. [Testing](#testing)
+10. [SDK-backed observability features](#sdk-backed-observability-features)
+11. [Testing](#testing)
 
 ---
 
@@ -195,12 +196,28 @@ djdevx/providers/features/<name>/
     ├── settings/
     │   └── apps/
     │       └── <name>.py.j2
-    └── urls/
-        └── apps/
-            └── <name>.py.j2
+    ├── urls/
+    │   └── apps/
+    │       └── <name>.py.j2
+    └── peer_templates/
+        └── <peer>/
+            └── settings/
+                └── apps/
+                    └── <name>_<peer>.py
 ```
 
 Templates render to the project root.
+
+Name a template `<name>.py.j2` only when it needs template variables (for
+example, otel's settings file renders the project name into the service name).
+A settings module with nothing to render should stay a plain `.py` — a `.j2`
+with no placeholders is misleading.
+
+`peer_templates/<peer>/` is copied in and out automatically when that peer
+installable is added or removed, in either order relative to the feature. Peer
+templates do not need a `__init__.py`: settings files are executed by filename
+in a shared namespace, and the plugin packages that need one ship it in the
+feature's own templates tree.
 
 ## Peer integration
 
@@ -235,6 +252,79 @@ class MyInstrumentationFeature(BaseFeature):
 Install the feature before or after the database — the same hooks fire either
 way, and removing either side cleans up both snippets and peer packages.
 See [Integration Protocol](integration.md) for full semantics.
+
+## SDK-backed observability features
+
+`sentry` is the reference for a feature that wraps a third-party SDK: the SDK
+initiates instrumentation itself, and djdevx only supplies the app, the settings,
+and the peer wiring. Three decisions are worth copying.
+
+**Initialize from `AppConfig.ready()`, not an install param or a server-only
+extension.** `ready()` runs exactly once per process — web server, Celery
+worker, Celery Beat, management commands — and Django's app registry is
+populated before a Celery worker executes any task, which is exactly the
+"initialize on worker startup" requirement these SDKs document. A
+`applications/extensions/` module is server-only and would miss workers
+entirely. See [Extensions Architecture](extensions-architecture.md).
+
+```python
+# templates/sentry/apps.py
+class SentryConfig(AppConfig):
+    name = "sentry"
+
+    def ready(self) -> None:
+        from sentry.setup import setup_sentry
+
+        setup_sentry()
+```
+
+The setup function must be **idempotent** (module-level guard) and must **never
+raise** — a broken or unreachable monitoring backend must not take the app
+registry down with it. `sentry/setup.py` logs and returns instead.
+
+**Declare required secrets without prompting, and say so at install time.** A
+required `SecretStr` with no default is the right call for a DSN: a placeholder
+would silently drop every event. `SecretsOps.generate()` only handles registered
+generators, so the feature declares none and the operator supplies the value.
+That makes Django un-importable until they act, so the install hook must print
+the exact command:
+
+```python
+def after_copy_templates(self, step: NestedStep | None = None) -> None:
+    (step.warning if step else print_console.warning)(
+        "Sentry DSN is required but was not configured"
+    )
+    for line in (...):
+        (step.info if step else print_console.info)(line)
+```
+
+Feature removal deliberately does **not** delete the resulting
+`.secrets/<name>` file: it was entered by hand, so deleting it would destroy a
+value the project still needs on reinstall. Only `secret_generators` output is
+cleaned up automatically.
+
+**Use hook-only peers, and detect them from the settings namespace.** When the
+SDK already bundles the integration, the peer needs no packages at all — an
+empty list still triggers `peer_templates/` synchronization:
+
+```python
+peer_pixi_packages: dict[InstallableRef, list[PixiPackageSpec]] = {
+    InstallableRef("celery", TASK_QUEUE): [],
+    InstallableRef("celery-beat", SCHEDULER): [],
+}
+```
+
+Celery is not in `INSTALLED_APPS` in a generated project, so there is nothing to
+introspect. The peer settings module's exported constants are the activation
+signal: `setup_sentry` checks `hasattr(settings, "SENTRY_CELERY_PROPAGATE_TRACES")`
+and registers the integration only when that file is present. Keep the two peer
+settings modules free of overlapping field names so the `SettingCollector` never
+sees a duplicate.
+
+Prefer the SDK's current API over deprecated flags (e.g. `capture_sentry_logs`
+rather than the removed `enable_logs`), and verify kwarg names against the
+installed SDK — a `DidNotEnable` raised by the SDK is a plain `Exception`, not
+an `ImportError`, so a guarded import needs to catch both.
 
 ## Testing
 

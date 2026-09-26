@@ -152,6 +152,11 @@ by_app = group_models_by_app(chosen, available)
 - Extension hooks take the application: `def load(application) -> None`.
   A hook that changes `settings.MIDDLEWARE` must rebuild the frozen chain
   (`application.load_middleware(is_async=...)`) or its middleware never runs
+- The `ready()` rule above is about *server-only* work. Process-agnostic SDK
+  bootstrapping belongs in the app's `ready()` instead, because it must cover
+  Celery workers, Celery Beat, and management commands as well as the web
+  server (see the `sentry` feature). Such a setup function must be idempotent
+  and must never raise
 
 > Read the [Extensions Architecture](extensions-architecture.md) for the
 > loader contract and the channels/otel examples.

@@ -362,6 +362,34 @@ them to the corresponding `SecretInfo`. When the CLI runs `secrets init dev`,
 it auto-generates values for secrets that have a generator and are not yet
 present on disk.
 
+### Required secrets with no generator
+
+A value the operator must obtain from a third party (a Sentry DSN, an API
+token) cannot be generated, so it is declared as a required `SecretStr` with
+**no class default and no dev default**:
+
+```python
+class SentrySettings(AppBaseSettings):
+    sentry_dsn: SecretStr
+```
+
+Consequences to design for when shipping an installable that does this:
+
+- `secrets init dev` cannot fill it in (`SecretsOps.generate()` only handles
+  registered generators), so the project is un-importable until the operator
+  runs it and types the value. The installable's `after_copy_templates` hook
+  must print the exact command to run — see the `sentry` feature.
+- Never give such a field a placeholder default. A wrong-but-present value
+  fails silently (events vanish) instead of loudly.
+- Removal must not delete the resulting `.secrets/<name>` file. Only
+  `secret_generators` output is cleaned up automatically, and a hand-entered
+  value is still needed if the installable is reinstalled.
+- Deployment generation needs no extra wiring: the collector reports the field,
+  and `deployment docker-compose` / `kubernetes` emit it as a secret.
+
+Keep the field at module level. A class nested under `if not IS_DEV:` is tagged
+`dev_relevant=False` and would never be prompted for during local development.
+
 ## The Settings Module System
 
 The generated Django project's settings are split across multiple files in a

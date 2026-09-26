@@ -165,7 +165,8 @@ existing declarations — including manual edits — untouched.
 
 - [Local Development](dev.md) -- Run the dev environment natively with pixi
 - [Managing Packages](managing-packages.md) -- Learn about the package system
-- [Managing Features](managing-features.md) -- Add PWA and more
+- [Managing Features](managing-features.md) -- Add PWA, Sentry, and more
+- [Sentry](sentry.md) -- Set up error monitoring and tracing
 - [Database Management](databases.md) -- Set up databases
 - [Cache Management](caching.md) -- Set up caches
 - [Architecture Overview](../developer-guide/architecture.md) -- Understand how djdevx is built

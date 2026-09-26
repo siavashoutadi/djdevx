@@ -14,8 +14,9 @@ streamline your workflow and make development enjoyable.
 - **Package Management** — Install and configure 35+ popular Django packages
   (`django-allauth`, `djangorestframework`, `django-debug-toolbar`, `channels`,
   and more) with a single command.
-- **Feature Addition** — Add PWA support, CSS frameworks (Bootstrap, FrankenUI,
-  Semantic, Starting Point UI), and deployment configurations.
+- **Feature Addition** — Add PWA support, Sentry error monitoring, CSS frameworks
+  (Bootstrap, FrankenUI, Semantic, Starting Point UI), and deployment
+  configurations.
 - **Database Management** — Create and manage databases with support for
   multiple providers, devcontainer integration, and single-instance enforcement.
 - **Cache Management** — Create and manage cache backends with support for
@@ -46,7 +47,8 @@ ddx packages add whitenoise
 |---------|-------------|
 | [Getting Started](user-guide/getting-started.md) | Install, scaffold, and configure your first project |
 | [Managing Packages](user-guide/managing-packages.md) | Install and manage Django packages |
-| [Managing Features](user-guide/managing-features.md) | Add PWA support and CSS frameworks |
+| [Managing Features](user-guide/managing-features.md) | Add PWA support, Sentry, and CSS frameworks |
+| [Sentry](user-guide/sentry.md) | Error monitoring, performance tracing, and log shipping |
 | [Database](user-guide/databases.md) | Create and manage databases |
 | [Cache](user-guide/caching.md) | Create and manage caches |
 | [Task Queues](user-guide/task-queues.md) | Add and manage Celery task queues |
