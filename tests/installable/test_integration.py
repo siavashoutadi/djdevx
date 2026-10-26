@@ -657,10 +657,10 @@ class TestLifecycleWiring:
         )
         return calls
 
-    def test_framework_first_then_listener_pull(self, tmp_path, monkeypatch, pixi_ops):
+    def test_framework_first_then_listener_pull(self, temp_dir, monkeypatch, pixi_ops):
         runner = CliRunner()
-        create_test_django_project(tmp_path, runner)
-        os.chdir(tmp_path)
+        create_test_django_project(temp_dir, runner)
+        os.chdir(temp_dir)
         calls = self._install_listening_whitenoise(monkeypatch)
 
         result = runner.invoke(app, ["frameworks", "add", "bootstrap"])
@@ -671,10 +671,10 @@ class TestLifecycleWiring:
         assert result.exit_code == 0, result.output
         assert calls == ["bootstrap"]
 
-    def test_listener_first_then_framework_push(self, tmp_path, monkeypatch, pixi_ops):
+    def test_listener_first_then_framework_push(self, temp_dir, monkeypatch, pixi_ops):
         runner = CliRunner()
-        create_test_django_project(tmp_path, runner)
-        os.chdir(tmp_path)
+        create_test_django_project(temp_dir, runner)
+        os.chdir(temp_dir)
         calls = self._install_listening_whitenoise(monkeypatch)
 
         result = runner.invoke(app, ["packages", "add", "whitenoise"])

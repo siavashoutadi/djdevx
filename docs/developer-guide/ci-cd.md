@@ -14,6 +14,10 @@ projects at runtime.
   **pixi** (pixi is required at runtime by the tests that scaffold target
   Django projects).
 - Steps: install uv + pixi, `uv sync --group dev` then `uv run pytest`.
+- Tests that scaffold Django projects use the shared `temp_dir` fixture, which
+  removes the generated project (including its pixi environment) at teardown.
+  This keeps the runner's disk usage bounded instead of accumulating until the
+  job hits its quota.
 - This is the safety net that ensures nothing is broken before a merge or
   tag.
 

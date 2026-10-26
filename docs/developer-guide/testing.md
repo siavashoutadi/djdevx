@@ -180,6 +180,10 @@ def test_something(temp_dir):
 Provided by `tests/conftest.py`. Wraps pytest's built-in `tmp_path` to give
 each test a unique temporary directory as a `pathlib.Path`.
 
+At teardown the fixture restores the original working directory (some CLI tests
+call `os.chdir(temp_dir)`) and deletes the temporary directory. This keeps disk
+usage bounded when tests scaffold full Django projects and pixi environments.
+
 ```python
 def test_template_rendering(temp_dir):
     output = temp_dir / "output.txt"
@@ -652,10 +656,12 @@ All test subdirectories must contain an `__init__.py`.
 
 ### Fixture Recommendations
 
-- Use `temp_dir` (from conftest.py) for any test that creates files
+- Use `temp_dir` (from conftest.py) for any test that creates files or a full
+  project scaffold; it is cleaned up after every test
 - Use `monkeypatch.chdir(temp_dir)` in CLI tests that change working directory
 - Define file-specific fixtures locally rather than in conftest.py
-- Use `tmp_path` directly for simple Path-based tests
+- Use `tmp_path` directly only for small `Path`-based tests; it is not cleaned
+  up per test
 
 ### Linting and Prek
 
